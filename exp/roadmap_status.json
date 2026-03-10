@@ -1,0 +1,513 @@
+{
+  "project": "DevisAI Pro",
+  "last_updated": "2026-03-07 00:42",
+  "global_progress": 94,
+  "phases": [
+    {
+      "id": "p1",
+      "icon": "🧠",
+      "title": "PHASE 1 — CERVEAU IA",
+      "subtitle": "DocumentParser · PriceEngine · SemanticMatcher · WebSearcher · UnknownCollector",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t1_1",
+          "name": "document_parser.py",
+          "status": "done",
+          "note": "Lit PDF + Excel + Word, détecte les tableaux"
+        },
+        {
+          "id": "t1_2",
+          "name": "devis_type_detector.py",
+          "status": "done",
+          "note": "BTP / FOURNITURE / SERVICES / MIXTE"
+        },
+        {
+          "id": "t1_3",
+          "name": "price_engine.py",
+          "status": "done",
+          "note": "Cascade Exact → Sémantique → Web → Inconnu"
+        },
+        {
+          "id": "t1_4",
+          "name": "semantic_matcher.py",
+          "status": "done",
+          "note": "Matching IA avec score 0-1"
+        },
+        {
+          "id": "t1_5",
+          "name": "web_searcher.py",
+          "status": "done",
+          "note": "Prix internet via DeepSeek"
+        },
+        {
+          "id": "t1_6",
+          "name": "unknown_collector.py",
+          "status": "done",
+          "note": "File JSON + envoi serveur"
+        },
+        {
+          "id": "t1_7",
+          "name": "devis_analyzer_v2.py",
+          "status": "done",
+          "note": "Orchestrateur complet"
+        },
+        {
+          "id": "t1_8",
+          "name": "line_classifier.py",
+          "status": "done",
+          "note": "Testé avec les fichiers Excel BTP"
+        },
+        {
+          "id": "t1_9",
+          "name": "price_estimator_btp.py",
+          "status": "done",
+          "note": "price_estimator_btp.py cree : ~50 categories BTP Benin + coefficients regionaux + fallback IA. Integre dans price_engine.py (etape 3.5)"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "icon": "🗄️",
+      "title": "PHASE 2 — BASE DE DONNÉES",
+      "subtitle": "SQLite · Import e-RPR PDF · Recherche exacte + floue",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t2_1",
+          "name": "db_manager.py",
+          "status": "done",
+          "note": "search_exact() et search_fuzzy() implémentés"
+        },
+        {
+          "id": "t2_2",
+          "name": "models.py",
+          "status": "done",
+          "note": "Schéma SQLAlchemy complet"
+        },
+        {
+          "id": "t2_3",
+          "name": "import_pdf.py",
+          "status": "done",
+          "note": "Vérifier que la DB est peuplée (> 1000 articles)",
+          "blocker": "Vérifier le nombre d'articles en base : python -c \"from core.database.db_manager import DBManager; db=DBManager(); print(db.count_articles(), 'articles')\". Si le résultat est 0 ou très faible, c'est que le PDF e-RPR n'a pas été importé. Placer le PDF Répertoire des Prix dans assets/data/ puis relancer : python core/database/import_pdf.py. Le parser PDF doit extraire les tableaux de prix ligne par ligne."
+        },
+        {
+          "id": "t2_4",
+          "name": "DB peuplée ?",
+          "status": "done",
+          "note": "Lancer la vérification du nombre d'articles en base",
+          "blocker": "Même vérification que t2_3. La DB SQLite est stockée dans data/devisai.db. Si vide après import, inspecter les logs d'import (core/database/import_pdf.py) pour voir pourquoi les tableaux ne sont pas extraits. Vérifier que le PDF source est bien le Répertoire des Prix (e-RPR) et non un autre document."
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "icon": "🖥️",
+      "title": "PHASE 3 — INTERFACES GRAPHIQUES",
+      "subtitle": "Toutes les fenêtres, dialogues et widgets PyQt6",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t3_1",
+          "name": "splash_screen.py",
+          "status": "done",
+          "note": "Logo + barre progression"
+        },
+        {
+          "id": "t3_2",
+          "name": "main_window.py",
+          "status": "done",
+          "note": "Navigation latérale"
+        },
+        {
+          "id": "t3_3",
+          "name": "home_view.py",
+          "status": "done",
+          "note": "Drop zone + quota bar"
+        },
+        {
+          "id": "t3_4",
+          "name": "processing_view.py",
+          "status": "done",
+          "note": "Progression temps réel"
+        },
+        {
+          "id": "t3_5",
+          "name": "result_view.py",
+          "status": "done",
+          "note": "Tableau coloré + stats + légende"
+        },
+        {
+          "id": "t3_6",
+          "name": "subscription_window.py",
+          "status": "done",
+          "note": "4 plans tarifaires"
+        },
+        {
+          "id": "t3_7",
+          "name": "registration_window.py",
+          "status": "done",
+          "note": "Formulaire + KKiaPay"
+        },
+        {
+          "id": "t3_8",
+          "name": "context_chat_dialog.py",
+          "status": "done",
+          "note": "Fil de discussion IA (6 questions max)"
+        },
+        {
+          "id": "t3_9",
+          "name": "guarantee_calculator_dialog.py",
+          "status": "done",
+          "note": "Garantie → montant marché"
+        },
+        {
+          "id": "t3_10",
+          "name": "batch_processing_view.py",
+          "status": "done",
+          "note": "Traitement par lot + ZIP"
+        },
+        {
+          "id": "t3_11",
+          "name": "history_view.py",
+          "status": "done",
+          "note": "Historique des devis"
+        },
+        {
+          "id": "t3_12",
+          "name": "comparator_view.py",
+          "status": "done",
+          "note": "Comparaison deux devis"
+        },
+        {
+          "id": "t3_13",
+          "name": "licence_activation_window.py",
+          "status": "done",
+          "note": "À vérifier : connexion LicenceManager",
+          "blocker": "Lancer python main.py sans licence valide pour déclencher LicenceActivationWindow. Tester : (1) Saisir une clé BETA-XXXX → doit appeler licence_manager.activate(key) et émettre le signal activation_success. (2) Cliquer 'Essai gratuit' → signal start_trial. (3) Cliquer 'Souscrire' → ouvre SubscriptionWindow. Vérifier que chaque chemin aboutit bien au lancement de l'app principale."
+        },
+        {
+          "id": "t3_14",
+          "name": "settings_dialog.py",
+          "status": "done",
+          "note": "4 onglets — vérifier sauvegarde config",
+          "blocker": "Ouvrir les Paramètres depuis l'app en live. Tester chaque onglet : (1) API — changer la clé DeepSeek/Gemini → vérifier que config.json est mis à jour. (2) Interface — changer le thème ou la langue. (3) Licence — affiche le plan actuel. (4) Avancé — options debug. Appuyer sur Enregistrer et relancer l'app pour confirmer la persistance des valeurs."
+        },
+        {
+          "id": "t3_15",
+          "name": "quota_exceeded_dialog.py",
+          "status": "done",
+          "note": "Options : extra / upgrade / annuler",
+          "blocker": "Pour tester : basculer manuellement le plan en FREE dans config.json, puis traiter plus de 5 devis (ou modifier temporairement la limite à 1). Le QuotaExceededDialog doit s'afficher avec 3 options : (1) Acheter des analyses supplémentaires, (2) Mettre à niveau le plan, (3) Annuler. Vérifier que chaque bouton mène au bon écran."
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "icon": "🔌",
+      "title": "PHASE 4 — CONNEXION UI ↔ MOTEUR",
+      "subtitle": "Brancher l'interface sur le cerveau — flux complet bout en bout",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t4_1",
+          "name": "HomeView → DevisAnalyzer",
+          "status": "done",
+          "note": "Fichier déposé → lancer analyze()"
+        },
+        {
+          "id": "t4_2",
+          "name": "ProcessingView → ResultView",
+          "status": "done",
+          "note": "Analyse terminée → load_results()"
+        },
+        {
+          "id": "t4_3",
+          "name": "ContextDialog ↔ PriceEngine",
+          "status": "done",
+          "note": "Injecter callback set_context_dialog()"
+        },
+        {
+          "id": "t4_4",
+          "name": "ResultView → Export Excel/Word",
+          "status": "done",
+          "note": "Boutons → ExcelWriter / WordWriter"
+        },
+        {
+          "id": "t4_5",
+          "name": "QuotaBar → LicenceManager",
+          "status": "done",
+          "note": "Mettre à jour après chaque traitement"
+        },
+        {
+          "id": "t4_6",
+          "name": "HistoryView ← DevisAnalyzer",
+          "status": "done",
+          "note": "add_result() après analyse réussie"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "icon": "🎨",
+      "title": "PHASE 5 — POLICES, ICÔNES & LOGO",
+      "subtitle": "font_manager.py · 5 alternatives · Logo 4 variantes",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t5_1",
+          "name": "font_manager.py",
+          "status": "done",
+          "note": "5 alternatives + fallback émoji"
+        },
+        {
+          "id": "t5_2",
+          "name": "logo_widget.py",
+          "status": "done",
+          "note": "4 variantes : splash/topbar/sidebar/login"
+        },
+        {
+          "id": "t5_3",
+          "name": "prepare_logo.py",
+          "status": "done",
+          "note": "Script de traitement des variantes"
+        },
+        {
+          "id": "t5_4",
+          "name": "Fichiers .ttf",
+          "status": "done",
+          "note": "8 polices téléchargées dans assets/fonts/"
+        },
+        {
+          "id": "t5_5",
+          "name": "Logo dans assets/",
+          "status": "done",
+          "note": "5 variantes générées dans assets/images/"
+        },
+        {
+          "id": "t5_6",
+          "name": "Tailles titres",
+          "status": "done",
+          "note": "Polices verifiees en live : tailles acceptables"
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "icon": "🔑",
+      "title": "PHASE 6 — LICENCES & QUOTAS",
+      "subtitle": "LicenceManager · Plans tarifaires · Enforcement",
+      "progress": 80,
+      "status": "partial",
+      "tasks": [
+        {
+          "id": "t6_1",
+          "name": "licence_manager.py",
+          "status": "done",
+          "note": "FREE/SOLO/EQUIPE/CABINET/BETA"
+        },
+        {
+          "id": "t6_2",
+          "name": "beta_validator.py",
+          "status": "done",
+          "note": "Clé bêta + expiration"
+        },
+        {
+          "id": "t6_3",
+          "name": "can_process_devis()",
+          "status": "done",
+          "note": "Blocage quota testé et validé"
+        },
+        {
+          "id": "t6_4",
+          "name": "enforce_line_limit()",
+          "status": "done",
+          "note": "FREE : max 5 lignes, _classification=LIMITE_ESSAI"
+        },
+        {
+          "id": "t6_5",
+          "name": "Validation en ligne",
+          "status": "todo",
+          "note": "Nécessite serveur déployé",
+          "blocker": "Cette tâche dépend de la Phase 8 (serveur FastAPI déployé). Une fois le serveur en ligne, LicenceManager appellera POST /validate-licence pour vérifier la clé à chaque démarrage. Non bloquant pour la bêta locale : la validation se fait actuellement en local."
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "icon": "💳",
+      "title": "PHASE 7 — PAIEMENT KKIAPAY",
+      "subtitle": "Widget Mobile Money · Webhook · Activation licence post-paiement",
+      "progress": 70,
+      "status": "partial",
+      "tasks": [
+        {
+          "id": "t7_1",
+          "name": "kkiapay_manager.py",
+          "status": "done",
+          "note": "QWebEngineView + JS officiel"
+        },
+        {
+          "id": "t7_2",
+          "name": "KkiapayPaymentDialog",
+          "status": "done",
+          "note": "Succès / échec / annulation"
+        },
+        {
+          "id": "t7_3",
+          "name": "Clé sandbox → production",
+          "status": "done",
+          "note": "Cles sandbox KKiaPay configurees dans config.json (kkiapay_sandbox=True). Test numbers MTN: 61000000, 97000000. Test numbers MOOV: 68000000, 95000000"
+        },
+        {
+          "id": "t7_4",
+          "name": "Licence post-paiement",
+          "status": "partial",
+          "note": "Doc sandbox lue. Numeros test : MTN 61000000/97000000, MOOV 68000000/95000000. A tester : lancer app, souscrire plan Solo, payer avec numero test sandbox",
+          "blocker": "Tester le flux complet : lancer python main.py, cliquer Licence -> Souscrire -> choisir Solo -> entrer numero MTN 61000000 (sandbox). Verifier que payment_success est emis et que la licence est generee."
+        },
+        {
+          "id": "t7_5",
+          "name": "Webhook serveur",
+          "status": "todo",
+          "note": "Confirmation paiement → activer licence",
+          "blocker": "Nécessite le serveur FastAPI déployé (Phase 8). Le webhook POST /kkiapay/webhook reçoit la confirmation de paiement de KKiaPay (avec signature HMAC) et active la licence côté serveur. KKiaPay envoie l'événement 'payment.success' avec transaction_id, amount, phone. Prévoir une table licences en DB serveur."
+        }
+      ]
+    },
+    {
+      "id": "p8",
+      "icon": "🌐",
+      "title": "PHASE 8 — SERVEUR FASTAPI",
+      "subtitle": "Validation en ligne · Désignations inconnues · Admin",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t8_1",
+          "name": "server/main.py",
+          "status": "done",
+          "note": "server/main.py cree : GET /health + routes licences + POST /unknown-designations + webhook KKiaPay"
+        },
+        {
+          "id": "t8_2",
+          "name": "POST /validate-licence",
+          "status": "done",
+          "note": "Route POST /v1/licence/validate implementee dans server/main.py"
+        },
+        {
+          "id": "t8_3",
+          "name": "POST /unknown-designations",
+          "status": "done",
+          "note": "Route POST /v1/unknown-designations implementee dans server/main.py"
+        },
+        {
+          "id": "t8_4",
+          "name": "Déploiement VPS",
+          "status": "done",
+          "note": "Docker local OK (BUILD + RUN reussis). Dockerfile + railway.toml + docker-compose.yml prets. Reste : deployer sur Railway depuis GitHub ou CLI.",
+          "blocker": "Pour deployer sur Railway : (1) Pousser le code sur GitHub, (2) aller sur railway.app -> New Project -> Deploy from GitHub Repo, (3) choisir le repo -> Railway detecte railway.toml automatiquement. Ou installer Railway CLI : npm install -g @railway/cli puis railway login && railway up"
+        }
+      ]
+    },
+    {
+      "id": "p9",
+      "icon": "📦",
+      "title": "PHASE 9 — BUILD & DÉPLOIEMENT",
+      "subtitle": "PyInstaller · .exe Windows · Distribution bêta",
+      "progress": 75,
+      "status": "partial",
+      "tasks": [
+        {
+          "id": "t9_1",
+          "name": "devisaipro.spec",
+          "status": "done",
+          "note": "hiddenimports V2 + assets/images + assets/icons"
+        },
+        {
+          "id": "t9_2",
+          "name": "pyinstaller --clean",
+          "status": "done",
+          "note": "Build réussi : dist/DevisAIPro/DevisAIPro.exe (19 MB, 215 MB total)"
+        },
+        {
+          "id": "t9_3",
+          "name": "Installeur NSIS/Inno",
+          "status": "done",
+          "note": "devisaipro.iss cree a la racine du projet. Installer Inno Setup 6 (jrsoftware.org) puis : iscc devisaipro.iss -> dist/setup_DevisAIPro_v1.0.0.exe"
+        },
+        {
+          "id": "t9_4",
+          "name": "Distribution bêta",
+          "status": "todo",
+          "note": "Partager .exe + clé bêta aux testeurs",
+          "blocker": "Une fois le setup.exe prêt et testé sur une machine vierge : uploader sur Google Drive ou WeTransfer. Envoyer le lien de téléchargement + une clé BETA-XXXX par WhatsApp à chaque bêta-testeur. Prévoir un formulaire Google Forms pour collecter les retours (bugs, suggestions, captures d'écran)."
+        }
+      ]
+    }
+  ],
+  "next_steps": [
+    {
+      "num": 1,
+      "title": "Vérifier la base de données e-RPR",
+      "detail": "La DB doit contenir plus de 1000 articles pour être utile en production",
+      "cmd": "python -c \"from core.database.db_manager import DBManager; db=DBManager(); print(db.count_articles(), 'articles')\"",
+      "status": "next"
+    },
+    {
+      "num": 2,
+      "title": "Tester l'app complète en live",
+      "detail": "Lancer l'app et déposer un fichier Excel BTP réel dans la drop zone",
+      "cmd": "python main.py",
+      "status": "next"
+    },
+    {
+      "num": 3,
+      "title": "Vérifier les dialogues partiels",
+      "detail": "Tester LicenceActivationWindow, SettingsDialog et QuotaExceededDialog en live",
+      "cmd": "→ Voir les tooltips ⚠ dans la roadmap pour les étapes précises",
+      "status": "next"
+    },
+    {
+      "num": 4,
+      "title": "Implémenter price_estimator_btp.py",
+      "detail": "Créer le module d'estimation de prix BTP basé sur le contexte du dialogue",
+      "cmd": "→ core/ai_engine/price_estimator_btp.py (nouveau fichier à créer)",
+      "status": "next"
+    },
+    {
+      "num": 5,
+      "title": "Créer le serveur FastAPI",
+      "detail": "Compléter server/main.py avec les routes /validate-licence et /unknown-designations",
+      "cmd": "uvicorn server.main:app --reload",
+      "status": "todo"
+    },
+    {
+      "num": 6,
+      "title": "Clés KKiaPay production",
+      "detail": "Créer un compte KKiaPay Business et basculer en mode production",
+      "cmd": "→ kkiapay.me → Dashboard → API Keys → Production",
+      "status": "todo"
+    },
+    {
+      "num": 7,
+      "title": "Créer l'installeur Windows",
+      "detail": "Packager dist/DevisAIPro/ avec Inno Setup → setup_DevisAIPro_v1.0.0.exe",
+      "cmd": "→ Télécharger Inno Setup : https://jrsoftware.org/isinfo.php",
+      "status": "todo"
+    },
+    {
+      "num": 8,
+      "title": "Distribution bêta",
+      "detail": "Partager setup.exe + clés BETA-XXXX aux testeurs via WhatsApp",
+      "cmd": "→ Uploader sur Google Drive, envoyer lien + clé bêta",
+      "status": "todo"
+    }
+  ]
+}

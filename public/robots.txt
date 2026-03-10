@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Block dashboard and API routes from indexing
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /connexion
+Disallow: /inscription
+
+Sitemap: https://shiftup.bj/sitemap.xml

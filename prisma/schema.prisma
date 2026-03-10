@@ -1,0 +1,389 @@
+// SHIFT UP — Schéma Prisma
+// Base de données : PostgreSQL via Supabase
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// AUTHENTIFICATION (NextAuth compatible)
+// ============================================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================
+// UTILISATEURS
+// ============================================================
+
+enum UserRole {
+  CLIENT
+  APPORTEUR
+  ETUDIANT
+  ADMIN
+  DEVELOPER
+}
+
+model User {
+  id              String    @id @default(cuid())
+  name            String?
+  email           String    @unique
+  emailVerified   DateTime?
+  password        String?
+  phone           String?
+  image           String?
+  role            UserRole  @default(CLIENT)
+  affiliationCode String    @unique @default("")
+  stars           Int       @default(0)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // NextAuth relations
+  accounts    Account[]
+  sessions    Session[]
+
+  // Business relations
+  clientProfile   ClientProfile?
+  apporteurProfile ApporteurProfile?
+  etudiantProfile EtudiantProfile?
+  prestations     Prestation[]      @relation("ClientPrestations")
+  assignedPrestations Prestation[]  @relation("AssignedPrestations")
+  payments        Payment[]
+  messages        Message[]
+  chatSessions        ChatSession[]
+  auditLogs           AuditLog[]
+  passwordResetToken  PasswordResetToken?
+}
+
+model ClientProfile {
+  id          String @id @default(cuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  affiliatedBy String?
+  totalSpent  Float  @default(0)
+}
+
+model ApporteurProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ifu          String
+  level        String   @default("BRONZE") // BRONZE | ARGENT | OR | PLATINE | DIAMANT
+  totalEarnings Float   @default(0)
+  pendingEarnings Float @default(0)
+}
+
+model EtudiantProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  university      String?
+  studentCardUrl  String?
+  badges          String[] @default([])
+  completedTasks  Int      @default(0)
+}
+
+// ============================================================
+// SERVICES
+// ============================================================
+
+model Service {
+  id          String   @id @default(cuid())
+  domain      String
+  title       String
+  description String
+  features    String[]
+  priceMin    Float
+  priceMax    Float?
+  currency    String   @default("XOF")
+  duration    String?
+  isPopular   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  prestations Prestation[]
+}
+
+// ============================================================
+// PRESTATIONS
+// ============================================================
+
+enum PrestationStatus {
+  EN_ATTENTE
+  EN_COURS
+  LIVRAISON
+  REVISION
+  TERMINEE
+  ANNULEE
+}
+
+model Prestation {
+  id               String           @id @default(cuid())
+  clientId         String
+  client           User             @relation("ClientPrestations", fields: [clientId], references: [id])
+  serviceId        String
+  service          Service          @relation(fields: [serviceId], references: [id])
+  assignedToId     String?
+  assignedTo       User?            @relation("AssignedPrestations", fields: [assignedToId], references: [id])
+  status           PrestationStatus @default(EN_ATTENTE)
+  phases           Json             @default("[]")
+  currentPhase     Int              @default(0)
+  globalProgress   Int              @default(0)
+  amount           Float
+  amountPaid       Float            @default(0)
+  notes            String?
+  rating           Int?
+  review           String?
+  startDate        DateTime         @default(now())
+  estimatedEndDate DateTime?
+  endDate          DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  payments Payment[]
+}
+
+// ============================================================
+// PAIEMENTS
+// ============================================================
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  prestationId String
+  prestation   Prestation    @relation(fields: [prestationId], references: [id])
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  amount       Float
+  currency     String        @default("XOF")
+  method       String        // MOBILE_MONEY | CARD | BANK_TRANSFER
+  provider     String        // FEDAPAY | STRIPE
+  status       PaymentStatus @default(PENDING)
+  reference    String        @unique
+  providerRef  String?
+  invoiceUrl   String?
+  metadata     Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+// ============================================================
+// MESSAGERIE INTERNE
+// ============================================================
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation(fields: [senderId], references: [id])
+  subject     String?
+  content     String
+  isRead      Boolean  @default(false)
+  conversationId String?
+  attachments String[] @default([])
+  createdAt   DateTime @default(now())
+}
+
+// ============================================================
+// CHATBOT IA
+// ============================================================
+
+model ChatSession {
+  id          String    @id @default(cuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  visitorId   String?
+  page        String?
+  converted   Boolean   @default(false)
+  messages    ChatMessage[]
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+}
+
+model ChatMessage {
+  id            String      @id @default(cuid())
+  sessionId     String
+  session       ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role          String      // user | assistant
+  content       String
+  timestamp     DateTime    @default(now())
+}
+
+// ============================================================
+// BLOG
+// ============================================================
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String
+  authorId    String?
+  authorName  String
+  category    String
+  tags        String[] @default([])
+  coverImage  String?
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  views       Int      @default(0)
+  readTime    Int      @default(5)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================================
+// FAQ
+// ============================================================
+
+model FAQ {
+  id       String @id @default(cuid())
+  question String
+  answer   String
+  category String
+  order    Int    @default(0)
+  isActive Boolean @default(true)
+}
+
+// ============================================================
+// NEWSLETTER
+// ============================================================
+
+model NewsletterSubscriber {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  isActive    Boolean  @default(true)
+  subscribedAt DateTime @default(now())
+}
+
+// ============================================================
+// MICRO-TACHES (Étudiant)
+// ============================================================
+
+model MicroTask {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        String   // DATA_ENTRY | REDACTION | RECHERCHE | TEST_LOGICIEL | AUTRE
+  reward      Float
+  estimatedHours Float @default(2)
+  deadline    DateTime
+  status      String   @default("DISPONIBLE")
+  assignedToId String?
+  deliverable  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================================
+// TÉMOIGNAGES
+// ============================================================
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  company   String?
+  avatar    String?
+  content   String
+  rating    Int      @default(5)
+  service   String
+  isVisible Boolean  @default(true)
+  date      DateTime @default(now())
+}
+
+// ============================================================
+// CONTACT
+// ============================================================
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  service   String?
+  message   String
+  isRead    Boolean  @default(false)
+  reply     String?
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// MOT DE PASSE OUBLIÉ
+// ============================================================
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}

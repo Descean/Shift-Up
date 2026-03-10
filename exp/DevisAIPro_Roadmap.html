@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevisAI Pro — Roadmap</title>
+<style>
+  :root {
+    --navy:#0e2a3d; --blue:#154d71; --sky:#1c6ea4; --cyan:#33a1e0;
+    --green:#0f9e6e; --orange:#e07020; --gold:#cc8800;
+    --gray:#64748b; --bg:#f0f6fb;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--navy); }
+
+  header {
+    background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 60%,var(--sky) 100%);
+    padding:28px 40px 24px; color:white;
+  }
+  header .logo { font-size:26px; font-weight:900; letter-spacing:-1px; }
+  header .logo span { color:var(--cyan); }
+  header p { font-size:12px; color:rgba(255,255,255,.6); margin-top:4px; }
+  .badge {
+    display:inline-block; background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.3); border-radius:20px;
+    padding:3px 12px; font-size:11px; color:rgba(255,255,255,.8);
+    margin-top:8px;
+  }
+  .updated { font-size:11px; color:rgba(255,255,255,.5); margin-top:4px; }
+
+  .container { max-width:1200px; margin:0 auto; padding:28px 20px; }
+
+  .global-progress {
+    background:white; border-radius:16px; padding:22px 28px;
+    box-shadow:0 2px 16px rgba(0,0,0,.06); margin-bottom:28px;
+  }
+  .global-progress h2 { font-size:14px; color:var(--gray); font-weight:600; margin-bottom:10px; }
+  .prog-bar-wrap { background:#e2e8f0; border-radius:99px; height:20px; overflow:hidden; }
+  .prog-bar-fill {
+    height:100%; border-radius:99px;
+    background:linear-gradient(90deg,var(--green) 0%,var(--cyan) 100%);
+    display:flex; align-items:center; justify-content:flex-end; padding-right:10px;
+    transition:width .6s ease;
+  }
+  .prog-bar-fill span { color:white; font-size:12px; font-weight:800; }
+  .prog-stats { display:flex; gap:24px; margin-top:14px; flex-wrap:wrap; }
+  .prog-stat .val { font-size:22px; font-weight:800; color:var(--blue); }
+  .prog-stat .lbl { font-size:10px; color:var(--gray); }
+
+  .legend {
+    display:flex; gap:16px; flex-wrap:wrap; background:white;
+    border-radius:12px; padding:12px 18px; margin-bottom:20px;
+    box-shadow:0 1px 6px rgba(0,0,0,.04);
+  }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--gray); }
+  .legend-dot { width:10px; height:10px; border-radius:50%; }
+
+  .section-header { display:flex; align-items:center; gap:10px; margin:28px 0 14px; }
+  .section-header h2 { font-size:17px; font-weight:800; color:var(--navy); }
+
+  .toggle-all { text-align:right; margin-bottom:10px; }
+  .toggle-all button {
+    background:none; border:1.5px solid #d0e4f0; border-radius:8px;
+    padding:5px 12px; font-size:11px; color:var(--blue); cursor:pointer; font-weight:600;
+  }
+  .toggle-all button:hover { background:#f0f8ff; }
+
+  .phases { display:flex; flex-direction:column; gap:16px; }
+
+  .phase-card {
+    background:white; border-radius:14px; overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+    border:1.5px solid transparent; transition:border-color .2s;
+  }
+  .phase-card:hover { border-color:var(--cyan); }
+
+  .phase-header {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 20px; cursor:pointer;
+  }
+  .phase-icon { font-size:22px; flex-shrink:0; }
+  .phase-meta { flex:1; }
+  .phase-meta h3 { font-size:14px; font-weight:800; color:var(--navy); }
+  .phase-meta p  { font-size:11px; color:var(--gray); margin-top:2px; }
+  .status-pill {
+    border-radius:99px; padding:4px 12px; font-size:11px;
+    font-weight:700; white-space:nowrap; flex-shrink:0;
+  }
+  .phase-mini-bar {
+    width:70px; height:6px; background:#e2e8f0;
+    border-radius:99px; overflow:hidden; flex-shrink:0;
+  }
+  .chevron { color:var(--gray); transition:transform .2s; font-size:16px; }
+  .phase-card.open .chevron { transform:rotate(180deg); }
+
+  .phase-body { display:none; padding:0 20px 18px; }
+  .phase-card.open .phase-body { display:block; }
+
+  .tasks-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+  @media(max-width:700px) { .tasks-grid { grid-template-columns:1fr; } }
+
+  .task {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:9px 12px; border-radius:10px; border:1px solid #e8f0f5;
+    position:relative;
+  }
+  .task-icon { font-size:15px; flex-shrink:0; margin-top:1px; }
+  .task-info h4 { font-size:12px; font-weight:700; color:var(--navy); }
+  .task-info p  { font-size:11px; color:var(--gray); margin-top:2px; line-height:1.4; }
+  .task-id { font-size:9px; color:#b0c4d4; font-family:Consolas,monospace; }
+
+  /* ── Tooltip blocker ── */
+  .task-blocker-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:15px; height:15px; border-radius:50%;
+    background:var(--orange); color:#fff;
+    font-size:9px; font-weight:900; font-style:italic;
+    vertical-align:middle; margin-left:5px;
+    cursor:help; flex-shrink:0; line-height:1;
+    border:1.5px solid rgba(255,255,255,.6);
+  }
+  .task-tooltip {
+    display:none;
+    position:absolute;
+    bottom:calc(100% + 8px);
+    left:0; right:0;
+    background:#0e2a3d;
+    color:#e8f4fc;
+    border-radius:10px;
+    padding:11px 14px;
+    font-size:11px;
+    line-height:1.6;
+    z-index:500;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+    pointer-events:none;
+    border:1px solid rgba(51,161,224,.25);
+  }
+  .task-tooltip::after {
+    content:'';
+    position:absolute;
+    top:100%; left:20px;
+    border:7px solid transparent;
+    border-top-color:#0e2a3d;
+  }
+  .task-tooltip strong {
+    color:var(--cyan); font-size:10px; text-transform:uppercase;
+    letter-spacing:.5px; display:block; margin-bottom:5px;
+  }
+  .task:hover .task-tooltip { display:block; }
+
+  .next-steps {
+    background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 100%);
+    border-radius:16px; padding:26px 28px; color:white; margin-top:8px;
+  }
+  .next-steps h2 { font-size:17px; font-weight:800; margin-bottom:18px; }
+  .steps-list { display:flex; flex-direction:column; gap:12px; }
+  .step-item {
+    display:flex; gap:14px; align-items:flex-start;
+    background:rgba(255,255,255,.08); border-radius:12px; padding:12px 14px;
+    border:1px solid rgba(255,255,255,.12);
+  }
+  .step-num {
+    color:white; font-weight:800; font-size:12px; border-radius:99px;
+    min-width:26px; height:26px; display:flex; align-items:center;
+    justify-content:center; flex-shrink:0;
+  }
+  .step-content h4 { font-size:13px; font-weight:700; color:white; }
+  .step-content p  { font-size:11px; color:rgba(255,255,255,.65); margin-top:2px; line-height:1.5; }
+  .step-cmd {
+    font-family:Consolas,'Courier New',monospace; background:rgba(0,0,0,.3);
+    color:var(--cyan); border-radius:6px; padding:5px 10px; font-size:11px;
+    margin-top:5px; display:block; word-break:break-all;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Devis<span>AI</span> Pro</div>
+  <p>Roadmap complète — Suivi d'avancement en temps réel</p>
+  <div class="badge">VS Code + Claude Code + DeepSeek</div>
+  <div class="updated">Dernière mise à jour : 2026-03-07 00:42</div>
+</header>
+
+<div class="container">
+
+  <div class="global-progress">
+    <h2>AVANCEMENT GLOBAL DU PROJET</h2>
+    <div class="prog-bar-wrap">
+      <div class="prog-bar-fill" style="width:94%">
+        <span>94%</span>
+      </div>
+    </div>
+    <div class="prog-stats">
+      <div class="prog-stat"><div class="val" style="color:var(--green)">54</div><div class="lbl">Terminées ✅</div></div>
+      <div class="prog-stat"><div class="val" style="color:var(--gold)">1</div><div class="lbl">En cours ⚠️</div></div>
+      <div class="prog-stat"><div class="val" style="color:var(--orange)">0</div><div class="lbl">Priorité 🔜</div></div>
+      <div class="prog-stat"><div class="val" style="color:var(--gray)">3</div><div class="lbl">À venir ⏳</div></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Terminé ✅</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Partiel ⚠️</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Priorité 🔜</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#cbd5e1"></div>À venir ⏳</div>
+  </div>
+
+  <div class="toggle-all"><button onclick="toggleAll()">Tout ouvrir / fermer</button></div>
+
+  <div class="phases">
+    <div class="phase-card" id="p1">
+      <div class="phase-header" style="border-left:5px solid #0f9e6e;" onclick="toggle('p1')">
+        <div class="phase-icon">🧠</div>
+        <div class="phase-meta">
+          <h3>PHASE 1 — CERVEAU IA</h3>
+          <p>DocumentParser · PriceEngine · SemanticMatcher · WebSearcher · UnknownCollector</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:100%;background:#0f9e6e;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#e8f9f4;color:#0f9e6e;">✅ DONE — 100%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>document_parser.py</h4>
+              <p>Lit PDF + Excel + Word, détecte les tableaux</p>
+              <span class="task-id">t1_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>devis_type_detector.py</h4>
+              <p>BTP / FOURNITURE / SERVICES / MIXTE</p>
+              <span class="task-id">t1_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>price_engine.py</h4>
+              <p>Cascade Exact → Sémantique → Web → Inconnu</p>
+              <span class="task-id">t1_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>semantic_matcher.py</h4>
+              <p>Matching IA avec score 0-1</p>
+              <span class="task-id">t1_4</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>web_searcher.py</h4>
+              <p>Prix internet via DeepSeek</p>
+              <span class="task-id">t1_5</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>unknown_collector.py</h4>
+              <p>File JSON + envoi serveur</p>
+              <span class="task-id">t1_6</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>devis_analyzer_v2.py</h4>
+              <p>Orchestrateur complet</p>
+              <span class="task-id">t1_7</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>line_classifier.py</h4>
+              <p>Testé avec les fichiers Excel BTP</p>
+              <span class="task-id">t1_8</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>price_estimator_btp.py</h4>
+              <p>price_estimator_btp.py cree : ~50 categories BTP Benin + coefficients regionaux + fallback IA. Integre dans price_engine.py (etape 3.5)</p>
+              <span class="task-id">t1_9</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p2">
+      <div class="phase-header" style="border-left:5px solid #0f9e6e;" onclick="toggle('p2')">
+        <div class="phase-icon">🗄️</div>
+        <div class="phase-meta">
+          <h3>PHASE 2 — BASE DE DONNÉES</h3>
+          <p>SQLite · Import e-RPR PDF · Recherche exacte + floue</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:100%;background:#0f9e6e;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#e8f9f4;color:#0f9e6e;">✅ DONE — 100%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>db_manager.py</h4>
+              <p>search_exact() et search_fuzzy() implémentés</p>
+              <span class="task-id">t2_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>models.py</h4>
+              <p>Schéma SQLAlchemy complet</p>
+              <span class="task-id">t2_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>import_pdf.py</h4>
+              <p>Vérifier que la DB est peuplée (> 1000 articles)</p>
+              <span class="task-id">t2_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>DB peuplée ?</h4>
+              <p>Lancer la vérification du nombre d'articles en base</p>
+              <span class="task-id">t2_4</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p3">
+      <div class="phase-header" style="border-left:5px solid #0f9e6e;" onclick="toggle('p3')">
+        <div class="phase-icon">🖥️</div>
+        <div class="phase-meta">
+          <h3>PHASE 3 — INTERFACES GRAPHIQUES</h3>
+          <p>Toutes les fenêtres, dialogues et widgets PyQt6</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:100%;background:#0f9e6e;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#e8f9f4;color:#0f9e6e;">✅ DONE — 100%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>splash_screen.py</h4>
+              <p>Logo + barre progression</p>
+              <span class="task-id">t3_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>main_window.py</h4>
+              <p>Navigation latérale</p>
+              <span class="task-id">t3_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>home_view.py</h4>
+              <p>Drop zone + quota bar</p>
+              <span class="task-id">t3_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>processing_view.py</h4>
+              <p>Progression temps réel</p>
+              <span class="task-id">t3_4</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>result_view.py</h4>
+              <p>Tableau coloré + stats + légende</p>
+              <span class="task-id">t3_5</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>subscription_window.py</h4>
+              <p>4 plans tarifaires</p>
+              <span class="task-id">t3_6</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>registration_window.py</h4>
+              <p>Formulaire + KKiaPay</p>
+              <span class="task-id">t3_7</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>context_chat_dialog.py</h4>
+              <p>Fil de discussion IA (6 questions max)</p>
+              <span class="task-id">t3_8</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>guarantee_calculator_dialog.py</h4>
+              <p>Garantie → montant marché</p>
+              <span class="task-id">t3_9</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>batch_processing_view.py</h4>
+              <p>Traitement par lot + ZIP</p>
+              <span class="task-id">t3_10</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>history_view.py</h4>
+              <p>Historique des devis</p>
+              <span class="task-id">t3_11</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>comparator_view.py</h4>
+              <p>Comparaison deux devis</p>
+              <span class="task-id">t3_12</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>licence_activation_window.py</h4>
+              <p>À vérifier : connexion LicenceManager</p>
+              <span class="task-id">t3_13</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>settings_dialog.py</h4>
+              <p>4 onglets — vérifier sauvegarde config</p>
+              <span class="task-id">t3_14</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>quota_exceeded_dialog.py</h4>
+              <p>Options : extra / upgrade / annuler</p>
+              <span class="task-id">t3_15</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p4">
+      <div class="phase-header" style="border-left:5px solid #0f9e6e;" onclick="toggle('p4')">
+        <div class="phase-icon">🔌</div>
+        <div class="phase-meta">
+          <h3>PHASE 4 — CONNEXION UI ↔ MOTEUR</h3>
+          <p>Brancher l'interface sur le cerveau — flux complet bout en bout</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:100%;background:#0f9e6e;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#e8f9f4;color:#0f9e6e;">✅ DONE — 100%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>HomeView → DevisAnalyzer</h4>
+              <p>Fichier déposé → lancer analyze()</p>
+              <span class="task-id">t4_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>ProcessingView → ResultView</h4>
+              <p>Analyse terminée → load_results()</p>
+              <span class="task-id">t4_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>ContextDialog ↔ PriceEngine</h4>
+              <p>Injecter callback set_context_dialog()</p>
+              <span class="task-id">t4_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>ResultView → Export Excel/Word</h4>
+              <p>Boutons → ExcelWriter / WordWriter</p>
+              <span class="task-id">t4_4</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>QuotaBar → LicenceManager</h4>
+              <p>Mettre à jour après chaque traitement</p>
+              <span class="task-id">t4_5</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>HistoryView ← DevisAnalyzer</h4>
+              <p>add_result() après analyse réussie</p>
+              <span class="task-id">t4_6</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p5">
+      <div class="phase-header" style="border-left:5px solid #0f9e6e;" onclick="toggle('p5')">
+        <div class="phase-icon">🎨</div>
+        <div class="phase-meta">
+          <h3>PHASE 5 — POLICES, ICÔNES & LOGO</h3>
+          <p>font_manager.py · 5 alternatives · Logo 4 variantes</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:100%;background:#0f9e6e;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#e8f9f4;color:#0f9e6e;">✅ DONE — 100%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>font_manager.py</h4>
+              <p>5 alternatives + fallback émoji</p>
+              <span class="task-id">t5_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>logo_widget.py</h4>
+              <p>4 variantes : splash/topbar/sidebar/login</p>
+              <span class="task-id">t5_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>prepare_logo.py</h4>
+              <p>Script de traitement des variantes</p>
+              <span class="task-id">t5_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>Fichiers .ttf</h4>
+              <p>8 polices téléchargées dans assets/fonts/</p>
+              <span class="task-id">t5_4</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>Logo dans assets/</h4>
+              <p>5 variantes générées dans assets/images/</p>
+              <span class="task-id">t5_5</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>Tailles titres</h4>
+              <p>Polices verifiees en live : tailles acceptables</p>
+              <span class="task-id">t5_6</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p6">
+      <div class="phase-header" style="border-left:5px solid #cc8800;" onclick="toggle('p6')">
+        <div class="phase-icon">🔑</div>
+        <div class="phase-meta">
+          <h3>PHASE 6 — LICENCES & QUOTAS</h3>
+          <p>LicenceManager · Plans tarifaires · Enforcement</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:80%;background:#cc8800;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#fffbeb;color:#cc8800;">⚠️ EN COURS — 80%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>licence_manager.py</h4>
+              <p>FREE/SOLO/EQUIPE/CABINET/BETA</p>
+              <span class="task-id">t6_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>beta_validator.py</h4>
+              <p>Clé bêta + expiration</p>
+              <span class="task-id">t6_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>can_process_devis()</h4>
+              <p>Blocage quota testé et validé</p>
+              <span class="task-id">t6_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>enforce_line_limit()</h4>
+              <p>FREE : max 5 lignes, _classification=LIMITE_ESSAI</p>
+              <span class="task-id">t6_4</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f8fafc; border-color:#e2e8f0;">
+            <div class="task-tooltip"><strong>&#9888; Ce qui est nécessaire :</strong>Cette tâche dépend de la Phase 8 (serveur FastAPI déployé). Une fois le serveur en ligne, LicenceManager appellera POST /validate-licence pour vérifier la clé à chaque démarrage. Non bloquant pour la bêta locale : la validation se fait actuellement en local.</div>
+            <div class="task-icon">[ ]</div>
+            <div class="task-info">
+              <h4>Validation en ligne<span class="task-blocker-badge" title="Voir ce qui bloque"><i>i</i></span></h4>
+              <p>Nécessite serveur déployé</p>
+              <span class="task-id">t6_5</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p7">
+      <div class="phase-header" style="border-left:5px solid #cc8800;" onclick="toggle('p7')">
+        <div class="phase-icon">💳</div>
+        <div class="phase-meta">
+          <h3>PHASE 7 — PAIEMENT KKIAPAY</h3>
+          <p>Widget Mobile Money · Webhook · Activation licence post-paiement</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:70%;background:#cc8800;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#fffbeb;color:#cc8800;">⚠️ EN COURS — 70%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>kkiapay_manager.py</h4>
+              <p>QWebEngineView + JS officiel</p>
+              <span class="task-id">t7_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>KkiapayPaymentDialog</h4>
+              <p>Succès / échec / annulation</p>
+              <span class="task-id">t7_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>Clé sandbox → production</h4>
+              <p>Cles sandbox KKiaPay configurees dans config.json (kkiapay_sandbox=True). Test numbers MTN: 61000000, 97000000. Test numbers MOOV: 68000000, 95000000</p>
+              <span class="task-id">t7_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#fffdf0; border-color:#fde68a;">
+            <div class="task-tooltip"><strong>&#9888; Ce qui est nécessaire :</strong>Tester le flux complet : lancer python main.py, cliquer Licence -&gt; Souscrire -&gt; choisir Solo -&gt; entrer numero MTN 61000000 (sandbox). Verifier que payment_success est emis et que la licence est generee.</div>
+            <div class="task-icon">[~]</div>
+            <div class="task-info">
+              <h4>Licence post-paiement<span class="task-blocker-badge" title="Voir ce qui bloque"><i>i</i></span></h4>
+              <p>Doc sandbox lue. Numeros test : MTN 61000000/97000000, MOOV 68000000/95000000. A tester : lancer app, souscrire plan Solo, payer avec numero test sandbox</p>
+              <span class="task-id">t7_4</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f8fafc; border-color:#e2e8f0;">
+            <div class="task-tooltip"><strong>&#9888; Ce qui est nécessaire :</strong>Nécessite le serveur FastAPI déployé (Phase 8). Le webhook POST /kkiapay/webhook reçoit la confirmation de paiement de KKiaPay (avec signature HMAC) et active la licence côté serveur. KKiaPay envoie l'événement 'payment.success' avec transaction_id, amount, phone. Prévoir une table licences en DB serveur.</div>
+            <div class="task-icon">[ ]</div>
+            <div class="task-info">
+              <h4>Webhook serveur<span class="task-blocker-badge" title="Voir ce qui bloque"><i>i</i></span></h4>
+              <p>Confirmation paiement → activer licence</p>
+              <span class="task-id">t7_5</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p8">
+      <div class="phase-header" style="border-left:5px solid #0f9e6e;" onclick="toggle('p8')">
+        <div class="phase-icon">🌐</div>
+        <div class="phase-meta">
+          <h3>PHASE 8 — SERVEUR FASTAPI</h3>
+          <p>Validation en ligne · Désignations inconnues · Admin</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:100%;background:#0f9e6e;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#e8f9f4;color:#0f9e6e;">✅ DONE — 100%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>server/main.py</h4>
+              <p>server/main.py cree : GET /health + routes licences + POST /unknown-designations + webhook KKiaPay</p>
+              <span class="task-id">t8_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>POST /validate-licence</h4>
+              <p>Route POST /v1/licence/validate implementee dans server/main.py</p>
+              <span class="task-id">t8_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>POST /unknown-designations</h4>
+              <p>Route POST /v1/unknown-designations implementee dans server/main.py</p>
+              <span class="task-id">t8_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>Déploiement VPS</h4>
+              <p>Docker local OK (BUILD + RUN reussis). Dockerfile + railway.toml + docker-compose.yml prets. Reste : deployer sur Railway depuis GitHub ou CLI.</p>
+              <span class="task-id">t8_4</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+    <div class="phase-card" id="p9">
+      <div class="phase-header" style="border-left:5px solid #cc8800;" onclick="toggle('p9')">
+        <div class="phase-icon">📦</div>
+        <div class="phase-meta">
+          <h3>PHASE 9 — BUILD & DÉPLOIEMENT</h3>
+          <p>PyInstaller · .exe Windows · Distribution bêta</p>
+        </div>
+        <div class="phase-mini-bar">
+          <div style="height:100%;width:75%;background:#cc8800;border-radius:99px;"></div>
+        </div>
+        <div class="status-pill" style="background:#fffbeb;color:#cc8800;">⚠️ EN COURS — 75%</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="phase-body">
+        <div class="tasks-grid">
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>devisaipro.spec</h4>
+              <p>hiddenimports V2 + assets/images + assets/icons</p>
+              <span class="task-id">t9_1</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>pyinstaller --clean</h4>
+              <p>Build réussi : dist/DevisAIPro/DevisAIPro.exe (19 MB, 215 MB total)</p>
+              <span class="task-id">t9_2</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f0fdf6; border-color:#bbf7d0;">
+            
+            <div class="task-icon">[+]</div>
+            <div class="task-info">
+              <h4>Installeur NSIS/Inno</h4>
+              <p>devisaipro.iss cree a la racine du projet. Installer Inno Setup 6 (jrsoftware.org) puis : iscc devisaipro.iss -> dist/setup_DevisAIPro_v1.0.0.exe</p>
+              <span class="task-id">t9_3</span>
+            </div>
+          </div>
+          <div class="task" style="background:#f8fafc; border-color:#e2e8f0;">
+            <div class="task-tooltip"><strong>&#9888; Ce qui est nécessaire :</strong>Une fois le setup.exe prêt et testé sur une machine vierge : uploader sur Google Drive ou WeTransfer. Envoyer le lien de téléchargement + une clé BETA-XXXX par WhatsApp à chaque bêta-testeur. Prévoir un formulaire Google Forms pour collecter les retours (bugs, suggestions, captures d'écran).</div>
+            <div class="task-icon">[ ]</div>
+            <div class="task-info">
+              <h4>Distribution bêta<span class="task-blocker-badge" title="Voir ce qui bloque"><i>i</i></span></h4>
+              <p>Partager .exe + clé bêta aux testeurs</p>
+              <span class="task-id">t9_4</span>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top:36px;">
+    <h2>🚀 ÉTAPES SUIVANTES — Dans l'ordre</h2>
+  </div>
+  <div class="next-steps">
+    <div class="steps-list">
+      <div class="step-item" style="opacity:1;">
+        <div class="step-num" style="background:#e07020;">1</div>
+        <div class="step-content">
+          <h4>Vérifier la base de données e-RPR</h4>
+          <p>La DB doit contenir plus de 1000 articles pour être utile en production</p>
+          <code class="step-cmd">python -c "from core.database.db_manager import DBManager; db=DBManager(); print(db.count_articles(), 'articles')"</code>
+        </div>
+      </div>
+      <div class="step-item" style="opacity:1;">
+        <div class="step-num" style="background:#e07020;">2</div>
+        <div class="step-content">
+          <h4>Tester l'app complète en live</h4>
+          <p>Lancer l'app et déposer un fichier Excel BTP réel dans la drop zone</p>
+          <code class="step-cmd">python main.py</code>
+        </div>
+      </div>
+      <div class="step-item" style="opacity:1;">
+        <div class="step-num" style="background:#e07020;">3</div>
+        <div class="step-content">
+          <h4>Vérifier les dialogues partiels</h4>
+          <p>Tester LicenceActivationWindow, SettingsDialog et QuotaExceededDialog en live</p>
+          <code class="step-cmd">→ Voir les tooltips ⚠ dans la roadmap pour les étapes précises</code>
+        </div>
+      </div>
+      <div class="step-item" style="opacity:1;">
+        <div class="step-num" style="background:#e07020;">4</div>
+        <div class="step-content">
+          <h4>Implémenter price_estimator_btp.py</h4>
+          <p>Créer le module d'estimation de prix BTP basé sur le contexte du dialogue</p>
+          <code class="step-cmd">→ core/ai_engine/price_estimator_btp.py (nouveau fichier à créer)</code>
+        </div>
+      </div>
+      <div class="step-item" style="opacity:0.6;">
+        <div class="step-num" style="background:#94a3b8;">5</div>
+        <div class="step-content">
+          <h4>Créer le serveur FastAPI</h4>
+          <p>Compléter server/main.py avec les routes /validate-licence et /unknown-designations</p>
+          <code class="step-cmd">uvicorn server.main:app --reload</code>
+        </div>
+      </div>
+      <div class="step-item" style="opacity:0.6;">
+        <div class="step-num" style="background:#94a3b8;">6</div>
+        <div class="step-content">
+          <h4>Clés KKiaPay production</h4>
+          <p>Créer un compte KKiaPay Business et basculer en mode production</p>
+          <code class="step-cmd">→ kkiapay.me → Dashboard → API Keys → Production</code>
+        </div>
+      </div>
+      <div class="step-item" style="opacity:0.6;">
+        <div class="step-num" style="background:#94a3b8;">7</div>
+        <div class="step-content">
+          <h4>Créer l'installeur Windows</h4>
+          <p>Packager dist/DevisAIPro/ avec Inno Setup → setup_DevisAIPro_v1.0.0.exe</p>
+          <code class="step-cmd">→ Télécharger Inno Setup : https://jrsoftware.org/isinfo.php</code>
+        </div>
+      </div>
+      <div class="step-item" style="opacity:0.6;">
+        <div class="step-num" style="background:#94a3b8;">8</div>
+        <div class="step-content">
+          <h4>Distribution bêta</h4>
+          <p>Partager setup.exe + clés BETA-XXXX aux testeurs via WhatsApp</p>
+          <code class="step-cmd">→ Uploader sur Google Drive, envoyer lien + clé bêta</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+function toggleAll() {
+  const cards = document.querySelectorAll('.phase-card');
+  const anyOpen = Array.from(cards).some(c => c.classList.contains('open'));
+  cards.forEach(c => anyOpen ? c.classList.remove('open') : c.classList.add('open'));
+}
+// Ouvrir la phase prioritaire par défaut
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.phase-card').forEach(c => {
+    if (c.querySelector('.phase-header[style*="e07020"]')) c.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>

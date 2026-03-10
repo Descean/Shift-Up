@@ -1,0 +1,510 @@
+{
+  "project": "SHIFT UP — Site Officiel",
+  "last_updated": "2026-03-07",
+  "global_progress": 93,
+  "phases": [
+    {
+      "id": "p1",
+      "icon": "⚙️",
+      "title": "PHASE 1 — FONDATIONS",
+      "subtitle": "next.config · Prisma · Middleware · Libs utilitaires",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t1_1",
+          "name": "next.config.ts",
+          "status": "done",
+          "note": "Config Next.js 14 : images Supabase/Google, redirections, headers sécurité"
+        },
+        {
+          "id": "t1_2",
+          "name": "prisma/schema.prisma",
+          "status": "done",
+          "note": "Schéma complet : User, Account, Session, Service, Prestation, Payment, Message, ChatSession, BlogPost, FAQ, Newsletter, MicroTask, Testimonial, ContactMessage, PasswordResetToken, AuditLog"
+        },
+        {
+          "id": "t1_3",
+          "name": "lib/prisma.ts",
+          "status": "done",
+          "note": "Singleton PrismaClient compatible hot-reload Next.js"
+        },
+        {
+          "id": "t1_4",
+          "name": "lib/auth.ts",
+          "status": "done",
+          "note": "Config NextAuth : Credentials + Google OAuth, callbacks JWT/session, roles UserRole"
+        },
+        {
+          "id": "t1_5",
+          "name": "lib/utils.ts",
+          "status": "done",
+          "note": "Helpers : cn(), formatPrice(), formatDate(), getInitials()"
+        },
+        {
+          "id": "t1_6",
+          "name": "lib/supabase.ts",
+          "status": "done",
+          "note": "Client Supabase pour stockage fichiers (avatars, pièces jointes)"
+        },
+        {
+          "id": "t1_7",
+          "name": "middleware.ts",
+          "status": "done",
+          "note": "Protection routes /dashboard/** — redirige vers /connexion si non authentifié"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "icon": "🎨",
+      "title": "PHASE 2 — COMPOSANTS UI",
+      "subtitle": "Design system · Layout · Providers",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t2_1",
+          "name": "app/layout.tsx",
+          "status": "done",
+          "note": "Layout racine : fonts Syne + Space Grotesk, Toaster, AuthProvider, Font Awesome CDN"
+        },
+        {
+          "id": "t2_2",
+          "name": "components/ui/Button.tsx",
+          "status": "done",
+          "note": "Variantes : gradient, primary, outline, ghost — tailles sm/md/lg — état loading spinner"
+        },
+        {
+          "id": "t2_3",
+          "name": "components/ui/Card.tsx",
+          "status": "done",
+          "note": "Composant carte réutilisable avec hover et shadow"
+        },
+        {
+          "id": "t2_4",
+          "name": "components/ui/Badge.tsx",
+          "status": "done",
+          "note": "Badges colorés pour statuts prestations, rôles utilisateurs"
+        },
+        {
+          "id": "t2_5",
+          "name": "components/providers/AuthProvider.tsx",
+          "status": "done",
+          "note": "SessionProvider NextAuth wrappé pour le client"
+        },
+        {
+          "id": "t2_6",
+          "name": "components/layout/Header.tsx",
+          "status": "done",
+          "note": "Navigation sticky : logo, menu desktop/mobile, boutons auth, menu utilisateur connecté"
+        },
+        {
+          "id": "t2_7",
+          "name": "components/layout/Footer.tsx",
+          "status": "done",
+          "note": "Footer 4 colonnes : brand, services, liens, contact — newsletter inline — réseaux sociaux"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "icon": "🌐",
+      "title": "PHASE 3 — PAGES PUBLIQUES",
+      "subtitle": "Landing · Services · Blog · Contact · FAQ · Légal",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t3_1",
+          "name": "app/(public)/layout.tsx",
+          "status": "done",
+          "note": "Layout pages publiques : Header + Footer + ChatWidget"
+        },
+        {
+          "id": "t3_2",
+          "name": "app/(public)/page.tsx",
+          "status": "done",
+          "note": "Page d'accueil : Hero + Sections (Services, Compteurs, Témoignages, CTA)"
+        },
+        {
+          "id": "t3_3",
+          "name": "components/home/Hero.tsx",
+          "status": "done",
+          "note": "Hero animé : gradient mesh, stats, boutons d'action, illustration"
+        },
+        {
+          "id": "t3_4",
+          "name": "components/home/ServicesSection.tsx",
+          "status": "done",
+          "note": "Grille 6 domaines (Web, Mobile, Marketing, Design, Rédaction, Data)"
+        },
+        {
+          "id": "t3_5",
+          "name": "components/home/CountersSection.tsx",
+          "status": "done",
+          "note": "Compteurs animés : projets livrés, clients, taux satisfaction, délai moyen"
+        },
+        {
+          "id": "t3_6",
+          "name": "components/home/TestimonialsSection.tsx",
+          "status": "done",
+          "note": "Carrousel témoignages clients avec notes étoiles"
+        },
+        {
+          "id": "t3_7",
+          "name": "components/home/CTASection.tsx",
+          "status": "done",
+          "note": "Section appel à l'action avec gradient et boutons inscription/contact"
+        },
+        {
+          "id": "t3_8",
+          "name": "app/(public)/services/page.tsx",
+          "status": "done",
+          "note": "Catalogue services filtrable par domaine avec prix min/max en XOF"
+        },
+        {
+          "id": "t3_9",
+          "name": "app/(public)/a-propos/page.tsx",
+          "status": "done",
+          "note": "Histoire SHIFT UP, mission, équipe, valeurs, chiffres clés"
+        },
+        {
+          "id": "t3_10",
+          "name": "app/(public)/contact/page.tsx",
+          "status": "done",
+          "note": "Formulaire contact (react-hook-form + zod) → POST /api/contact — coordonnées Abomey-Calavi"
+        },
+        {
+          "id": "t3_11",
+          "name": "app/(public)/faq/page.tsx",
+          "status": "done",
+          "note": "Accordéon FAQ dynamique avec catégories et recherche"
+        },
+        {
+          "id": "t3_12",
+          "name": "app/(public)/blog/page.tsx",
+          "status": "done",
+          "note": "Liste articles avec filtres catégories, recherche, pagination"
+        },
+        {
+          "id": "t3_13",
+          "name": "app/(public)/blog/[slug]/page.tsx",
+          "status": "done",
+          "note": "Article dynamique : SSG generateStaticParams, sidebar CTA + auteur + articles liés, partage WhatsApp/LinkedIn"
+        },
+        {
+          "id": "t3_14",
+          "name": "app/(public)/confidentialite/page.tsx",
+          "status": "done",
+          "note": "Politique de Confidentialité RGPD + droit béninois — 10 articles — sidebar TOC sticky"
+        },
+        {
+          "id": "t3_15",
+          "name": "app/(public)/cgv/page.tsx",
+          "status": "done",
+          "note": "CGV — 12 articles (acompte 40%/solde 60%, droit OHADA) — sidebar TOC sticky"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "icon": "🔐",
+      "title": "PHASE 4 — AUTHENTIFICATION",
+      "subtitle": "Login · Register · Reset mot de passe · NextAuth",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t4_1",
+          "name": "app/(auth)/layout.tsx",
+          "status": "done",
+          "note": "Layout auth : panneau gauche animé brand + panneau droit formulaire"
+        },
+        {
+          "id": "t4_2",
+          "name": "app/(auth)/connexion/page.tsx",
+          "status": "done",
+          "note": "Login email/mot de passe + bouton Google OAuth — react-hook-form + zod"
+        },
+        {
+          "id": "t4_3",
+          "name": "app/(auth)/inscription/page.tsx",
+          "status": "done",
+          "note": "Inscription 3 types (Client/Apporteur/Étudiant) — code affiliation — CGV checkbox"
+        },
+        {
+          "id": "t4_4",
+          "name": "app/(auth)/mot-de-passe-oublie/page.tsx",
+          "status": "done",
+          "note": "Demande réinitialisation — anti-énumération email — conseils si non reçu — aide WhatsApp"
+        },
+        {
+          "id": "t4_5",
+          "name": "app/(auth)/reinitialiser-mot-de-passe/page.tsx",
+          "status": "done",
+          "note": "Confirmation token URL — Suspense (useSearchParams) — showPwd toggle — 3 états : invalide/formulaire/succès"
+        },
+        {
+          "id": "t4_6",
+          "name": "app/api/auth/[...nextauth]/route.ts",
+          "status": "done",
+          "note": "Handler NextAuth v4 : Credentials + Google, JWT callbacks, gestion isActive"
+        },
+        {
+          "id": "t4_7",
+          "name": "app/api/auth/register/route.ts",
+          "status": "done",
+          "note": "POST /api/auth/register — validation zod — bcrypt hash — création User + profil métier"
+        },
+        {
+          "id": "t4_8",
+          "name": "app/api/auth/reset-password/route.ts",
+          "status": "done",
+          "note": "POST demande (token 32 bytes, expire 1h, email Resend) — PATCH confirmation (transaction atomique : update user + marque used + AuditLog)"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "icon": "📊",
+      "title": "PHASE 5 — DASHBOARDS",
+      "subtitle": "4 profils : Client · Admin · Apporteur · Étudiant",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t5_1",
+          "name": "app/dashboard/layout.tsx",
+          "status": "done",
+          "note": "Layout dashboard : Sidebar + Header — protection session côté serveur"
+        },
+        {
+          "id": "t5_2",
+          "name": "components/dashboard/DashboardSidebar.tsx",
+          "status": "done",
+          "note": "Navigation latérale avec liens rôle-dépendants, collapse mobile, avatar utilisateur"
+        },
+        {
+          "id": "t5_3",
+          "name": "components/dashboard/DashboardHeader.tsx",
+          "status": "done",
+          "note": "Header dashboard : fil d'Ariane, notifications, menu profil"
+        },
+        {
+          "id": "t5_4",
+          "name": "components/dashboard/ClientDashboard.tsx",
+          "status": "done",
+          "note": "Stats prestations (en cours/terminées/facture), liste avec badge statut, bouton nouvelle commande"
+        },
+        {
+          "id": "t5_5",
+          "name": "components/dashboard/AdminDashboard.tsx",
+          "status": "done",
+          "note": "KPIs globaux, tableau prestations toutes, gestion utilisateurs, graphiques revenus"
+        },
+        {
+          "id": "t5_6",
+          "name": "components/dashboard/ApporteurDashboard.tsx",
+          "status": "done",
+          "note": "Gains (total/en attente), niveau (Bronze→Diamant), filleuls, code affiliation"
+        },
+        {
+          "id": "t5_7",
+          "name": "components/dashboard/EtudiantDashboard.tsx",
+          "status": "done",
+          "note": "Micro-tâches disponibles/assignées, badges, compteur tâches complétées"
+        },
+        {
+          "id": "t5_8",
+          "name": "app/dashboard/client/page.tsx",
+          "status": "done",
+          "note": "Page dashboard client — charge ClientDashboard avec données session"
+        },
+        {
+          "id": "t5_9",
+          "name": "app/dashboard/admin/page.tsx",
+          "status": "done",
+          "note": "Page dashboard admin — charge AdminDashboard — vérification rôle ADMIN"
+        },
+        {
+          "id": "t5_10",
+          "name": "app/dashboard/apporteur/page.tsx",
+          "status": "done",
+          "note": "Page dashboard apporteur — charge ApporteurDashboard avec profil apporteur"
+        },
+        {
+          "id": "t5_11",
+          "name": "app/dashboard/etudiant/page.tsx",
+          "status": "done",
+          "note": "Page dashboard étudiant — charge EtudiantDashboard avec profil étudiant"
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "icon": "💳",
+      "title": "PHASE 6 — API ROUTES & PAIEMENTS",
+      "subtitle": "Contact · Chat IA · Newsletter · FedaPay · Stripe",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t6_1",
+          "name": "app/api/contact/route.ts",
+          "status": "done",
+          "note": "POST /api/contact — sauvegarde ContactMessage + email notification admin via Resend"
+        },
+        {
+          "id": "t6_2",
+          "name": "app/api/newsletter/route.ts",
+          "status": "done",
+          "note": "POST /api/newsletter — upsert NewsletterSubscriber — anti-doublon email"
+        },
+        {
+          "id": "t6_3",
+          "name": "app/api/chat/route.ts",
+          "status": "done",
+          "note": "GET init session + POST message — intégration Claude API — contexte page courante"
+        },
+        {
+          "id": "t6_4",
+          "name": "app/api/payments/create/route.ts",
+          "status": "done",
+          "note": "POST — crée PaymentIntent Stripe ou transaction FedaPay selon provider — enregistre Payment en DB"
+        },
+        {
+          "id": "t6_5",
+          "name": "app/api/payments/webhook/fedapay/route.ts",
+          "status": "done",
+          "note": "POST — vérifie signature HMAC FedaPay — met à jour Payment (COMPLETED/FAILED) — AuditLog"
+        },
+        {
+          "id": "t6_6",
+          "name": "app/api/payments/webhook/stripe/route.ts",
+          "status": "done",
+          "note": "POST — vérifie signature Stripe — gère payment_intent.succeeded/failed + charge.refunded — avance statut prestation si 40%+ payé"
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "icon": "🤖",
+      "title": "PHASE 7 — CHATBOT IA",
+      "subtitle": "Widget flottant · Claude API · Contexte page",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        {
+          "id": "t7_1",
+          "name": "components/chatbot/ChatWidget.tsx",
+          "status": "done",
+          "note": "Widget flottant : bulle animée, conversation streaming, historique session — correction hooks React (useEffect avant return conditionnel) — masqué dans /dashboard/**"
+        }
+      ]
+    },
+    {
+      "id": "p8",
+      "icon": "🚀",
+      "title": "PHASE 8 — DÉPLOIEMENT",
+      "subtitle": "Variables env · Migration DB · Vercel · Domaine",
+      "progress": 20,
+      "status": "partial",
+      "tasks": [
+        {
+          "id": "t8_1",
+          "name": "Variables d'environnement",
+          "status": "partial",
+          "note": "Configurer dans Vercel : DATABASE_URL, DIRECT_URL (Supabase), NEXTAUTH_SECRET, NEXTAUTH_URL, GOOGLE_CLIENT_ID/SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, FEDAPAY_SECRET_KEY, RESEND_API_KEY",
+          "blocker": "Toutes les variables doivent être renseignées dans Vercel Dashboard → Settings → Environment Variables. Sans DATABASE_URL valide, l'app crashe au démarrage. Générer NEXTAUTH_SECRET avec : openssl rand -base64 32"
+        },
+        {
+          "id": "t8_2",
+          "name": "Migration Prisma (Supabase)",
+          "status": "todo",
+          "note": "Appliquer le schéma Prisma sur la base Supabase de production",
+          "blocker": "Depuis le terminal avec DATABASE_URL pointant vers Supabase production : npx prisma migrate deploy. Vérifier que toutes les tables sont créées dans Supabase Dashboard → Table Editor. Si erreur de connexion : utiliser DIRECT_URL (connexion directe, non poolée) pour les migrations."
+        },
+        {
+          "id": "t8_3",
+          "name": "Déploiement Vercel",
+          "status": "todo",
+          "note": "Connecter le repo GitHub à Vercel et déployer",
+          "blocker": "Aller sur vercel.com → New Project → Import depuis GitHub. Choisir le repo SHIFT UP. Framework preset : Next.js. Root directory : laisser vide si à la racine. Ajouter les env variables AVANT le premier déploiement. Si build échoue : vérifier les logs Vercel pour les erreurs TypeScript ou modules manquants."
+        },
+        {
+          "id": "t8_4",
+          "name": "Domaine shiftup.bj",
+          "status": "todo",
+          "note": "Configurer le domaine personnalisé sur Vercel",
+          "blocker": "Dans Vercel → Project Settings → Domains → ajouter shiftup.bj. Mettre à jour les DNS chez le registrar : ajouter CNAME www pointant vers cname.vercel-dns.com et A record pour @ pointant vers l'IP Vercel. Propagation DNS : 10min à 48h. Mettre à jour NEXTAUTH_URL=https://shiftup.bj"
+        },
+        {
+          "id": "t8_5",
+          "name": "Configuration webhooks paiement",
+          "status": "todo",
+          "note": "Enregistrer les URLs de webhook Stripe et FedaPay en production",
+          "blocker": "Stripe : Dashboard → Webhooks → Add endpoint : https://shiftup.bj/api/payments/webhook/stripe — events : payment_intent.succeeded, payment_intent.payment_failed, charge.refunded. Copier le Signing Secret dans STRIPE_WEBHOOK_SECRET. FedaPay : Dashboard → API → Webhooks → URL : https://shiftup.bj/api/payments/webhook/fedapay."
+        }
+      ]
+    }
+  ],
+  "next_steps": [
+    {
+      "num": 1,
+      "title": "Configurer les variables d'environnement",
+      "detail": "Renseigner toutes les clés API dans Vercel avant le premier déploiement",
+      "cmd": "NEXTAUTH_SECRET=$(openssl rand -base64 32) → copier dans Vercel env vars",
+      "status": "next"
+    },
+    {
+      "num": 2,
+      "title": "Créer la base Supabase et migrer",
+      "detail": "Créer un projet Supabase, récupérer DATABASE_URL et DIRECT_URL, puis appliquer les migrations",
+      "cmd": "npx prisma migrate deploy",
+      "status": "next"
+    },
+    {
+      "num": 3,
+      "title": "Déployer sur Vercel",
+      "detail": "Importer le repo GitHub dans Vercel, configurer les env vars, lancer le premier build",
+      "cmd": "→ vercel.com → New Project → Import GitHub repo",
+      "status": "next"
+    },
+    {
+      "num": 4,
+      "title": "Connecter le domaine shiftup.bj",
+      "detail": "Ajouter le domaine dans Vercel et configurer les DNS chez le registrar",
+      "cmd": "→ Vercel Dashboard → Settings → Domains → Add shiftup.bj",
+      "status": "todo"
+    },
+    {
+      "num": 5,
+      "title": "Configurer les webhooks Stripe",
+      "detail": "Enregistrer l'URL webhook en production et récupérer le Signing Secret",
+      "cmd": "→ Stripe Dashboard → Webhooks → https://shiftup.bj/api/payments/webhook/stripe",
+      "status": "todo"
+    },
+    {
+      "num": 6,
+      "title": "Configurer les webhooks FedaPay",
+      "detail": "Enregistrer l'URL webhook FedaPay et basculer en mode production",
+      "cmd": "→ FedaPay Dashboard → API → Webhooks → https://shiftup.bj/api/payments/webhook/fedapay",
+      "status": "todo"
+    },
+    {
+      "num": 7,
+      "title": "Test end-to-end en production",
+      "detail": "Tester inscription, connexion, commande de service, paiement test, réinitialisation mot de passe",
+      "cmd": "→ Ouvrir https://shiftup.bj et parcourir tous les flux utilisateur",
+      "status": "todo"
+    },
+    {
+      "num": 8,
+      "title": "Configurer Resend pour les emails",
+      "detail": "Vérifier le domaine shiftup.bj dans Resend, configurer DKIM/SPF pour les emails transactionnels",
+      "cmd": "→ resend.com → Domains → Add shiftup.bj → vérifier les DNS records",
+      "status": "todo"
+    }
+  ]
+}

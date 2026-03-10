@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHIFT UP — Roadmap Site Officiel</title>
+<style>
+  /* ── Variables couleurs SHIFT UP ── */
+  :root {
+    --navy:    #0a2533;
+    --blue:    #163548;
+    --accent:  #1e9fd4;
+    --green:   #00d4a0;
+    --gold:    #f5c842;
+    --orange:  #f97316;
+    --gray:    #6d8fa3;
+    --bg:      #070f14;
+    --surface: #0e1f2b;
+    --surface2:#162d3d;
+    --text:    #e8f4fc;
+    --muted:   #6d8fa3;
+    --border:  #1d3a4d;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+
+  /* ── En-tête ── */
+  header {
+    background:linear-gradient(135deg, var(--navy) 0%, var(--blue) 60%, #0e2d42 100%);
+    padding:28px 40px 24px;
+    border-bottom:1px solid var(--border);
+  }
+  .logo {
+    font-size:26px; font-weight:900; letter-spacing:-1px; color:white;
+  }
+  .logo span { color:var(--accent); }
+  header p  { font-size:12px; color:rgba(255,255,255,.55); margin-top:4px; }
+  .badge {
+    display:inline-block; background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.2); border-radius:20px;
+    padding:3px 12px; font-size:11px; color:rgba(255,255,255,.75);
+    margin-top:8px;
+  }
+  .updated { font-size:11px; color:rgba(255,255,255,.4); margin-top:4px; }
+
+  /* ── Conteneur principal ── */
+  .container { max-width:1200px; margin:0 auto; padding:28px 20px; }
+
+  /* ── Barre de progression globale ── */
+  .global-progress {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px; padding:22px 28px;
+    margin-bottom:24px;
+  }
+  .global-progress h2 {
+    font-size:11px; color:var(--muted); font-weight:700;
+    text-transform:uppercase; letter-spacing:2px; margin-bottom:12px;
+  }
+  .prog-bar-wrap {
+    background:var(--surface2); border-radius:99px; height:22px; overflow:hidden;
+  }
+  .prog-bar-fill {
+    height:100%; border-radius:99px;
+    background:linear-gradient(90deg, var(--accent) 0%, var(--green) 100%);
+    display:flex; align-items:center; justify-content:flex-end;
+    padding-right:10px; transition:width .8s ease;
+  }
+  .prog-bar-fill span { color:white; font-size:12px; font-weight:800; }
+  .prog-stats { display:flex; gap:28px; margin-top:16px; flex-wrap:wrap; }
+  .prog-stat .val {
+    font-size:24px; font-weight:800;
+  }
+  .prog-stat .lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+
+  /* ── Légende ── */
+  .legend {
+    display:flex; gap:16px; flex-wrap:wrap;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:12px 18px; margin-bottom:20px;
+  }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+  .legend-dot  { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+  /* ── Bouton tout ouvrir/fermer ── */
+  .toggle-all { text-align:right; margin-bottom:12px; }
+  .toggle-all button {
+    background:none; border:1.5px solid var(--border); border-radius:8px;
+    padding:6px 14px; font-size:11px; color:var(--accent); cursor:pointer;
+    font-weight:600; transition:background .2s;
+  }
+  .toggle-all button:hover { background:var(--surface2); }
+
+  /* ── Cards de phase ── */
+  .phases { display:flex; flex-direction:column; gap:14px; }
+
+  .phase-card {
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:14px; overflow:hidden;
+    transition:border-color .2s;
+  }
+  .phase-card:hover { border-color:var(--accent); }
+
+  .phase-header {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 20px; cursor:pointer;
+  }
+  .phase-icon { font-size:22px; flex-shrink:0; }
+  .phase-meta { flex:1; min-width:0; }
+  .phase-meta h3 { font-size:14px; font-weight:800; color:var(--text); }
+  .phase-meta p  { font-size:11px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .status-pill {
+    border-radius:99px; padding:4px 12px; font-size:11px;
+    font-weight:700; white-space:nowrap; flex-shrink:0;
+  }
+  .phase-mini-bar {
+    width:70px; height:6px; background:var(--surface2);
+    border-radius:99px; overflow:hidden; flex-shrink:0;
+  }
+  .chevron { color:var(--muted); transition:transform .2s; font-size:16px; flex-shrink:0; }
+  .phase-card.open .chevron { transform:rotate(180deg); }
+
+  /* ── Corps de phase ── */
+  .phase-body { display:none; padding:0 20px 18px; }
+  .phase-card.open .phase-body { display:block; }
+
+  /* ── Grille de tâches ── */
+  .tasks-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;
+  }
+  @media(max-width:700px) { .tasks-grid { grid-template-columns:1fr; } }
+
+  .task {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:9px 12px; border-radius:10px; border:1px solid var(--border);
+    position:relative; background:var(--surface2);
+  }
+  .task-icon { font-size:14px; flex-shrink:0; margin-top:2px; }
+  .task-info h4 { font-size:12px; font-weight:700; color:var(--text); }
+  .task-info p  { font-size:11px; color:var(--muted); margin-top:2px; line-height:1.45; }
+  .task-id { font-size:9px; color:rgba(109,143,163,.5); font-family:Consolas,monospace; }
+
+  /* Couleurs selon statut */
+  .task.done    { border-color:#00d4a030; }
+  .task.partial { border-color:#f5c84230; }
+  .task.todo    { border-color:#1d3a4d; }
+
+  /* ── Badge bloquant (tooltip) ── */
+  .task-blocker-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:15px; height:15px; border-radius:50%;
+    background:var(--orange); color:#fff;
+    font-size:9px; font-weight:900; font-style:italic;
+    vertical-align:middle; margin-left:5px; cursor:help;
+    flex-shrink:0; line-height:1;
+    border:1.5px solid rgba(255,255,255,.3);
+  }
+  .task-tooltip {
+    display:none; position:absolute;
+    bottom:calc(100% + 8px); left:0; right:0;
+    background:#0a2533; color:#c8e8f8;
+    border:1px solid rgba(30,159,212,.3);
+    border-radius:10px; padding:11px 14px;
+    font-size:11px; line-height:1.6; z-index:500;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    pointer-events:none;
+  }
+  .task-tooltip::after {
+    content:''; position:absolute; top:100%; left:20px;
+    border:7px solid transparent; border-top-color:#0a2533;
+  }
+  .task-tooltip strong {
+    color:var(--accent); font-size:10px; text-transform:uppercase;
+    letter-spacing:.5px; display:block; margin-bottom:5px;
+  }
+  .task:hover .task-tooltip { display:block; }
+
+  /* ── Section prochaines étapes ── */
+  .next-steps {
+    background:linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    border:1px solid var(--border);
+    border-radius:16px; padding:26px 28px;
+    margin-top:12px;
+  }
+  .next-steps h2 {
+    font-size:14px; font-weight:800; color:var(--text);
+    text-transform:uppercase; letter-spacing:2px; margin-bottom:18px;
+  }
+  .steps-list { display:flex; flex-direction:column; gap:12px; }
+  .step-item {
+    display:flex; gap:14px; align-items:flex-start;
+    background:rgba(255,255,255,.06);
+    border-radius:12px; padding:12px 14px;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .step-num {
+    color:white; font-weight:800; font-size:12px; border-radius:99px;
+    min-width:26px; height:26px; display:flex; align-items:center;
+    justify-content:center; flex-shrink:0;
+    background:rgba(30,159,212,.3);
+  }
+  .step-content h4 { font-size:13px; font-weight:700; color:white; }
+  .step-content p  { font-size:11px; color:rgba(255,255,255,.6); margin-top:2px; line-height:1.5; }
+  .step-cmd {
+    font-family:Consolas,'Courier New',monospace;
+    background:rgba(0,0,0,.35); color:var(--green);
+    border-radius:6px; padding:5px 10px; font-size:11px;
+    margin-top:5px; display:block; word-break:break-all;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ EN-TÊTE ══════════════ -->
+<header>
+  <div class="logo">SHIFT <span>UP</span></div>
+  <p>Roadmap du site officiel — Suivi d'avancement en temps réel</p>
+  <div class="badge">Next.js 14 · Prisma · Supabase · Vercel · Stripe · FedaPay</div>
+  <div class="updated" id="last-updated"></div>
+</header>
+
+<div class="container">
+
+  <!-- ══ Barre de progression globale ══ -->
+  <div class="global-progress">
+    <h2>Avancement global du projet</h2>
+    <div class="prog-bar-wrap">
+      <div class="prog-bar-fill" id="global-bar">
+        <span id="global-pct"></span>
+      </div>
+    </div>
+    <div class="prog-stats">
+      <div class="prog-stat">
+        <div class="val" id="cnt-done" style="color:var(--green)">0</div>
+        <div class="lbl">Terminées ✅</div>
+      </div>
+      <div class="prog-stat">
+        <div class="val" id="cnt-partial" style="color:var(--gold)">0</div>
+        <div class="lbl">Partielles ⚠️</div>
+      </div>
+      <div class="prog-stat">
+        <div class="val" id="cnt-todo" style="color:var(--muted)">0</div>
+        <div class="lbl">À venir ⏳</div>
+      </div>
+      <div class="prog-stat">
+        <div class="val" id="cnt-total" style="color:var(--accent)">0</div>
+        <div class="lbl">Total tâches</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Légende ══ -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Terminé ✅</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Partiel ⚠️</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Bloquant ⚠</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div>À venir ⏳</div>
+  </div>
+
+  <!-- ══ Bouton tout ouvrir/fermer ══ -->
+  <div class="toggle-all">
+    <button onclick="toggleAll()">Tout ouvrir / fermer</button>
+  </div>
+
+  <!-- ══ Phases (injectées par JS) ══ -->
+  <div class="phases" id="phases-container"></div>
+
+  <!-- ══ Prochaines étapes (injectées par JS) ══ -->
+  <div class="next-steps" style="margin-top:28px;">
+    <h2>Prochaines étapes</h2>
+    <div class="steps-list" id="next-steps-container"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════ DONNÉES JSON EMBARQUÉES ══════════════ -->
+<script>
+/* ──────────────────────────────────────────────────────────────
+   ROADMAP DATA — modifier ici pour mettre à jour l'avancement
+   statut des tâches : "done" | "partial" | "todo"
+   statut des phases : "done" | "partial" | "todo"
+────────────────────────────────────────────────────────────── */
+const ROADMAP = {
+  "project": "SHIFT UP — Site Officiel",
+  "last_updated": "2026-03-07",
+  "global_progress": 93,
+  "phases": [
+    {
+      "id": "p1",
+      "icon": "⚙️",
+      "title": "PHASE 1 — FONDATIONS",
+      "subtitle": "next.config · Prisma · Middleware · Libs utilitaires",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        { "id": "t1_1", "name": "next.config.ts",       "status": "done",
+          "note": "Config Next.js 14 : images Supabase/Google, redirections, headers sécurité" },
+        { "id": "t1_2", "name": "prisma/schema.prisma",  "status": "done",
+          "note": "Schéma complet : User, Prestation, Payment, Message, ChatSession, BlogPost, FAQ, Newsletter, MicroTask, Testimonial, ContactMessage, PasswordResetToken, AuditLog" },
+        { "id": "t1_3", "name": "lib/prisma.ts",         "status": "done",
+          "note": "Singleton PrismaClient compatible hot-reload Next.js" },
+        { "id": "t1_4", "name": "lib/auth.ts",           "status": "done",
+          "note": "Config NextAuth : Credentials + Google OAuth, callbacks JWT/session, rôles UserRole" },
+        { "id": "t1_5", "name": "lib/utils.ts",          "status": "done",
+          "note": "Helpers : cn(), formatPrice(), formatDate(), getInitials()" },
+        { "id": "t1_6", "name": "lib/supabase.ts",       "status": "done",
+          "note": "Client Supabase pour stockage fichiers (avatars, pièces jointes)" },
+        { "id": "t1_7", "name": "middleware.ts",         "status": "done",
+          "note": "Protection routes /dashboard/** — redirige vers /connexion si non authentifié" }
+      ]
+    },
+    {
+      "id": "p2",
+      "icon": "🎨",
+      "title": "PHASE 2 — COMPOSANTS UI",
+      "subtitle": "Design system · Layout · Providers",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        { "id": "t2_1", "name": "app/layout.tsx",                   "status": "done",
+          "note": "Layout racine : fonts Syne + Space Grotesk, Toaster, AuthProvider, Font Awesome CDN" },
+        { "id": "t2_2", "name": "components/ui/Button.tsx",         "status": "done",
+          "note": "Variantes : gradient, primary, outline, ghost — tailles sm/md/lg — état loading spinner" },
+        { "id": "t2_3", "name": "components/ui/Card.tsx",           "status": "done",
+          "note": "Composant carte réutilisable avec hover et shadow" },
+        { "id": "t2_4", "name": "components/ui/Badge.tsx",          "status": "done",
+          "note": "Badges colorés pour statuts prestations, rôles utilisateurs" },
+        { "id": "t2_5", "name": "components/providers/AuthProvider.tsx", "status": "done",
+          "note": "SessionProvider NextAuth wrappé pour le client" },
+        { "id": "t2_6", "name": "components/layout/Header.tsx",     "status": "done",
+          "note": "Navigation sticky : logo, menu desktop/mobile, boutons auth, menu utilisateur connecté" },
+        { "id": "t2_7", "name": "components/layout/Footer.tsx",     "status": "done",
+          "note": "Footer 4 colonnes : brand, services, liens, contact — newsletter inline — réseaux sociaux" }
+      ]
+    },
+    {
+      "id": "p3",
+      "icon": "🌐",
+      "title": "PHASE 3 — PAGES PUBLIQUES",
+      "subtitle": "Landing · Services · Blog · Contact · FAQ · Légal",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        { "id": "t3_1",  "name": "app/(public)/layout.tsx",               "status": "done",
+          "note": "Layout pages publiques : Header + Footer + ChatWidget" },
+        { "id": "t3_2",  "name": "app/(public)/page.tsx",                 "status": "done",
+          "note": "Page d'accueil : Hero + Sections (Services, Compteurs, Témoignages, CTA)" },
+        { "id": "t3_3",  "name": "components/home/Hero.tsx",              "status": "done",
+          "note": "Hero animé : gradient mesh, stats, boutons d'action, illustration" },
+        { "id": "t3_4",  "name": "components/home/ServicesSection.tsx",   "status": "done",
+          "note": "Grille 6 domaines (Web, Mobile, Marketing, Design, Rédaction, Data)" },
+        { "id": "t3_5",  "name": "components/home/CountersSection.tsx",   "status": "done",
+          "note": "Compteurs animés : projets livrés, clients, taux satisfaction, délai moyen" },
+        { "id": "t3_6",  "name": "components/home/TestimonialsSection.tsx","status": "done",
+          "note": "Carrousel témoignages clients avec notes étoiles" },
+        { "id": "t3_7",  "name": "components/home/CTASection.tsx",        "status": "done",
+          "note": "Section appel à l'action avec gradient et boutons inscription/contact" },
+        { "id": "t3_8",  "name": "app/(public)/services/page.tsx",        "status": "done",
+          "note": "Catalogue services filtrable par domaine avec prix min/max en XOF" },
+        { "id": "t3_9",  "name": "app/(public)/a-propos/page.tsx",        "status": "done",
+          "note": "Histoire SHIFT UP, mission, équipe, valeurs, chiffres clés" },
+        { "id": "t3_10", "name": "app/(public)/contact/page.tsx",         "status": "done",
+          "note": "Formulaire contact (react-hook-form + zod) → POST /api/contact — coordonnées Abomey-Calavi" },
+        { "id": "t3_11", "name": "app/(public)/faq/page.tsx",             "status": "done",
+          "note": "Accordéon FAQ avec catégories et recherche" },
+        { "id": "t3_12", "name": "app/(public)/blog/page.tsx",            "status": "done",
+          "note": "Liste articles avec filtres catégories, recherche, pagination" },
+        { "id": "t3_13", "name": "app/(public)/blog/[slug]/page.tsx",     "status": "done",
+          "note": "Article dynamique : SSG generateStaticParams, sidebar CTA + auteur + articles liés, partage WhatsApp/LinkedIn" },
+        { "id": "t3_14", "name": "app/(public)/confidentialite/page.tsx", "status": "done",
+          "note": "Politique de Confidentialité RGPD + droit béninois — 10 articles — sidebar TOC sticky" },
+        { "id": "t3_15", "name": "app/(public)/cgv/page.tsx",             "status": "done",
+          "note": "CGV — 12 articles (acompte 40%/solde 60%, droit OHADA) — sidebar TOC sticky" }
+      ]
+    },
+    {
+      "id": "p4",
+      "icon": "🔐",
+      "title": "PHASE 4 — AUTHENTIFICATION",
+      "subtitle": "Login · Register · Reset mot de passe · NextAuth",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        { "id": "t4_1", "name": "app/(auth)/layout.tsx",                      "status": "done",
+          "note": "Layout auth : panneau gauche animé brand + panneau droit formulaire" },
+        { "id": "t4_2", "name": "app/(auth)/connexion/page.tsx",              "status": "done",
+          "note": "Login email/mot de passe + bouton Google OAuth — react-hook-form + zod" },
+        { "id": "t4_3", "name": "app/(auth)/inscription/page.tsx",            "status": "done",
+          "note": "Inscription 3 types (Client/Apporteur/Étudiant) — code affiliation — CGV checkbox" },
+        { "id": "t4_4", "name": "app/(auth)/mot-de-passe-oublie/page.tsx",   "status": "done",
+          "note": "Demande réinitialisation — anti-énumération email — conseils si non reçu — aide WhatsApp" },
+        { "id": "t4_5", "name": "app/(auth)/reinitialiser-mot-de-passe/page.tsx", "status": "done",
+          "note": "Confirmation token URL — Suspense (useSearchParams) — showPwd toggle — 3 états : invalide/formulaire/succès" },
+        { "id": "t4_6", "name": "app/api/auth/[...nextauth]/route.ts",        "status": "done",
+          "note": "Handler NextAuth v4 : Credentials + Google, JWT callbacks, gestion isActive" },
+        { "id": "t4_7", "name": "app/api/auth/register/route.ts",             "status": "done",
+          "note": "POST — validation zod — bcrypt hash — création User + profil métier (ClientProfile/ApporteurProfile/EtudiantProfile)" },
+        { "id": "t4_8", "name": "app/api/auth/reset-password/route.ts",       "status": "done",
+          "note": "POST demande (token 32 bytes, expire 1h, email Resend) — PATCH confirmation (transaction atomique : update user + marque used + AuditLog)" }
+      ]
+    },
+    {
+      "id": "p5",
+      "icon": "📊",
+      "title": "PHASE 5 — DASHBOARDS",
+      "subtitle": "4 profils : Client · Admin · Apporteur · Étudiant",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        { "id": "t5_1",  "name": "app/dashboard/layout.tsx",                     "status": "done",
+          "note": "Layout dashboard : Sidebar + Header — protection session côté serveur" },
+        { "id": "t5_2",  "name": "components/dashboard/DashboardSidebar.tsx",    "status": "done",
+          "note": "Navigation latérale avec liens rôle-dépendants, collapse mobile, avatar utilisateur" },
+        { "id": "t5_3",  "name": "components/dashboard/DashboardHeader.tsx",     "status": "done",
+          "note": "Header dashboard : fil d'Ariane, notifications, menu profil" },
+        { "id": "t5_4",  "name": "components/dashboard/ClientDashboard.tsx",     "status": "done",
+          "note": "Stats prestations (en cours/terminées/facture), liste avec badge statut, bouton nouvelle commande" },
+        { "id": "t5_5",  "name": "components/dashboard/AdminDashboard.tsx",      "status": "done",
+          "note": "KPIs globaux, tableau prestations, gestion utilisateurs, graphiques revenus" },
+        { "id": "t5_6",  "name": "components/dashboard/ApporteurDashboard.tsx",  "status": "done",
+          "note": "Gains (total/en attente), niveau Bronze→Diamant, filleuls, code affiliation partageable" },
+        { "id": "t5_7",  "name": "components/dashboard/EtudiantDashboard.tsx",   "status": "done",
+          "note": "Micro-tâches disponibles/assignées, badges, compteur tâches complétées" },
+        { "id": "t5_8",  "name": "app/dashboard/client/page.tsx",                "status": "done",
+          "note": "Page dashboard client — charge ClientDashboard avec données session" },
+        { "id": "t5_9",  "name": "app/dashboard/admin/page.tsx",                 "status": "done",
+          "note": "Page dashboard admin — charge AdminDashboard — vérification rôle ADMIN" },
+        { "id": "t5_10", "name": "app/dashboard/apporteur/page.tsx",             "status": "done",
+          "note": "Page dashboard apporteur — charge ApporteurDashboard avec profil apporteur" },
+        { "id": "t5_11", "name": "app/dashboard/etudiant/page.tsx",              "status": "done",
+          "note": "Page dashboard étudiant — charge EtudiantDashboard avec profil étudiant" }
+      ]
+    },
+    {
+      "id": "p6",
+      "icon": "💳",
+      "title": "PHASE 6 — API ROUTES & PAIEMENTS",
+      "subtitle": "Contact · Chat IA · Newsletter · FedaPay · Stripe",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        { "id": "t6_1", "name": "app/api/contact/route.ts",                      "status": "done",
+          "note": "POST — sauvegarde ContactMessage en DB + email notification admin via Resend" },
+        { "id": "t6_2", "name": "app/api/newsletter/route.ts",                   "status": "done",
+          "note": "POST — upsert NewsletterSubscriber — anti-doublon email" },
+        { "id": "t6_3", "name": "app/api/chat/route.ts",                         "status": "done",
+          "note": "GET init session + POST message — intégration Claude API — contexte page courante" },
+        { "id": "t6_4", "name": "app/api/payments/create/route.ts",              "status": "done",
+          "note": "POST — crée PaymentIntent Stripe ou transaction FedaPay selon provider — enregistre Payment en DB" },
+        { "id": "t6_5", "name": "app/api/payments/webhook/fedapay/route.ts",     "status": "done",
+          "note": "POST — vérifie signature HMAC FedaPay — met à jour Payment (COMPLETED/FAILED) — AuditLog" },
+        { "id": "t6_6", "name": "app/api/payments/webhook/stripe/route.ts",      "status": "done",
+          "note": "POST — vérifie signature Stripe — gère payment_intent.succeeded/failed + charge.refunded — avance prestation si 40%+ payé" }
+      ]
+    },
+    {
+      "id": "p7",
+      "icon": "🤖",
+      "title": "PHASE 7 — CHATBOT IA",
+      "subtitle": "Widget flottant · Claude API · Contexte page",
+      "progress": 100,
+      "status": "done",
+      "tasks": [
+        { "id": "t7_1", "name": "components/chatbot/ChatWidget.tsx", "status": "done",
+          "note": "Widget flottant : bulle animée, conversation streaming, historique session — correction hooks React (useEffect avant return conditionnel) — masqué dans /dashboard/**" }
+      ]
+    },
+    {
+      "id": "p8",
+      "icon": "🚀",
+      "title": "PHASE 8 — DÉPLOIEMENT",
+      "subtitle": "Variables env · Migration DB · Vercel · Domaine · Webhooks",
+      "progress": 20,
+      "status": "partial",
+      "tasks": [
+        { "id": "t8_1", "name": "Variables d'environnement",    "status": "partial",
+          "note": "Configurer dans Vercel Dashboard : DATABASE_URL, NEXTAUTH_SECRET, GOOGLE_CLIENT_ID/SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, FEDAPAY_SECRET_KEY, RESEND_API_KEY",
+          "blocker": "Sans DATABASE_URL valide, l'app crashe au démarrage. Générer NEXTAUTH_SECRET avec : openssl rand -base64 32. Toutes les variables doivent être renseignées dans Vercel → Settings → Environment Variables AVANT le premier déploiement." },
+        { "id": "t8_2", "name": "Migration Prisma (Supabase)", "status": "todo",
+          "note": "Appliquer le schéma Prisma sur la base Supabase de production",
+          "blocker": "Commande depuis le terminal avec DATABASE_URL pointant vers Supabase production : npx prisma migrate deploy. Si erreur de connexion, utiliser DIRECT_URL (connexion directe non poolée) pour les migrations. Vérifier que toutes les tables apparaissent dans Supabase → Table Editor." },
+        { "id": "t8_3", "name": "Déploiement Vercel",         "status": "todo",
+          "note": "Connecter le repo GitHub à Vercel et lancer le premier build",
+          "blocker": "vercel.com → New Project → Import depuis GitHub → choisir le repo SHIFT UP. Framework preset : Next.js. Root directory : laisser vide. Ajouter les env vars AVANT de valider. Si build échoue : vérifier les logs Vercel pour les erreurs TypeScript ou modules manquants." },
+        { "id": "t8_4", "name": "Domaine shiftup.bj",         "status": "todo",
+          "note": "Configurer le domaine personnalisé sur Vercel",
+          "blocker": "Vercel → Project Settings → Domains → ajouter shiftup.bj. Mettre à jour les DNS chez le registrar : CNAME www → cname.vercel-dns.com, A record @ → IP Vercel. Propagation DNS : 10 min à 48h. Mettre à jour NEXTAUTH_URL=https://shiftup.bj après." },
+        { "id": "t8_5", "name": "Webhooks paiement (prod)",   "status": "todo",
+          "note": "Enregistrer les URLs de webhook Stripe et FedaPay en mode production",
+          "blocker": "Stripe : Dashboard → Webhooks → Add endpoint : https://shiftup.bj/api/payments/webhook/stripe — events : payment_intent.succeeded, payment_intent.payment_failed, charge.refunded. FedaPay : Dashboard → API → Webhooks → URL : https://shiftup.bj/api/payments/webhook/fedapay. Copier les Signing Secrets dans les env vars Vercel." }
+      ]
+    }
+  ],
+  "next_steps": [
+    { "num": 1, "title": "Configurer les variables d'environnement",
+      "detail": "Renseigner toutes les clés API dans Vercel avant le premier déploiement",
+      "cmd": "NEXTAUTH_SECRET=$(openssl rand -base64 32)", "status": "next" },
+    { "num": 2, "title": "Créer la base Supabase et migrer",
+      "detail": "Créer un projet Supabase, récupérer DATABASE_URL et DIRECT_URL, puis appliquer les migrations",
+      "cmd": "npx prisma migrate deploy", "status": "next" },
+    { "num": 3, "title": "Déployer sur Vercel",
+      "detail": "Importer le repo GitHub dans Vercel, configurer les env vars, lancer le premier build",
+      "cmd": "→ vercel.com → New Project → Import GitHub repo", "status": "next" },
+    { "num": 4, "title": "Connecter le domaine shiftup.bj",
+      "detail": "Ajouter le domaine dans Vercel et configurer les DNS chez le registrar béninois",
+      "cmd": "→ Vercel Dashboard → Settings → Domains → Add shiftup.bj", "status": "todo" },
+    { "num": 5, "title": "Configurer les webhooks Stripe",
+      "detail": "Enregistrer l'URL webhook en production et récupérer le Signing Secret",
+      "cmd": "→ Stripe Dashboard → Webhooks → https://shiftup.bj/api/payments/webhook/stripe", "status": "todo" },
+    { "num": 6, "title": "Configurer les webhooks FedaPay",
+      "detail": "Enregistrer l'URL webhook FedaPay et basculer en mode production",
+      "cmd": "→ FedaPay Dashboard → API → Webhooks → https://shiftup.bj/api/payments/webhook/fedapay", "status": "todo" },
+    { "num": 7, "title": "Vérifier le domaine email (Resend)",
+      "detail": "Vérifier shiftup.bj dans Resend, configurer DKIM/SPF pour les emails transactionnels",
+      "cmd": "→ resend.com → Domains → Add shiftup.bj → vérifier DNS records", "status": "todo" },
+    { "num": 8, "title": "Test end-to-end en production",
+      "detail": "Tester inscription, connexion, commande service, paiement test, réinitialisation mot de passe",
+      "cmd": "→ Ouvrir https://shiftup.bj et parcourir tous les flux utilisateur", "status": "todo" }
+  ]
+};
+
+/* ──────────────────────────────────────────────────────────────
+   HELPERS — couleurs et icônes selon statut
+────────────────────────────────────────────────────────────── */
+function statusColor(s) {
+  return s === "done"    ? "#00d4a0"
+       : s === "partial" ? "#f5c842"
+       : /* todo */        "#1d3a4d";
+}
+function statusBg(s) {
+  return s === "done"    ? "rgba(0,212,160,.12)"
+       : s === "partial" ? "rgba(245,200,66,.12)"
+       : /* todo */        "rgba(29,58,77,.5)";
+}
+function pillStyle(s) {
+  const clr = statusColor(s);
+  return `background:${statusBg(s)};color:${clr};`;
+}
+function pillLabel(s, pct) {
+  return s === "done"    ? `✅ DONE — ${pct}%`
+       : s === "partial" ? `⚠️ EN COURS — ${pct}%`
+       : `⏳ À VENIR — ${pct}%`;
+}
+function taskIcon(s) {
+  return s === "done" ? "✅" : s === "partial" ? "⚠️" : "⏳";
+}
+function taskBg(s) {
+  return s === "done"    ? "rgba(0,212,160,.07)"
+       : s === "partial" ? "rgba(245,200,66,.07)"
+       : "";
+}
+
+/* ──────────────────────────────────────────────────────────────
+   RENDU DES PHASES
+────────────────────────────────────────────────────────────── */
+function renderPhases() {
+  const container = document.getElementById("phases-container");
+  let html = "";
+
+  ROADMAP.phases.forEach(phase => {
+    const borderColor = statusColor(phase.status);
+    const miniBarColor = borderColor;
+    const miniBarWidth = phase.progress;
+
+    let tasksHtml = "";
+    phase.tasks.forEach(task => {
+      const icon   = taskIcon(task.status);
+      const bg     = taskBg(task.status);
+      const border = statusColor(task.status);
+      const tooltipHtml = task.blocker
+        ? `<span class="task-blocker-badge" title="">!</span>
+           <div class="task-tooltip">
+             <strong>⚠ Point de vigilance</strong>${task.blocker}
+           </div>`
+        : "";
+      tasksHtml += `
+        <div class="task ${task.status}" style="${bg ? 'background:' + bg + ';' : ''}border-color:${border}30;">
+          <div class="task-icon">${icon}</div>
+          <div class="task-info" style="flex:1;">
+            <h4>${task.name}${tooltipHtml}</h4>
+            <p>${task.note}</p>
+            <span class="task-id">${task.id}</span>
+          </div>
+        </div>`;
+    });
+
+    html += `
+      <div class="phase-card" id="${phase.id}">
+        <div class="phase-header" style="border-left:5px solid ${borderColor};" onclick="toggle('${phase.id}')">
+          <div class="phase-icon">${phase.icon}</div>
+          <div class="phase-meta">
+            <h3>${phase.title}</h3>
+            <p>${phase.subtitle}</p>
+          </div>
+          <div class="phase-mini-bar">
+            <div style="height:100%;width:${miniBarWidth}%;background:${miniBarColor};border-radius:99px;transition:width .6s;"></div>
+          </div>
+          <div class="status-pill" style="${pillStyle(phase.status)}">${pillLabel(phase.status, phase.progress)}</div>
+          <div class="chevron">▾</div>
+        </div>
+        <div class="phase-body">
+          <div class="tasks-grid">${tasksHtml}</div>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   RENDU DES PROCHAINES ÉTAPES
+────────────────────────────────────────────────────────────── */
+function renderNextSteps() {
+  const container = document.getElementById("next-steps-container");
+  let html = "";
+  ROADMAP.next_steps.forEach(step => {
+    const numBg = step.status === "next"
+      ? "background:rgba(30,159,212,.4);"
+      : "background:rgba(109,143,163,.2);";
+    html += `
+      <div class="step-item">
+        <div class="step-num" style="${numBg}">${step.num}</div>
+        <div class="step-content">
+          <h4>${step.title}</h4>
+          <p>${step.detail}</p>
+          <code class="step-cmd">${step.cmd}</code>
+        </div>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   CALCUL DES STATS GLOBALES
+────────────────────────────────────────────────────────────── */
+function renderStats() {
+  let done = 0, partial = 0, todo = 0;
+  ROADMAP.phases.forEach(p => p.tasks.forEach(t => {
+    if      (t.status === "done")    done++;
+    else if (t.status === "partial") partial++;
+    else                             todo++;
+  }));
+  const total = done + partial + todo;
+  const pct   = ROADMAP.global_progress;
+
+  document.getElementById("global-bar").style.width = pct + "%";
+  document.getElementById("global-pct").textContent  = pct + "%";
+  document.getElementById("cnt-done").textContent    = done;
+  document.getElementById("cnt-partial").textContent = partial;
+  document.getElementById("cnt-todo").textContent    = todo;
+  document.getElementById("cnt-total").textContent   = total;
+  document.getElementById("last-updated").textContent = "Dernière mise à jour : " + ROADMAP.last_updated;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   INTERACTIONS — ouvrir / fermer les phases
+────────────────────────────────────────────────────────────── */
+function toggle(id) {
+  document.getElementById(id).classList.toggle("open");
+}
+
+let allOpen = false;
+function toggleAll() {
+  allOpen = !allOpen;
+  document.querySelectorAll(".phase-card").forEach(card => {
+    allOpen ? card.classList.add("open") : card.classList.remove("open");
+  });
+}
+
+/* ──────────────────────────────────────────────────────────────
+   INITIALISATION — ouvrir la première phase par défaut
+────────────────────────────────────────────────────────────── */
+document.addEventListener("DOMContentLoaded", () => {
+  renderPhases();
+  renderNextSteps();
+  renderStats();
+  // Ouvrir la dernière phase incomplète par défaut
+  const lastIncomplete = [...ROADMAP.phases].reverse().find(p => p.status !== "done");
+  if (lastIncomplete) {
+    const card = document.getElementById(lastIncomplete.id);
+    if (card) card.classList.add("open");
+  }
+});
+</script>
+</body>
+</html>
