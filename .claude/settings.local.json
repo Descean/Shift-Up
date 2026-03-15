@@ -28,7 +28,8 @@
       "Bash(powershell.exe -Command \"Remove-Item ''C:\\\\Users\\\\DELL\\\\Downloads\\\\SHIFT_UP\\\\Site SHIFT UP\\\\next.config.ts'' -Force\")",
       "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\DELL\\\\Downloads\\\\SHIFT_UP\\\\Site SHIFT UP\\\\run-dev.ps1\")",
       "Bash(powershell.exe -Command \"Start-Process ''http://localhost:3001''\")",
-      "Bash(npm run dev)"
+      "Bash(npm run dev)",
+      "Bash(npx prisma:*)"
     ]
   }
 }

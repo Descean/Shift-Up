@@ -62,11 +62,11 @@ const sections = [
     title: "1. Responsable du traitement",
     content: `Conformément à l'**Article 68 de la Loi n°2017-20 portant Code du Numérique** en République du Bénin, le responsable du traitement de vos données personnelles est :
 
-**SHIFT UP**
-Siège social : Abomey-Calavi, Département de l'Atlantique, République du Bénin
-Email : shiftup.eudes@gmail.com
-Téléphone : (+229) 01 95 03 50 99
-Représentant légal : Eudes KPADONOU, Directeur Général
+**SHIFT UP** — Entreprise individuelle (Établissement — Personne physique)
+Propriétaire-exploitant : GNANCADJA Mètogbé Jean-Eudes
+RCCM : RB/ABC/25 A 124734 — IFU : 0202113434116
+Siège : Maison Léopold TCHIBOZO, Tankpe, Abomey-Calavi, Atlantique, Bénin
+Email : shiftup.eudes@gmail.com — Tél : (+229) 01 95 03 50 99
 
 **Délégué à la Protection des Données (DPO)** :
 Conformément à l'Article 75 du Code du Numérique, SHIFT UP a désigné un DPO joignable à l'adresse : **dpo@shiftup.bj**

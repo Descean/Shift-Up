@@ -53,23 +53,23 @@ const sections = [
     title: "1. Éditeur du site",
     content: `Le présent site internet accessible à l'adresse **https://shiftup.bj** est édité par :
 
-**Raison sociale** : SHIFT UP
-**Forme juridique** : [À COMPLÉTER — ex : SARL, SA, Entreprise individuelle]
-**Capital social** : [À COMPLÉTER — ex : 1 000 000 FCFA]
-**Siège social** : Abomey-Calavi, Département de l'Atlantique, République du Bénin
-**N° RCCM** : [À COMPLÉTER — ex : RB/ABC/25-A-12345]
-**N° IFU** : [À COMPLÉTER — ex : 3202500000000]
-**Représentant légal** : Eudes KPADONOU, Directeur Général
+**Nom commercial** : SHIFT UP
+**Forme juridique** : Entreprise individuelle (Établissement — Personne physique)
+**Régime fiscal** : Micro et petites entreprises
+**Propriétaire-exploitant** : GNANCADJA Mètogbé Jean-Eudes
+**N° RCCM** : RB/ABC/25 A 124734 (Greffe du Tribunal de Commerce de Cotonou — 30/05/2025)
+**N° IFU** : 0202113434116 (Centre des impôts : CIPE 3 AB-CAL)
+**Siège social** : Maison Léopold TCHIBOZO, Tankpe, Abomey-Calavi, Département de l'Atlantique, République du Bénin
 **Email** : shiftup.eudes@gmail.com
 **Téléphone** : (+229) 01 95 03 50 99
-**Activité** : Conseil stratégique, solutions numériques, formation, marketing digital`,
+**Activité exercée** : Activités juridiques, comptables et de conseil de gestion ; Bureau d'études ; Édition de logiciels et solutions numériques ; Conseil en transformation numérique ; Formation et Coaching ; Marketing et communication ; Gestion de projets ; Analyses de données et Business Intelligence`,
   },
   {
     id: "directeur-publication",
     title: "2. Directeur de la publication",
     content: `Le directeur de la publication est :
 
-**Eudes KPADONOU**, Directeur Général de SHIFT UP.
+**GNANCADJA Mètogbé Jean-Eudes**, Propriétaire-exploitant de SHIFT UP.
 
 Conformément à l'Article 16 de la Loi n°2017-20 portant Code du Numérique en République du Bénin, le directeur de la publication est responsable du contenu éditorial diffusé sur ce site.`,
   },
