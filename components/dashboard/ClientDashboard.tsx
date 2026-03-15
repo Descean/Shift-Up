@@ -62,7 +62,7 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
         <StatCard label="Prestations actives" value="1" icon={<i className="fas fa-briefcase" />} color="accent" trend="neutral" />
         <StatCard label="Prestations terminées" value="3" icon={<i className="fas fa-check-circle" />} color="secondary" trendValue="2 ce trimestre" trend="up" />
         <StatCard label="Solde à régler" value="900 000 F" icon={<i className="fas fa-wallet" />} color="primary" />
-        <StatCard label="Mes étoiles" value={<StarBadge stars={2} />} icon={<i className="fas fa-star" />} color="accent" />
+        <StatCard label="Mes étoiles" value="2 / 5" icon={<i className="fas fa-star" />} color="accent" />
       </div>
 
       {/* Active prestation */}
