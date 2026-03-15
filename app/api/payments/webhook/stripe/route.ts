@@ -33,7 +33,7 @@ import prisma from "@/lib/prisma";
 // STRIPE_SECRET_KEY est obligatoire — le `!` indique à TypeScript qu'on garantit
 // sa présence (vérification faite dans le handler).
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2026-02-25.clover",
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
