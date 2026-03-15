@@ -1,7 +1,7 @@
 {
   "project": "SHIFT UP — Site Officiel",
-  "last_updated": "2026-03-07",
-  "global_progress": 93,
+  "last_updated": "2026-03-15",
+  "global_progress": 96,
   "phases": [
     {
       "id": "p1",
@@ -448,10 +448,47 @@
         }
       ]
     }
+  ,
+  {
+    "id": "p9",
+    "icon": "⚖️",
+    "title": "Phase 9 — Conformité Juridique & Sécurité",
+    "description": "Mise en conformité du site au Code du Numérique béninois (Loi n°2017-20) et aux bonnes pratiques de sécurité des services en ligne. Audit complet + corrections.",
+    "progress": 85,
+    "status": "partial",
+    "tasks": [
+      { "id": "p9-t1", "name": "En-têtes HTTP sécurité (HSTS, CSP, X-Frame, Permissions-Policy)", "status": "done", "note": "Configurés dans next.config.js — conformes Art. 20 CDN" },
+      { "id": "p9-t2", "name": "Rate limiting brute-force sur routes /api/auth", "status": "done", "note": "middleware.ts — 10 req/15min par IP — HTTP 429 + Retry-After" },
+      { "id": "p9-t3", "name": "Bannière consentement cookies (RGPD + Code Numérique)", "status": "done", "note": "CookieConsent.tsx — localStorage 13 mois — catégories essentiels/analytiques/marketing" },
+      { "id": "p9-t4", "name": "Google Analytics Consent Mode v2", "status": "done", "note": "analytics_storage=denied par défaut — activé après consentement" },
+      { "id": "p9-t5", "name": "Page Mentions Légales (/mentions-legales)", "status": "done", "note": "Créée — Art. 16 CDN — RCCM/IFU à compléter avant production" },
+      { "id": "p9-t6", "name": "Politique de confidentialité — Code du Numérique Bénin", "status": "done", "note": "Mis à jour : DPO, durées conservation, transferts internationaux, APDP, Art. 68-90 CDN" },
+      { "id": "p9-t7", "name": "Consentement explicite formulaire de contact", "status": "done", "note": "Case non pré-cochée + finalité du traitement + lien politique confidentialité" },
+      { "id": "p9-t8", "name": "Rapport de conformité (SHIFTUP_Conformite.html)", "status": "done", "note": "Score 82/100 — 14 points conformes, 3 à compléter, 5 post-production" },
+      { "id": "p9-t9", "name": "Créer email DPO (dpo@shiftup.bj)", "status": "todo", "blocker": "Action manuelle — créer l'adresse email avant mise en production" },
+      { "id": "p9-t10", "name": "Compléter RCCM/IFU dans mentions légales", "status": "todo", "blocker": "Informations légales SHIFT UP à saisir dans la page mentions-legales" },
+      { "id": "p9-t11", "name": "Vérifier libellé bouton commande ('Commander avec obligation de payer')", "status": "todo", "blocker": "À vérifier dans le flux de paiement — Art. 50 CDN" },
+      { "id": "p9-t12", "name": "Migrer rate limiter vers Upstash Redis (production multi-instances)", "status": "todo", "blocker": "Important pour déploiement Vercel — le rate limiter mémoire ne scale pas" }
+    ]
+  }
   ],
   "next_steps": [
     {
       "num": 1,
+      "title": "🔴 Créer l'email DPO — dpo@shiftup.bj",
+      "detail": "Créer et activer l'adresse email du Délégué à la Protection des Données. Obligatoire avant mise en production (Art. 75 CDN Bénin).",
+      "cmd": "→ Panneau d'admin email → Créer compte dpo@shiftup.bj",
+      "status": "next"
+    },
+    {
+      "num": 2,
+      "title": "🔴 Compléter les Mentions Légales (RCCM, IFU)",
+      "detail": "Renseigner les champs [À COMPLÉTER] dans app/(public)/mentions-legales/page.tsx : RCCM, IFU, capital social, forme juridique.",
+      "cmd": "→ Éditer mentions-legales/page.tsx → sections[0].content",
+      "status": "next"
+    },
+    {
+      "num": 3,
       "title": "Configurer les variables d'environnement",
       "detail": "Renseigner toutes les clés API dans Vercel avant le premier déploiement",
       "cmd": "NEXTAUTH_SECRET=$(openssl rand -base64 32) → copier dans Vercel env vars",

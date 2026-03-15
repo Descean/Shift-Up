@@ -8,6 +8,21 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
 
+/**
+ * Schéma de validation Zod du formulaire de contact.
+ *
+ * ─── CONFORMITÉ Code du Numérique béninois (Art. 72) ─────────────────────────
+ * Le champ `consentData` est obligatoire :
+ *   → L'utilisateur doit explicitement cocher la case pour consentir
+ *     au traitement de ses données dans le cadre de sa demande de contact.
+ *   → La case n'est pas pré-cochée (refine v === true).
+ *   → Le formulaire affiche un lien vers la Politique de Confidentialité.
+ *
+ * Base légale du traitement des données de contact :
+ *   → Consentement (Art. 72 CDN) pour les messages généraux.
+ *   → Intérêt légitime (Art. 73 CDN) pour les demandes de devis
+ *     (nécessaire à l'exécution d'un pré-contrat).
+ */
 const schema = z.object({
   name: z.string().min(2, "Nom requis (min 2 caractères)"),
   email: z.string().email("Adresse email invalide"),
@@ -15,6 +30,10 @@ const schema = z.object({
   subject: z.string().min(3, "Objet requis"),
   service: z.string().optional(),
   message: z.string().min(20, "Message trop court (min 20 caractères)"),
+  // Consentement explicite requis — case non pré-cochée (Art. 72 CDN)
+  consentData: z.boolean().refine((v) => v === true, {
+    message: "Vous devez accepter le traitement de vos données pour envoyer ce message.",
+  }),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -251,14 +270,49 @@ export default function ContactPage() {
                   {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>}
                 </div>
 
+                {/*
+                 * ── Case de consentement explicite ────────────────────────
+                 * Obligatoire selon l'Article 72 du Code du Numérique béninois.
+                 * La case N'EST PAS pré-cochée (valeur par défaut: false).
+                 * L'utilisateur doit cocher activement pour donner son consentement.
+                 *
+                 * Finalité du traitement : répondre à votre demande de contact,
+                 * vous rappeler si besoin, vous envoyer un devis.
+                 * Durée de conservation : 3 ans après le dernier contact.
+                 */}
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    {...register("consentData")}
+                    type="checkbox"
+                    defaultChecked={false}
+                    className="mt-0.5 w-4 h-4 rounded text-accent border-gray-300 focus:ring-accent flex-shrink-0"
+                  />
+                  <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
+                    J'accepte que SHIFT UP traite mes données personnelles (nom, email, message)
+                    dans le but de répondre à ma demande.{" "}
+                    <a href="/confidentialite" className="text-accent hover:underline font-medium">
+                      Politique de confidentialité →
+                    </a>
+                  </span>
+                </label>
+                {errors.consentData && (
+                  <p className="text-red-500 text-xs -mt-2 flex items-center gap-1">
+                    <i className="fas fa-circle-exclamation text-xs" />
+                    {errors.consentData.message}
+                  </p>
+                )}
+
                 <Button type="submit" variant="gradient" size="lg" loading={loading} className="w-full">
                   {loading ? "Envoi en cours..." : "Envoyer le message"}
                   {!loading && <i className="fas fa-paper-plane" />}
                 </Button>
 
+                {/* Mention légale récapitulative sous le bouton */}
                 <p className="text-xs text-gray-400 text-center">
-                  En soumettant ce formulaire, vous acceptez notre{" "}
-                  <a href="/confidentialite" className="text-accent hover:underline">politique de confidentialité</a>.
+                  <i className="fas fa-lock mr-1" />
+                  Vos données sont traitées conformément au{" "}
+                  <strong>Code du Numérique béninois (Loi n°2017-20)</strong>.{" "}
+                  DPO : <a href="mailto:dpo@shiftup.bj" className="text-accent hover:underline">dpo@shiftup.bj</a>
                 </p>
               </form>
             </motion.div>

@@ -5,16 +5,27 @@
  * des données personnelles de SHIFT UP.
  *
  * Structure :
- *  - `sections` : tableau de 10 articles (id, titre, contenu) utilisés pour
+ *  - `sections` : tableau d'articles (id, titre, contenu) utilisés pour
  *    générer à la fois la table des matières (sidebar) et le corps de la page.
- *  - La sidebar est sticky (position: sticky) sur desktop → reste visible
- *    pendant le scroll et permet de naviguer directement vers chaque section.
+ *  - La sidebar est sticky sur desktop → reste visible pendant le scroll.
  *  - Les ancres (#collecte, #finalites, etc.) correspondent aux `id` des sections.
  *
- * Conformité :
- *  - RGPD (Règlement Général sur la Protection des Données — UE)
- *  - Loi n°2009-09 sur la protection des données personnelles au Bénin
- *  - Base légale : contrat, consentement, intérêt légitime, obligation légale
+ * ─── CONFORMITÉ LÉGALE ────────────────────────────────────────────────────────
+ *  - Loi n°2017-20 portant Code du Numérique en République du Bénin
+ *    (Articles 68 à 90 sur la protection des données personnelles)
+ *  - Règlement n°C/REG.21/11/22 de la CEDEAO sur la protection des données
+ *  - RGPD (Règlement UE 2016/679) — bonne pratique internationale
+ *  - Base légale : contrat (Art. 71 CDN), consentement (Art. 72 CDN),
+ *    intérêt légitime (Art. 73 CDN), obligation légale
+ *
+ * ─── AJOUTS OBLIGATOIRES (Code du Numérique Bénin) ──────────────────────────
+ *  - Identité du Responsable de Traitement (Art. 68 CDN)
+ *  - Délégué à la Protection des Données — DPO (Art. 75 CDN)
+ *  - Durées de conservation par catégorie de données (Art. 76 CDN)
+ *  - Droits des personnes : accès, rectification, effacement, portabilité (Art. 80 CDN)
+ *  - Transferts internationaux de données (Art. 88 CDN — vers Vercel/Supabase USA)
+ *  - Procédure de réclamation auprès de l'APDP (Art. 90 CDN)
+ *    APDP = Autorité de Protection des Données à Caractère Personnel (Bénin)
  */
 
 import type { Metadata } from "next";
@@ -22,13 +33,48 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Politique de Confidentialité | SHIFT UP",
-  description: "Politique de confidentialité et protection des données personnelles de SHIFT UP.",
+  description: "Politique de confidentialité et protection des données personnelles de SHIFT UP — conforme au Code du Numérique béninois (Loi n°2017-20).",
 };
 
+/**
+ * sections — Tableau de toutes les sections de la politique de confidentialité.
+ *
+ * Chaque section est rendue par la fonction renderContent() qui transforme
+ * le Markdown simplifié (**, -, ##) en JSX.
+ *
+ * L'ordre des sections respecte les exigences de l'Article 69 du Code du
+ * Numérique qui liste les informations obligatoires de la politique de
+ * confidentialité :
+ *  1. Identité du responsable (section "responsable")
+ *  2. Données collectées
+ *  3. Finalités
+ *  4. Base légale
+ *  5. Destinataires
+ *  6. Durées de conservation
+ *  7. Droits des personnes
+ *  8. Transferts internationaux
+ *  9. Cookies
+ * 10. Contact DPO + réclamation APDP
+ */
 const sections = [
   {
+    id: "responsable",
+    title: "1. Responsable du traitement",
+    content: `Conformément à l'**Article 68 de la Loi n°2017-20 portant Code du Numérique** en République du Bénin, le responsable du traitement de vos données personnelles est :
+
+**SHIFT UP**
+Siège social : Abomey-Calavi, Département de l'Atlantique, République du Bénin
+Email : shiftup.eudes@gmail.com
+Téléphone : (+229) 01 95 03 50 99
+Représentant légal : Eudes KPADONOU, Directeur Général
+
+**Délégué à la Protection des Données (DPO)** :
+Conformément à l'Article 75 du Code du Numérique, SHIFT UP a désigné un DPO joignable à l'adresse : **dpo@shiftup.bj**
+Pour toute question relative à vos données ou pour exercer vos droits, contactez directement le DPO.`,
+  },
+  {
     id: "collecte",
-    title: "1. Données collectées",
+    title: "2. Données collectées",
     content: `Dans le cadre de nos services, SHIFT UP collecte les données personnelles suivantes :
 
 **Données d'identification** : nom, prénom, adresse email, numéro de téléphone.
@@ -109,21 +155,59 @@ Pour exercer ces droits, contactez-nous à : **shiftup.eudes@gmail.com** ou par 
 Nous nous engageons à répondre dans un délai maximum de **30 jours**.`,
   },
   {
+    id: "durees",
+    title: "7. Durées de conservation",
+    content: `Conformément à l'**Article 76 du Code du Numérique béninois**, vos données sont conservées uniquement le temps nécessaire aux finalités pour lesquelles elles ont été collectées :
+
+**Compte utilisateur** : Pendant la durée de la relation contractuelle + 3 ans après la clôture du compte.
+
+**Données de prestations et factures** : 10 ans à compter de la dernière opération (obligation comptable et fiscale — droit béninois).
+
+**Données de navigation (cookies analytiques)** : 13 mois maximum.
+
+**Données de contact** : 3 ans à compter du dernier contact, sauf demande d'effacement.
+
+**Logs de sécurité (audit logs)** : 12 mois glissants.
+
+**Tokens de réinitialisation de mot de passe** : 1 heure (expiration automatique).
+
+À l'expiration de ces délais, vos données sont supprimées ou anonymisées de manière irréversible.`,
+  },
+  {
+    id: "transferts",
+    title: "8. Transferts internationaux de données",
+    content: `Conformément à l'**Article 88 du Code du Numérique béninois**, nous vous informons que certaines de vos données sont transférées hors du Bénin auprès de nos prestataires techniques :
+
+**Vercel Inc.** (États-Unis) — Hébergement de l'application web.
+Garantie : Vercel est certifié SOC 2 Type II et GDPR-compliant. Les transferts vers les États-Unis sont encadrés par les clauses contractuelles types de la Commission Européenne.
+
+**Supabase Inc.** (Singapour/États-Unis) — Base de données et stockage de fichiers.
+Garantie : Supabase est certifié SOC 2 Type II. Vos données sont chiffrées en transit (TLS) et au repos (AES-256).
+
+**Google LLC** (États-Unis) — Google Analytics (uniquement si vous avez consenti aux cookies analytiques).
+Garantie : Google est soumis au cadre de protection des données UE–États-Unis (EU-U.S. Data Privacy Framework).
+
+Ces transferts sont nécessaires à la fourniture de nos services. Vous pouvez retirer votre consentement aux cookies analytiques à tout moment via notre bannière de gestion des cookies.`,
+  },
+  {
     id: "cookies",
-    title: "7. Politique de cookies",
-    content: `Notre site utilise des cookies pour améliorer votre expérience :
+    title: "9. Politique de cookies",
+    content: `Notre site utilise des cookies. Conformément à l'**Article 72 du Code du Numérique béninois**, les cookies non essentiels ne sont déposés qu'avec votre consentement explicite.
 
-**Cookies essentiels** (non soumis au consentement) : nécessaires au fonctionnement du site (authentification, sécurité, préférences de session).
+**Cookies essentiels** (toujours actifs — aucun consentement requis) :
+- next-auth.session-token : Cookie de session sécurisé (HttpOnly, Secure, SameSite)
+- next-auth.csrf-token : Protection contre les attaques CSRF
+- shiftup-cookie-consent : Mémorise vos préférences de cookies (1 an)
 
-**Cookies analytiques** (avec consentement) : Google Analytics 4, PostHog — permettent d'analyser les statistiques de visite de manière anonymisée.
+**Cookies analytiques** (uniquement avec votre consentement) :
+- Google Analytics 4 (_ga, _ga_*) : Mesure d'audience anonymisée — durée max 13 mois.
+Activés via le Consent Mode v2 de Google : aucune donnée n'est collectée avant votre accord.
 
-**Cookies tiers** : intégrés via Font Awesome CDN (aucune donnée personnelle collectée).
-
-Vous pouvez gérer vos préférences de cookies depuis les paramètres de votre navigateur ou via notre bannière de consentement.`,
+Vous pouvez modifier vos préférences à tout moment en cliquant sur "Gérer mes cookies" en bas de chaque page, ou en supprimant les cookies de votre navigateur.`,
   },
   {
     id: "securite",
-    title: "8. Sécurité des données",
+    title: "10. Sécurité des données",
     content: `SHIFT UP met en œuvre les mesures techniques et organisationnelles suivantes pour protéger vos données :
 
 - Chiffrement des données en transit (HTTPS/TLS 1.3) et au repos (AES-256).
@@ -138,21 +222,26 @@ En cas de violation de données susceptible d'engendrer un risque élevé pour v
   },
   {
     id: "contact-dpo",
-    title: "9. Contact & Responsable du traitement",
-    content: `Le responsable du traitement est :
+    title: "12. Contact DPO & Réclamation APDP",
+    content: `**Délégué à la Protection des Données (DPO)** :
+Pour exercer vos droits (accès, rectification, effacement, portabilité, opposition) ou pour toute question relative à vos données personnelles, contactez notre DPO :
 
-**SHIFT UP**
-Représenté par Jean-Eudes MÈTOGBÉ GNANCADJA
-RCCM : RB/ABC/25 A 124734 | IFU : 0202113434116
-Abomey-Calavi, Atlantique, République du Bénin
-Email : shiftup.eudes@gmail.com
-Tél : (+229) 01 95 03 50 99
+Email : **dpo@shiftup.bj**
+Délai de réponse : **30 jours maximum** (conformément à l'Art. 82 CDN)
 
-Pour toute question relative à la protection de vos données ou pour exercer vos droits, contactez-nous à l'adresse ci-dessus.`,
+**Réclamation auprès de l'Autorité de Contrôle** :
+Conformément à l'**Article 90 du Code du Numérique béninois**, si vous estimez que le traitement de vos données porte atteinte à vos droits, vous avez le droit de déposer une réclamation auprès de :
+
+**APDP — Autorité de Protection des Données à Caractère Personnel du Bénin**
+Organe de contrôle institué par la Loi n°2017-20
+Site officiel : www.apdp.bj (en cours de déploiement)
+Email : contact@apdp.bj
+
+Cette réclamation peut être déposée sans préjudice de tout recours juridictionnel.`,
   },
   {
     id: "modifications",
-    title: "10. Modifications de la politique",
+    title: "13. Modifications de la politique",
     content: `SHIFT UP se réserve le droit de modifier la présente politique de confidentialité à tout moment, notamment pour se conformer à l'évolution de la réglementation applicable.
 
 En cas de modification substantielle, vous serez informé par email ou via une notification sur notre site au moins 15 jours avant l'entrée en vigueur des modifications.

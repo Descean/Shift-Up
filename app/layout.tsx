@@ -1,9 +1,32 @@
+/**
+ * app/layout.tsx — Layout racine de SHIFT UP
+ *
+ * Ce fichier est le point d'entrée de toute l'application Next.js.
+ * Il enveloppe TOUTES les pages dans les providers globaux.
+ *
+ * ─── CONFORMITÉ CODE DU NUMÉRIQUE BÉNIN ─────────────────────────────────────
+ *
+ * Google Analytics (GA4) :
+ *   → Chargé avec le MODE CONSENTEMENT (gtag consent mode v2).
+ *   → Par défaut, analytics_storage = "denied" (aucune donnée collectée).
+ *   → Le composant CookieConsent active GA via gtag("consent","update",...)
+ *     uniquement APRÈS que l'utilisateur a explicitement accepté les cookies.
+ *   → Ceci est conforme à l'Article 72 de la Loi n°2017-20 sur le numérique
+ *     au Bénin qui exige un consentement PRÉALABLE pour les cookies non essentiels.
+ *
+ * CookieConsent :
+ *   → Composant client qui s'affiche à la première visite.
+ *   → Stocke le choix dans localStorage["shiftup-cookie-consent"].
+ *   → Valide 13 mois (recommandation internationale pour les bannières cookies).
+ */
+
 import type { Metadata, Viewport } from "next";
 import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import ChatWidget from "@/components/chatbot/ChatWidget";
 import AuthProvider from "@/components/providers/AuthProvider";
+import CookieConsent from "@/components/legal/CookieConsent";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -102,20 +125,50 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
           crossOrigin="anonymous"
         />
-        {/* Google Analytics */}
+
+        {/*
+         * ── Google Analytics avec Consent Mode v2 ─────────────────────────
+         *
+         * Chargé uniquement si NEXT_PUBLIC_GA_MEASUREMENT_ID est défini.
+         *
+         * IMPORTANT — Ordre des scripts :
+         *   1. Chargement du script gtag.js (async)
+         *   2. Initialisation de gtag() avec consentement par DÉFAUT refusé
+         *      → analytics_storage: "denied" signifie : GA est chargé mais
+         *        NE collecte AUCUNE donnée d'identification tant que l'utilisateur
+         *        n'a pas accepté.
+         *   3. Après acceptation dans CookieConsent.tsx, gtag("consent","update",...)
+         *      est appelé avec "granted" → GA commence la collecte.
+         *
+         * Ce mécanisme est appelé "Consent Mode v2" par Google et est conforme
+         * aux exigences du Code du Numérique béninois (Loi n°2017-20, Art. 72).
+         */}
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
+            {/* Étape 1 : Chargement du script Google Analytics (asynchrone) */}
             <script
               async
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
             />
+            {/* Étape 2 : Initialisation avec consentement par DÉFAUT refusé */}
             <script
               dangerouslySetInnerHTML={{
                 __html: `
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
+
+                  /* Consent Mode v2 — Refus par défaut (avant choix utilisateur) */
+                  /* Modifié en "granted" par CookieConsent.tsx après acceptation  */
+                  gtag('consent', 'default', {
+                    analytics_storage: 'denied',
+                    ad_storage:        'denied',
+                    wait_for_update:   500
+                  });
+
                   gtag('js', new Date());
-                  gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                    anonymize_ip: true
+                  });
                 `,
               }}
             />
@@ -126,6 +179,16 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <ChatWidget />
+
+          {/*
+           * ── Bannière de consentement aux cookies ──────────────────────────
+           * Composant client — s'affiche à la première visite si aucun consentement
+           * n'est stocké dans localStorage["shiftup-cookie-consent"].
+           * Se masque automatiquement après le choix de l'utilisateur.
+           * Conforme : Code du Numérique Bénin, Loi n°2017-20, Articles 70-76.
+           */}
+          <CookieConsent />
+
           <Toaster
             position="top-right"
             toastOptions={{

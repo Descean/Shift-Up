@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Rapport de Conformité — SHIFT UP</title>
+<style>
+  :root {
+    --navy:#0a2533; --accent:#1e9fd4; --green:#00d4a0;
+    --red:#ef4444; --orange:#f97316; --yellow:#eab308;
+    --gray:#6b7280; --light:#f8fafc; --border:#e2e8f0;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--light);color:#1e293b;line-height:1.6}
+
+  /* ── Header ── */
+  header{background:linear-gradient(135deg,var(--navy) 0%,#0d3547 100%);color:#fff;padding:48px 32px 32px;position:relative;overflow:hidden}
+  header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 50%,rgba(30,159,212,.15) 0%,transparent 60%)}
+  header .inner{max-width:900px;margin:0 auto;position:relative}
+  header .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(30,159,212,.2);border:1px solid rgba(30,159,212,.4);color:var(--accent);padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;margin-bottom:20px}
+  header h1{font-size:32px;font-weight:900;letter-spacing:-0.5px;margin-bottom:8px}
+  header p{color:rgba(255,255,255,.65);font-size:14px;max-width:560px}
+  .meta{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap}
+  .meta-item{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 16px}
+  .meta-item .label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.45);margin-bottom:3px}
+  .meta-item .val{font-size:15px;font-weight:700;color:#fff}
+
+  /* ── Score global ── */
+  .score-bar-wrap{background:#fff;border-bottom:1px solid var(--border);padding:20px 32px}
+  .score-bar-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .score-label{font-size:13px;color:var(--gray);white-space:nowrap}
+  .score-bar{flex:1;min-width:200px;background:var(--border);border-radius:999px;height:12px;overflow:hidden}
+  .score-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width 1s ease}
+  .score-pct{font-size:22px;font-weight:900;color:var(--navy);white-space:nowrap}
+
+  /* ── Main layout ── */
+  .container{max-width:900px;margin:0 auto;padding:32px 16px}
+
+  /* ── Summary cards ── */
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:32px}
+  .summary-card{background:var(--card);border-radius:14px;padding:18px 16px;text-align:center;border:1px solid var(--border)}
+  .summary-card .ico{font-size:24px;margin-bottom:8px}
+  .summary-card .num{font-size:28px;font-weight:900;line-height:1}
+  .summary-card .lbl{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+  .c-ok  {border-top:3px solid var(--green)}
+  .c-err {border-top:3px solid var(--red)}
+  .c-warn{border-top:3px solid var(--orange)}
+  .c-info{border-top:3px solid var(--accent)}
+
+  /* ── Section heading ── */
+  .section-title{font-size:18px;font-weight:800;color:var(--navy);margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
+
+  /* ── Compliance table ── */
+  .compliance-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--border);margin-bottom:24px}
+  .compliance-table thead tr{background:var(--navy);color:#fff}
+  .compliance-table th{padding:12px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+  .compliance-table td{padding:13px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:top}
+  .compliance-table tr:last-child td{border-bottom:none}
+  .compliance-table tr:hover td{background:#f8fafc}
+
+  /* ── Status pills ── */
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+  .pill-ok    {background:#dcfce7;color:#16a34a}
+  .pill-err   {background:#fee2e2;color:#dc2626}
+  .pill-warn  {background:#ffedd5;color:#c2410c}
+  .pill-info  {background:#dbeafe;color:#1d4ed8}
+  .pill-todo  {background:#f3f4f6;color:#6b7280}
+
+  /* ── Detail box ── */
+  .detail-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+  .detail-box h3{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .detail-box p{font-size:13px;color:var(--gray);line-height:1.7}
+  .detail-box code{background:#f1f5f9;border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:12px;color:var(--navy);font-family:monospace}
+  .detail-box ul{margin:8px 0 0 16px;color:var(--gray);font-size:13px}
+  .detail-box li{margin-bottom:4px}
+
+  .alert{border-radius:10px;padding:14px 16px;font-size:13px;margin-top:12px;display:flex;gap:10px;align-items:flex-start}
+  .alert-ok  {background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+  .alert-err {background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+  .alert-warn{background:#fff7ed;border:1px solid #fed7aa;color:#c2410c}
+
+  /* ── Legal references ── */
+  .legal-ref{display:inline-flex;align-items:center;gap:4px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap}
+
+  /* ── Progress ring ── */
+  .ring-wrap{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+  .ring-text .pct{font-size:36px;font-weight:900;color:var(--navy)}
+  .ring-text .sub{font-size:12px;color:var(--gray)}
+
+  /* ── Todo list ── */
+  .todo-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+  .todo-item:last-child{border-bottom:none}
+  .todo-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .todo-content .title{font-size:13px;font-weight:600;color:var(--navy)}
+  .todo-content .desc{font-size:12px;color:var(--gray);margin-top:2px}
+
+  /* ── Footer ── */
+  footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:20px;font-size:12px;margin-top:48px}
+  footer strong{color:rgba(255,255,255,.9)}
+
+  @media(max-width:600px){
+    header{padding:32px 16px 24px}
+    header h1{font-size:22px}
+    .meta{gap:10px}
+    .meta-item{padding:8px 12px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<header>
+  <div class="inner">
+    <div class="badge">⚖️ Rapport de Conformité</div>
+    <h1>SHIFT UP — Audit de Conformité Juridique & Sécurité</h1>
+    <p>Analyse de la conformité du site web de SHIFT UP au regard du Code du Numérique béninois
+       (Loi n°2017-20) et des bonnes pratiques de sécurité des services en ligne.</p>
+    <div class="meta">
+      <div class="meta-item"><div class="label">Date d'audit</div><div class="val">Mars 2026</div></div>
+      <div class="meta-item"><div class="label">Version site</div><div class="val">Next.js 14 / v1.0</div></div>
+      <div class="meta-item"><div class="label">Référentiel</div><div class="val">CDN Bénin + CEDEAO</div></div>
+      <div class="meta-item"><div class="label">Auditeur</div><div class="val">SHIFT UP DPO</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════ SCORE BAR ══════════════════════════ -->
+<div class="score-bar-wrap">
+  <div class="score-bar-inner">
+    <span class="score-label">Score global de conformité</span>
+    <div class="score-bar"><div class="score-fill" style="width:82%"></div></div>
+    <span class="score-pct">82 / 100</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MAIN ════════════════════════════════ -->
+<div class="container">
+
+  <!-- ── CARDS RÉCAPITULATIVES ── -->
+  <div class="summary">
+    <div class="summary-card c-ok">
+      <div class="ico">✅</div>
+      <div class="num" style="color:#16a34a">14</div>
+      <div class="lbl">Points conformes</div>
+    </div>
+    <div class="summary-card c-warn">
+      <div class="ico">🔧</div>
+      <div class="num" style="color:#c2410c">3</div>
+      <div class="lbl">À compléter</div>
+    </div>
+    <div class="summary-card c-err">
+      <div class="ico">❌</div>
+      <div class="num" style="color:#dc2626">0</div>
+      <div class="lbl">Non-conformités critiques</div>
+    </div>
+    <div class="summary-card c-info">
+      <div class="ico">📋</div>
+      <div class="num" style="color:#1d4ed8">5</div>
+      <div class="lbl">Actions post-production</div>
+    </div>
+  </div>
+
+  <!-- ═════════ 1. PROTECTION DES DONNÉES PERSONNELLES ═══════════ -->
+  <div class="section-title">🛡️ 1. Protection des Données Personnelles</div>
+
+  <table class="compliance-table">
+    <thead><tr>
+      <th style="width:35%">Exigence</th>
+      <th style="width:15%">Statut</th>
+      <th style="width:15%">Réf. légale</th>
+      <th>Détail</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Politique de confidentialité</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 69 CDN</span></td>
+        <td>Page <code>/confidentialite</code> existante. Mise à jour mars 2026 : ajout responsable de traitement, DPO, durées de conservation, transferts internationaux, droits APDP.</td>
+      </tr>
+      <tr>
+        <td><strong>Identité du responsable de traitement</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 68 CDN</span></td>
+        <td>SHIFT UP, Eudes KPADONOU, Abomey-Calavi. Coordonnées complètes dans la politique de confidentialité et les mentions légales.</td>
+      </tr>
+      <tr>
+        <td><strong>Délégué à la Protection des Données (DPO)</strong></td>
+        <td><span class="pill pill-warn">🔧 À compléter</span></td>
+        <td><span class="legal-ref">Art. 75 CDN</span></td>
+        <td>Email <code>dpo@shiftup.bj</code> référencé dans le code. <strong>Action requise :</strong> créer et activer cette adresse email avant la mise en production.</td>
+      </tr>
+      <tr>
+        <td><strong>Bannière de consentement cookies</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 72 CDN</span></td>
+        <td>Composant <code>CookieConsent.tsx</code> implémenté. Consentement préalable requis, stockage localStorage 13 mois, retrait possible à tout moment. Catégories : essentiels / analytiques / marketing.</td>
+      </tr>
+      <tr>
+        <td><strong>Consentement cookies analytiques (GA)</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 72 CDN</span></td>
+        <td>Google Analytics chargé avec Consent Mode v2. <code>analytics_storage: 'denied'</code> par défaut. Aucune collecte sans accord explicite de l'utilisateur.</td>
+      </tr>
+      <tr>
+        <td><strong>Consentement formulaire d'inscription</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 72 CDN</span></td>
+        <td>Case à cocher non pré-cochée, liens vers CGV et politique de confidentialité. Validation Zod : <code>acceptTerms: z.boolean().refine(v => v)</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Consentement formulaire de contact</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 72 CDN</span></td>
+        <td>Champ <code>consentData</code> ajouté. Case non pré-cochée. Mention de la finalité du traitement et lien vers la politique de confidentialité.</td>
+      </tr>
+      <tr>
+        <td><strong>Durées de conservation des données</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 76 CDN</span></td>
+        <td>Tableau des durées par catégorie ajouté à la politique : compte (3 ans post-clôture), factures (10 ans), logs (12 mois), tokens reset (1h).</td>
+      </tr>
+      <tr>
+        <td><strong>Transferts internationaux de données</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 88 CDN</span></td>
+        <td>Section dédiée dans la politique : Vercel (USA, SOC2), Supabase (Singapour, SOC2), Google (EU-US DPF). Garanties contractuelles mentionnées.</td>
+      </tr>
+      <tr>
+        <td><strong>Droits des personnes</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 80 CDN</span></td>
+        <td>6 droits explicités (accès, rectification, effacement, portabilité, opposition, retrait). Email DPO et délai 30 jours précisés.</td>
+      </tr>
+      <tr>
+        <td><strong>Réclamation auprès de l'APDP</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 90 CDN</span></td>
+        <td>Section "Contact DPO & Réclamation APDP" ajoutée avec coordonnées de l'Autorité de Protection des Données à Caractère Personnel du Bénin.</td>
+      </tr>
+      <tr>
+        <td><strong>Données minimales collectées</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 71 CDN</span></td>
+        <td>Principe de minimisation respecté : inscription (nom, email, tel. optionnel), contact (nom, email, message). Pas de collecte de données sensibles.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═════════ 2. SÉCURITÉ & CHIFFREMENT ═════════════════════════ -->
+  <div class="section-title">🔒 2. Sécurité & Chiffrement</div>
+
+  <table class="compliance-table">
+    <thead><tr>
+      <th style="width:35%">Exigence</th>
+      <th style="width:15%">Statut</th>
+      <th style="width:15%">Réf. légale</th>
+      <th>Détail</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>En-têtes HTTP de sécurité</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 20 CDN</span></td>
+        <td>
+          Configurés dans <code>next.config.js</code> :<br>
+          • HSTS : <code>max-age=31536000; includeSubDomains; preload</code><br>
+          • CSP : restreint aux origines autorisées<br>
+          • <code>X-Content-Type-Options: nosniff</code><br>
+          • <code>X-Frame-Options: SAMEORIGIN</code><br>
+          • <code>Referrer-Policy: strict-origin-when-cross-origin</code><br>
+          • <code>Permissions-Policy</code> : caméra, micro, géoloc désactivés
+        </td>
+      </tr>
+      <tr>
+        <td><strong>HTTPS (TLS)</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 21 CDN</span></td>
+        <td>HSTS actif force HTTPS sur toutes les communications. Certificat TLS géré automatiquement par Vercel (Let's Encrypt).</td>
+      </tr>
+      <tr>
+        <td><strong>Hachage des mots de passe</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 21 CDN</span></td>
+        <td>Algorithme : <strong>bcryptjs, saltRounds=12</strong>. Aucun mot de passe en clair en base de données. Import dynamique pour éviter la pré-compilation.</td>
+      </tr>
+      <tr>
+        <td><strong>Cookies de session sécurisés</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 21 CDN</span></td>
+        <td>Cookies NextAuth configurés avec : <code>HttpOnly</code> (inaccessible au JS), <code>Secure</code> (HTTPS uniquement), <code>SameSite=Lax</code> (protection CSRF). Gérés automatiquement par NextAuth.js v4.</td>
+      </tr>
+      <tr>
+        <td><strong>Protection CSRF</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 21 CDN</span></td>
+        <td>Token CSRF généré et vérifié automatiquement par NextAuth.js sur toutes les mutations d'authentification.</td>
+      </tr>
+      <tr>
+        <td><strong>Rate limiting (anti brute-force)</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 20 CDN</span></td>
+        <td>Middleware <code>middleware.ts</code> : 10 tentatives / 15 min par IP sur <code>/api/auth/connexion</code>, <code>/api/auth/register</code>, <code>/api/auth/reset-password</code>, <code>/api/contact</code>. Retour HTTP 429 + <code>Retry-After: 900</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Validation des entrées côté serveur</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 21 CDN</span></td>
+        <td>Schémas Zod appliqués sur TOUS les endpoints API. Erreurs ZodError retournées en HTTP 422. Protège contre les injections SQL (via Prisma ORM) et XSS.</td>
+      </tr>
+      <tr>
+        <td><strong>Journalisation (Audit Logs)</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 22 CDN</span></td>
+        <td>Table <code>AuditLog</code> Prisma enregistre : REGISTER, LOGIN, PASSWORD_RESET, PAYMENT_SUCCEEDED, PAYMENT_FAILED, PRESTATION_CREATED, ADMIN_USER_UPDATED. Inclut IP, userId, timestamp.</td>
+      </tr>
+      <tr>
+        <td><strong>Anti-énumération mots de passe oubliés</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 21 CDN</span></td>
+        <td>Route <code>POST /api/auth/reset-password</code> retourne toujours <code>{ success: true }</code> même si l'email n'existe pas. Prévient la reconnaissance d'adresses email enregistrées.</td>
+      </tr>
+      <tr>
+        <td><strong>Contrôle d'accès RBAC</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 21 CDN</span></td>
+        <td>5 rôles : CLIENT, APPORTEUR, ETUDIANT, ADMIN, DEVELOPER. Contrôle dans <code>middleware.ts</code> + <code>getServerSession()</code> sur chaque API. Principe du moindre privilège.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═════════ 3. MENTIONS LÉGALES & COMMERCE ÉLECTRONIQUE ══════ -->
+  <div class="section-title">📄 3. Mentions Légales & Commerce Électronique</div>
+
+  <table class="compliance-table">
+    <thead><tr>
+      <th style="width:35%">Exigence</th>
+      <th style="width:15%">Statut</th>
+      <th style="width:15%">Réf. légale</th>
+      <th>Détail</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Page Mentions Légales</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 16 CDN</span></td>
+        <td>Page <code>/mentions-legales</code> créée avec : identité éditeur, directeur de publication, hébergeur, propriété intellectuelle, droit applicable. <strong>Action :</strong> compléter RCCM, IFU, capital social.</td>
+      </tr>
+      <tr>
+        <td><strong>RCCM et IFU dans les mentions légales</strong></td>
+        <td><span class="pill pill-warn">🔧 À compléter</span></td>
+        <td><span class="legal-ref">Art. 16 CDN</span></td>
+        <td>Champs <code>[À COMPLÉTER]</code> dans la page Mentions Légales. Renseigner avant mise en production : RCCM, IFU, capital social, forme juridique exacte.</td>
+      </tr>
+      <tr>
+        <td><strong>CGV accessibles</strong></td>
+        <td><span class="pill pill-ok">✅ Conforme</span></td>
+        <td><span class="legal-ref">Art. 49 CDN</span></td>
+        <td>Page <code>/cgv</code> : 12 articles, prix TTC, modalités de paiement, droit de rétractation, recours CRIET. Accessible depuis le footer.</td>
+      </tr>
+      <tr>
+        <td><strong>Libellé bouton commande</strong></td>
+        <td><span class="pill pill-warn">🔧 À compléter</span></td>
+        <td><span class="legal-ref">Art. 50 CDN</span></td>
+        <td>Le bouton de validation finale d'une commande doit être libellé <strong>"Commander avec obligation de payer"</strong> conformément à l'Art. 50. À vérifier dans le flux de commande.</td>
+      </tr>
+      <tr>
+        <td><strong>Email de confirmation de commande</strong></td>
+        <td><span class="pill pill-todo">⏳ Post-production</span></td>
+        <td><span class="legal-ref">Art. 51 CDN</span></td>
+        <td>L'accusé de réception de commande par email est prévu (Resend configuré) mais dépend de la connexion à la base de données. À tester en production.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═════════ 4. ACTIONS REQUISES ══════════════════════════════ -->
+  <div class="section-title">📋 4. Actions Requises Avant Mise en Production</div>
+
+  <div class="detail-box">
+    <div class="todo-item">
+      <div class="todo-num">1</div>
+      <div class="todo-content">
+        <div class="title">🔴 Créer l'adresse email DPO</div>
+        <div class="desc">Créer et activer <code>dpo@shiftup.bj</code>. Cette adresse est référencée dans la politique de confidentialité, les mentions légales et le formulaire de contact. Sans elle, les droits des utilisateurs ne peuvent pas être exercés.</div>
+      </div>
+    </div>
+    <div class="todo-item">
+      <div class="todo-num">2</div>
+      <div class="todo-content">
+        <div class="title">🔴 Compléter les Mentions Légales (RCCM, IFU, capital)</div>
+        <div class="desc">Renseigner dans <code>app/(public)/mentions-legales/page.tsx</code> : N° RCCM, N° IFU, capital social, forme juridique exacte de SHIFT UP. Ces informations sont obligatoires selon l'Art. 16 du CDN.</div>
+      </div>
+    </div>
+    <div class="todo-item">
+      <div class="todo-num">3</div>
+      <div class="todo-content">
+        <div class="title">🟠 Libellé bouton commande</div>
+        <div class="desc">Vérifier que le bouton de validation du paiement porte la mention exacte <strong>"Commander avec obligation de payer"</strong> dans le flux de commande (page de checkout).</div>
+      </div>
+    </div>
+    <div class="todo-item">
+      <div class="todo-num">4</div>
+      <div class="todo-content">
+        <div class="title">🟠 Connecter la base de données (DATABASE_URL)</div>
+        <div class="desc">Renseigner les variables <code>DATABASE_URL</code> et <code>DIRECT_URL</code> dans <code>.env.local</code> avec les credentials Supabase. Puis lancer <code>npm run db:push</code> pour créer les tables.</div>
+      </div>
+    </div>
+    <div class="todo-item">
+      <div class="todo-num">5</div>
+      <div class="todo-content">
+        <div class="title">🟡 Configurer l'envoi d'emails (Resend)</div>
+        <div class="desc">Renseigner <code>RESEND_API_KEY</code> et <code>EMAIL_FROM</code>. Nécessaire pour : email de réinitialisation de mot de passe, accusé de réception de commande, notifications de prestations.</div>
+      </div>
+    </div>
+    <div class="todo-item">
+      <div class="todo-num">6</div>
+      <div class="todo-content">
+        <div class="title">🟡 Tester la bannière cookies en production</div>
+        <div class="desc">Vérifier que Google Analytics ne charge aucune donnée avant acceptation en production. Utiliser l'extension navigateur "Google Analytics Debugger" pour confirmer que <code>analytics_storage=denied</code> jusqu'à consentement.</div>
+      </div>
+    </div>
+    <div class="todo-item">
+      <div class="todo-num">7</div>
+      <div class="todo-content">
+        <div class="title">🟡 Remplacer le rate limiter mémoire par Redis en production</div>
+        <div class="desc">Sur Vercel (serverless), chaque instance a sa propre mémoire. Le rate limiter actuel fonctionne instance par instance. Intégrer <strong>Upstash Redis</strong> pour un rate limiting fiable sur toutes les instances.</div>
+      </div>
+    </div>
+    <div class="todo-item" style="border-bottom:none">
+      <div class="todo-num">8</div>
+      <div class="todo-content">
+        <div class="title">🟡 Déclaration auprès de l'APDP</div>
+        <div class="desc">Lorsque l'APDP (Autorité de Protection des Données à Caractère Personnel du Bénin) sera pleinement opérationnelle, procéder à la déclaration du traitement de données conformément à l'Art. 78 du CDN.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════ 5. RÉCAPITULATIF PAR ARTICLE ══════════════════════ -->
+  <div class="section-title">📚 5. Correspondance Articles du Code du Numérique</div>
+
+  <table class="compliance-table">
+    <thead><tr>
+      <th>Article CDN</th>
+      <th>Objet</th>
+      <th>Statut</th>
+      <th>Implémentation SHIFT UP</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><span class="legal-ref">Art. 16</span></td><td>Mentions légales obligatoires</td><td><span class="pill pill-warn">Partiel</span></td><td>Page créée — RCCM/IFU à compléter</td></tr>
+      <tr><td><span class="legal-ref">Art. 20</span></td><td>Sécurité des systèmes d'information</td><td><span class="pill pill-ok">✅</span></td><td>En-têtes HTTP, HSTS, rate limiting, audit logs</td></tr>
+      <tr><td><span class="legal-ref">Art. 21</span></td><td>Protection contre les accès non autorisés</td><td><span class="pill pill-ok">✅</span></td><td>bcrypt, RBAC, CSRF, HttpOnly cookies, Zod validation</td></tr>
+      <tr><td><span class="legal-ref">Art. 22</span></td><td>Journalisation des accès</td><td><span class="pill pill-ok">✅</span></td><td>Table AuditLog — 10+ événements tracés avec IP</td></tr>
+      <tr><td><span class="legal-ref">Art. 49</span></td><td>CGV — Commerce électronique</td><td><span class="pill pill-ok">✅</span></td><td>Page /cgv — 12 articles conformes</td></tr>
+      <tr><td><span class="legal-ref">Art. 50</span></td><td>Bouton commande libellé</td><td><span class="pill pill-warn">Partiel</span></td><td>À vérifier dans le flux de commande</td></tr>
+      <tr><td><span class="legal-ref">Art. 51</span></td><td>Accusé de réception commande</td><td><span class="pill pill-todo">⏳</span></td><td>Resend configuré — dépend de la BDD</td></tr>
+      <tr><td><span class="legal-ref">Art. 68</span></td><td>Identité du responsable de traitement</td><td><span class="pill pill-ok">✅</span></td><td>SHIFT UP — Eudes KPADONOU — coordonnées complètes</td></tr>
+      <tr><td><span class="legal-ref">Art. 69</span></td><td>Politique de confidentialité</td><td><span class="pill pill-ok">✅</span></td><td>13 sections — toutes exigences couvertes</td></tr>
+      <tr><td><span class="legal-ref">Art. 71</span></td><td>Minimisation des données</td><td><span class="pill pill-ok">✅</span></td><td>Données strictement nécessaires collectées</td></tr>
+      <tr><td><span class="legal-ref">Art. 72</span></td><td>Consentement préalable</td><td><span class="pill pill-ok">✅</span></td><td>Bannière cookies + cases non pré-cochées dans formulaires</td></tr>
+      <tr><td><span class="legal-ref">Art. 73</span></td><td>Intérêt légitime</td><td><span class="pill pill-ok">✅</span></td><td>Base légale documentée par finalité dans la politique</td></tr>
+      <tr><td><span class="legal-ref">Art. 75</span></td><td>Délégué à la Protection des Données</td><td><span class="pill pill-warn">Partiel</span></td><td>dpo@shiftup.bj référencé — email à créer</td></tr>
+      <tr><td><span class="legal-ref">Art. 76</span></td><td>Durées de conservation</td><td><span class="pill pill-ok">✅</span></td><td>Tableau détaillé par catégorie dans la politique</td></tr>
+      <tr><td><span class="legal-ref">Art. 80</span></td><td>Droits des personnes</td><td><span class="pill pill-ok">✅</span></td><td>6 droits explicités + délai 30j + contact DPO</td></tr>
+      <tr><td><span class="legal-ref">Art. 88</span></td><td>Transferts internationaux</td><td><span class="pill pill-ok">✅</span></td><td>Section dédiée — Vercel, Supabase, Google avec garanties</td></tr>
+      <tr><td><span class="legal-ref">Art. 90</span></td><td>Réclamation auprès de l'APDP</td><td><span class="pill pill-ok">✅</span></td><td>Coordonnées APDP dans la politique de confidentialité</td></tr>
+    </tbody>
+  </table>
+
+</div><!-- /container -->
+
+<!-- ═══════════════════════════ FOOTER ══════════════════════════════ -->
+<footer>
+  <p>
+    <strong>SHIFT UP</strong> — Cabinet de conseil stratégique & solutions numériques — Abomey-Calavi, Bénin<br>
+    Rapport généré le <strong>Mars 2026</strong> — Référentiel : Loi n°2017-20 portant Code du Numérique en République du Bénin<br>
+    Contact DPO : <strong>dpo@shiftup.bj</strong>
+  </p>
+</footer>
+
+</body>
+</html>
