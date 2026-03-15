@@ -9,6 +9,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 
 // Messages mock — remplacer par fetch /api/messages en production
@@ -159,6 +160,7 @@ export default function MessagesPage() {
                     />
                     <button
                       disabled={!newMessage.trim()}
+                      onClick={() => { toast.success("Réponse envoyée !"); setNewMessage(""); }}
                       className="w-11 h-11 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white hover:opacity-90 transition-opacity disabled:opacity-40"
                     >
                       <i className="fas fa-paper-plane text-sm" />
@@ -201,7 +203,7 @@ export default function MessagesPage() {
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors resize-none"
                     />
                   </div>
-                  <button className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity">
+                  <button onClick={() => { toast.success("Message envoyé à l'équipe SHIFT UP !"); setComposing(false); }} className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity">
                     <i className="fas fa-paper-plane mr-2" />
                     Envoyer le message
                   </button>
