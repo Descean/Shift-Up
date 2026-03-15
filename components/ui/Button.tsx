@@ -99,7 +99,7 @@ export default function Button({
         whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
         className={classes}
         disabled={disabled || loading}
-        {...( ({ onAnimationStart, onAnimationEnd, onAnimationIteration, ...rest }) => rest)(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+        {...(props as any)}
       >
         {content}
       </motion.button>
