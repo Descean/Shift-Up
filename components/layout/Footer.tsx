@@ -35,13 +35,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-white/10">
+              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
                 <Image
                   src="/assets/logo-icon.png"
                   alt="SHIFT UP"
                   width={48}
                   height={48}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain brightness-0 invert"
                 />
               </div>
               <div>
