@@ -209,6 +209,16 @@ https://shiftup.bj/api/payments/webhook/fedapay
 
 ---
 
+## Mobile & PWA
+
+- Dashboard entièrement responsive (testé iPhone 8 Plus)
+- Sidebar mobile : drawer slide-in + barre de navigation bottom (5 onglets)
+- PWA installable : `manifest.json` avec icônes maskable, shortcuts (Dashboard, Services, Contact)
+- Support iOS : meta tags Apple, `viewportFit=cover`, `safe-area-inset-bottom`
+- **Icônes à générer** : placer les PNG dans `/public/icons/` (72→512px via maskable.app)
+
+---
+
 ## Sécurité
 
 - Auth JWT + refresh tokens (httpOnly cookies via NextAuth)
@@ -226,7 +236,7 @@ https://shiftup.bj/api/payments/webhook/fedapay
 | Champ | Valeur |
 |-------|--------|
 | Raison sociale | SHIFT UP |
-| Dirigeant | Jean-Eudes MÈTOGBÉ GNANCADJA |
+| Dirigeant | La Direction SHIFT UP |
 | RCCM | RB/ABC/25 A 124734 |
 | IFU | 0202113434116 |
 | Date immatriculation | 30 mai 2025 |
@@ -240,7 +250,7 @@ https://shiftup.bj/api/payments/webhook/fedapay
 
 - **Email** : shiftup.eudes@gmail.com
 - **WhatsApp** : (+229) 01 95 03 50 99
-- **RDV** : [calendly.com/shiftup](https://calendly.com/shiftup)
+- **RDV** : Page [/contact](https://shiftup.bj/contact) (Calendly à configurer)
 
 ---
 
