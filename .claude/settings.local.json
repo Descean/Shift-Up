@@ -33,7 +33,8 @@
       "Bash(npm install:*)",
       "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/\")",
       "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/services/\")",
-      "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(auth\\)/\")"
+      "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(auth\\)/\")",
+      "Bash(find \"/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/boutique\" -type f)"
     ]
   }
 }
