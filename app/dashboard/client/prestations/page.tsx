@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -168,7 +169,7 @@ export default function ClientPrestationsPage() {
           )}
 
           {/* Financials */}
-          <div className="grid grid-cols-3 gap-4 border-t border-gray-50 pt-4">
+          <div className="grid grid-cols-3 gap-4 border-t border-gray-50 pt-4 mb-4">
             <div>
               <p className="text-xs text-gray-500">Montant total</p>
               <p className="font-bold text-primary">{detail.amount.toLocaleString()} F</p>
@@ -182,9 +183,55 @@ export default function ClientPrestationsPage() {
               <p className="font-bold text-amber-600">{(detail.amount - detail.amountPaid).toLocaleString()} F</p>
             </div>
           </div>
+
+          {/* Pay button — for EN_ATTENTE (acompte 40%) or remaining balance */}
+          {detail.status !== "TERMINEE" && detail.status !== "ANNULEE" && detail.amount > detail.amountPaid && (
+            <PayButton
+              prestationId={detail.id}
+              label={detail.service}
+              amount={detail.status === "EN_ATTENTE" ? Math.round(detail.amount * 0.4) : detail.amount - detail.amountPaid}
+              isDeposit={detail.status === "EN_ATTENTE"}
+            />
+          )}
         </motion.div>
       )}
     </div>
+  );
+}
+
+function PayButton({
+  prestationId,
+  label,
+  amount,
+  isDeposit,
+}: {
+  prestationId: string;
+  label: string;
+  amount: number;
+  isDeposit: boolean;
+}) {
+  const router = useRouter();
+
+  const handlePay = () => {
+    const params = new URLSearchParams({
+      type:         "service",
+      prestationId,
+      amount:       String(amount),
+      label:        isDeposit ? `Acompte 40% — ${label}` : `Solde 60% — ${label}`,
+    });
+    router.push(`/paiement?${params.toString()}`);
+  };
+
+  return (
+    <button
+      onClick={handlePay}
+      className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+    >
+      <i className="fas fa-credit-card" />
+      {isDeposit
+        ? `Payer l'acompte (40%) — ${amount.toLocaleString()} F`
+        : `Payer le solde (60%) — ${amount.toLocaleString()} F`}
+    </button>
   );
 }
 

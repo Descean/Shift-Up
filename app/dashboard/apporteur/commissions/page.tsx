@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const mockStats = {
   totalEarnings: 145000,
@@ -38,9 +39,20 @@ export default function ApporteurCommissionsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-syne font-black text-2xl text-primary">Commissions & Revenus</h1>
-        <p className="text-gray-500 text-sm mt-1">Consultez vos gains et l'historique de vos commissions.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-syne font-black text-2xl text-primary">Commissions & Revenus</h1>
+          <p className="text-gray-500 text-sm mt-1">Consultez vos gains et l'historique de vos commissions.</p>
+        </div>
+        {mockStats.pendingEarnings >= 30000 && (
+          <Link
+            href="/dashboard/apporteur/commissions/reclamer"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+          >
+            <i className="fas fa-money-bill-transfer" />
+            Réclamer mes commissions
+          </Link>
+        )}
       </div>
 
       {/* Stats */}
@@ -126,10 +138,21 @@ export default function ApporteurCommissionsPage() {
       </div>
 
       {/* Payout info */}
-      <div className="bg-accent/5 rounded-2xl p-5 text-sm text-gray-600">
-        <i className="fas fa-info-circle text-accent mr-2" />
-        Les commissions sont versées chaque <strong>15 du mois</strong> par Mobile Money (MTN/Moov) ou virement bancaire,
-        après règlement complet du client final.
+      <div className="bg-accent/5 rounded-2xl p-5 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p>
+          <i className="fas fa-info-circle text-accent mr-2" />
+          Réclamez vos commissions dès <strong>30 000 F</strong> de solde disponible.
+          Versement par Mobile Money sous <strong>48h ouvrées</strong> après validation.
+        </p>
+        {mockStats.pendingEarnings >= 30000 && (
+          <Link
+            href="/dashboard/apporteur/commissions/reclamer"
+            className="inline-flex items-center gap-2 text-accent font-semibold text-sm hover:underline whitespace-nowrap"
+          >
+            <i className="fas fa-arrow-right" />
+            Faire une demande
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import toast from "react-hot-toast";
 
 const categories = ["Tous", "Templates", "Guides", "Outils", "Formation"];
 
@@ -163,18 +163,19 @@ const products = [
 ];
 
 export default function BoutiquePage() {
+  const router = useRouter();
   const [filter, setFilter] = useState("Tous");
-  const [buying, setBuying] = useState<string | null>(null);
 
   const filtered = filter === "Tous" ? products : products.filter((p) => p.category === filter);
 
   const handleBuy = (product: (typeof products)[0]) => {
-    setBuying(product.id);
-    // Simulate payment intent — in production, call /api/payments/create-checkout
-    setTimeout(() => {
-      setBuying(null);
-      toast.success(`"${product.title}" — Paiement en cours de déploiement. Contactez-nous pour acheter ce produit.`);
-    }, 1000);
+    const params = new URLSearchParams({
+      type:   "boutique",
+      id:     product.id,
+      name:   product.title,
+      amount: String(product.price),
+    });
+    router.push(`/paiement?${params.toString()}`);
   };
 
   return (
@@ -273,21 +274,14 @@ export default function BoutiquePage() {
                     </div>
                     <button
                       onClick={() => handleBuy(product)}
-                      disabled={buying === product.id}
                       className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
                         product.isPopular
                           ? "bg-gradient-to-r from-accent to-secondary text-white hover:opacity-90"
                           : "bg-primary text-white hover:bg-primary/90"
-                      } disabled:opacity-60`}
+                      }`}
                     >
-                      {buying === product.id ? (
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <i className="fas fa-download" />
-                          Acheter & télécharger
-                        </>
-                      )}
+                      <i className="fas fa-shopping-cart" />
+                      Acheter & télécharger
                     </button>
                   </div>
                 </div>

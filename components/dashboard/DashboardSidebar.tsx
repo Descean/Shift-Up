@@ -44,6 +44,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/admin/marketing", icon: "fas fa-bullhorn", label: "Marketing" },
     { href: "/dashboard/admin/analytics", icon: "fas fa-chart-bar", label: "Analytics" },
     { href: "/dashboard/admin/finances", icon: "fas fa-coins", label: "Finances (DG)" },
+    { href: "/dashboard/admin/finances/versements", icon: "fas fa-money-bill-transfer", label: "Versements" },
   ],
   DEVELOPER: [
     { href: "/dashboard/admin", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
@@ -52,6 +53,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/admin/services", icon: "fas fa-cog", label: "Services & CMS" },
     { href: "/dashboard/admin/blog", icon: "fas fa-newspaper", label: "Blog" },
     { href: "/dashboard/admin/analytics", icon: "fas fa-chart-bar", label: "Analytics" },
+    { href: "/dashboard/admin/finances/versements", icon: "fas fa-money-bill-transfer", label: "Versements" },
   ],
 };
 

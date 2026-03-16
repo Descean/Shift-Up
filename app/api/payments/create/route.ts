@@ -102,9 +102,25 @@ async function handleStripe({ amount, reference, session, prestation, prestation
   const Stripe = (await import("stripe")).default;
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: Math.round(amount * 100), // Stripe uses cents (convert from XOF to EUR if needed)
-    currency: "eur",
+  // Convert XOF → EUR (approximate: 1 EUR ≈ 655.957 XOF)
+  const amountEurCents = Math.round((amount / 655.957) * 100);
+
+  const checkoutSession = await stripe.checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: "eur",
+          unit_amount: amountEurCents,
+          product_data: { name: `SHIFT UP — Prestation ${prestationId}` },
+        },
+        quantity: 1,
+      },
+    ],
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/paiement/succes?type=service&prestationId=${prestationId}&ref=${reference}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/paiement/echec?type=service&reason=cancelled`,
+    customer_email: session.user.email,
     metadata: { prestationId, reference, userId: session.user.id },
   });
 
@@ -118,13 +134,13 @@ async function handleStripe({ amount, reference, session, prestation, prestation
       provider: "STRIPE",
       status: "PENDING",
       reference,
-      providerRef: paymentIntent.id,
+      providerRef: checkoutSession.id,
     },
   });
 
   return NextResponse.json({
     success: true,
-    clientSecret: paymentIntent.client_secret,
+    checkoutUrl: checkoutSession.url,
     reference,
   });
 }

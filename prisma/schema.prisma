@@ -82,13 +82,14 @@ model User {
   sessions    Session[]
 
   // Business relations
-  clientProfile   ClientProfile?
-  apporteurProfile ApporteurProfile?
-  etudiantProfile EtudiantProfile?
-  prestations     Prestation[]      @relation("ClientPrestations")
-  assignedPrestations Prestation[]  @relation("AssignedPrestations")
-  payments        Payment[]
-  messages        Message[]
+  clientProfile       ClientProfile?
+  apporteurProfile    ApporteurProfile?
+  etudiantProfile     EtudiantProfile?
+  prestations         Prestation[]      @relation("ClientPrestations")
+  assignedPrestations Prestation[]      @relation("AssignedPrestations")
+  payments            Payment[]
+  payoutRequests      PayoutRequest[]
+  messages            Message[]
   chatSessions        ChatSession[]
   auditLogs           AuditLog[]
   passwordResetToken  PasswordResetToken?
@@ -212,6 +213,32 @@ model Payment {
   metadata     Json?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+// ============================================================
+// DEMANDES DE VERSEMENT (Apporteurs)
+// ============================================================
+
+// Statuts possibles d'une demande de versement :
+//   PENDING    → soumise, en attente de traitement par l'admin
+//   PROCESSING → en cours de traitement (virement initié)
+//   PAID       → versée avec succès sur le Mobile Money
+//   REJECTED   → rejetée (montant insuffisant, numéro invalide, etc.)
+
+model PayoutRequest {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  amount         Float                          // Montant demandé en XOF
+  currency       String    @default("XOF")
+  mobileProvider String                         // MTN_MOMO | MOOV_MONEY | WAVE | CELTIIS
+  mobileNumber   String                         // Numéro Mobile Money du bénéficiaire
+  status         String    @default("PENDING")  // PENDING | PROCESSING | PAID | REJECTED
+  reference      String    @unique              // SU-POUT-{timestamp}-{random}
+  notes          String?                        // Note admin (raison du rejet, etc.)
+  processedAt    DateTime?                      // Date du traitement
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 // ============================================================
