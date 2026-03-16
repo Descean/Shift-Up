@@ -50,8 +50,15 @@ export default function Header() {
       <div className="container-custom flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center shadow-glow">
-            <span className="text-white font-syne font-black text-lg">SU</span>
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-white/10">
+            <Image
+              src="/assets/logo-icon.png"
+              alt="SHIFT UP"
+              width={40}
+              height={40}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
           <div className="hidden sm:block">
             <p className="text-white font-syne font-bold text-xl leading-none">SHIFT UP</p>

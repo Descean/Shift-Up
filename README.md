@@ -15,10 +15,9 @@
 | Auth | NextAuth.js v4 (JWT + Google OAuth) |
 | Base de données | PostgreSQL via Supabase + Prisma ORM |
 | Paiements | FedaPay (Mobile Money) + Stripe (cartes) |
-| Chatbot IA | Google Gemini 1.5 Flash |
-| IA Dashboard | Claude API (Anthropic) |
+| Chatbot IA | Claude API (Anthropic) |
 | Email | Resend / Brevo |
-| Déploiement | Vercel (front) + Railway/Render (back) + Cloudflare CDN |
+| Déploiement | Vercel (Next.js) + Supabase (PostgreSQL) |
 | Analytics | PostHog + Google Analytics 4 |
 
 ---
@@ -69,7 +68,7 @@ shift-up-website/
 - Node.js >= 18
 - pnpm ou npm ou yarn
 - Compte Supabase (gratuit)
-- Comptes : Google Cloud, Resend, FedaPay, Gemini AI
+- Comptes : Anthropic (Claude API), Resend, FedaPay, Google OAuth
 
 ### 1. Cloner et installer
 
@@ -125,8 +124,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
 SUPABASE_SERVICE_ROLE_KEY=xxx
 DATABASE_URL=postgresql://...
 
-GOOGLE_AI_API_KEY=xxx          # Chatbot Gemini
-ANTHROPIC_API_KEY=xxx          # Dashboard IA Claude
+ANTHROPIC_API_KEY=xxx          # Chatbot IA Claude
 ```
 
 Variables pour les paiements :

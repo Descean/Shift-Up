@@ -94,8 +94,8 @@ const mockUsers: User[] = [
   },
   {
     id: "u-006",
-    name: "Eudes Kpadonou",
-    email: "shiftup.eudes@gmail.com",
+    name: "Admin SHIFT UP",
+    email: "admin@shiftup.bj",
     role: "ADMIN",
     isActive: true,
     stars: 0,

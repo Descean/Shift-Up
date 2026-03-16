@@ -5,13 +5,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
   return [
-    { url: baseUrl, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${baseUrl}/services`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/a-propos`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/faq`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
-    { url: `${baseUrl}/connexion`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/inscription`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
+    // ── Pages principales (haute priorité) ────────────────────────────────
+    { url: baseUrl,                           lastModified: now, changeFrequency: "weekly",  priority: 1.0 },
+    { url: `${baseUrl}/services`,             lastModified: now, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/services/souscrire`,   lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/boutique`,             lastModified: now, changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/contact`,              lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+
+    // ── Pages secondaires ─────────────────────────────────────────────────
+    { url: `${baseUrl}/a-propos`,             lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/blog`,                 lastModified: now, changeFrequency: "daily",   priority: 0.8 },
+    { url: `${baseUrl}/faq`,                  lastModified: now, changeFrequency: "weekly",  priority: 0.6 },
+
+    // ── Pages légales ─────────────────────────────────────────────────────
+    { url: `${baseUrl}/mentions-legales`,     lastModified: now, changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${baseUrl}/confidentialite`,      lastModified: now, changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${baseUrl}/cgv`,                  lastModified: now, changeFrequency: "yearly",  priority: 0.3 },
+
+    // ── Pages d'auth (faible priorité, non indexées idéalement) ──────────
+    { url: `${baseUrl}/connexion`,            lastModified: now, changeFrequency: "yearly",  priority: 0.2 },
+    { url: `${baseUrl}/inscription`,          lastModified: now, changeFrequency: "yearly",  priority: 0.3 },
   ];
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const services = [
   "Conseil Stratégique",
@@ -34,8 +35,14 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center shadow-glow">
-                <span className="text-white font-syne font-black text-xl">SU</span>
+              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-white/10">
+                <Image
+                  src="/assets/logo-icon.png"
+                  alt="SHIFT UP"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <p className="text-white font-syne font-bold text-2xl leading-none">SHIFT UP</p>
