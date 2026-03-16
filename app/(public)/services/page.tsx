@@ -189,6 +189,49 @@ const domains = [
     ],
   },
   {
+    id: "dossiers",
+    icon: "fas fa-folder-open",
+    color: "from-teal-600 to-emerald-400",
+    badge: "Dossiers",
+    title: "Montage de Dossiers",
+    intro: "Nous constituons et optimisons vos dossiers de financement, d'appels d'offres et de création d'entreprise pour maximiser vos chances de succès.",
+    services: [
+      {
+        title: "Dossier de financement bancaire",
+        description: "Constitution d'un dossier complet et solide pour l'obtention d'un crédit auprès d'une banque ou institution de microfinance.",
+        priceLabel: "À partir de",
+        price: "75 000 FCFA",
+        duration: "5-10 jours",
+        features: ["Business plan intégré", "Analyse de faisabilité", "Accompagnement entretien banque"],
+        isPopular: true,
+      },
+      {
+        title: "Réponse à appel d'offres",
+        description: "Préparation d'un dossier de soumission complet et compétitif pour les marchés publics et privés.",
+        priceLabel: "À partir de",
+        price: "100 000 FCFA",
+        duration: "3-7 jours",
+        features: ["Dossier administratif complet", "Offre technique rédigée", "Offre financière optimisée"],
+      },
+      {
+        title: "Dossier de création d'entreprise",
+        description: "Accompagnement complet pour la création officielle de votre structure (SARL, SAS, GIE…) au Bénin.",
+        priceLabel: "À partir de",
+        price: "60 000 FCFA",
+        duration: "5-10 jours",
+        features: ["Statuts et actes constitutifs", "Immatriculation RCCM + IFU", "Compte bancaire professionnel"],
+      },
+      {
+        title: "Dossier de subvention / programme",
+        description: "Montage de dossier pour des programmes de financement public : FNDA, ADPME, BOAD, BAD et autres.",
+        priceLabel: "Sur devis",
+        price: "",
+        duration: "2-4 semaines",
+        features: ["Étude d'éligibilité", "Plan de financement", "Suivi du dossier"],
+      },
+    ],
+  },
+  {
     id: "finance",
     icon: "fas fa-chart-bar",
     color: "from-yellow-500 to-amber-400",
@@ -346,7 +389,7 @@ export default function ServicesPage() {
                     ))}
                   </ul>
 
-                  <Button href="/inscription" variant={service.isPopular ? "gradient" : "outline"} size="md" className="w-full">
+                  <Button href={`/services/souscrire?service=${activeDomain.id}`} variant={service.isPopular ? "gradient" : "outline"} size="md" className="w-full">
                     Souscrire
                     <i className="fas fa-arrow-right text-sm" />
                   </Button>

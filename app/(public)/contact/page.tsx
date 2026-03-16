@@ -177,7 +177,7 @@ export default function ContactPage() {
 
               {/* Calendly */}
               <a
-                href="https://calendly.com/shiftup"
+                href="https://calendly.com/shiftup/apoionacional"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 bg-accent p-5 rounded-2xl text-white hover:bg-accent/90 transition-colors"

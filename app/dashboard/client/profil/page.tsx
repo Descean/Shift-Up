@@ -21,15 +21,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 // ─── Composant principal ───────────────────────────────────────────────────────
 
 export default function ProfilPage() {
+  const { data: session } = useSession();
+  const sessionUser = session?.user as { name?: string; email?: string; phone?: string; affiliationCode?: string } | undefined;
+
   // ── Informations personnelles ────────────────────────────────────────────
-  // TODO: charger depuis GET /api/user/profile au montage
-  const [name, setName]   = useState("Kofi Mensah");
-  const [email]           = useState("kofi@example.com");  // email non modifiable
-  const [phone, setPhone] = useState("+229 97 00 00 00");
+  const [name, setName]   = useState(sessionUser?.name || "");
+  const [email]           = useState(sessionUser?.email || "");  // email non modifiable
+  const [phone, setPhone] = useState(sessionUser?.phone || "");
   const [savingInfo, setSavingInfo] = useState(false);
 
   // ── Changement de mot de passe ───────────────────────────────────────────
@@ -49,7 +52,7 @@ export default function ProfilPage() {
   });
 
   // ── Code de parrainage (lecture seule) ───────────────────────────────────
-  const referralCode = "SU-KM2025";
+  const referralCode = sessionUser?.affiliationCode || "SU-CLIENT";
   const referralLink = `https://shiftup.bj/inscription?ref=${referralCode}`;
 
   // ─── Sauvegarde des infos personnelles ────────────────────────────────────

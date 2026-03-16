@@ -33,6 +33,16 @@ const services = [
     href: "/services#formation",
   },
   {
+    icon: "fas fa-folder-open",
+    color: "from-teal-600 to-emerald-400",
+    title: "Montage de Dossiers",
+    description:
+      "Dossiers de financement bancaire, réponses aux appels d'offres, création d'entreprise et subventions.",
+    features: ["Financement bancaire", "Appels d'offres", "Création d'entreprise", "Subventions & programmes"],
+    href: "/services#dossiers",
+    isPopular: true,
+  },
+  {
     icon: "fas fa-bullhorn",
     color: "from-orange-400 to-accent",
     title: "Marketing Digital",
@@ -40,7 +50,6 @@ const services = [
       "Stratégie de contenu, SEO/SEA, gestion des réseaux sociaux, e-réputation, campagnes publicité.",
     features: ["Stratégie contenu", "SEO & publicité", "Social media", "Email marketing"],
     href: "/services#marketing",
-    isPopular: true,
   },
   {
     icon: "fas fa-scale-balanced",
@@ -82,7 +91,7 @@ export default function ServicesSection() {
             <span className="gradient-text">votre croissance</span>
           </h2>
           <p className="text-gray-500 text-lg">
-            6 domaines d'expertise couvrant tous les besoins stratégiques et numériques de votre entreprise.
+            7 domaines d'expertise couvrant tous les besoins stratégiques et numériques de votre entreprise.
           </p>
         </motion.div>
 
