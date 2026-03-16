@@ -56,7 +56,7 @@ const sections = [
 **Nom commercial** : SHIFT UP
 **Forme juridique** : Entreprise individuelle (Établissement — Personne physique)
 **Régime fiscal** : Micro et petites entreprises
-**Propriétaire-exploitant** : GNANCADJA Mètogbé Jean-Eudes
+**Propriétaire-exploitant** : La Direction SHIFT UP
 **N° RCCM** : RB/ABC/25 A 124734 (Greffe du Tribunal de Commerce de Cotonou — 30/05/2025)
 **N° IFU** : 0202113434116 (Centre des impôts : CIPE 3 AB-CAL)
 **Siège social** : Maison Léopold TCHIBOZO, Tankpe, Abomey-Calavi, Département de l'Atlantique, République du Bénin
@@ -69,7 +69,7 @@ const sections = [
     title: "2. Directeur de la publication",
     content: `Le directeur de la publication est :
 
-**GNANCADJA Mètogbé Jean-Eudes**, Propriétaire-exploitant de SHIFT UP.
+**La Direction SHIFT UP**, Propriétaire-exploitant.
 
 Conformément à l'Article 16 de la Loi n°2017-20 portant Code du Numérique en République du Bénin, le directeur de la publication est responsable du contenu éditorial diffusé sur ce site.`,
   },

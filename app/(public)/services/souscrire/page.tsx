@@ -337,9 +337,7 @@ export default function SouscrirePage() {
                 <p className="font-syne font-bold text-primary mb-1">Besoin d'un appel d'abord ?</p>
                 <p className="text-sm text-gray-500 mb-3">Réservez un créneau gratuit de 30 min avec notre équipe.</p>
                 <a
-                  href="https://calendly.com/shiftup/apoionacional"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/contact"
                   className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
                 >
                   <i className="fas fa-calendar-check" />

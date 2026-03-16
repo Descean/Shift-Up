@@ -63,7 +63,7 @@ const sections = [
     content: `Conformément à l'**Article 68 de la Loi n°2017-20 portant Code du Numérique** en République du Bénin, le responsable du traitement de vos données personnelles est :
 
 **SHIFT UP** — Entreprise individuelle (Établissement — Personne physique)
-Propriétaire-exploitant : GNANCADJA Mètogbé Jean-Eudes
+Propriétaire-exploitant : La Direction SHIFT UP
 RCCM : RB/ABC/25 A 124734 — IFU : 0202113434116
 Siège : Maison Léopold TCHIBOZO, Tankpe, Abomey-Calavi, Atlantique, Bénin
 Email : shiftup.eudes@gmail.com — Tél : (+229) 01 95 03 50 99

@@ -62,7 +62,7 @@ export default function AProposPage() {
               </h1>
               <p className="text-white/70 text-lg leading-relaxed mb-8">
                 SHIFT UP est né d'une conviction : les entreprises béninoises et africaines méritent
-                un accompagnement de classe mondiale. Fondé par Jean-Eudes MÈTOGBÉ GNANCADJA, notre
+                un accompagnement de classe mondiale. Notre
                 cabinet combine expertise stratégique et maîtrise des technologies pour propulser
                 votre croissance.
               </p>
@@ -83,7 +83,7 @@ export default function AProposPage() {
               <div className="space-y-4">
                 {[
                   { icon: "fas fa-building-columns", label: "Raison sociale", value: "SHIFT UP" },
-                  { icon: "fas fa-user-tie", label: "Dirigeant", value: "Jean-Eudes MÈTOGBÉ GNANCADJA" },
+                  { icon: "fas fa-user-tie", label: "Dirigeant", value: "La Direction SHIFT UP" },
                   { icon: "fas fa-id-card", label: "RCCM", value: "RB/ABC/25 A 124734" },
                   { icon: "fas fa-receipt", label: "IFU", value: "0202113434116" },
                   { icon: "fas fa-map-marker-alt", label: "Siège social", value: "Abomey-Calavi, Atlantique, Bénin" },
@@ -198,12 +198,12 @@ export default function AProposPage() {
           <div className="max-w-sm mx-auto">
             <div className="bg-gradient-to-br from-primary to-primary/90 rounded-3xl p-8 text-center">
               <div className="w-24 h-24 bg-gradient-to-br from-accent to-secondary rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-glow text-white font-syne font-black text-3xl">
-                JE
+                SU
               </div>
-              <h3 className="font-syne font-bold text-2xl text-white mb-1">Jean-Eudes MÈTOGBÉ GNANCADJA</h3>
-              <p className="text-accent mb-4">Fondateur & Directeur Général</p>
+              <h3 className="font-syne font-bold text-2xl text-white mb-1">Le Fondateur</h3>
+              <p className="text-accent mb-4">Directeur Général & Fondateur</p>
               <p className="text-white/60 text-sm leading-relaxed mb-6">
-                Entrepreneur passionné et expert en conseil stratégique, Jean-Eudes a fondé SHIFT UP
+                Entrepreneur passionné et expert en conseil stratégique, il a fondé SHIFT UP
                 avec l'ambition de transformer le paysage entrepreneurial béninois.
               </p>
               <div className="flex justify-center gap-3">

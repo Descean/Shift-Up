@@ -185,7 +185,7 @@ export default function Footer() {
             <div className="text-white/30 text-xs text-center md:text-left">
               <p>© {new Date().getFullYear()} SHIFT UP — Tous droits réservés</p>
               <p className="mt-1">
-                RCCM : RB/ABC/25 A 124734 | IFU : 0202113434116 | Dirigeant : Jean-Eudes MÈTOGBÉ GNANCADJA
+                RCCM : RB/ABC/25 A 124734 | IFU : 0202113434116
               </p>
             </div>
             <div className="flex items-center gap-4">

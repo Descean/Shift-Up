@@ -43,7 +43,7 @@ Toute commande de service implique l'acceptation pleine et entière des présent
 **RCCM** : RB/ABC/25 A 124734
 **IFU** : 0202113434116
 **Siège social** : Abomey-Calavi, Atlantique, République du Bénin
-**Dirigeant** : Jean-Eudes MÈTOGBÉ GNANCADJA
+**Dirigeant** : La Direction SHIFT UP
 **Email** : shiftup.eudes@gmail.com
 **Téléphone** : (+229) 01 95 03 50 99
 **Site web** : https://shiftup.bj`,

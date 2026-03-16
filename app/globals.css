@@ -124,7 +124,7 @@
   }
 
   .sidebar-item:not(.active) {
-    @apply text-gray-600 hover:bg-gray-100 hover:text-primary;
+    @apply text-gray-400 hover:bg-white/10 hover:text-white;
   }
 
   /* Status badge */
@@ -147,6 +147,20 @@
   /* Text shadow */
   .text-shadow {
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Safe area for iPhone notch / home indicator */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 
   /* Perspective */
