@@ -86,7 +86,7 @@ function PaiementContent() {
   // ── État du formulaire ──────────────────────────────────────────────────
   const [payMethod, setPayMethod]   = useState<"mobile" | "card">("mobile");
   const [provider,  setProvider]    = useState("MTN_MOMO");
-  const [phone,     setPhone]       = useState(session?.user?.phone || "");
+  const [phone,     setPhone]       = useState("");
   const [loading,   setLoading]     = useState(false);
 
   // ── Calculs ─────────────────────────────────────────────────────────────
