@@ -246,7 +246,7 @@ export default function AdminFinancesPage() {
               </tr>
             </thead>
             <tbody>
-              {mockCommissions.map((c) => (
+              {commissions.map((c) => (
                 <tr key={c.code} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-primary">{c.apporteur}</td>
                   <td className="px-6 py-4">
