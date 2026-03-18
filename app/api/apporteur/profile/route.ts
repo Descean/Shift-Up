@@ -17,7 +17,6 @@ export async function GET() {
     const profile = await prisma.apporteurProfile.findUnique({
       where: { userId: session.user.id },
       include: {
-        _count: { select: { referrals: true } },
         user: { select: { affiliationCode: true } },
       },
     });
@@ -26,11 +25,15 @@ export async function GET() {
       return NextResponse.json({ error: "Profil apporteur introuvable." }, { status: 404 });
     }
 
+    const totalReferrals = await prisma.clientProfile.count({
+      where: { affiliatedBy: profile.user.affiliationCode ?? "" },
+    });
+
     return NextResponse.json({
       profile: {
         totalEarnings:   profile.totalEarnings,
         pendingEarnings: profile.pendingEarnings,
-        totalReferrals:  profile._count.referrals,
+        totalReferrals,
         affiliationCode: profile.user.affiliationCode ?? "",
       },
     });
