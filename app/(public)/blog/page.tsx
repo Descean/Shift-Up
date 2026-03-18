@@ -97,7 +97,7 @@ export default async function BlogPage() {
                       {featured.category}
                     </span>
                     <span className="text-gray-400 text-xs">
-                      {formatDate(featured.publishedAt)}
+                      {formatDate(featured.publishedAt ?? new Date())}
                     </span>
                     <span className="text-gray-400 text-xs">
                       <i className="fas fa-clock mr-1" />
@@ -137,7 +137,7 @@ export default async function BlogPage() {
                   </div>
                   <div className="p-6">
                     <div className="flex items-center gap-3 mb-3 text-gray-400 text-xs">
-                      <span>{formatDate(post.publishedAt)}</span>
+                      <span>{formatDate(post.publishedAt ?? new Date())}</span>
                       <span>•</span>
                       <span>{post.readTime} min de lecture</span>
                     </div>
