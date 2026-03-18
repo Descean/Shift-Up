@@ -79,12 +79,14 @@ export function StarBadge({ stars }: { stars: number }) {
 
 export function PrestationStatusBadge({ status }: { status: string }) {
   const statusMap: Record<string, { label: string; variant: BadgeVariant; dot: boolean }> = {
-    EN_ATTENTE: { label: "En attente", variant: "warning", dot: true },
-    EN_COURS: { label: "En cours", variant: "accent", dot: true },
-    LIVRAISON: { label: "Livraison", variant: "secondary", dot: true },
-    REVISION: { label: "Révision", variant: "warning", dot: true },
-    TERMINEE: { label: "Terminée", variant: "success", dot: false },
-    ANNULEE: { label: "Annulée", variant: "danger", dot: false },
+    EN_ATTENTE:          { label: "En attente",       variant: "warning",   dot: true  },
+    DEVIS_ENVOYE:        { label: "Devis envoyé",     variant: "accent",    dot: true  },
+    EN_ATTENTE_PAIEMENT: { label: "Attente paiement", variant: "warning",   dot: true  },
+    EN_COURS:            { label: "En cours",          variant: "accent",    dot: true  },
+    LIVRAISON:           { label: "Livraison",         variant: "secondary", dot: true  },
+    REVISION:            { label: "Révision",          variant: "warning",   dot: true  },
+    TERMINEE:            { label: "Terminée",          variant: "success",   dot: false },
+    ANNULEE:             { label: "Annulée",           variant: "danger",    dot: false },
   };
 
   const config = statusMap[status] || { label: status, variant: "neutral" as BadgeVariant, dot: false };

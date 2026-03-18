@@ -47,7 +47,9 @@ export async function GET() {
       prisma.prestation.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
-        include: {
+        select: {
+          id: true, status: true, amount: true, createdAt: true,
+          sector: true, customService: true,
           client:  { select: { name: true, email: true } },
           service: { select: { title: true, domain: true } },
         },

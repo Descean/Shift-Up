@@ -17,8 +17,10 @@ type Stats = {
     status: string;
     amount: number;
     createdAt: string;
+    sector: string | null;
+    customService: string | null;
     client: { name: string | null; email: string | null };
-    service: { title: string; domain: string };
+    service: { title: string; domain: string } | null;
   }[];
 };
 
@@ -114,7 +116,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm text-primary truncate">{p.client.name ?? p.client.email}</p>
-                  <p className="text-gray-400 text-xs truncate">{p.service.title}</p>
+                  <p className="text-gray-400 text-xs truncate">{p.service?.title ?? p.customService ?? p.sector ?? "Prestation"}</p>
                 </div>
                 <PrestationStatusBadge status={p.status} />
                 <div className="text-right flex-shrink-0">
