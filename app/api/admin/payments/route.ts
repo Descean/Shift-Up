@@ -42,7 +42,6 @@ export async function GET() {
         where: { pendingEarnings: { gt: 0 } },
         include: {
           user: { select: { name: true, affiliationCode: true } },
-          _count: { select: { referrals: true } },
         },
         orderBy: { pendingEarnings: "desc" },
       }),
@@ -74,7 +73,7 @@ export async function GET() {
       commissions: apporteurs.map((a) => ({
         apporteur: a.user.name ?? "—",
         code: a.user.affiliationCode ?? "—",
-        referrals: a._count.referrals,
+        referrals: 0,
         totalGenerated: a.totalEarnings,
         commission: a.pendingEarnings,
         status: "A_PAYER",
