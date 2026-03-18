@@ -89,7 +89,9 @@ model User {
   assignedPrestations Prestation[]      @relation("AssignedPrestations")
   payments            Payment[]
   payoutRequests      PayoutRequest[]
-  messages            Message[]
+  sentMessages        Message[]         @relation("SentMessages")
+  receivedMessages    Message[]         @relation("ReceivedMessages")
+  campaigns           Campaign[]
   chatSessions        ChatSession[]
   auditLogs           AuditLog[]
   passwordResetToken  PasswordResetToken?
@@ -246,15 +248,17 @@ model PayoutRequest {
 // ============================================================
 
 model Message {
-  id          String   @id @default(cuid())
-  senderId    String
-  sender      User     @relation(fields: [senderId], references: [id])
-  subject     String?
-  content     String
-  isRead      Boolean  @default(false)
+  id             String   @id @default(cuid())
+  senderId       String
+  sender         User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId    String?
+  recipient      User?    @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  subject        String?
+  content        String
+  isRead         Boolean  @default(false)
   conversationId String?
-  attachments String[] @default([])
-  createdAt   DateTime @default(now())
+  attachments    String[] @default([])
+  createdAt      DateTime @default(now())
 }
 
 // ============================================================
@@ -396,6 +400,46 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+// ============================================================
+// CAMPAGNES (Apporteur)
+// ============================================================
+
+model Campaign {
+  id          String   @id @default(cuid())
+  apporteurId String
+  apporteur   User     @relation(fields: [apporteurId], references: [id], onDelete: Cascade)
+  name        String
+  channel     String                        // WhatsApp | LinkedIn | Facebook | Instagram | Email | Autre
+  service     String?
+  clicks      Int      @default(0)
+  leads       Int      @default(0)
+  conversions Int      @default(0)
+  status      String   @default("ACTIVE")  // ACTIVE | PAUSEE | TERMINEE
+  startDate   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================================
+// RESSOURCES PÉDAGOGIQUES (Étudiant)
+// ============================================================
+
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        String                        // VIDEO | PDF | TEMPLATE | LIEN
+  category    String
+  url         String
+  duration    String?
+  size        String?
+  isNew       Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // ============================================================
