@@ -403,6 +403,41 @@ model PasswordResetToken {
 }
 
 // ============================================================
+// PRODUITS BOUTIQUE
+// ============================================================
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  type        String                         // APP | LOGICIEL | FICHIER | LICENCE | TEMPLATE | FORMATION | AUTRE
+  category    String?
+  price       Float
+  currency    String   @default("XOF")
+  downloadUrl String?                        // URL de téléchargement (produits numériques)
+  previewUrl  String?                        // Lien démo / aperçu
+  thumbnail   String?                        // Image de couverture (URL)
+  features    String[] @default([])          // Liste des fonctionnalités
+  tags        String[] @default([])
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  stock       Int?                           // null = illimité (numérique), entier = stock physique
+  purchases   ProductPurchase[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProductPurchase {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  amount    Float
+  reference String   @unique
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
 // CAMPAGNES (Apporteur)
 // ============================================================
 

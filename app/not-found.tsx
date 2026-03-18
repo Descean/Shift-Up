@@ -21,9 +21,9 @@ export default function NotFound() {
         <Image
           src="/assets/logo-full.png"
           alt="SHIFT UP"
-          width={180}
-          height={60}
-          className="h-12 w-auto brightness-0 invert"
+          width={280}
+          height={90}
+          className="h-20 w-auto brightness-0 invert"
           priority
         />
       </Link>
