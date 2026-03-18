@@ -28,41 +28,22 @@ export async function GET() {
     const [
       totalUsers,
       newUsersThisMonth,
-      totalPrestations,
-      activePrestations,
-      completedPrestations,
+      allPrestations,
+      allUsers,
       revenueTotal,
       revenueThisMonth,
       pendingMessages,
       newsletterCount,
       recentPrestations,
     ] = await Promise.all([
-      // Utilisateurs
       prisma.user.count(),
       prisma.user.count({ where: { createdAt: { gte: startOfMonth } } }),
-
-      // Prestations
-      prisma.prestation.count(),
-      prisma.prestation.count({ where: { status: { in: ["EN_COURS","LIVRAISON","REVISION"] } } }),
-      prisma.prestation.count({ where: { status: "TERMINEE" } }),
-
-      // Revenus (paiements COMPLETED)
-      prisma.payment.aggregate({
-        where: { status: "COMPLETED" },
-        _sum: { amount: true },
-      }),
-      prisma.payment.aggregate({
-        where: { status: "COMPLETED", createdAt: { gte: startOfMonth } },
-        _sum: { amount: true },
-      }),
-
-      // Messages contact non lus
+      prisma.prestation.findMany({ select: { status: true } }),
+      prisma.user.findMany({ select: { role: true } }),
+      prisma.payment.aggregate({ where: { status: "COMPLETED" }, _sum: { amount: true } }),
+      prisma.payment.aggregate({ where: { status: "COMPLETED", createdAt: { gte: startOfMonth } }, _sum: { amount: true } }),
       prisma.contactMessage.count({ where: { isRead: false } }),
-
-      // Abonnés newsletter actifs
       prisma.newsletterSubscriber.count({ where: { isActive: true } }),
-
-      // 5 dernières prestations avec infos client + service
       prisma.prestation.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
@@ -73,15 +54,29 @@ export async function GET() {
       }),
     ]);
 
+    // Répartition prestations par statut
+    const statusCounts: Record<string, number> = {};
+    for (const p of allPrestations) {
+      statusCounts[p.status] = (statusCounts[p.status] ?? 0) + 1;
+    }
+
+    // Répartition utilisateurs par rôle
+    const roleCounts: Record<string, number> = {};
+    for (const u of allUsers) {
+      roleCounts[u.role] = (roleCounts[u.role] ?? 0) + 1;
+    }
+
     return NextResponse.json({
       users: {
         total: totalUsers,
         newThisMonth: newUsersThisMonth,
+        byRole: roleCounts,
       },
       prestations: {
-        total: totalPrestations,
-        active: activePrestations,
-        completed: completedPrestations,
+        total: allPrestations.length,
+        active: allPrestations.filter(p => ["EN_COURS","LIVRAISON","REVISION"].includes(p.status)).length,
+        completed: allPrestations.filter(p => p.status === "TERMINEE").length,
+        byStatus: statusCounts,
       },
       revenue: {
         total: revenueTotal._sum.amount ?? 0,
