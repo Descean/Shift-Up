@@ -14,7 +14,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -33,77 +33,6 @@ interface User {
   affiliationCode: string | null; // uniquement pour APPORTEUR
 }
 
-// ─── Données mock ─────────────────────────────────────────────────────────────
-// TODO: remplacer par fetch("/api/admin/users?page=1&limit=20") dans un useEffect
-
-const mockUsers: User[] = [
-  {
-    id: "u-001",
-    name: "Kofi Mensah",
-    email: "kofi@example.com",
-    role: "CLIENT",
-    isActive: true,
-    stars: 4,
-    prestationsCount: 2,
-    createdAt: "10/09/2025",
-    affiliationCode: null,
-  },
-  {
-    id: "u-002",
-    name: "Aïcha Traoré",
-    email: "aicha@example.com",
-    role: "CLIENT",
-    isActive: true,
-    stars: 5,
-    prestationsCount: 1,
-    createdAt: "01/10/2025",
-    affiliationCode: null,
-  },
-  {
-    id: "u-003",
-    name: "Rodrigue Hounton",
-    email: "rodrigue@example.com",
-    role: "APPORTEUR",
-    isActive: true,
-    stars: 3,
-    prestationsCount: 0,
-    createdAt: "15/08/2025",
-    affiliationCode: "SU-RH2025",
-  },
-  {
-    id: "u-004",
-    name: "Élodie Favi",
-    email: "elodie@example.com",
-    role: "ETUDIANT",
-    isActive: true,
-    stars: 0,
-    prestationsCount: 0,
-    createdAt: "22/10/2025",
-    affiliationCode: null,
-  },
-  {
-    id: "u-005",
-    name: "Samuel Kpoton",
-    email: "samuel@example.com",
-    role: "CLIENT",
-    isActive: false, // compte désactivé
-    stars: 2,
-    prestationsCount: 1,
-    createdAt: "05/11/2025",
-    affiliationCode: null,
-  },
-  {
-    id: "u-006",
-    name: "Admin SHIFT UP",
-    email: "admin@shiftup.bj",
-    role: "ADMIN",
-    isActive: true,
-    stars: 0,
-    prestationsCount: 0,
-    createdAt: "01/01/2025",
-    affiliationCode: null,
-  },
-];
 
 // ─── Couleurs par rôle ────────────────────────────────────────────────────────
 
@@ -120,6 +49,9 @@ const roleStyle: Record<UserRole, string> = {
 
 export default function AdminUtilisateursPage() {
   // ── États de liste / filtre ──────────────────────────────────────────────
+  const [users, setUsers]           = useState<User[]>([]);
+  const [total, setTotal]           = useState(0);
+  const [loadingList, setLoadingList] = useState(true);
   const [search, setSearch]         = useState("");
   const [filterRole, setFilterRole] = useState<UserRole | "TOUS">("TOUS");
 
@@ -130,20 +62,30 @@ export default function AdminUtilisateursPage() {
   const [editStars, setEditStars]   = useState(0);
   const [saving, setSaving]         = useState(false);
 
-  // ── Filtrage ─────────────────────────────────────────────────────────────
-  // Combine le filtre de rôle et la recherche textuelle (nom OU email)
-  const filtered = mockUsers.filter((u) => {
-    const matchRole = filterRole === "TOUS" || u.role === filterRole;
-    const q = search.toLowerCase();
-    const matchSearch =
-      !q ||
-      u.name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q);
-    return matchRole && matchSearch;
-  });
+  // ── Chargement depuis l'API ───────────────────────────────────────────────
+  const load = useCallback(() => {
+    setLoadingList(true);
+    const params = new URLSearchParams({ limit: "50" });
+    if (filterRole !== "TOUS") params.set("role", filterRole);
+    if (search) params.set("search", search);
+    fetch(`/api/admin/users?${params}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setUsers(data.users ?? []);
+        setTotal(data.total ?? 0);
+      })
+      .finally(() => setLoadingList(false));
+  }, [filterRole, search]);
+
+  useEffect(() => {
+    const t = setTimeout(load, 300);
+    return () => clearTimeout(t);
+  }, [load]);
+
+  // ── Filtrage local (en complément du filtre serveur) ─────────────────────
+  const filtered = users;
 
   // ── Ouverture du modal d'édition ─────────────────────────────────────────
-  // Pré-remplit les champs avec les valeurs actuelles de l'utilisateur
   function openEdit(u: User) {
     setEditing(u);
     setEditRole(u.role);
@@ -151,27 +93,33 @@ export default function AdminUtilisateursPage() {
     setEditStars(u.stars);
   }
 
-  /**
-   * saveEdit — Applique les modifications d'un utilisateur.
-   *
-   * TODO: remplacer le setTimeout par un vrai appel :
-   *   await fetch("/api/admin/users", {
-   *     method: "PATCH",
-   *     headers: { "Content-Type": "application/json" },
-   *     body: JSON.stringify({
-   *       userId: editing.id,
-   *       role: editRole,
-   *       isActive: editActive,
-   *       stars: editStars,
-   *     }),
-   *   });
-   */
   async function saveEdit() {
     if (!editing) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setSaving(false);
-    setEditing(null);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: editing.id,
+          role: editRole,
+          isActive: editActive,
+          stars: editStars,
+        }),
+      });
+      if (res.ok) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === editing.id
+              ? { ...u, role: editRole, isActive: editActive, stars: editStars }
+              : u
+          )
+        );
+        setEditing(null);
+      }
+    } finally {
+      setSaving(false);
+    }
   }
 
   // ─── Rendu ───────────────────────────────────────────────────────────────
@@ -185,7 +133,7 @@ export default function AdminUtilisateursPage() {
           Gestion des Utilisateurs
         </h1>
         <p className="text-gray-500 text-sm">
-          {mockUsers.length} utilisateur(s) enregistré(s)
+          {total} utilisateur(s) enregistré(s)
         </p>
       </motion.div>
 
@@ -218,6 +166,12 @@ export default function AdminUtilisateursPage() {
 
       {/* ── Tableau des utilisateurs ──────────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+        {loadingList && (
+          <div className="flex justify-center py-12">
+            <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {!loadingList && (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -321,6 +275,7 @@ export default function AdminUtilisateursPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* ── Modal d'édition utilisateur ───────────────────────────────────── */}

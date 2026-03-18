@@ -14,7 +14,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -41,89 +41,6 @@ interface Commission {
   status: "A_PAYER" | "PAYE";
 }
 
-// ─── Données mock ─────────────────────────────────────────────────────────────
-
-const mockPayments: Payment[] = [
-  {
-    id: "pay-001",
-    reference: "SU-PAY-1729000000-XK3A",
-    client: "Kofi Mensah",
-    service: "Application Web / SaaS",
-    amount: 600000,
-    method: "FedaPay (MTN MoMo)",
-    status: "COMPLETED",
-    date: "15/10/2025",
-  },
-  {
-    id: "pay-002",
-    reference: "SU-PAY-1730600000-M9TZ",
-    client: "Aïcha Traoré",
-    service: "Stratégie digitale",
-    amount: 200000,
-    method: "Stripe (Carte Visa)",
-    status: "COMPLETED",
-    date: "02/11/2025",
-  },
-  {
-    id: "pay-003",
-    reference: "SU-PAY-1731500000-P2KL",
-    client: "Félicia Dossa",
-    service: "E-commerce / Boutique",
-    amount: 180000,
-    method: "FedaPay (Wave)",
-    status: "COMPLETED",
-    date: "10/11/2025",
-  },
-  {
-    id: "pay-004",
-    reference: "SU-PAY-1732000000-Q7WX",
-    client: "Boris Agbayissah",
-    service: "Community Management",
-    amount: 60000,
-    method: "FedaPay (MTN MoMo)",
-    status: "PENDING",
-    date: "—",
-  },
-  {
-    id: "pay-005",
-    reference: "SU-PAY-1732100000-R5MN",
-    client: "Samuel Kpoton",
-    service: "Logo & Identité visuelle",
-    amount: 80000,
-    method: "Stripe (Carte Mastercard)",
-    status: "FAILED",
-    date: "18/11/2025",
-  },
-  {
-    id: "pay-006",
-    reference: "SU-PAY-1732200000-T3BC",
-    client: "Élodie Favi",
-    service: "Application Mobile",
-    amount: 350000,
-    method: "FedaPay (Moov Money)",
-    status: "REFUNDED",
-    date: "20/11/2025",
-  },
-];
-
-const mockCommissions: Commission[] = [
-  {
-    apporteur: "Rodrigue Hounton",
-    code: "SU-RH2025",
-    referrals: 4,
-    totalGenerated: 980000,
-    commission: 98000,
-    status: "A_PAYER",
-  },
-  {
-    apporteur: "Carole Dangnon",
-    code: "SU-CD2025",
-    referrals: 2,
-    totalGenerated: 400000,
-    commission: 40000,
-    status: "PAYE",
-  },
-];
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
@@ -144,28 +61,30 @@ const statusLabel: Record<PaymentStatus, string> = {
 // ─── Composant principal ───────────────────────────────────────────────────────
 
 export default function AdminFinancesPage() {
-  const [filterStatus, setFilter] = useState<PaymentStatus | "TOUS">("TOUS");
-  const [search, setSearch]       = useState("");
+  const [payments, setPayments]     = useState<Payment[]>([]);
+  const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [totals, setTotals]         = useState({ total: 0, thisMonth: 0 });
+  const [loading, setLoading]       = useState(true);
+  const [filterStatus, setFilter]   = useState<PaymentStatus | "TOUS">("TOUS");
+  const [search, setSearch]         = useState("");
 
-  // ── Calculs récapitulatifs ────────────────────────────────────────────────
-  const totalCompleted = mockPayments
-    .filter((p) => p.status === "COMPLETED")
-    .reduce((s, p) => s + p.amount, 0);
+  useEffect(() => {
+    fetch("/api/admin/payments")
+      .then((r) => r.json())
+      .then((data) => {
+        setPayments(data.payments ?? []);
+        setCommissions(data.commissions ?? []);
+        setTotals(data.totals ?? { total: 0, thisMonth: 0 });
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const totalPending = mockPayments
-    .filter((p) => p.status === "PENDING")
-    .reduce((s, p) => s + p.amount, 0);
+  const totalCompleted = totals.total;
+  const revenueThisMonth = totals.thisMonth;
+  const totalPending = payments.filter((p) => p.status === "PENDING").reduce((s, p) => s + p.amount, 0);
+  const totalCommissions = commissions.reduce((s, c) => s + c.commission, 0);
 
-  const totalCommissions = mockCommissions
-    .filter((c) => c.status === "A_PAYER")
-    .reduce((s, c) => s + c.commission, 0);
-
-  // Mois courant — revenus des paiements COMPLETED ce mois
-  // (mock simplifié : on prend les 2 derniers)
-  const revenueThisMonth = 760000;
-
-  // ── Filtrage du tableau des paiements ────────────────────────────────────
-  const filtered = mockPayments.filter((p) => {
+  const filtered = payments.filter((p) => {
     const matchStatus = filterStatus === "TOUS" || p.status === filterStatus;
     const q = search.toLowerCase();
     const matchSearch =
@@ -290,7 +209,9 @@ export default function AdminFinancesPage() {
                     {p.amount.toLocaleString()} F
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{p.method}</td>
-                  <td className="px-6 py-4 text-sm text-gray-400">{p.date}</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">
+                    {p.date ? new Date(p.date).toLocaleDateString("fr-FR") : "—"}
+                  </td>
                   <td className="px-6 py-4 text-center">
                     <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyle[p.status]}`}>
                       {statusLabel[p.status]}

@@ -1,99 +1,42 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
+import prisma from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Blog & Ressources | SHIFT UP",
   description: "Articles, actualités et ressources sur le conseil stratégique, le numérique et l'entrepreneuriat au Bénin.",
 };
 
-// Mock data — replace with CMS/Supabase fetch
-const posts = [
-  {
-    id: "1",
-    slug: "transformation-digitale-pme-benin",
-    title: "Transformation digitale : par où commencer pour une PME béninoise ?",
-    excerpt:
-      "La transformation numérique n'est plus une option. Voici une feuille de route pratique adaptée aux réalités des entreprises du Bénin.",
-    category: "Digital",
-    tags: ["Digital", "PME", "Stratégie"],
-    author: "Jean-Eudes MÈTOGBÉ",
-    authorInitials: "JE",
-    publishedAt: new Date("2025-11-15"),
-    readTime: 8,
-    views: 1240,
-    featured: true,
-    coverColor: "from-blue-600 to-accent",
-  },
-  {
-    id: "2",
-    slug: "business-plan-erreurs-eviter",
-    title: "Les 7 erreurs fatales dans un business plan que les investisseurs détestent",
-    excerpt:
-      "Après avoir analysé des centaines de business plans, voici les erreurs récurrentes qui font fuir les investisseurs et comment les éviter.",
-    category: "Finance",
-    tags: ["Business Plan", "Finance", "Entrepreneuriat"],
-    author: "Jean-Eudes MÈTOGBÉ",
-    authorInitials: "JE",
-    publishedAt: new Date("2025-10-28"),
-    readTime: 6,
-    views: 890,
-    featured: false,
-    coverColor: "from-purple-600 to-pink-500",
-  },
-  {
-    id: "3",
-    slug: "marketing-digital-afrique-strategies",
-    title: "Marketing digital en Afrique : 5 stratégies qui fonctionnent vraiment",
-    excerpt:
-      "Le marketing digital en Afrique a ses spécificités. Découvrez les approches éprouvées qui génèrent des résultats concrets.",
-    category: "Marketing",
-    tags: ["Marketing", "Digital", "Afrique"],
-    author: "Jean-Eudes MÈTOGBÉ",
-    authorInitials: "JE",
-    publishedAt: new Date("2025-10-10"),
-    readTime: 7,
-    views: 2100,
-    featured: false,
-    coverColor: "from-orange-500 to-red-400",
-  },
-  {
-    id: "4",
-    slug: "ia-entreprise-benin-opportunites",
-    title: "Intelligence artificielle : les opportunités concrètes pour votre entreprise au Bénin",
-    excerpt:
-      "L'IA n'est plus réservée aux grandes tech. Voici comment les PME béninoises peuvent en tirer parti dès aujourd'hui.",
-    category: "Technologie",
-    tags: ["IA", "Technologie", "Innovation"],
-    author: "Jean-Eudes MÈTOGBÉ",
-    authorInitials: "JE",
-    publishedAt: new Date("2025-09-20"),
-    readTime: 9,
-    views: 1560,
-    featured: false,
-    coverColor: "from-secondary to-teal-500",
-  },
-  {
-    id: "5",
-    slug: "creation-entreprise-benin-guide",
-    title: "Guide complet pour créer son entreprise au Bénin en 2025",
-    excerpt:
-      "De l'idée à l'immatriculation : toutes les étapes, les coûts et les pièges à éviter pour lancer votre activité au Bénin.",
-    category: "Juridique",
-    tags: ["Création", "Juridique", "RCCM"],
-    author: "Jean-Eudes MÈTOGBÉ",
-    authorInitials: "JE",
-    publishedAt: new Date("2025-09-05"),
-    readTime: 12,
-    views: 3200,
-    featured: false,
-    coverColor: "from-indigo-600 to-purple-500",
-  },
+const COVER_COLORS = [
+  "from-blue-600 to-accent",
+  "from-purple-600 to-pink-500",
+  "from-orange-500 to-red-400",
+  "from-secondary to-teal-500",
+  "from-indigo-600 to-purple-500",
+  "from-green-600 to-teal-400",
 ];
 
 const categories = ["Tous", "Digital", "Finance", "Marketing", "Technologie", "Juridique", "Stratégie"];
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const dbPosts = await prisma.blogPost.findMany({
+    where: { published: true },
+    orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+    select: {
+      id: true, slug: true, title: true, excerpt: true,
+      category: true, tags: true, authorName: true,
+      publishedAt: true, readTime: true, views: true, featured: true,
+    },
+  }).catch(() => []);
+
+  const posts = dbPosts.map((p, i) => ({
+    ...p,
+    author: p.authorName,
+    authorInitials: p.authorName.split(" ").map((n: string) => n[0]).slice(0, 2).join(""),
+    coverColor: COVER_COLORS[i % COVER_COLORS.length],
+  }));
+
   const featured = posts.find((p) => p.featured);
   const rest = posts.filter((p) => !p.featured);
 

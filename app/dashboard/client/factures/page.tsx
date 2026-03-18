@@ -7,51 +7,70 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
-// Factures mock — remplacer par données réelles depuis /api/prestations
-const mockInvoices = [
-  {
-    id: "FAC-2025-001",
-    service: "Application Web / SaaS",
-    type: "Acompte (40%)",
-    amount: 600000,
-    status: "PAYÉ",
-    method: "FedaPay (MTN MoMo)",
-    date: "15/10/2025",
-    reference: "SU-PAY-1729000000-XK3A",
-  },
-  {
-    id: "FAC-2025-002",
-    service: "Stratégie digitale",
-    type: "Règlement total",
-    amount: 200000,
-    status: "PAYÉ",
-    method: "Stripe (Carte Visa)",
-    date: "02/11/2025",
-    reference: "SU-PAY-1730600000-M9TZ",
-  },
-  {
-    id: "FAC-2025-003",
-    service: "Application Web / SaaS",
-    type: "Solde (60%)",
-    amount: 900000,
-    status: "EN ATTENTE",
-    method: "—",
-    date: "—",
-    reference: "—",
-  },
-];
+type Invoice = {
+  id: string;
+  service: string;
+  type: string;
+  amount: number;
+  status: string;
+  method: string;
+  date: string;
+  reference: string;
+  prestationId?: string;
+};
 
 const statusStyle: Record<string, string> = {
   "PAYÉ":       "bg-green-50 text-green-700",
+  "COMPLETED":  "bg-green-50 text-green-700",
   "EN ATTENTE": "bg-amber-50 text-amber-700",
+  "PENDING":    "bg-amber-50 text-amber-700",
   "REMBOURSÉ":  "bg-gray-100 text-gray-500",
+  "FAILED":     "bg-red-50 text-red-600",
+};
+
+const statusLabel: Record<string, string> = {
+  COMPLETED: "Payé",
+  PENDING:   "En attente",
+  FAILED:    "Échoué",
+  REFUNDED:  "Remboursé",
 };
 
 export default function FacturesPage() {
-  const totalPaid    = mockInvoices.filter(i => i.status === "PAYÉ").reduce((s, i) => s + i.amount, 0);
-  const totalPending = mockInvoices.filter(i => i.status === "EN ATTENTE").reduce((s, i) => s + i.amount, 0);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    fetch("/api/prestations")
+      .then((r) => r.json())
+      .then((data) => {
+        const prestations = data.prestations ?? [];
+        const rows: Invoice[] = [];
+        prestations.forEach((p: any) => {
+          (p.payments ?? []).forEach((pay: any, idx: number) => {
+            rows.push({
+              id: `FAC-${p.id.slice(-4).toUpperCase()}-${idx + 1}`,
+              service: p.service?.title ?? "Service",
+              type: idx === 0 ? "Acompte (40%)" : "Solde (60%)",
+              amount: pay.amount,
+              status: pay.status,
+              method: `${pay.provider} (${pay.method})`,
+              date: pay.createdAt ? new Date(pay.createdAt).toLocaleDateString("fr-FR") : "—",
+              reference: pay.reference,
+              prestationId: p.id,
+            });
+          });
+        });
+        setInvoices(rows);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalPaid    = invoices.filter(i => i.status === "COMPLETED").reduce((s, i) => s + i.amount, 0);
+  const totalPending = invoices.filter(i => i.status === "PENDING").reduce((s, i) => s + i.amount, 0);
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -73,7 +92,7 @@ export default function FacturesPage() {
         </div>
         <div className="bg-white rounded-2xl shadow-card p-5">
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Transactions</p>
-          <p className="font-syne font-black text-2xl text-primary">{mockInvoices.length}</p>
+          <p className="font-syne font-black text-2xl text-primary">{invoices.length}</p>
         </div>
       </div>
 
@@ -87,6 +106,11 @@ export default function FacturesPage() {
           </button>
         </div>
 
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -102,9 +126,12 @@ export default function FacturesPage() {
               </tr>
             </thead>
             <tbody>
-              {mockInvoices.map((inv) => (
+              {invoices.length === 0 && (
+                <tr><td colSpan={8} className="px-6 py-12 text-center text-gray-400 text-sm">Aucune transaction pour l'instant.</td></tr>
+              )}
+              {invoices.map((inv) => (
                 <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-xs font-mono text-gray-500">{inv.id}</td>
+                  <td className="px-6 py-4 text-xs font-mono text-gray-500">{inv.reference}</td>
                   <td className="px-6 py-4 text-sm font-medium text-primary">{inv.service}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{inv.type}</td>
                   <td className="px-6 py-4 text-sm font-bold text-primary text-right">{inv.amount.toLocaleString()} F</td>
@@ -112,26 +139,27 @@ export default function FacturesPage() {
                   <td className="px-6 py-4 text-sm text-gray-500">{inv.date}</td>
                   <td className="px-6 py-4 text-center">
                     <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyle[inv.status] ?? "bg-gray-100 text-gray-500"}`}>
-                      {inv.status}
+                      {statusLabel[inv.status] ?? inv.status}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    {inv.status === "PAYÉ" ? (
-                      <button className="text-accent hover:text-secondary transition-colors text-xs font-medium flex items-center gap-1">
-                        <i className="fas fa-download" />
-                        PDF
-                      </button>
-                    ) : (
-                      <button className="text-white bg-gradient-to-r from-accent to-secondary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity whitespace-nowrap">
+                    {inv.status === "COMPLETED" ? (
+                      <span className="text-gray-300 text-xs">PDF bientôt</span>
+                    ) : inv.status === "PENDING" && inv.prestationId ? (
+                      <Link
+                        href={`/paiement?type=service&prestationId=${inv.prestationId}&amount=${inv.amount}`}
+                        className="text-white bg-gradient-to-r from-accent to-secondary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity whitespace-nowrap"
+                      >
                         Payer maintenant
-                      </button>
-                    )}
+                      </Link>
+                    ) : null}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Note de bas de tableau */}
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">

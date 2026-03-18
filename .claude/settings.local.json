@@ -35,7 +35,8 @@
       "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/services/\")",
       "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(auth\\)/\")",
       "Bash(find \"/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/boutique\" -type f)",
-      "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/boutique/\")"
+      "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/boutique/\")",
+      "Bash(find \"/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)\" -name \"page.tsx\")"
     ]
   }
 }

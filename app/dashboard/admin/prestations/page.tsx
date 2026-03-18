@@ -13,7 +13,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -39,72 +39,6 @@ interface Prestation {
   createdAt: string;
   estimatedEndDate: string | null;
 }
-
-// ─── Données mock ─────────────────────────────────────────────────────────────
-// TODO: remplacer par fetch("/api/admin/prestations") dans un useEffect
-
-const mockPrestations: Prestation[] = [
-  {
-    id: "prest-001",
-    client: { name: "Kofi Mensah", email: "kofi@example.com" },
-    service: { title: "Application Web / SaaS", domain: "dev" },
-    status: "EN_COURS",
-    globalProgress: 45,
-    amount: 1500000,
-    amountPaid: 600000,
-    assignedTo: "Jean-Paul R.",
-    createdAt: "10/10/2025",
-    estimatedEndDate: "31/12/2025",
-  },
-  {
-    id: "prest-002",
-    client: { name: "Aïcha Traoré", email: "aicha@example.com" },
-    service: { title: "Stratégie digitale", domain: "marketing" },
-    status: "TERMINEE",
-    globalProgress: 100,
-    amount: 200000,
-    amountPaid: 200000,
-    assignedTo: "Marie C.",
-    createdAt: "01/11/2025",
-    estimatedEndDate: "20/11/2025",
-  },
-  {
-    id: "prest-003",
-    client: { name: "Samuel Kpoton", email: "samuel@example.com" },
-    service: { title: "Logo & Identité visuelle", domain: "design" },
-    status: "EN_ATTENTE",
-    globalProgress: 0,
-    amount: 80000,
-    amountPaid: 0,
-    assignedTo: null,
-    createdAt: "20/11/2025",
-    estimatedEndDate: null,
-  },
-  {
-    id: "prest-004",
-    client: { name: "Félicia Dossa", email: "felicia@example.com" },
-    service: { title: "E-commerce / Boutique", domain: "dev" },
-    status: "LIVRAISON",
-    globalProgress: 90,
-    amount: 450000,
-    amountPaid: 180000,
-    assignedTo: "Jean-Paul R.",
-    createdAt: "15/10/2025",
-    estimatedEndDate: "05/12/2025",
-  },
-  {
-    id: "prest-005",
-    client: { name: "Boris Agbayissah", email: "boris@example.com" },
-    service: { title: "Community Management", domain: "marketing" },
-    status: "REVISION",
-    globalProgress: 75,
-    amount: 150000,
-    amountPaid: 60000,
-    assignedTo: "Marie C.",
-    createdAt: "05/11/2025",
-    estimatedEndDate: "10/12/2025",
-  },
-];
 
 // Membres de l'équipe disponibles pour assignation
 const teamMembers = ["Jean-Paul R.", "Marie C.", "Eudes K.", "Carole M."];
@@ -142,31 +76,42 @@ function progressColor(p: number): string {
 // ─── Composant principal ───────────────────────────────────────────────────────
 
 export default function AdminPrestationsPage() {
-  // ── États de liste / filtre ──────────────────────────────────────────────
-  const [search, setSearch]         = useState("");
-  const [filterStatus, setFilter]   = useState<PrestationStatus | "TOUS">("TOUS");
+  // ── États ────────────────────────────────────────────────────────────────
+  const [prestations, setPrestations] = useState<Prestation[]>([]);
+  const [total, setTotal]             = useState(0);
+  const [loadingList, setLoadingList] = useState(true);
+  const [search, setSearch]           = useState("");
+  const [filterStatus, setFilter]     = useState<PrestationStatus | "TOUS">("TOUS");
 
   // ── États du modal d'édition ─────────────────────────────────────────────
-  const [editing, setEditing]         = useState<Prestation | null>(null);
-  const [editStatus, setEditStatus]   = useState<PrestationStatus>("EN_ATTENTE");
+  const [editing, setEditing]           = useState<Prestation | null>(null);
+  const [editStatus, setEditStatus]     = useState<PrestationStatus>("EN_ATTENTE");
   const [editProgress, setEditProgress] = useState(0);
   const [editAssigned, setEditAssigned] = useState<string>("");
-  const [saving, setSaving]           = useState(false);
+  const [saving, setSaving]             = useState(false);
 
-  // ── Filtrage des prestations ─────────────────────────────────────────────
-  // Filtre simultané sur le statut ET la recherche textuelle (client + service)
-  const filtered = mockPrestations.filter((p) => {
-    const matchStatus = filterStatus === "TOUS" || p.status === filterStatus;
-    const q = search.toLowerCase();
-    const matchSearch =
-      !q ||
-      p.client.name.toLowerCase().includes(q) ||
-      p.service.title.toLowerCase().includes(q);
-    return matchStatus && matchSearch;
-  });
+  // ── Chargement API ────────────────────────────────────────────────────────
+  const load = useCallback(() => {
+    setLoadingList(true);
+    const params = new URLSearchParams({ limit: "50" });
+    if (filterStatus !== "TOUS") params.set("status", filterStatus);
+    if (search) params.set("search", search);
+    fetch(`/api/admin/prestations?${params}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setPrestations(data.prestations ?? []);
+        setTotal(data.total ?? 0);
+      })
+      .finally(() => setLoadingList(false));
+  }, [filterStatus, search]);
 
-  // ── Ouverture du modal d'édition ─────────────────────────────────────────
-  // Pré-remplit les champs éditables avec les valeurs actuelles de la prestation
+  useEffect(() => {
+    const t = setTimeout(load, 300);
+    return () => clearTimeout(t);
+  }, [load]);
+
+  const filtered = prestations;
+
   function openEdit(p: Prestation) {
     setEditing(p);
     setEditStatus(p.status);
@@ -174,27 +119,32 @@ export default function AdminPrestationsPage() {
     setEditAssigned(p.assignedTo ?? "");
   }
 
-  /**
-   * saveEdit — Enregistre les modifications d'une prestation.
-   *
-   * TODO: remplacer le setTimeout par un vrai appel :
-   *   await fetch("/api/admin/prestations", {
-   *     method: "PATCH",
-   *     headers: { "Content-Type": "application/json" },
-   *     body: JSON.stringify({
-   *       prestationId: editing.id,
-   *       status: editStatus,
-   *       globalProgress: editProgress,
-   *       assignedToId: editAssigned,  // doit être un userId, pas un nom
-   *     }),
-   *   });
-   */
   async function saveEdit() {
     if (!editing) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600)); // simulation réseau
-    setSaving(false);
-    setEditing(null);
+    try {
+      const res = await fetch("/api/admin/prestations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prestationId: editing.id,
+          status: editStatus,
+          globalProgress: editProgress,
+        }),
+      });
+      if (res.ok) {
+        setPrestations((prev) =>
+          prev.map((p) =>
+            p.id === editing.id
+              ? { ...p, status: editStatus, globalProgress: editProgress }
+              : p
+          )
+        );
+        setEditing(null);
+      }
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -206,7 +156,7 @@ export default function AdminPrestationsPage() {
           Gestion des Prestations
         </h1>
         <p className="text-gray-500 text-sm">
-          {mockPrestations.length} prestation(s) au total
+          {total} prestation(s) au total
         </p>
       </motion.div>
 
@@ -239,7 +189,12 @@ export default function AdminPrestationsPage() {
 
       {/* ── Tableau des prestations ───────────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-        <div className="overflow-x-auto">
+        {loadingList && (
+          <div className="flex justify-center py-12">
+            <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {!loadingList && <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
@@ -308,7 +263,9 @@ export default function AdminPrestationsPage() {
                   </td>
 
                   {/* Date de création */}
-                  <td className="px-6 py-4 text-sm text-gray-400">{p.createdAt}</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">
+                    {new Date(p.createdAt).toLocaleDateString("fr-FR")}
+                  </td>
 
                   {/* Bouton édition */}
                   <td className="px-6 py-4">
@@ -324,7 +281,7 @@ export default function AdminPrestationsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </div>}
       </div>
 
       {/* ── Modal d'édition ──────────────────────────────────────────────── */}

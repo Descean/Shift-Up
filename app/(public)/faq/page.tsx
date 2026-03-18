@@ -1,79 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Metadata } from "next";
 
-const categories = ["Tous", "Services", "Paiement", "Affiliation", "Compte", "Général"];
+type FAQ = { id: number; category: string; question: string; answer: string };
 
-const faqs = [
-  {
-    category: "Services",
-    question: "Quels types d'entreprises accompagnez-vous ?",
-    answer:
-      "SHIFT UP accompagne tout type de structure : TPE, PME, startups, grandes entreprises, ONG, et entrepreneurs individuels. Nos solutions sont adaptables à toutes les tailles et tous les secteurs d'activité.",
-  },
-  {
-    category: "Services",
-    question: "Comment se déroule une première consultation ?",
-    answer:
-      "Votre premier RDV de diagnostic est offert. Lors de cette session (60-90 min), nous écoutons vos besoins, analysons votre situation et vous proposons des pistes de solutions. Aucun engagement requis.",
-  },
-  {
-    category: "Paiement",
-    question: "Quels sont les modes de paiement acceptés ?",
-    answer:
-      "Nous acceptons : MTN Mobile Money, Moov Money (via FedaPay), ainsi que les cartes bancaires Visa/Mastercard (via Stripe) pour les paiements internationaux.",
-  },
-  {
-    category: "Paiement",
-    question: "Quel est le système d'acompte ?",
-    answer:
-      "Un acompte de 40% est requis à la souscription pour démarrer la mission. Le solde de 60% est réglé à la livraison finale du service. Une facture officielle (avec IFU et RCCM) est émise automatiquement.",
-  },
-  {
-    category: "Paiement",
-    question: "Puis-je obtenir une facture officielle ?",
-    answer:
-      "Oui. Chaque transaction génère automatiquement une facture PDF officielle incluant notre IFU (0202113434116) et RCCM (RB/ABC/25 A 124734), conforme aux exigences fiscales béninoises.",
-  },
-  {
-    category: "Affiliation",
-    question: "Comment fonctionne le programme d'affiliation ?",
-    answer:
-      "Chaque client inscrit reçoit un code d'affiliation unique. Lorsqu'un nouveau client s'inscrit avec votre code, vous gagnez une commission sur ses achats. Les gains sont versés annuellement le 25 décembre.",
-  },
-  {
-    category: "Affiliation",
-    question: "Quels sont les avantages du système d'étoiles ?",
-    answer:
-      "Il y a 5 niveaux (Bronze → Argent → Or → Platine → Diamant) avec des avantages cumulatifs : réductions sur les services, accès prioritaire, contenus exclusifs et bonus de fidélité.",
-  },
-  {
-    category: "Compte",
-    question: "Quels profils d'utilisateurs existent sur la plateforme ?",
-    answer:
-      "Quatre profils : Client (accès aux prestations et suivi), Apporteur d'affaires (IFU requis, commissions), Étudiant (ressources éducatives, micro-tâches rémunérées), et Admin (équipe SHIFT UP).",
-  },
-  {
-    category: "Compte",
-    question: "Mon dashboard s'adapte-t-il à mon type de prestation ?",
-    answer:
-      "Oui ! Grâce à l'intelligence artificielle (API Claude), votre espace client génère dynamiquement les phases et étapes de votre prestation en cours, avec un graphique de progression en temps réel.",
-  },
-  {
-    category: "Général",
-    question: "SHIFT UP opère-t-il en dehors du Bénin ?",
-    answer:
-      "Notre siège est à Abomey-Calavi, mais nous accompagnons des clients dans toute l'Afrique de l'Ouest. Les prestations de conseil et numériques peuvent être réalisées à distance.",
-  },
-  {
-    category: "Général",
-    question: "Les données clients sont-elles sécurisées ?",
-    answer:
-      "Absolument. Nous utilisons le chiffrement AES-256, des connexions HTTPS, des tokens JWT sécurisés, et des sauvegardes quotidiennes. Nous sommes conformes au RGPD et aux recommandations CNIL.",
-  },
-];
+const ALL_CATEGORIES = ["Tous", "Services", "Paiement", "Affiliation", "Compte", "Général"];
 
 function FAQItem({ question, answer, isOpen, onToggle }: {
   question: string;
@@ -116,8 +48,21 @@ function FAQItem({ question, answer, isOpen, onToggle }: {
 }
 
 export default function FAQPage() {
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("Tous");
   const [openItem, setOpenItem] = useState<number | null>(0);
+
+  useEffect(() => {
+    fetch("/api/faq")
+      .then((r) => r.json())
+      .then((data) => setFaqs(data.faqs ?? []))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const categories = ALL_CATEGORIES.filter(
+    (cat) => cat === "Tous" || faqs.some((f) => f.category === cat)
+  );
 
   const filtered = activeCategory === "Tous"
     ? faqs
@@ -165,7 +110,15 @@ export default function FAQPage() {
           </div>
 
           {/* FAQ list */}
+          {loading ? (
+            <div className="flex justify-center py-16">
+              <span className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
           <div className="space-y-3">
+            {filtered.length === 0 && (
+              <p className="text-center text-gray-400 py-10">Aucune question dans cette catégorie.</p>
+            )}
             {filtered.map((faq, i) => (
               <motion.div
                 key={i}
@@ -182,6 +135,7 @@ export default function FAQPage() {
               </motion.div>
             ))}
           </div>
+          )}
 
           {/* Still have questions */}
           <div className="mt-12 bg-primary rounded-3xl p-8 text-center">

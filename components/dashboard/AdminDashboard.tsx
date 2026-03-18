@@ -1,25 +1,81 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { StatCard } from "@/components/ui/Card";
 import { PrestationStatusBadge } from "@/components/ui/Badge";
 import Link from "next/link";
 
-const recentPrestations = [
-  { id: "1", client: "Kossi Adigbli", service: "Application Web", status: "EN_COURS", amount: "1 500 000", date: "12/11/2025" },
-  { id: "2", client: "Amina Soumaïla", service: "Business Plan", status: "TERMINEE", amount: "350 000", date: "05/11/2025" },
-  { id: "3", client: "Pierre Dossa", service: "Formation équipe", status: "LIVRAISON", amount: "450 000", date: "01/11/2025" },
-  { id: "4", client: "Marie-Claire Adjovi", service: "Stratégie digitale", status: "EN_ATTENTE", amount: "200 000", date: "28/10/2025" },
-];
-
-const kpis = [
-  { label: "CA ce mois", value: "4.5M FCFA", icon: <i className="fas fa-chart-line" />, color: "secondary" as const, trend: "up" as const, trendValue: "12% vs mois dernier" },
-  { label: "Prestations actives", value: "8", icon: <i className="fas fa-briefcase" />, color: "accent" as const },
-  { label: "Nouveaux clients", value: "14", icon: <i className="fas fa-users" />, color: "accent" as const, trend: "up" as const, trendValue: "5 cette semaine" },
-  { label: "Taux satisfaction", value: "4.9/5", icon: <i className="fas fa-star" />, color: "secondary" as const },
-];
+type Stats = {
+  users: { total: number; newThisMonth: number };
+  prestations: { total: number; active: number; completed: number };
+  revenue: { total: number; thisMonth: number };
+  pendingMessages: number;
+  newsletterCount: number;
+  recentPrestations: {
+    id: string;
+    status: string;
+    amount: number;
+    createdAt: string;
+    client: { name: string | null; email: string | null };
+    service: { title: string; domain: string };
+  }[];
+};
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/stats")
+      .then((r) => r.json())
+      .then((data) => { setStats(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const kpis = stats
+    ? [
+        {
+          label: "CA ce mois",
+          value: `${(stats.revenue.thisMonth / 1000).toFixed(0)}k FCFA`,
+          icon: <i className="fas fa-chart-line" />,
+          color: "secondary" as const,
+          trend: "up" as const,
+          trendValue: `${stats.revenue.total.toLocaleString()} F total`,
+        },
+        {
+          label: "Prestations actives",
+          value: String(stats.prestations.active),
+          icon: <i className="fas fa-briefcase" />,
+          color: "accent" as const,
+          trendValue: `${stats.prestations.completed} terminées`,
+        },
+        {
+          label: "Utilisateurs",
+          value: String(stats.users.total),
+          icon: <i className="fas fa-users" />,
+          color: "accent" as const,
+          trend: "up" as const,
+          trendValue: `+${stats.users.newThisMonth} ce mois`,
+        },
+        {
+          label: "Messages non lus",
+          value: String(stats.pendingMessages),
+          icon: <i className="fas fa-envelope" />,
+          color: "primary" as const,
+          trendValue: `${stats.newsletterCount} abonnés newsletter`,
+        },
+      ]
+    : [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <span className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-7xl">
       {/* Header */}
@@ -48,19 +104,22 @@ export default function AdminDashboard() {
             </Link>
           </div>
           <div className="space-y-3">
-            {recentPrestations.map((p) => (
+            {stats?.recentPrestations.length === 0 && (
+              <p className="text-center text-gray-400 text-sm py-8">Aucune prestation pour l'instant.</p>
+            )}
+            {stats?.recentPrestations.map((p) => (
               <div key={p.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
                 <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {p.client.charAt(0)}
+                  {(p.client.name ?? "?").charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-primary truncate">{p.client}</p>
-                  <p className="text-gray-400 text-xs truncate">{p.service}</p>
+                  <p className="font-medium text-sm text-primary truncate">{p.client.name ?? p.client.email}</p>
+                  <p className="text-gray-400 text-xs truncate">{p.service.title}</p>
                 </div>
                 <PrestationStatusBadge status={p.status} />
                 <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-bold text-primary">{p.amount} F</p>
-                  <p className="text-gray-400 text-xs">{p.date}</p>
+                  <p className="text-sm font-bold text-primary">{p.amount.toLocaleString()} F</p>
+                  <p className="text-gray-400 text-xs">{new Date(p.createdAt).toLocaleDateString("fr-FR")}</p>
                 </div>
               </div>
             ))}

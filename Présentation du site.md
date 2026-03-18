@@ -49,7 +49,8 @@ Cas d'utilisations :
  	- Mêmes usages qu'un
 
  	- Pourvoir s'identifier en tant que Apporteur d'affaires et bénéficier d'un tableau de bord  présentant  les services et produits disponibles ; les 	campagnes en cours, l'évolution de leurs gains sur chaque affaire apporter ; autres que tu peux proposer.
-- Bénéficier du classement périodique des Apporteurs d'Affaires. La Périodicité est de 3 mois. La durée de l'évaluation est de 3 ans. Je te laisse 	définis les niveaux et les bénéfices. Trouve le moyens d'encourager tous le monde à devenir apporteur d'affaires.
+
+* Bénéficier du classement périodique des Apporteurs d'Affaires. La Périodicité est de 3 mois. La durée de l'évaluation est de 3 ans. Je te laisse 	définis les niveaux et les bénéfices. Trouve le moyens d'encourager tous le monde à devenir apporteur d'affaires.
 
 
 
@@ -65,12 +66,13 @@ Cas d'utilisations :
 
 *  L'équipe développeur : Tout l'équipe qui travaillera sur les diférents mises à jour, la  gestion des pages du site
 
- 	- Pouvoir se connecter à un tableau de bordprésentant, l'évolution des flux de visite de site et de connexion ; les indicateurs de performance ; legraphe de vente, les client et apporteur d'afaires plus méritants, les activitée sen course d'exécution par les étudiants ; la gestion des impôts liés aux activités du site ; Interface d'analyse de tout les données marketings, comptables et financières. la gestion des impôts liés aux activités du site ; Interface d'analyse de tout les données marketings, comptables et financières ne seront accessible qu'au Directeur de l'entreprise sous clé unique de connexion.
+ 	- Pouvoir se connecter à un tableau de bord présentant, l'évolution des flux de visite de site et de connexion ; les indicateurs de performance ; legraphe de vente, les client et apporteur d'afaires plus méritants, les activitée sen course d'exécution par les étudiants ; la gestion des impôts liés aux activités du site ; Interface d'analyse de tout les données marketings, comptables et financières. la gestion des impôts liés aux activités du site ; Interface d'analyse de tout les données marketings, comptables et financières ne seront accessible qu'au Directeur de l'entreprise sous clé unique de connexion.
 
  	- Pouvoir inscrire des utilisateurs
 
  	- Pouvoir Gérer les utilisateurs
-- Pouvoir lancer des campages publicitaires
+
+* Pouvoir lancer des campages publicitaires
 
  	- Administrer tout le site
 

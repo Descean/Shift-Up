@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { StatCard } from "@/components/ui/Card";
 
 const levels = [
@@ -11,20 +13,31 @@ const levels = [
   { name: "Diamant", icon: "fas fa-gem", color: "text-purple-500", min: 60, max: Infinity },
 ];
 
-const recentReferrals = [
-  { name: "Kossi A.", date: "12/11/2025", amount: "350 000", commission: "35 000", paid: true },
-  { name: "Amina S.", date: "05/11/2025", amount: "1 500 000", commission: "150 000", paid: false },
-  { name: "Pierre D.", date: "28/10/2025", amount: "450 000", commission: "45 000", paid: false },
-];
+type Profile = {
+  totalEarnings: number;
+  pendingEarnings: number;
+  totalReferrals: number;
+  affiliationCode: string;
+};
 
 interface Props {
   user?: { name?: string | null };
 }
 
 export default function ApporteurDashboard({ user }: Props) {
-  const currentLevel = levels[1]; // Argent (exemple)
-  const totalReferrals = 8;
-  const nextLevelMin = currentLevel.max;
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    fetch("/api/apporteur/profile")
+      .then((r) => r.json())
+      .then((data) => setProfile(data.profile))
+      .catch(() => {});
+  }, []);
+
+  const totalReferrals = profile?.totalReferrals ?? 0;
+  const currentLevel = levels.findLast((l) => totalReferrals >= l.min) ?? levels[0];
+  const nextLevel = levels[levels.indexOf(currentLevel) + 1];
+  const nextLevelMin = nextLevel?.min ?? currentLevel.max;
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -37,38 +50,50 @@ export default function ApporteurDashboard({ user }: Props) {
 
       {/* Stats */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard label="Gains totaux" value="230 000 F" icon={<i className="fas fa-coins" />} color="secondary" trend="up" trendValue="2 ce mois" />
-        <StatCard label="Affiliés actifs" value="8" icon={<i className="fas fa-users" />} color="accent" />
-        <StatCard label="Gains en attente" value="195 000 F" icon={<i className="fas fa-clock" />} color="primary" />
-        <StatCard label="Niveau actuel" value="Argent" icon={<i className="fas fa-medal text-gray-400" />} color="accent" />
+        <StatCard label="Gains totaux" value={`${(profile?.totalEarnings ?? 0).toLocaleString()} F`} icon={<i className="fas fa-coins" />} color="secondary" trend="up" />
+        <StatCard label="Affiliés" value={String(totalReferrals)} icon={<i className="fas fa-users" />} color="accent" />
+        <StatCard label="Gains en attente" value={`${(profile?.pendingEarnings ?? 0).toLocaleString()} F`} icon={<i className="fas fa-clock" />} color="primary" />
+        <StatCard label="Niveau actuel" value={currentLevel.name} icon={<i className={`${currentLevel.icon} ${currentLevel.color}`} />} color="accent" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Referrals table */}
+        {/* Accès rapides */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6">
-          <h2 className="font-syne font-bold text-lg text-primary mb-5">Mes affaires récentes</h2>
+          <h2 className="font-syne font-bold text-lg text-primary mb-5">Mes commissions & actions</h2>
           <div className="space-y-3">
-            {recentReferrals.map((r, i) => (
-              <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {r.name.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-primary">{r.name}</p>
-                  <p className="text-gray-400 text-xs">{r.date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Affaire : {r.amount} F</p>
-                  <p className="text-sm font-bold text-secondary">Commission : +{r.commission} F</p>
-                </div>
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${r.paid ? "bg-green-50 text-green-600" : "bg-amber-50 text-amber-600"}`}>
-                  {r.paid ? "Versé" : "En attente"}
-                </span>
+            <Link href="/dashboard/apporteur/commissions" className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
+              <div className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                <i className="fas fa-coins text-sm" />
               </div>
-            ))}
+              <div className="flex-1">
+                <p className="font-medium text-sm text-primary">Voir mes commissions</p>
+                <p className="text-gray-400 text-xs">Détail de toutes vos commissions</p>
+              </div>
+              <span className="text-accent font-bold text-sm">{(profile?.pendingEarnings ?? 0).toLocaleString()} F</span>
+            </Link>
+            <Link href="/dashboard/apporteur/commissions/reclamer" className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i className="fas fa-mobile-screen-button text-green-600 text-sm" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm text-primary">Réclamer mes commissions</p>
+                <p className="text-gray-400 text-xs">Versement Mobile Money (min. 30 000 F)</p>
+              </div>
+              <i className="fas fa-arrow-right text-gray-300" />
+            </Link>
+            <Link href="/dashboard/apporteur/campagnes" className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i className="fas fa-bullhorn text-purple-600 text-sm" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm text-primary">Mes campagnes</p>
+                <p className="text-gray-400 text-xs">Gérer vos liens de parrainage</p>
+              </div>
+              <i className="fas fa-arrow-right text-gray-300" />
+            </Link>
           </div>
           <p className="text-xs text-gray-400 mt-4 text-center">
-            Les gains sont versés automatiquement le 25 décembre de chaque année.
+            Les versements sont traités sous 48h ouvrées après validation.
           </p>
         </div>
 
@@ -100,19 +125,21 @@ export default function ApporteurDashboard({ user }: Props) {
           </div>
 
           <div className="bg-white rounded-2xl shadow-card p-5">
-            <h3 className="font-syne font-bold text-primary mb-3">Progression vers Or</h3>
+            <h3 className="font-syne font-bold text-primary mb-3">Progression vers {nextLevel?.name ?? "Diamant"}</h3>
             <div className="flex justify-between mb-2">
-              <span className="text-sm text-gray-500">Affiliés actifs</span>
+              <span className="text-sm text-gray-500">Affiliés</span>
               <span className="text-sm font-bold text-primary">{totalReferrals} / {nextLevelMin}</span>
             </div>
             <div className="progress-bar">
               <div
                 className="progress-fill"
-                style={{ width: `${(totalReferrals / nextLevelMin) * 100}%` }}
+                style={{ width: `${nextLevelMin > 0 ? Math.min((totalReferrals / nextLevelMin) * 100, 100) : 100}%` }}
               />
             </div>
             <p className="text-xs text-gray-400 mt-2">
-              Encore {nextLevelMin - totalReferrals} affiliés pour atteindre le niveau Or
+              {nextLevel
+                ? `Encore ${Math.max(nextLevelMin - totalReferrals, 0)} affiliés pour le niveau ${nextLevel.name}`
+                : "Niveau maximum atteint !"}
             </p>
           </div>
         </div>
