@@ -153,27 +153,48 @@ model Service {
 // ============================================================
 
 enum PrestationStatus {
-  EN_ATTENTE
-  EN_COURS
-  LIVRAISON
-  REVISION
-  TERMINEE
-  ANNULEE
+  EN_ATTENTE          // Demande soumise, en attente de traitement admin
+  DEVIS_ENVOYE        // Admin a envoyé devis + plan — client doit valider
+  EN_ATTENTE_PAIEMENT // Client a accepté le devis, doit payer l'acompte
+  EN_COURS            // Paiement confirmé, service en exécution
+  LIVRAISON           // Livrables disponibles pour le client
+  REVISION            // Client demande des révisions
+  TERMINEE            // Projet livré et accepté
+  ANNULEE             // Annulé
 }
 
 model Prestation {
   id               String           @id @default(cuid())
   clientId         String
   client           User             @relation("ClientPrestations", fields: [clientId], references: [id])
-  serviceId        String
-  service          Service          @relation(fields: [serviceId], references: [id])
+  serviceId        String?          // Null si service personnalisé / "Autre"
+  service          Service?         @relation(fields: [serviceId], references: [id])
   assignedToId     String?
   assignedTo       User?            @relation("AssignedPrestations", fields: [assignedToId], references: [id])
+
+  // ── Demande client ──────────────────────────────────────────
+  sector           String?          // Domaine choisi
+  customService    String?          // Intitulé libre si service "Autre"
+  brief            String?          // Description du besoin
+  budget           String?          // Fourchette budget
+  deadline         String?          // Délai souhaité
+  company          String?          // Entreprise / organisation
+  phone            String?          // Téléphone pour ce projet
+  attachments      String[]         @default([])  // URLs fichiers Supabase Storage
+  customFields     Json?            // Données spécifiques au type de service
+
+  // ── Traitement admin ────────────────────────────────────────
   status           PrestationStatus @default(EN_ATTENTE)
-  phases           Json             @default("[]")
+  quote            Json?            // { items:[{label,amount}], deposit, total, validity, terms }
+  plan             Json?            // { phases:[{title,description,duration,order}] }
+  adminNote        String?          // Note interne admin
+
+  // ── Suivi (legacy Json + nouveaux modèles) ──────────────────
+  phases           Json             @default("[]")  // Gardé pour compatibilité
   currentPhase     Int              @default(0)
   globalProgress   Int              @default(0)
-  amount           Float
+
+  amount           Float            @default(0)
   amountPaid       Float            @default(0)
   notes            String?
   rating           Int?
@@ -184,7 +205,37 @@ model Prestation {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  payments Payment[]
+  payments         Payment[]
+  prestationPhases PrestationPhase[]
+  livrables        Livrable[]
+}
+
+model PrestationPhase {
+  id           String     @id @default(cuid())
+  prestationId String
+  prestation   Prestation @relation(fields: [prestationId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  order        Int        @default(0)
+  status       String     @default("PENDING") // PENDING | IN_PROGRESS | DONE
+  progress     Int        @default(0)
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Livrable {
+  id           String     @id @default(cuid())
+  prestationId String
+  prestation   Prestation @relation(fields: [prestationId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  type         String     // PDF | LINK | VIDEO | CODE | DESIGN | ARCHIVE
+  url          String?
+  isAvailable  Boolean    @default(false)
+  viewedAt     DateTime?
+  createdAt    DateTime   @default(now())
 }
 
 // ============================================================

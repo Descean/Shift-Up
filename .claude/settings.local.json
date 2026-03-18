@@ -36,7 +36,12 @@
       "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(auth\\)/\")",
       "Bash(find \"/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/boutique\" -type f)",
       "Bash(ls \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)/boutique/\")",
-      "Bash(find \"/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)\" -name \"page.tsx\")"
+      "Bash(find \"/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/\\(public\\)\" -name \"page.tsx\")",
+      "Bash(npx tsc:*)",
+      "Bash(ls \"c:\\\\Users\\\\DELL\\\\Downloads\\\\SHIFT_UP\\\\Site SHIFT UP\\\\app\\\\dashboard\\\\client\"\" && ls \"c:UsersDELLDownloadsSHIFT_UPSite SHIFT UPappdashboardadmin\"\")",
+      "Bash(mkdir -p \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/api/admin/prestations/[id]/devis\")",
+      "Bash(mkdir -p \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/api/admin/prestations/[id]/phase\")",
+      "Bash(mkdir -p \"c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/api/admin/prestations/[id]/livrable\")"
     ]
   }
 }

@@ -15,13 +15,14 @@ import { z } from "zod";
 
 const patchSchema = z.object({
   prestationId:    z.string(),
-  status:          z.enum(["EN_ATTENTE","EN_COURS","LIVRAISON","REVISION","TERMINEE","ANNULEE"]).optional(),
+  status:          z.enum(["EN_ATTENTE","DEVIS_ENVOYE","EN_ATTENTE_PAIEMENT","EN_COURS","LIVRAISON","REVISION","TERMINEE","ANNULEE"]).optional(),
   assignedToId:    z.string().optional(),
   globalProgress:  z.number().min(0).max(100).optional(),
   currentPhase:    z.number().min(0).optional(),
   phases:          z.array(z.any()).optional(),
   estimatedEndDate: z.string().optional(),
   endDate:         z.string().optional(),
+  adminNote:       z.string().optional(),
 });
 
 async function requireAdmin() {
@@ -60,10 +61,12 @@ export async function GET(req: NextRequest) {
         take:    limit,
         orderBy: { createdAt: "desc" },
         include: {
-          client:     { select: { id: true, name: true, email: true } },
-          service:    { select: { id: true, title: true, domain: true } },
-          assignedTo: { select: { id: true, name: true } },
-          payments:   { select: { status: true, amount: true } },
+          client:          { select: { id: true, name: true, email: true } },
+          service:         { select: { id: true, title: true, domain: true } },
+          assignedTo:      { select: { id: true, name: true } },
+          payments:        { select: { status: true, amount: true } },
+          prestationPhases: { orderBy: { order: "asc" } },
+          livrables:       { orderBy: { createdAt: "asc" } },
         },
       }),
       prisma.prestation.count({ where }),

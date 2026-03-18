@@ -1,49 +1,37 @@
 /**
- * app/api/prestations/route.ts — CRUD des prestations (côté client)
+ * app/api/prestations/route.ts
  *
- * GET  /api/prestations        → Liste les prestations du client connecté
- * POST /api/prestations        → Crée une nouvelle demande de prestation
- *
- * Sécurité : session NextAuth obligatoire pour les deux méthodes.
+ * GET  /api/prestations  → Liste les prestations du client connecté
+ * POST /api/prestations  → Soumet une nouvelle demande de prestation
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { z } from "zod";
+import { sendDemandeConfirmation, sendNewDemandeAdmin } from "@/lib/email";
 
-// Schéma de création d'une prestation
-const createSchema = z.object({
-  serviceId: z.string(),
-  amount: z.number().positive(),
-  notes: z.string().optional(),
-  estimatedEndDate: z.string().optional(),
-});
-
-// ── GET — Récupère les prestations du client connecté ────────────────────────
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
-  }
+  if (!session?.user?.id) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status"); // Filtre optionnel par statut
+  const status = searchParams.get("status");
 
   try {
     const prestations = await prisma.prestation.findMany({
       where: {
         clientId: session.user.id,
-        ...(status ? { status: status as any } : {}),
+        ...(status ? { status: status as never } : {}),
       },
       include: {
-        service: true,   // Détails du service
-        payments: true,  // Historique des paiements pour calculer amountPaid
+        service: true,
+        payments: true,
+        prestationPhases: { orderBy: { order: "asc" } },
+        livrables: { orderBy: { createdAt: "asc" } },
       },
       orderBy: { createdAt: "desc" },
     });
-
     return NextResponse.json({ prestations });
   } catch (error) {
     console.error("GET /api/prestations error:", error);
@@ -51,35 +39,41 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ── POST — Crée une nouvelle demande de prestation ───────────────────────────
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
-  }
+  if (!session?.user?.id) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
 
   try {
     const body = await req.json();
-    const data = createSchema.parse(body);
+    const {
+      serviceId, sector, customService, brief, budget, deadline,
+      company, phone, attachments, customFields,
+    } = body;
 
-    // Vérifie que le service existe et est actif
-    const service = await prisma.service.findUnique({
-      where: { id: data.serviceId, isActive: true },
-    });
-    if (!service) {
-      return NextResponse.json({ error: "Service introuvable ou inactif." }, { status: 404 });
+    if (!brief?.trim()) return NextResponse.json({ error: "La description du besoin est requise." }, { status: 400 });
+    if (!sector) return NextResponse.json({ error: "Le secteur d'activité est requis." }, { status: 400 });
+
+    // Vérifie le service si fourni
+    let service = null;
+    if (serviceId) {
+      service = await prisma.service.findUnique({ where: { id: serviceId, isActive: true } });
     }
 
-    // Crée la prestation avec le statut initial EN_ATTENTE
     const prestation = await prisma.prestation.create({
       data: {
         clientId: session.user.id,
-        serviceId: data.serviceId,
-        amount: data.amount,
-        notes: data.notes,
+        serviceId: serviceId || null,
+        sector,
+        customService: customService || null,
+        brief,
+        budget: budget || null,
+        deadline: deadline || null,
+        company: company || null,
+        phone: phone || null,
+        attachments: attachments ?? [],
+        customFields: customFields ?? undefined,
         status: "EN_ATTENTE",
-        estimatedEndDate: data.estimatedEndDate ? new Date(data.estimatedEndDate) : undefined,
-        phases: [], // Phases définies par l'admin lors de l'assignation
+        amount: 0, // Défini par le devis admin
       },
       include: { service: true },
     });
@@ -91,15 +85,20 @@ export async function POST(req: NextRequest) {
         action: "PRESTATION_CREATED",
         entity: "Prestation",
         entityId: prestation.id,
-        details: { serviceId: data.serviceId, amount: data.amount },
+        details: { sector, serviceId, brief: brief.slice(0, 100) },
       },
     });
 
+    // Notifications email (sans bloquer la réponse)
+    const serviceName = service?.title ?? customService ?? sector;
+    const clientName = session.user.name ?? session.user.email ?? "Client";
+    Promise.all([
+      sendDemandeConfirmation({ to: session.user.email!, name: clientName, serviceName, prestationId: prestation.id }),
+      sendNewDemandeAdmin({ clientName, clientEmail: session.user.email!, serviceName, brief, prestationId: prestation.id }),
+    ]).catch((e) => console.error("Email error:", e));
+
     return NextResponse.json({ prestation }, { status: 201 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Données invalides." }, { status: 422 });
-    }
     console.error("POST /api/prestations error:", error);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }

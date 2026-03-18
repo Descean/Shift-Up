@@ -12,6 +12,7 @@ type NavItem = { href: string; icon: string; label: string; badge?: string };
 const navByRole: Record<string, NavItem[]> = {
   CLIENT: [
     { href: "/dashboard/client", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
+    { href: "/dashboard/client/nouvelle-demande", icon: "fas fa-plus-circle", label: "Nouvelle demande" },
     { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Mes prestations" },
     { href: "/dashboard/client/suivi", icon: "fas fa-chart-line", label: "Suivi en temps réel" },
     { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messagerie", badge: "3" },

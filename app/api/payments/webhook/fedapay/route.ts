@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getPhaseTemplates } from "@/lib/service-templates";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,16 +31,37 @@ export async function POST(req: NextRequest) {
     });
 
     if (newStatus === "COMPLETED") {
-      // Update prestation amountPaid
+      const newAmountPaid = payment.prestation.amountPaid + payment.amount;
+      const isFullyPaid = newAmountPaid >= payment.prestation.amount;
+
+      // Passe toujours en EN_COURS dès qu'un paiement est confirmé (acompte suffisant)
       await prisma.prestation.update({
         where: { id: payment.prestationId },
         data: {
           amountPaid: { increment: payment.amount },
-          status: payment.prestation.amountPaid + payment.amount >= payment.prestation.amount
-            ? "EN_COURS"
-            : "EN_ATTENTE",
+          status: "EN_COURS",
+          startDate: new Date(),
         },
       });
+
+      // Générer automatiquement les phases depuis le template du secteur
+      const existingPhases = await prisma.prestationPhase.count({ where: { prestationId: payment.prestationId } });
+      if (existingPhases === 0) {
+        const prestation = await prisma.prestation.findUnique({ where: { id: payment.prestationId } });
+        const templates = getPhaseTemplates(prestation?.sector ?? null);
+        await prisma.prestationPhase.createMany({
+          data: templates.map((t) => ({
+            prestationId: payment.prestationId,
+            title: t.title,
+            description: t.description,
+            order: t.order,
+            status: t.order === 0 ? "IN_PROGRESS" : "PENDING",
+            progress: 0,
+          })),
+        });
+      }
+
+      void isFullyPaid;
 
       // Log audit
       await prisma.auditLog.create({

@@ -1,108 +1,1173 @@
-/**
- * app/dashboard/admin/prestations/page.tsx — Gestion des prestations (admin)
- *
- * Fonctionnalités :
- *  - Tableau paginé de toutes les prestations (toutes priorités, tous clients)
- *  - Filtrage par statut (EN_ATTENTE, EN_COURS, LIVRAISON, REVISION, TERMINEE, ANNULEE)
- *  - Recherche par nom client ou titre service
- *  - Modal de mise à jour : statut, progression globale, assignation membre équipe
- *  - Consomme GET /api/admin/prestations et PATCH /api/admin/prestations
- *
- * Données : actuellement mockées — remplacer fetch() par appels réels (TODO commentés).
- */
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-/** Statuts possibles d'une prestation (miroir du schéma Prisma) */
 type PrestationStatus =
   | "EN_ATTENTE"
+  | "DEVIS_ENVOYE"
+  | "EN_ATTENTE_PAIEMENT"
   | "EN_COURS"
   | "LIVRAISON"
   | "REVISION"
   | "TERMINEE"
   | "ANNULEE";
 
-interface Prestation {
+interface PrestationPhase {
   id: string;
-  client: { name: string; email: string };
-  service: { title: string; domain: string };
-  status: PrestationStatus;
-  globalProgress: number;   // 0–100
-  amount: number;           // montant total FCFA
-  amountPaid: number;       // montant déjà payé
-  assignedTo: string | null; // nom du membre assigné
-  createdAt: string;
-  estimatedEndDate: string | null;
+  title: string;
+  description: string | null;
+  status: string;
+  progress: number;
+  order: number;
 }
 
-// Membres de l'équipe disponibles pour assignation
-const teamMembers = ["Jean-Paul R.", "Marie C.", "Eudes K.", "Carole M."];
+interface Livrable {
+  id: string;
+  title: string;
+  type: string;
+  url: string | null;
+  isAvailable: boolean;
+}
 
-// ─── Styles de statuts ────────────────────────────────────────────────────────
+interface QuoteItem {
+  label: string;
+  amount: number;
+}
 
-/** Classes CSS Tailwind par statut pour les badges colorés */
-const statusStyle: Record<PrestationStatus, string> = {
-  EN_ATTENTE: "bg-gray-100 text-gray-600",
-  EN_COURS:   "bg-blue-50 text-blue-700",
-  LIVRAISON:  "bg-purple-50 text-purple-700",
-  REVISION:   "bg-amber-50 text-amber-700",
-  TERMINEE:   "bg-green-50 text-green-700",
-  ANNULEE:    "bg-red-50 text-red-500",
-};
+interface Quote {
+  items: QuoteItem[];
+  deposit: number;
+  total: number;
+  validity?: string;
+  terms?: string;
+}
 
-/** Labels affichables par statut (version lisible du code enum) */
+interface Prestation {
+  id: string;
+  client: { id: string; name: string; email: string };
+  service: { title: string; domain: string } | null;
+  sector: string | null;
+  customService: string | null;
+  brief: string | null;
+  budget: string | null;
+  deadline: string | null;
+  company: string | null;
+  phone: string | null;
+  attachments: string[];
+  status: string;
+  globalProgress: number;
+  amount: number;
+  amountPaid: number;
+  quote: Quote | null;
+  plan: { phases: { title: string; description: string; duration: string }[] } | null;
+  adminNote: string | null;
+  createdAt: string;
+  estimatedEndDate: string | null;
+  prestationPhases: PrestationPhase[];
+  livrables: Livrable[];
+  payments: { status: string; amount: number }[];
+}
+
+// ─── Status config ────────────────────────────────────────────────────────────
+
 const statusLabel: Record<PrestationStatus, string> = {
   EN_ATTENTE: "En attente",
-  EN_COURS:   "En cours",
-  LIVRAISON:  "Livraison",
-  REVISION:   "Révision",
-  TERMINEE:   "Terminée",
-  ANNULEE:    "Annulée",
+  DEVIS_ENVOYE: "Devis envoyé",
+  EN_ATTENTE_PAIEMENT: "Attente paiement",
+  EN_COURS: "En cours",
+  LIVRAISON: "Livraison",
+  REVISION: "Révision",
+  TERMINEE: "Terminée",
+  ANNULEE: "Annulée",
 };
 
-/** Couleur de la barre de progression selon avancement */
-function progressColor(p: number): string {
+const statusBadge: Record<PrestationStatus, string> = {
+  EN_ATTENTE: "bg-amber-100 text-amber-700 border border-amber-200",
+  DEVIS_ENVOYE: "bg-blue-100 text-blue-700 border border-blue-200",
+  EN_ATTENTE_PAIEMENT: "bg-purple-100 text-purple-700 border border-purple-200",
+  EN_COURS: "bg-cyan-100 text-cyan-700 border border-cyan-200",
+  LIVRAISON: "bg-green-100 text-green-700 border border-green-200",
+  REVISION: "bg-orange-100 text-orange-700 border border-orange-200",
+  TERMINEE: "bg-gray-100 text-gray-600 border border-gray-200",
+  ANNULEE: "bg-red-100 text-red-600 border border-red-200",
+};
+
+const statusDot: Record<PrestationStatus, string> = {
+  EN_ATTENTE: "bg-amber-400",
+  DEVIS_ENVOYE: "bg-blue-500",
+  EN_ATTENTE_PAIEMENT: "bg-purple-500",
+  EN_COURS: "bg-cyan-500",
+  LIVRAISON: "bg-green-500",
+  REVISION: "bg-orange-500",
+  TERMINEE: "bg-gray-400",
+  ANNULEE: "bg-red-500",
+};
+
+/** Transitions autorisées par statut courant */
+const statusTransitions: Record<PrestationStatus, PrestationStatus[]> = {
+  EN_ATTENTE: ["DEVIS_ENVOYE", "ANNULEE"],
+  DEVIS_ENVOYE: ["EN_ATTENTE_PAIEMENT", "EN_ATTENTE", "ANNULEE"],
+  EN_ATTENTE_PAIEMENT: ["EN_COURS", "ANNULEE"],
+  EN_COURS: ["LIVRAISON", "REVISION", "ANNULEE"],
+  LIVRAISON: ["TERMINEE", "REVISION", "EN_COURS"],
+  REVISION: ["EN_COURS", "LIVRAISON", "ANNULEE"],
+  TERMINEE: [],
+  ANNULEE: [],
+};
+
+const livrableTypes = ["PDF", "LINK", "VIDEO", "CODE", "DESIGN", "ARCHIVE"];
+
+function progressBarColor(p: number): string {
   if (p === 100) return "bg-green-500";
-  if (p >= 60)   return "bg-blue-500";
-  if (p >= 30)   return "bg-amber-500";
+  if (p >= 60) return "bg-cyan-500";
+  if (p >= 30) return "bg-amber-400";
   return "bg-gray-300";
 }
 
-// ─── Composant principal ───────────────────────────────────────────────────────
+function serviceLabel(p: Prestation): string {
+  if (p.service) return p.service.title;
+  if (p.customService) return p.customService;
+  if (p.sector) return p.sector;
+  return "—";
+}
+
+// ─── Spinner ──────────────────────────────────────────────────────────────────
+
+function Spinner({ sm }: { sm?: boolean }) {
+  return (
+    <span
+      className={`inline-block border-2 border-accent border-t-transparent rounded-full animate-spin ${sm ? "w-4 h-4" : "w-6 h-6"}`}
+    />
+  );
+}
+
+// ─── Status Badge ─────────────────────────────────────────────────────────────
+
+function StatusBadge({ status }: { status: string }) {
+  const s = status as PrestationStatus;
+  const isPulsing = s === "DEVIS_ENVOYE";
+  return (
+    <span
+      className={`relative inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${statusBadge[s] ?? "bg-gray-100 text-gray-500"}`}
+    >
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${statusDot[s] ?? "bg-gray-400"} ${isPulsing ? "animate-pulse" : ""}`}
+      />
+      {statusLabel[s] ?? s}
+    </span>
+  );
+}
+
+// ─── Phase status label ───────────────────────────────────────────────────────
+
+function phaseStatusLabel(s: string): string {
+  if (s === "DONE") return "Terminée";
+  if (s === "IN_PROGRESS") return "En cours";
+  return "En attente";
+}
+
+// ─── Tab "Devis & Plan" ───────────────────────────────────────────────────────
+
+function TabDevis({
+  prestation,
+  onRefresh,
+}: {
+  prestation: Prestation;
+  onRefresh: () => void;
+}) {
+  const isReadOnly =
+    prestation.status !== "EN_ATTENTE" && prestation.status !== "DEVIS_ENVOYE";
+  const hasSentQuote = prestation.status === "DEVIS_ENVOYE" && prestation.quote;
+
+  const defaultItems: QuoteItem[] = prestation.quote?.items ?? [
+    { label: "", amount: 0 },
+  ];
+  const defaultPhases =
+    prestation.plan?.phases ??
+    prestation.service
+      ? []
+      : [];
+
+  const [items, setItems] = useState<QuoteItem[]>(defaultItems);
+  const [validity, setValidity] = useState(prestation.quote?.validity ?? "7 jours");
+  const [terms, setTerms] = useState(prestation.quote?.terms ?? "");
+  const [planPhases, setPlanPhases] = useState<
+    { title: string; description: string; duration: string }[]
+  >(prestation.plan?.phases ?? []);
+  const [editMode, setEditMode] = useState(!hasSentQuote);
+  const [sending, setSending] = useState(false);
+
+  const total = items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const deposit = Math.round(total * 0.4);
+
+  function addItem() {
+    setItems((prev) => [...prev, { label: "", amount: 0 }]);
+  }
+
+  function removeItem(idx: number) {
+    setItems((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateItem(idx: number, field: keyof QuoteItem, value: string | number) {
+    setItems((prev) =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
+    );
+  }
+
+  function addPlanPhase() {
+    setPlanPhases((prev) => [...prev, { title: "", description: "", duration: "" }]);
+  }
+
+  function removePlanPhase(idx: number) {
+    setPlanPhases((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function updatePlanPhase(
+    idx: number,
+    field: "title" | "description" | "duration",
+    value: string
+  ) {
+    setPlanPhases((prev) =>
+      prev.map((ph, i) => (i === idx ? { ...ph, [field]: value } : ph))
+    );
+  }
+
+  async function sendDevis() {
+    if (items.some((i) => !i.label.trim())) {
+      toast.error("Tous les postes doivent avoir un libellé.");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch(`/api/admin/prestations/${prestation.id}/devis`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quote: { items, deposit, total, validity, terms },
+          plan: { phases: planPhases },
+          amount: total,
+        }),
+      });
+      if (res.ok) {
+        toast.success("Devis envoyé avec succès !");
+        setEditMode(false);
+        onRefresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data?.error ?? "Erreur lors de l'envoi du devis.");
+      }
+    } catch {
+      toast.error("Erreur réseau.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (isReadOnly) {
+    return (
+      <div className="p-4 text-center text-gray-400 text-sm">
+        Le devis ne peut être édité que pour les statuts{" "}
+        <span className="font-semibold">EN_ATTENTE</span> et{" "}
+        <span className="font-semibold">DEVIS_ENVOYE</span>.
+      </div>
+    );
+  }
+
+  if (hasSentQuote && !editMode) {
+    const q = prestation.quote!;
+    return (
+      <div className="space-y-4 p-1">
+        <div className="flex items-center justify-between">
+          <h4 className="font-syne font-bold text-sm text-primary">Devis envoyé</h4>
+          <button
+            onClick={() => setEditMode(true)}
+            className="text-xs text-accent hover:text-secondary font-semibold flex items-center gap-1"
+          >
+            <i className="fas fa-pen" /> Modifier
+          </button>
+        </div>
+        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+          {q.items.map((item, i) => (
+            <div key={i} className="flex justify-between text-sm">
+              <span className="text-gray-700">{item.label}</span>
+              <span className="font-semibold text-primary">
+                {item.amount.toLocaleString()} F
+              </span>
+            </div>
+          ))}
+          <div className="border-t border-gray-200 pt-2 mt-2 space-y-1">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Acompte (40%)</span>
+              <span className="text-purple-600 font-semibold">
+                {q.deposit.toLocaleString()} F
+              </span>
+            </div>
+            <div className="flex justify-between text-sm font-bold">
+              <span className="text-primary">Total</span>
+              <span className="text-primary">{q.total.toLocaleString()} F</span>
+            </div>
+          </div>
+        </div>
+        {q.validity && (
+          <p className="text-xs text-gray-500">
+            Validité : <span className="font-medium text-gray-700">{q.validity}</span>
+          </p>
+        )}
+        {q.terms && (
+          <div className="bg-gray-50 rounded-xl p-3">
+            <p className="text-xs text-gray-500 whitespace-pre-wrap">{q.terms}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5 p-1">
+      {/* Lignes du devis */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-syne font-bold text-sm text-primary">Postes du devis</h4>
+          <button
+            onClick={addItem}
+            className="text-xs text-accent hover:text-secondary font-semibold flex items-center gap-1"
+          >
+            <i className="fas fa-plus" /> Ajouter
+          </button>
+        </div>
+        <div className="space-y-2">
+          {items.map((item, idx) => (
+            <div key={idx} className="flex gap-2">
+              <input
+                value={item.label}
+                onChange={(e) => updateItem(idx, "label", e.target.value)}
+                placeholder="Libellé du poste"
+                className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent"
+              />
+              <input
+                type="number"
+                value={item.amount || ""}
+                onChange={(e) => updateItem(idx, "amount", Number(e.target.value))}
+                placeholder="Montant (F)"
+                className="w-32 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent"
+              />
+              <button
+                onClick={() => removeItem(idx)}
+                className="text-red-400 hover:text-red-600 px-2"
+                disabled={items.length === 1}
+              >
+                <i className="fas fa-trash text-xs" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Récapitulatif */}
+      <div className="bg-gray-50 rounded-xl p-4 space-y-1.5">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500">Acompte (40%)</span>
+          <span className="font-semibold text-purple-600">{deposit.toLocaleString()} F</span>
+        </div>
+        <div className="flex justify-between text-sm font-bold border-t border-gray-200 pt-1.5">
+          <span className="text-primary">Total</span>
+          <span className="text-primary">{total.toLocaleString()} F</span>
+        </div>
+      </div>
+
+      {/* Validité */}
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1.5">
+          Validité du devis
+        </label>
+        <input
+          value={validity}
+          onChange={(e) => setValidity(e.target.value)}
+          placeholder="ex: 7 jours"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent"
+        />
+      </div>
+
+      {/* Conditions */}
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1.5">
+          Conditions générales / Notes
+        </label>
+        <textarea
+          value={terms}
+          onChange={(e) => setTerms(e.target.value)}
+          rows={3}
+          placeholder="Conditions, remarques, délais de paiement…"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent resize-none"
+        />
+      </div>
+
+      {/* Plan de phases */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-syne font-bold text-sm text-primary">Plan de phases</h4>
+          <button
+            onClick={addPlanPhase}
+            className="text-xs text-accent hover:text-secondary font-semibold flex items-center gap-1"
+          >
+            <i className="fas fa-plus" /> Phase
+          </button>
+        </div>
+        <div className="space-y-3">
+          {planPhases.map((ph, idx) => (
+            <div key={idx} className="border border-gray-200 rounded-xl p-3 space-y-2">
+              <div className="flex gap-2">
+                <input
+                  value={ph.title}
+                  onChange={(e) => updatePlanPhase(idx, "title", e.target.value)}
+                  placeholder="Titre de la phase"
+                  className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent"
+                />
+                <input
+                  value={ph.duration}
+                  onChange={(e) => updatePlanPhase(idx, "duration", e.target.value)}
+                  placeholder="Durée (ex: 3j)"
+                  className="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent"
+                />
+                <button
+                  onClick={() => removePlanPhase(idx)}
+                  className="text-red-400 hover:text-red-600 px-1"
+                >
+                  <i className="fas fa-trash text-xs" />
+                </button>
+              </div>
+              <textarea
+                value={ph.description}
+                onChange={(e) => updatePlanPhase(idx, "description", e.target.value)}
+                placeholder="Description de la phase…"
+                rows={2}
+                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent resize-none"
+              />
+            </div>
+          ))}
+          {planPhases.length === 0 && (
+            <p className="text-xs text-gray-400 italic text-center py-3">
+              Aucune phase définie — cliquez sur "Phase" pour en ajouter.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Bouton envoi */}
+      <button
+        onClick={sendDevis}
+        disabled={sending || total === 0}
+        className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
+      >
+        {sending ? (
+          <>
+            <Spinner sm /> Envoi en cours…
+          </>
+        ) : (
+          <>
+            <i className="fas fa-paper-plane" /> Envoyer le devis
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
+// ─── Tab "Phases" ─────────────────────────────────────────────────────────────
+
+function TabPhases({
+  prestation,
+  onRefresh,
+}: {
+  prestation: Prestation;
+  onRefresh: () => void;
+}) {
+  const [phases, setPhases] = useState<PrestationPhase[]>(prestation.prestationPhases);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [addingPhase, setAddingPhase] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+
+  async function updatePhase(
+    phase: PrestationPhase,
+    newStatus: string,
+    newProgress: number
+  ) {
+    setUpdating(phase.id);
+    try {
+      const res = await fetch(`/api/admin/prestations/${prestation.id}/phase`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phaseId: phase.id,
+          status: newStatus,
+          progress: newProgress,
+        }),
+      });
+      if (res.ok) {
+        setPhases((prev) =>
+          prev.map((p) =>
+            p.id === phase.id ? { ...p, status: newStatus, progress: newProgress } : p
+          )
+        );
+        toast.success("Phase mise à jour.");
+        onRefresh();
+      } else {
+        toast.error("Erreur lors de la mise à jour de la phase.");
+      }
+    } catch {
+      toast.error("Erreur réseau.");
+    } finally {
+      setUpdating(null);
+    }
+  }
+
+  async function addPhase() {
+    if (!newTitle.trim()) {
+      toast.error("Le titre est requis.");
+      return;
+    }
+    setAddingPhase(true);
+    try {
+      const res = await fetch(`/api/admin/prestations/${prestation.id}/phase`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTitle.trim(),
+          description: newDesc.trim(),
+          order: phases.length + 1,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPhases((prev) => [...prev, data.phase]);
+        setNewTitle("");
+        setNewDesc("");
+        toast.success("Phase ajoutée.");
+        onRefresh();
+      } else {
+        toast.error("Erreur lors de l'ajout de la phase.");
+      }
+    } catch {
+      toast.error("Erreur réseau.");
+    } finally {
+      setAddingPhase(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4 p-1">
+      {phases.length === 0 && (
+        <p className="text-center text-sm text-gray-400 italic py-4">
+          Aucune phase pour cette prestation.
+        </p>
+      )}
+
+      {phases.map((phase) => (
+        <div
+          key={phase.id}
+          className="border border-gray-200 rounded-xl p-4 space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-primary">{phase.title}</p>
+              {phase.description && (
+                <p className="text-xs text-gray-500 mt-0.5">{phase.description}</p>
+              )}
+            </div>
+            {updating === phase.id && <Spinner sm />}
+          </div>
+
+          {/* Barre de progression */}
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-gray-100 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full transition-all ${progressBarColor(phase.progress)}`}
+                style={{ width: `${phase.progress}%` }}
+              />
+            </div>
+            <span className="text-xs text-gray-500 w-8 text-right">{phase.progress}%</span>
+          </div>
+
+          {/* Contrôles */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <select
+              value={phase.status}
+              onChange={(e) =>
+                updatePhase(phase, e.target.value, phase.progress)
+              }
+              disabled={updating === phase.id}
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent disabled:opacity-60"
+            >
+              <option value="PENDING">{phaseStatusLabel("PENDING")}</option>
+              <option value="IN_PROGRESS">{phaseStatusLabel("IN_PROGRESS")}</option>
+              <option value="DONE">{phaseStatusLabel("DONE")}</option>
+            </select>
+            <div className="flex items-center gap-2 flex-1">
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={phase.progress}
+                onChange={(e) =>
+                  setPhases((prev) =>
+                    prev.map((p) =>
+                      p.id === phase.id
+                        ? { ...p, progress: Number(e.target.value) }
+                        : p
+                    )
+                  )
+                }
+                className="flex-1 accent-accent"
+                disabled={updating === phase.id}
+              />
+              <button
+                onClick={() => updatePhase(phase, phase.status, phase.progress)}
+                disabled={updating === phase.id}
+                className="text-xs bg-gradient-to-r from-accent to-secondary text-white px-3 py-1.5 rounded-lg font-semibold hover:opacity-90 disabled:opacity-60"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {/* Formulaire ajout phase */}
+      <div className="border border-dashed border-gray-300 rounded-xl p-4 space-y-3">
+        <h5 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          Ajouter une phase
+        </h5>
+        <input
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          placeholder="Titre de la phase"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
+        />
+        <textarea
+          value={newDesc}
+          onChange={(e) => setNewDesc(e.target.value)}
+          placeholder="Description (optionnel)"
+          rows={2}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent resize-none"
+        />
+        <button
+          onClick={addPhase}
+          disabled={addingPhase}
+          className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {addingPhase ? (
+            <>
+              <Spinner sm /> Ajout…
+            </>
+          ) : (
+            <>
+              <i className="fas fa-plus" /> Ajouter une phase
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tab "Livrables" ──────────────────────────────────────────────────────────
+
+function TabLivrables({
+  prestation,
+  onRefresh,
+}: {
+  prestation: Prestation;
+  onRefresh: () => void;
+}) {
+  const [livrables, setLivrables] = useState<Livrable[]>(prestation.livrables);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const [newTitle, setNewTitle] = useState("");
+  const [newType, setNewType] = useState("LINK");
+  const [newUrl, setNewUrl] = useState("");
+  const [newAvailable, setNewAvailable] = useState(false);
+
+  async function toggleLivrable(livrable: Livrable) {
+    setToggling(livrable.id);
+    try {
+      const res = await fetch(`/api/admin/prestations/${prestation.id}/livrable`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          livrableId: livrable.id,
+          isAvailable: !livrable.isAvailable,
+        }),
+      });
+      if (res.ok) {
+        setLivrables((prev) =>
+          prev.map((l) =>
+            l.id === livrable.id ? { ...l, isAvailable: !l.isAvailable } : l
+          )
+        );
+        toast.success(
+          !livrable.isAvailable
+            ? "Livrable rendu disponible."
+            : "Livrable masqué au client."
+        );
+        onRefresh();
+      } else {
+        toast.error("Erreur lors du changement de disponibilité.");
+      }
+    } catch {
+      toast.error("Erreur réseau.");
+    } finally {
+      setToggling(null);
+    }
+  }
+
+  async function addLivrable() {
+    if (!newTitle.trim()) {
+      toast.error("Le titre est requis.");
+      return;
+    }
+    setAdding(true);
+    try {
+      const res = await fetch(`/api/admin/prestations/${prestation.id}/livrable`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTitle.trim(),
+          type: newType,
+          url: newUrl.trim() || null,
+          isAvailable: newAvailable,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLivrables((prev) => [...prev, data.livrable]);
+        setNewTitle("");
+        setNewUrl("");
+        setNewAvailable(false);
+        setNewType("LINK");
+        toast.success("Livrable ajouté.");
+        onRefresh();
+      } else {
+        toast.error("Erreur lors de l'ajout du livrable.");
+      }
+    } catch {
+      toast.error("Erreur réseau.");
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  const typeIcon: Record<string, string> = {
+    PDF: "fa-file-pdf",
+    LINK: "fa-link",
+    VIDEO: "fa-video",
+    CODE: "fa-code",
+    DESIGN: "fa-paintbrush",
+    ARCHIVE: "fa-file-zipper",
+  };
+
+  return (
+    <div className="space-y-4 p-1">
+      {livrables.length === 0 && (
+        <p className="text-center text-sm text-gray-400 italic py-4">
+          Aucun livrable pour cette prestation.
+        </p>
+      )}
+
+      {livrables.map((livrable) => (
+        <div
+          key={livrable.id}
+          className="flex items-center gap-3 border border-gray-200 rounded-xl p-3"
+        >
+          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <i
+              className={`fas ${typeIcon[livrable.type] ?? "fa-file"} text-sm text-gray-500`}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-primary truncate">{livrable.title}</p>
+            {livrable.url && (
+              <a
+                href={livrable.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-accent hover:text-secondary truncate block"
+              >
+                {livrable.url}
+              </a>
+            )}
+            <span className="text-xs text-gray-400">{livrable.type}</span>
+          </div>
+          <button
+            onClick={() => toggleLivrable(livrable)}
+            disabled={toggling === livrable.id}
+            className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${
+              livrable.isAvailable ? "bg-green-500" : "bg-gray-300"
+            } disabled:opacity-60`}
+            title={livrable.isAvailable ? "Masquer au client" : "Rendre disponible"}
+          >
+            {toggling === livrable.id ? (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <Spinner sm />
+              </span>
+            ) : (
+              <span
+                className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  livrable.isAvailable ? "translate-x-5" : "translate-x-0.5"
+                }`}
+              />
+            )}
+          </button>
+        </div>
+      ))}
+
+      {/* Formulaire ajout livrable */}
+      <div className="border border-dashed border-gray-300 rounded-xl p-4 space-y-3">
+        <h5 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          Ajouter un livrable
+        </h5>
+        <div className="flex gap-2">
+          <input
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="Titre"
+            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
+          />
+          <select
+            value={newType}
+            onChange={(e) => setNewType(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
+          >
+            {livrableTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+        <input
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          placeholder="URL (optionnel)"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
+        />
+        <div className="flex items-center justify-between">
+          <label className="text-sm text-gray-600">Disponible dès maintenant</label>
+          <button
+            onClick={() => setNewAvailable(!newAvailable)}
+            className={`relative w-10 h-5 rounded-full transition-colors ${
+              newAvailable ? "bg-green-500" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                newAvailable ? "translate-x-5" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </div>
+        <button
+          onClick={addLivrable}
+          disabled={adding}
+          className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {adding ? (
+            <>
+              <Spinner sm /> Ajout…
+            </>
+          ) : (
+            <>
+              <i className="fas fa-plus" /> Ajouter le livrable
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Detail Panel ─────────────────────────────────────────────────────────────
+
+function DetailPanel({
+  prestation,
+  onClose,
+  onRefresh,
+}: {
+  prestation: Prestation;
+  onClose: () => void;
+  onRefresh: () => void;
+}) {
+  const [activeTab, setActiveTab] = useState<"devis" | "phases" | "livrables">("devis");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const status = prestation.status as PrestationStatus;
+  const transitions = statusTransitions[status] ?? [];
+
+  async function changeStatus(newStatus: PrestationStatus) {
+    setUpdatingStatus(true);
+    try {
+      const res = await fetch("/api/admin/prestations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prestationId: prestation.id, status: newStatus }),
+      });
+      if (res.ok) {
+        toast.success(`Statut mis à jour : ${statusLabel[newStatus]}`);
+        onRefresh();
+      } else {
+        toast.error("Erreur lors de la mise à jour du statut.");
+      }
+    } catch {
+      toast.error("Erreur réseau.");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  }
+
+  const tabs = [
+    { id: "devis" as const, label: "Devis & Plan" },
+    { id: "phases" as const, label: "Phases" },
+    { id: "livrables" as const, label: "Livrables" },
+  ];
+
+  return (
+    <motion.div
+      key={prestation.id}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className="bg-white rounded-2xl shadow-card flex flex-col h-full overflow-hidden"
+    >
+      {/* Header */}
+      <div className="p-5 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-syne font-bold text-base text-primary truncate">
+              {prestation.client.name}
+            </h3>
+            <p className="text-xs text-gray-400 truncate">{prestation.client.email}</p>
+            <p className="text-sm text-gray-600 mt-1 font-medium">
+              {serviceLabel(prestation)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <StatusBadge status={prestation.status} />
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 p-1"
+            >
+              <i className="fas fa-xmark" />
+            </button>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex-1 bg-gray-100 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full transition-all ${progressBarColor(prestation.globalProgress)}`}
+              style={{ width: `${prestation.globalProgress}%` }}
+            />
+          </div>
+          <span className="text-xs text-gray-500 font-medium w-8 text-right">
+            {prestation.globalProgress}%
+          </span>
+        </div>
+      </div>
+
+      {/* Client info */}
+      <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0 space-y-2">
+        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Informations client
+        </h4>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          {prestation.company && (
+            <div>
+              <p className="text-xs text-gray-400">Entreprise</p>
+              <p className="text-sm text-primary font-medium">{prestation.company}</p>
+            </div>
+          )}
+          {prestation.phone && (
+            <div>
+              <p className="text-xs text-gray-400">Téléphone</p>
+              <p className="text-sm text-primary font-medium">{prestation.phone}</p>
+            </div>
+          )}
+          {prestation.sector && (
+            <div>
+              <p className="text-xs text-gray-400">Secteur</p>
+              <p className="text-sm text-primary font-medium">{prestation.sector}</p>
+            </div>
+          )}
+          {prestation.budget && (
+            <div>
+              <p className="text-xs text-gray-400">Budget</p>
+              <p className="text-sm text-primary font-medium">{prestation.budget}</p>
+            </div>
+          )}
+          {prestation.deadline && (
+            <div>
+              <p className="text-xs text-gray-400">Délai souhaité</p>
+              <p className="text-sm text-primary font-medium">{prestation.deadline}</p>
+            </div>
+          )}
+          <div>
+            <p className="text-xs text-gray-400">Créé le</p>
+            <p className="text-sm text-primary font-medium">
+              {new Date(prestation.createdAt).toLocaleDateString("fr-FR")}
+            </p>
+          </div>
+        </div>
+        {prestation.brief && (
+          <div className="mt-2">
+            <p className="text-xs text-gray-400 mb-1">Brief</p>
+            <p className="text-xs text-gray-700 bg-gray-50 rounded-lg p-2.5 leading-relaxed line-clamp-4">
+              {prestation.brief}
+            </p>
+          </div>
+        )}
+
+        {/* Attachments */}
+        {prestation.attachments.length > 0 && (
+          <div className="mt-2">
+            <p className="text-xs text-gray-400 mb-1.5">Pièces jointes</p>
+            <div className="flex flex-wrap gap-1.5">
+              {prestation.attachments.map((url, i) => (
+                <a
+                  key={i}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-accent hover:text-secondary border border-accent/30 rounded-lg px-2.5 py-1 hover:bg-accent/5 transition-colors"
+                >
+                  <i className="fas fa-paperclip text-xs" />
+                  Fichier {i + 1}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Status transitions */}
+      {transitions.length > 0 && (
+        <div className="px-5 py-3 border-b border-gray-100 flex-shrink-0">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Changer le statut
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {transitions.map((s) => (
+              <button
+                key={s}
+                onClick={() => changeStatus(s)}
+                disabled={updatingStatus}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all hover:opacity-80 disabled:opacity-50 ${statusBadge[s]}`}
+              >
+                {updatingStatus ? (
+                  <Spinner sm />
+                ) : (
+                  <>→ {statusLabel[s]}</>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="px-5 pt-4 border-b border-gray-100 flex-shrink-0">
+        <div className="flex gap-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors ${
+                activeTab === tab.id
+                  ? "bg-white border-b-2 border-accent text-accent"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <AnimatePresence mode="wait">
+          {activeTab === "devis" && (
+            <motion.div
+              key="devis"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+            >
+              <TabDevis prestation={prestation} onRefresh={onRefresh} />
+            </motion.div>
+          )}
+          {activeTab === "phases" && (
+            <motion.div
+              key="phases"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+            >
+              <TabPhases prestation={prestation} onRefresh={onRefresh} />
+            </motion.div>
+          )}
+          {activeTab === "livrables" && (
+            <motion.div
+              key="livrables"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+            >
+              <TabLivrables prestation={prestation} onRefresh={onRefresh} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminPrestationsPage() {
-  // ── États ────────────────────────────────────────────────────────────────
   const [prestations, setPrestations] = useState<Prestation[]>([]);
-  const [total, setTotal]             = useState(0);
-  const [loadingList, setLoadingList] = useState(true);
-  const [search, setSearch]           = useState("");
-  const [filterStatus, setFilter]     = useState<PrestationStatus | "TOUS">("TOUS");
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<PrestationStatus | "TOUS">("TOUS");
+  const [selected, setSelected] = useState<Prestation | null>(null);
 
-  // ── États du modal d'édition ─────────────────────────────────────────────
-  const [editing, setEditing]           = useState<Prestation | null>(null);
-  const [editStatus, setEditStatus]     = useState<PrestationStatus>("EN_ATTENTE");
-  const [editProgress, setEditProgress] = useState(0);
-  const [editAssigned, setEditAssigned] = useState<string>("");
-  const [saving, setSaving]             = useState(false);
-
-  // ── Chargement API ────────────────────────────────────────────────────────
   const load = useCallback(() => {
-    setLoadingList(true);
-    const params = new URLSearchParams({ limit: "50" });
+    setLoading(true);
+    const params = new URLSearchParams({ limit: "100" });
     if (filterStatus !== "TOUS") params.set("status", filterStatus);
     if (search) params.set("search", search);
     fetch(`/api/admin/prestations?${params}`)
       .then((r) => r.json())
       .then((data) => {
-        setPrestations(data.prestations ?? []);
-        setTotal(data.total ?? 0);
+        const list: Prestation[] = data.prestations ?? [];
+        setPrestations(list);
+        setTotal(data.total ?? list.length);
+        // Refresh selected prestation if it exists in the new list
+        if (selected) {
+          const refreshed = list.find((p) => p.id === selected.id);
+          if (refreshed) setSelected(refreshed);
+        }
       })
-      .finally(() => setLoadingList(false));
+      .catch(() => toast.error("Impossible de charger les prestations."))
+      .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus, search]);
 
   useEffect(() => {
@@ -110,297 +1175,129 @@ export default function AdminPrestationsPage() {
     return () => clearTimeout(t);
   }, [load]);
 
-  const filtered = prestations;
-
-  function openEdit(p: Prestation) {
-    setEditing(p);
-    setEditStatus(p.status);
-    setEditProgress(p.globalProgress);
-    setEditAssigned(p.assignedTo ?? "");
-  }
-
-  async function saveEdit() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const res = await fetch("/api/admin/prestations", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prestationId: editing.id,
-          status: editStatus,
-          globalProgress: editProgress,
-        }),
-      });
-      if (res.ok) {
-        setPrestations((prev) =>
-          prev.map((p) =>
-            p.id === editing.id
-              ? { ...p, status: editStatus, globalProgress: editProgress }
-              : p
-          )
-        );
-        setEditing(null);
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
+  const allStatuses = Object.keys(statusLabel) as PrestationStatus[];
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="h-full flex flex-col gap-6 max-w-[1600px]">
 
-      {/* ── En-tête ─────────────────────────────────────────────────────── */}
+      {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-syne font-black text-2xl text-primary">
           Gestion des Prestations
         </h1>
-        <p className="text-gray-500 text-sm">
-          {total} prestation(s) au total
-        </p>
+        <p className="text-gray-500 text-sm">{total} prestation(s) au total</p>
       </motion.div>
 
-      {/* ── Barre de filtres ─────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row gap-3">
-
-        {/* Recherche textuelle */}
+      {/* Filter bar */}
+      <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
         <div className="relative flex-1">
           <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher client ou service..."
+            placeholder="Rechercher par nom client…"
             className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent"
           />
         </div>
-
-        {/* Filtre par statut */}
         <select
           value={filterStatus}
-          onChange={(e) => setFilter(e.target.value as any)}
+          onChange={(e) => setFilterStatus(e.target.value as any)}
           className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent bg-white"
         >
           <option value="TOUS">Tous les statuts</option>
-          {(Object.keys(statusLabel) as PrestationStatus[]).map((s) => (
-            <option key={s} value={s}>{statusLabel[s]}</option>
+          {allStatuses.map((s) => (
+            <option key={s} value={s}>
+              {statusLabel[s]}
+            </option>
           ))}
         </select>
       </div>
 
-      {/* ── Tableau des prestations ───────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-        {loadingList && (
-          <div className="flex justify-center py-12">
-            <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        {!loadingList && <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Client</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Service</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Statut</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Progression</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Montant</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Assigné à</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Créé le</th>
-                <th className="px-6 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-400 text-sm">
-                    Aucune prestation trouvée.
-                  </td>
-                </tr>
-              )}
-              {filtered.map((p) => (
-                <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+      {/* Main layout: list + detail */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
 
-                  {/* Client */}
-                  <td className="px-6 py-4">
-                    <p className="text-sm font-medium text-primary">{p.client.name}</p>
-                    <p className="text-xs text-gray-400">{p.client.email}</p>
-                  </td>
-
-                  {/* Service */}
-                  <td className="px-6 py-4">
-                    <p className="text-sm text-gray-700">{p.service.title}</p>
-                    <span className="text-xs text-gray-400 capitalize">{p.service.domain}</span>
-                  </td>
-
-                  {/* Statut */}
-                  <td className="px-6 py-4">
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyle[p.status]}`}>
-                      {statusLabel[p.status]}
-                    </span>
-                  </td>
-
-                  {/* Progression — barre de pourcentage */}
-                  <td className="px-6 py-4 min-w-[120px]">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-                        <div
-                          className={`h-1.5 rounded-full ${progressColor(p.globalProgress)}`}
-                          style={{ width: `${p.globalProgress}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-500 w-8 text-right">{p.globalProgress}%</span>
-                    </div>
-                  </td>
-
-                  {/* Montant total + payé */}
-                  <td className="px-6 py-4 text-right">
-                    <p className="text-sm font-bold text-primary">{p.amount.toLocaleString()} F</p>
-                    <p className="text-xs text-gray-400">{p.amountPaid.toLocaleString()} payé</p>
-                  </td>
-
-                  {/* Assigné à */}
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {p.assignedTo ?? <span className="text-gray-300 italic">Non assigné</span>}
-                  </td>
-
-                  {/* Date de création */}
-                  <td className="px-6 py-4 text-sm text-gray-400">
-                    {new Date(p.createdAt).toLocaleDateString("fr-FR")}
-                  </td>
-
-                  {/* Bouton édition */}
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => openEdit(p)}
-                      className="text-accent hover:text-secondary transition-colors text-xs font-medium flex items-center gap-1"
+        {/* List */}
+        <div
+          className={`bg-white rounded-2xl shadow-card overflow-hidden flex flex-col ${
+            selected ? "lg:w-[40%]" : "w-full"
+          } transition-all duration-300`}
+        >
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center py-12">
+              <Spinner />
+            </div>
+          ) : (
+            <div className="overflow-y-auto flex-1">
+              {prestations.length === 0 ? (
+                <div className="py-16 text-center text-gray-400 text-sm">
+                  Aucune prestation trouvée.
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-50">
+                  {prestations.map((p) => (
+                    <motion.button
+                      key={p.id}
+                      onClick={() => setSelected(selected?.id === p.id ? null : p)}
+                      className={`w-full text-left px-5 py-4 hover:bg-gray-50 transition-colors flex flex-col gap-2 ${
+                        selected?.id === p.id
+                          ? "bg-accent/5 border-l-4 border-accent"
+                          : "border-l-4 border-transparent"
+                      }`}
+                      layout
                     >
-                      <i className="fas fa-pen-to-square" />
-                      Éditer
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>}
+                      {/* Client + service */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-primary truncate">
+                            {p.client.name}
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">
+                            {p.client.email}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-0.5 font-medium truncate">
+                            {serviceLabel(p)}
+                          </p>
+                        </div>
+                        <StatusBadge status={p.status} />
+                      </div>
+
+                      {/* Progress + date */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                          <div
+                            className={`h-1.5 rounded-full ${progressBarColor(p.globalProgress)}`}
+                            style={{ width: `${p.globalProgress}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-400 flex-shrink-0">
+                          {p.globalProgress}%
+                        </span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">
+                          {new Date(p.createdAt).toLocaleDateString("fr-FR")}
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Detail panel */}
+        <AnimatePresence>
+          {selected && (
+            <div className="lg:flex-1 lg:min-w-0 min-h-[500px] lg:min-h-0">
+              <DetailPanel
+                key={selected.id}
+                prestation={selected}
+                onClose={() => setSelected(null)}
+                onRefresh={load}
+              />
+            </div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* ── Modal d'édition ──────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {editing && (
-          <>
-            {/* Fond semi-transparent */}
-            <motion.div
-              className="fixed inset-0 bg-black/40 z-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !saving && setEditing(null)}
-            />
-
-            {/* Panneau modal */}
-            <motion.div
-              className="fixed inset-0 flex items-center justify-center z-50 p-4"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-            >
-              <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-5">
-
-                {/* En-tête modal */}
-                <div className="flex items-center justify-between">
-                  <h3 className="font-syne font-bold text-primary">
-                    Modifier la prestation
-                  </h3>
-                  <button
-                    onClick={() => setEditing(null)}
-                    className="text-gray-400 hover:text-gray-600"
-                    disabled={saving}
-                  >
-                    <i className="fas fa-xmark" />
-                  </button>
-                </div>
-
-                {/* Nom du client + service */}
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-sm font-medium text-primary">{editing.client.name}</p>
-                  <p className="text-xs text-gray-400">{editing.service.title}</p>
-                </div>
-
-                {/* Sélection du statut */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                  <select
-                    value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value as PrestationStatus)}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
-                  >
-                    {(Object.keys(statusLabel) as PrestationStatus[]).map((s) => (
-                      <option key={s} value={s}>{statusLabel[s]}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Slider de progression */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Progression globale — <span className="text-accent font-bold">{editProgress}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={editProgress}
-                    onChange={(e) => setEditProgress(Number(e.target.value))}
-                    className="w-full accent-accent"
-                  />
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>0%</span><span>50%</span><span>100%</span>
-                  </div>
-                </div>
-
-                {/* Sélection du membre assigné */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Assigner à</label>
-                  <select
-                    value={editAssigned}
-                    onChange={(e) => setEditAssigned(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
-                  >
-                    <option value="">— Non assigné —</option>
-                    {teamMembers.map((m) => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Boutons d'action */}
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={() => setEditing(null)}
-                    className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600 hover:border-gray-300"
-                    disabled={saving}
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={saveEdit}
-                    disabled={saving}
-                    className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
-                  >
-                    {saving ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Enregistrement…
-                      </span>
-                    ) : "Enregistrer"}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
