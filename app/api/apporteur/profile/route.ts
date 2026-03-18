@@ -17,7 +17,7 @@ export async function GET() {
     const profile = await prisma.apporteurProfile.findUnique({
       where: { userId: session.user.id },
       include: {
-        user: { select: { affiliationCode: true } },
+        user: { select: { affiliationCode: true, name: true, email: true, createdAt: true } },
       },
     });
 
@@ -31,10 +31,16 @@ export async function GET() {
 
     return NextResponse.json({
       profile: {
+        name:            profile.user.name ?? "",
+        email:           profile.user.email ?? "",
+        ifu:             profile.ifu,
+        level:           profile.level,
         totalEarnings:   profile.totalEarnings,
         pendingEarnings: profile.pendingEarnings,
+        paidEarnings:    Math.max(0, profile.totalEarnings - profile.pendingEarnings),
         totalReferrals,
         affiliationCode: profile.user.affiliationCode ?? "",
+        joinedAt:        profile.user.createdAt,
       },
     });
   } catch (error) {
