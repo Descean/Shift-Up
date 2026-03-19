@@ -10,13 +10,18 @@ interface Service { id: string; title: string; description: string; priceMin: nu
 
 /* ─── Données statiques ──────────────────────────────────────────────────── */
 const SECTORS = [
-  { value: "Conseil Stratégique",  icon: "fas fa-chess",         color: "from-blue-500 to-blue-700",    desc: "Stratégie d'entreprise, audit, feuille de route" },
-  { value: "Solutions Numériques", icon: "fas fa-code",           color: "from-accent to-secondary",     desc: "Sites web, applications, logiciels sur mesure" },
-  { value: "Formation",            icon: "fas fa-graduation-cap", color: "from-purple-500 to-pink-500",  desc: "Formation professionnelle et montée en compétences" },
-  { value: "Marketing Digital",    icon: "fas fa-bullhorn",       color: "from-orange-400 to-red-500",   desc: "SEO, réseaux sociaux, publicité digitale" },
-  { value: "Juridique & Finance",  icon: "fas fa-scale-balanced", color: "from-gray-500 to-gray-700",    desc: "Droit des affaires, comptabilité, fiscalité" },
-  { value: "Design & Branding",    icon: "fas fa-palette",        color: "from-pink-500 to-rose-500",    desc: "Identité visuelle, logo, supports marketing" },
-  { value: "Autre",                icon: "fas fa-box-open",       color: "from-teal-500 to-cyan-500",    desc: "Besoin spécifique non listé ci-dessus" },
+  { value: "Conseil Stratégique",          icon: "fas fa-chess",              color: "from-blue-500 to-blue-700",      desc: "Stratégie d'entreprise, audit, feuille de route" },
+  { value: "Marchés Publics & Dossiers",   icon: "fas fa-file-contract",      color: "from-indigo-500 to-blue-700",    desc: "Appels d'offres, dossiers de candidature, marchés publics" },
+  { value: "Juridique & Finance",          icon: "fas fa-scale-balanced",     color: "from-slate-500 to-slate-700",    desc: "Droit des affaires, comptabilité, fiscalité OHADA" },
+  { value: "Marketing Digital",            icon: "fas fa-bullhorn",           color: "from-orange-400 to-red-500",     desc: "SEO, réseaux sociaux, publicité digitale, branding" },
+  { value: "BTP & Génie Civil",            icon: "fas fa-helmet-safety",      color: "from-yellow-500 to-orange-500",  desc: "Études, plans, suivi de chantiers, devis travaux" },
+  { value: "Solutions Numériques",         icon: "fas fa-code",               color: "from-accent to-secondary",       desc: "Sites web, applications, logiciels sur mesure" },
+  { value: "Transformation Digitale",      icon: "fas fa-rocket",             color: "from-blue-600 to-purple-500",    desc: "Digitalisation, automatisation, ERP, CRM" },
+  { value: "Data & Business Intelligence", icon: "fas fa-chart-line",         color: "from-teal-500 to-emerald-500",   desc: "Tableaux de bord, analyses, rapports décisionnels" },
+  { value: "Formation & Coaching",         icon: "fas fa-graduation-cap",     color: "from-purple-500 to-pink-500",    desc: "Formation professionnelle, coaching, montée en compétences" },
+  { value: "RSE & Développement Durable",  icon: "fas fa-leaf",               color: "from-green-500 to-teal-600",     desc: "Stratégie RSE, impact environnemental, rapports durabilité" },
+  { value: "Finance & Investissement",     icon: "fas fa-coins",              color: "from-emerald-600 to-green-700",  desc: "Business plan, levée de fonds, analyse financière" },
+  { value: "Autre",                        icon: "fas fa-box-open",           color: "from-gray-400 to-gray-600",      desc: "Besoin spécifique non listé ci-dessus" },
 ];
 
 const BUDGETS  = ["< 100 000 XOF", "100 000 – 300 000 XOF", "300 000 – 500 000 XOF", "500 000 – 1 000 000 XOF", "> 1 000 000 XOF", "À discuter"];

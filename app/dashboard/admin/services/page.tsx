@@ -19,8 +19,17 @@ interface Service {
 }
 
 const DOMAINS = [
-  "Conseil Stratégique", "Solutions Numériques", "Formation",
-  "Marketing Digital", "Juridique & Finance", "Design & Branding",
+  "Conseil Stratégique",
+  "Marchés Publics & Dossiers",
+  "Juridique & Finance",
+  "Marketing Digital",
+  "BTP & Génie Civil",
+  "Solutions Numériques",
+  "Transformation Digitale",
+  "Data & Business Intelligence",
+  "Formation & Coaching",
+  "RSE & Développement Durable",
+  "Finance & Investissement",
 ];
 
 const emptyForm = {
