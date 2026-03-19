@@ -59,13 +59,6 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
           </h1>
           <p className="text-gray-500 text-sm">Voici un résumé de votre espace client</p>
         </div>
-        <Link
-          href="/services"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity"
-        >
-          <i className="fas fa-plus" />
-          Nouvelle prestation
-        </Link>
       </motion.div>
 
       {/* Stats */}
