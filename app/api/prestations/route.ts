@@ -53,16 +53,19 @@ export async function POST(req: NextRequest) {
     if (!brief?.trim()) return NextResponse.json({ error: "La description du besoin est requise." }, { status: 400 });
     if (!sector) return NextResponse.json({ error: "Le secteur d'activité est requis." }, { status: 400 });
 
+    // "autre" est une valeur interne UI, pas un vrai ID de service
+    const realServiceId = (serviceId && serviceId !== "autre") ? serviceId : null;
+
     // Vérifie le service si fourni
     let service = null;
-    if (serviceId) {
-      service = await prisma.service.findUnique({ where: { id: serviceId, isActive: true } });
+    if (realServiceId) {
+      service = await prisma.service.findUnique({ where: { id: realServiceId, isActive: true } });
     }
 
     const prestation = await prisma.prestation.create({
       data: {
         clientId: session.user.id,
-        serviceId: serviceId || null,
+        serviceId: realServiceId,
         sector,
         customService: customService || null,
         brief,
