@@ -45,10 +45,12 @@ export default function NouvelleDemandePage() {
   const [files, setFiles]         = useState<{ url: string; name: string }[]>([]);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingServices, setLoadingServices] = useState(false);
 
   // Chargement des services du secteur sélectionné
   useEffect(() => {
     if (!sector || sector === "Autre") { setServices([]); setServiceId(""); return; }
+    setLoadingServices(true);
     fetch("/api/admin/services")
       .then((r) => r.json())
       .then((d) => {
@@ -57,7 +59,9 @@ export default function NouvelleDemandePage() {
         );
         setServices(filtered);
         setServiceId("");
-      });
+      })
+      .catch(() => setServices([]))
+      .finally(() => setLoadingServices(false));
   }, [sector]);
 
   /* ─── Upload pièce jointe ──────────────────────────────────────────────── */
@@ -191,10 +195,22 @@ export default function NouvelleDemandePage() {
                   placeholder="Ex: Traduction de documents, photographie..."
                 />
               </div>
-            ) : services.length === 0 ? (
+            ) : loadingServices ? (
               <div className="bg-gray-50 rounded-2xl p-6 text-center text-gray-400 text-sm">
                 <i className="fas fa-spinner fa-spin text-2xl mb-2 block" />
                 Chargement des services…
+              </div>
+            ) : services.length === 0 ? (
+              <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3">
+                <i className="fas fa-box-open text-3xl text-gray-300 block" />
+                <p className="text-gray-500 text-sm font-medium">Aucun service disponible pour ce secteur</p>
+                <p className="text-gray-400 text-xs">Utilisez l&apos;option ci-dessous pour décrire votre besoin personnalisé.</p>
+                <button
+                  onClick={() => { setServiceId("autre"); setCustomService(""); }}
+                  className="inline-flex items-center gap-2 bg-accent/10 text-accent text-sm font-semibold px-4 py-2 rounded-xl hover:bg-accent/20 transition-colors"
+                >
+                  <i className="fas fa-plus-circle" />Décrire mon besoin
+                </button>
               </div>
             ) : (
               <div className="space-y-3">
