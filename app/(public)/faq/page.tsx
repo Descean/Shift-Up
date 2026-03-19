@@ -155,7 +155,7 @@ export default function FAQPage() {
                 Email direct
               </a>
               <a
-                href="https://wa.me/22901950350999"
+                href="https://wa.me/2290195035099"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors"

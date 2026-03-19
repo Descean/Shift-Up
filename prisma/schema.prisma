@@ -95,6 +95,7 @@ model User {
   chatSessions        ChatSession[]
   auditLogs           AuditLog[]
   passwordResetToken  PasswordResetToken?
+  apporteurServices   ApporteurService[]
 }
 
 model ClientProfile {
@@ -113,6 +114,52 @@ model ApporteurProfile {
   level        String   @default("BRONZE") // BRONZE | ARGENT | OR | PLATINE | DIAMANT
   totalEarnings Float   @default(0)
   pendingEarnings Float @default(0)
+}
+
+// ============================================================
+// SERVICES APPORTEURS — Services créés et vendus par les apporteurs
+// Commission SHIFT UP : 10 % sur chaque vente
+// ============================================================
+
+model ApporteurService {
+  id             String   @id @default(cuid())
+  apporteurId    String                          // userId de l'apporteur
+  apporteur      User     @relation(fields: [apporteurId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  category       String
+  features       String[] @default([])
+  priceMin       Float
+  priceMax       Float?
+  currency       String   @default("XOF")
+  duration       String?  // ex: "3-5 jours", "1 semaine"
+  isActive       Boolean  @default(true)
+  isApproved     Boolean  @default(false)        // validation admin requise
+  commissionRate Float    @default(0.10)         // 10 % pour SHIFT UP
+  totalOrders    Int      @default(0)
+  totalRevenue   Float    @default(0)            // CA brut généré
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orders         ApporteurServiceOrder[]
+}
+
+model ApporteurServiceOrder {
+  id               String   @id @default(cuid())
+  serviceId        String
+  service          ApporteurService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  clientName       String
+  clientEmail      String
+  clientPhone      String?
+  brief            String?
+  amount           Float
+  commission       Float                          // 10 % → SHIFT UP
+  apporteurRevenue Float                          // 90 % → apporteur
+  status           String   @default("EN_ATTENTE") // EN_ATTENTE | EN_COURS | TERMINEE | ANNULEE
+  paymentId        String?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model EtudiantProfile {

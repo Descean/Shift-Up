@@ -110,7 +110,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <i className="fas fa-phone text-accent w-4" />
-                <a href="tel:+22901950350999" className="text-white/60 hover:text-accent text-sm transition-colors">
+                <a href="tel:+2290195035099" className="text-white/60 hover:text-accent text-sm transition-colors">
                   (+229) 01 95 03 50 99
                 </a>
               </li>
@@ -126,7 +126,7 @@ export default function Footer() {
               <li className="flex items-center gap-3">
                 <i className="fab fa-whatsapp text-accent w-4" />
                 <a
-                  href="https://wa.me/22901950350999"
+                  href="https://wa.me/2290195035099"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-white/60 hover:text-accent text-sm transition-colors"

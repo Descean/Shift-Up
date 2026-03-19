@@ -3,6 +3,8 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Blog & Ressources | SHIFT UP",
   description: "Articles, actualités et ressources sur le conseil stratégique, le numérique et l'entrepreneuriat au Bénin.",
@@ -17,7 +19,20 @@ const COVER_COLORS = [
   "from-green-600 to-teal-400",
 ];
 
-const categories = ["Tous", "Digital", "Finance", "Marketing", "Technologie", "Juridique", "Stratégie"];
+const categories = [
+  "Tous",
+  "Conseil & Stratégie",
+  "Marchés Publics & Dossiers",
+  "Juridique & Comptabilité",
+  "Communication & Marketing",
+  "BTP & Génie Civil",
+  "Solutions Numériques",
+  "Transformation Digitale",
+  "Data & Business Intelligence",
+  "Formation & Coaching",
+  "RSE & Développement Durable",
+  "Finance & Investissement",
+];
 
 export default async function BlogPage() {
   const dbPosts = await prisma.blogPost.findMany({

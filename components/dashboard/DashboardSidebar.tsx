@@ -23,6 +23,7 @@ const navByRole: Record<string, NavItem[]> = {
   APPORTEUR: [
     { href: "/dashboard/apporteur", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/apporteur/catalogue", icon: "fas fa-list", label: "Catalogue services" },
+    { href: "/dashboard/apporteur/mes-services", icon: "fas fa-briefcase", label: "Mes services" },
     { href: "/dashboard/apporteur/campagnes", icon: "fas fa-bullhorn", label: "Mes campagnes" },
     { href: "/dashboard/apporteur/commissions", icon: "fas fa-coins", label: "Commissions" },
     { href: "/dashboard/apporteur/classement", icon: "fas fa-trophy", label: "Classement" },
@@ -74,7 +75,7 @@ const mobileTabsByRole: Record<string, NavItem[]> = {
   ],
   APPORTEUR: [
     { href: "/dashboard/apporteur", icon: "fas fa-grid-2", label: "Accueil" },
-    { href: "/dashboard/apporteur/catalogue", icon: "fas fa-list", label: "Catalogue" },
+    { href: "/dashboard/apporteur/mes-services", icon: "fas fa-briefcase", label: "Services" },
     { href: "/dashboard/apporteur/commissions", icon: "fas fa-coins", label: "Gains" },
     { href: "/dashboard/apporteur/classement", icon: "fas fa-trophy", label: "Classement" },
     { href: "/dashboard/apporteur/profil", icon: "fas fa-user-circle", label: "Profil" },

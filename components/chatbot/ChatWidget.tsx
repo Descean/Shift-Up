@@ -74,18 +74,37 @@ export default function ChatWidget() {
 
   /**
    * useEffect 2 — Initialisation de session chatbot.
-   * Appelé à chaque changement de page (pathname). Envoie le GET /api/chat
-   * avec la page courante pour que l'IA dispose du contexte (ex : si
-   * l'utilisateur est sur /services, l'IA peut en parler directement).
-   * La réponse contient { sessionId } qui est stocké pour être renvoyé
-   * à chaque message suivant.
    */
   useEffect(() => {
     if (isDashboard) return;
     fetch(`/api/chat?page=${encodeURIComponent(pathname)}`)
       .then((r) => r.json())
-      .then((d) => setSessionId(d.sessionId));
+      .then((d) => setSessionId(d.sessionId))
+      .catch(() => {});
   }, [pathname, isDashboard]);
+
+  /**
+   * useEffect 3 — Écoute l'événement custom "shiftup:open-chat"
+   * émis par la page /services quand l'utilisateur clique "Parler à l'assistant".
+   * Ouvre automatiquement le widget et envoie le message pré-rempli.
+   */
+  useEffect(() => {
+    if (isDashboard) return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ message?: string }>).detail;
+      setOpen(true);
+      setUnread(0);
+      if (detail?.message?.trim()) {
+        // Petit délai pour que le widget soit visible avant d'envoyer
+        setTimeout(() => {
+          sendMessage(detail.message!);
+        }, 300);
+      }
+    };
+    window.addEventListener("shiftup:open-chat", handler);
+    return () => window.removeEventListener("shiftup:open-chat", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDashboard]);
 
   // ── Guard de rendu — placé APRÈS tous les hooks (règle React) ─────────────
   // Le widget est invisible sur toutes les pages /dashboard/**

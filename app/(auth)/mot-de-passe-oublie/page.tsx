@@ -201,7 +201,7 @@ export default function MotDePasseOubliePage() {
               </Link>
               {/* Lien WhatsApp direct vers le support SHIFT UP */}
               <a
-                href="https://wa.me/22901950350999"
+                href="https://wa.me/2290195035099"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl text-sm font-semibold transition-colors"

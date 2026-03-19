@@ -116,7 +116,7 @@ export default function ContactPage() {
                   icon: "fas fa-phone",
                   title: "Téléphone",
                   lines: ["(+229) 01 95 03 50 99"],
-                  href: "tel:+22901950350999",
+                  href: "tel:+2290195035099",
                   color: "from-secondary to-teal-400",
                 },
                 {
@@ -160,7 +160,7 @@ export default function ContactPage() {
 
               {/* WhatsApp */}
               <a
-                href="https://wa.me/22901950350999"
+                href="https://wa.me/2290195035099"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 bg-green-500 p-5 rounded-2xl text-white hover:bg-green-600 transition-colors"

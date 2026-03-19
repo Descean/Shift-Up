@@ -10,21 +10,9 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
+import { registerSchema } from "@/lib/validation";
 
-const schema = z.object({
-  name: z.string().min(2, "Nom requis (min 2 caractères)"),
-  email: z.string().email("Email invalide"),
-  phone: z.string().optional(),
-  password: z.string().min(8, "Minimum 8 caractères"),
-  confirmPassword: z.string(),
-  role: z.enum(["CLIENT", "APPORTEUR", "ETUDIANT"]),
-  affiliationCode: z.string().optional(),
-  ifu: z.string().optional(),
-  acceptTerms: z.boolean().refine((v) => v, "Vous devez accepter les conditions"),
-}).refine((d) => d.password === d.confirmPassword, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["confirmPassword"],
-});
+const schema = registerSchema;
 
 type FormData = z.infer<typeof schema>;
 
