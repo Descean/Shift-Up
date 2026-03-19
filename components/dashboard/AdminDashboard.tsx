@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetch("/api/admin/stats")
       .then((r) => r.json())
-      .then((data) => { setStats(data); setLoading(false); })
+      .then((data) => { if (data && !data.error) setStats(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
@@ -74,6 +74,30 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <span className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="space-y-6 max-w-7xl">
+        <div>
+          <h1 className="font-syne font-black text-2xl text-primary">Tableau de bord Admin</h1>
+          <p className="text-gray-500 text-sm">Vue globale — SHIFT UP</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-card p-12 text-center space-y-3">
+          <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
+            <i className="fas fa-exclamation-triangle text-amber-500 text-2xl" />
+          </div>
+          <p className="font-syne font-bold text-primary">Données indisponibles</p>
+          <p className="text-gray-500 text-sm max-w-sm mx-auto">
+            Impossible de charger les statistiques. Vérifiez les variables d'environnement
+            (DATABASE_URL, NEXTAUTH_SECRET, etc.) dans les paramètres Vercel.
+          </p>
+          <button onClick={() => window.location.reload()} className="mt-2 text-accent text-sm hover:underline">
+            <i className="fas fa-rotate-right mr-1" />Réessayer
+          </button>
+        </div>
       </div>
     );
   }
