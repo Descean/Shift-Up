@@ -25,7 +25,7 @@ export async function GET() {
   try {
     const posts = await prisma.blogPost.findMany({
       orderBy: { publishedAt: "desc" },
-      select: { id: true, title: true, slug: true, excerpt: true, category: true, published: true, views: true, publishedAt: true, authorName: true },
+      select: { id: true, title: true, slug: true, excerpt: true, content: true, category: true, published: true, views: true, publishedAt: true, authorName: true },
     });
     return NextResponse.json({ posts });
   } catch (error) {
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
 
   try {
-    const { title, excerpt, category, published } = await req.json();
+    const { title, excerpt, content, category, published } = await req.json();
     if (!title?.trim()) return NextResponse.json({ error: "Titre requis." }, { status: 422 });
 
     const post = await prisma.blogPost.create({
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         slug: slugify(title),
         excerpt: excerpt ?? "",
         category: category ?? "Général",
-        content: "",
+        content: content ?? "",
         authorName: session.user.name ?? "SHIFT UP",
         authorId: session.user.id,
         published: published ?? false,
@@ -70,7 +70,7 @@ export async function PATCH(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
 
   try {
-    const { id, title, excerpt, category, published } = await req.json();
+    const { id, title, excerpt, content, category, published } = await req.json();
     if (!id) return NextResponse.json({ error: "ID requis." }, { status: 422 });
 
     const post = await prisma.blogPost.update({
@@ -78,6 +78,7 @@ export async function PATCH(req: NextRequest) {
       data: {
         ...(title    !== undefined && { title, slug: slugify(title) }),
         ...(excerpt  !== undefined && { excerpt }),
+        ...(content  !== undefined && { content }),
         ...(category !== undefined && { category }),
         ...(published !== undefined && {
           published,

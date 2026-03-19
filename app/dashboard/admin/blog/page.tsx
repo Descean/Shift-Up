@@ -9,6 +9,7 @@ interface BlogPost {
   title: string;
   slug: string;
   excerpt: string;
+  content: string;
   category: string;
   published: boolean;
   views: number;
@@ -16,7 +17,20 @@ interface BlogPost {
   authorName: string;
 }
 
-const categories = ["Stratégie digitale", "Marketing", "Design", "Tech", "Actualités", "Général"];
+const categories = [
+  "Conseil & Stratégie",
+  "Marchés Publics & Dossiers",
+  "Juridique & Comptabilité",
+  "Communication & Marketing",
+  "BTP & Génie Civil",
+  "Solutions Numériques",
+  "Transformation Digitale",
+  "Data & Business Intelligence",
+  "Formation & Coaching",
+  "RSE & Développement Durable",
+  "Finance & Investissement",
+  "Général",
+];
 
 export default function AdminBlogPage() {
   const [posts, setPosts]         = useState<BlogPost[]>([]);
@@ -28,6 +42,7 @@ export default function AdminBlogPage() {
   const [editing, setEditing]     = useState<BlogPost | null>(null);
   const [formTitle, setFormTitle]       = useState("");
   const [formExcerpt, setFormExcerpt]   = useState("");
+  const [formContent, setFormContent]   = useState("");
   const [formCategory, setFormCategory] = useState(categories[0]);
   const [formStatus, setFormStatus]     = useState<"PUBLIE" | "BROUILLON">("BROUILLON");
   const [saving, setSaving]             = useState(false);
@@ -49,13 +64,14 @@ export default function AdminBlogPage() {
 
   function openCreate() {
     setEditing(null);
-    setFormTitle(""); setFormExcerpt(""); setFormCategory(categories[0]); setFormStatus("BROUILLON");
+    setFormTitle(""); setFormExcerpt(""); setFormContent(""); setFormCategory(categories[0]); setFormStatus("BROUILLON");
     setShowForm(true);
   }
 
   function openEdit(post: BlogPost) {
     setEditing(post);
-    setFormTitle(post.title); setFormExcerpt(post.excerpt); setFormCategory(post.category);
+    setFormTitle(post.title); setFormExcerpt(post.excerpt); setFormContent(post.content ?? "");
+    setFormCategory(post.category);
     setFormStatus(post.published ? "PUBLIE" : "BROUILLON");
     setShowForm(true);
   }
@@ -69,7 +85,7 @@ export default function AdminBlogPage() {
         const r = await fetch("/api/admin/blog", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editing.id, title: formTitle, excerpt: formExcerpt, category: formCategory, published: isPublished }),
+          body: JSON.stringify({ id: editing.id, title: formTitle, excerpt: formExcerpt, content: formContent, category: formCategory, published: isPublished }),
         });
         const data = await r.json();
         setPosts((prev) => prev.map((p) => p.id === editing.id ? { ...p, ...data.post } : p));
@@ -78,7 +94,7 @@ export default function AdminBlogPage() {
         const r = await fetch("/api/admin/blog", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: formTitle, excerpt: formExcerpt, category: formCategory, published: isPublished }),
+          body: JSON.stringify({ title: formTitle, excerpt: formExcerpt, content: formContent, category: formCategory, published: isPublished }),
         });
         const data = await r.json();
         setPosts((prev) => [data.post, ...prev]);
@@ -178,8 +194,8 @@ export default function AdminBlogPage() {
           <>
             <motion.div className="fixed inset-0 bg-black/40 z-40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !saving && setShowForm(false)} />
             <motion.div className="fixed inset-0 flex items-center justify-center z-50 p-4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
-              <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-5">
-                <div className="flex items-center justify-between">
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-5">
+                <div className="flex items-center justify-between sticky top-0 bg-white pb-2 border-b border-gray-100">
                   <h3 className="font-syne font-bold text-primary">{editing ? "Modifier l'article" : "Nouvel article"}</h3>
                   <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-xmark" /></button>
                 </div>
@@ -190,8 +206,21 @@ export default function AdminBlogPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Extrait</label>
-                  <textarea value={formExcerpt} onChange={(e) => setFormExcerpt(e.target.value)} rows={3} placeholder="Résumé court..."
+                  <textarea value={formExcerpt} onChange={(e) => setFormExcerpt(e.target.value)} rows={2} placeholder="Résumé court affiché dans la liste d'articles..."
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Contenu (Markdown)
+                    <span className="ml-2 text-xs text-gray-400 font-normal">## Titre, ### Sous-titre, **gras**, - liste</span>
+                  </label>
+                  <textarea
+                    value={formContent}
+                    onChange={(e) => setFormContent(e.target.value)}
+                    rows={16}
+                    placeholder={`## Introduction\n\nVotre contenu ici...\n\n## Section 1\n\nTexte de la section.\n\n- Point 1\n- Point 2`}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-y font-mono"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -208,10 +237,7 @@ export default function AdminBlogPage() {
                     </select>
                   </div>
                 </div>
-                <div className="bg-amber-50 rounded-xl p-3 text-xs text-amber-700">
-                  <i className="fas fa-info-circle mr-1" />Le contenu complet est éditable via un éditeur riche (TipTap / MDX).
-                </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 sticky bottom-0 bg-white pt-2 border-t border-gray-100">
                   <button onClick={() => setShowForm(false)} disabled={saving} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600">Annuler</button>
                   <button onClick={saveForm} disabled={saving || !formTitle.trim()} className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60">
                     {saving ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Enregistrement…</span>
