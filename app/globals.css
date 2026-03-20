@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ----- Google Fonts import ----- */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
 /* ----- CSS Variables ----- */
 :root {
   --primary: #0A2533;
