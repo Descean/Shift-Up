@@ -73,7 +73,10 @@ async function handleFedaPay({ amount, reference, phone, session, prestation, pr
   const fedaData = await fedapayRes.json();
 
   if (!fedapayRes.ok) {
-    return NextResponse.json({ error: "FedaPay: " + fedaData.message }, { status: 400 });
+    console.error("FedaPay error response:", JSON.stringify(fedaData));
+    console.error("FedaPay env:", { env: process.env.FEDAPAY_ENVIRONMENT, keyPresent: !!process.env.FEDAPAY_SECRET_KEY });
+    const errMsg = fedaData.message || fedaData.error || JSON.stringify(fedaData);
+    return NextResponse.json({ error: "FedaPay: " + errMsg }, { status: 400 });
   }
 
   // Save payment record
