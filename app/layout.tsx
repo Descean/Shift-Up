@@ -23,6 +23,7 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Toaster } from "react-hot-toast";
 import ChatWidget from "@/components/chatbot/ChatWidget";
 import AuthProvider from "@/components/providers/AuthProvider";
@@ -127,12 +128,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="SHIFT UP" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-          crossOrigin="anonymous"
-        />
 
         {/*
          * ── Google Analytics avec Consent Mode v2 ─────────────────────────

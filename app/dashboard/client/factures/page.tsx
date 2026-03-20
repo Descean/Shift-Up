@@ -13,6 +13,7 @@ import Link from "next/link";
 
 type Invoice = {
   id: string;
+  payId: string;       // ID réel du Payment (pour le lien PDF)
   service: string;
   type: string;
   amount: number;
@@ -53,6 +54,7 @@ export default function FacturesPage() {
           (p.payments ?? []).forEach((pay: any, idx: number) => {
             rows.push({
               id: `FAC-${p.id.slice(-4).toUpperCase()}-${idx + 1}`,
+              payId: pay.id,
               service: p.service?.title ?? "Service",
               type: idx === 0 ? "Acompte (40%)" : "Solde (60%)",
               amount: pay.amount,
@@ -144,7 +146,15 @@ export default function FacturesPage() {
                   </td>
                   <td className="px-6 py-4">
                     {inv.status === "COMPLETED" ? (
-                      <span className="text-gray-300 text-xs">PDF bientôt</span>
+                      <a
+                        href={`/api/payments/invoice?paymentId=${inv.payId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-accent hover:text-secondary text-xs font-semibold transition-colors"
+                      >
+                        <i className="fas fa-file-pdf" />
+                        Télécharger
+                      </a>
                     ) : inv.status === "PENDING" && inv.prestationId ? (
                       <Link
                         href={`/paiement?type=service&prestationId=${inv.prestationId}&amount=${inv.amount}`}

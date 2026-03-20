@@ -45,7 +45,17 @@
       "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(''resend:'', p.dependencies?.resend ?? ''NOT FOUND''\\); console.log\\(''zod:'', p.dependencies?.zod ?? ''NOT FOUND''\\)\")",
       "Bash(node -e \"const p=require\\(''./package.json''\\); console.log\\(JSON.stringify\\({scripts:p.scripts,postinstall:p.scripts?.postinstall},null,2\\)\\)\")",
       "Bash(grep -rn \"fedapay\\\\|FEDAPAY\" 'c:/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app' --include=*.ts --include=*.tsx)",
-      "Bash(npx ts-node:*)"
+      "Bash(npx ts-node:*)",
+      "Bash(wc -l \"app/\\(public\\)/blog/[slug]/page.tsx\")",
+      "Bash(npm audit:*)",
+      "Bash(find '/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app' -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(grep -r 'type Props.*params.*Promise' '/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app' --include=*.tsx --include=*.ts)",
+      "Bash(grep -r 'export async function.*{ params }' '/c/Users/DELL/Downloads/SHIFT_UP/Site SHIFT UP/app/api' --include=*.ts)",
+      "Bash(find ./app/api -name \"route.ts\" -exec sh -c 'echo \"\"\"\"=== {} ===\"\"\"\" && head -20 \"\"\"\"{}\"\"\"\"')",
+      "Bash(ls -la app/\\\\\\(public\\\\\\)/)",
+      "Bash(ls -la app/\\\\\\(auth\\\\\\)/)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(node -e \"require\\(''@tiptap/react''\\); require\\(''@fortawesome/fontawesome-free''\\); console.log\\(''OK''\\)\")"
     ]
   }
 }

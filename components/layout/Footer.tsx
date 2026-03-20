@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import NewsletterForm from "./NewsletterForm";
 
 const services = [
   "Conseil Stratégique",
@@ -168,19 +169,7 @@ export default function Footer() {
               <p className="font-syne font-bold text-lg">Restez informé</p>
               <p className="text-white/50 text-sm">Inscrivez-vous à notre newsletter</p>
             </div>
-            <form className="flex gap-3 w-full md:w-auto">
-              <input
-                type="email"
-                placeholder="votre@email.com"
-                className="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-accent w-full md:w-64 transition-colors"
-              />
-              <button
-                type="submit"
-                className="bg-accent hover:bg-accent/90 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap"
-              >
-                S'abonner
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
       </div>

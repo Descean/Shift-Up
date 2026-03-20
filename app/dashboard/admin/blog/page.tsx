@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import dynamic from "next/dynamic";
+
+const TiptapEditor = dynamic(() => import("@/components/admin/TiptapEditor"), { ssr: false });
 
 interface BlogPost {
   id: string;
@@ -210,16 +213,11 @@ export default function AdminBlogPage() {
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-none" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contenu (Markdown)
-                    <span className="ml-2 text-xs text-gray-400 font-normal">## Titre, ### Sous-titre, **gras**, - liste</span>
-                  </label>
-                  <textarea
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Contenu</label>
+                  <TiptapEditor
                     value={formContent}
-                    onChange={(e) => setFormContent(e.target.value)}
-                    rows={16}
-                    placeholder={`## Introduction\n\nVotre contenu ici...\n\n## Section 1\n\nTexte de la section.\n\n- Point 1\n- Point 2`}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-y font-mono"
+                    onChange={setFormContent}
+                    placeholder="Rédigez votre article ici…"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">

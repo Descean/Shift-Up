@@ -56,7 +56,7 @@ const nextConfig = {
   // ── Packages Node.js à ne pas bundler côté serveur ────────────────────────
   // Prisma et bcryptjs utilisent des binaires natifs — doivent rester externes.
   // (déplacé hors de experimental depuis Next.js 15)
-  serverExternalPackages: ["@prisma/client", "bcryptjs"],
+  serverExternalPackages: ["@prisma/client", "bcryptjs", "@react-pdf/renderer"],
 
   // ── En-têtes de sécurité HTTP ─────────────────────────────────────────────
   // Appliqués à toutes les routes (source: "/(.*)" = pattern regex catch-all).
@@ -78,14 +78,14 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: [
-              // Scripts : notre domaine + Google (Analytics) + Stripe + cdnjs (FontAwesome)
-              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://cdnjs.cloudflare.com",
-              // Styles : notre domaine + Google Fonts + cdnjs (FontAwesome)
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
+              // Scripts : notre domaine + Google (Analytics) + Stripe
+              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
+              // Styles : notre domaine + Google Fonts (FontAwesome est désormais self-hosted via npm)
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               // Images : notre domaine + Google Analytics + Supabase + data: URIs (SVG inline)
               "img-src 'self' data: https://www.google-analytics.com https://*.supabase.co https://lh3.googleusercontent.com",
-              // Fonts : notre domaine + Google Fonts
-              "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+              // Fonts : notre domaine + Google Fonts + fonts gstatic pour PDF invoices
+              "font-src 'self' https://fonts.gstatic.com",
               // Connexions fetch/WebSocket : notre domaine + APIs externes
               "connect-src 'self' https://www.google-analytics.com https://*.supabase.co https://api.fedapay.com",
               // Iframes : Stripe Payment Element (iframes de paiement sécurisé)
