@@ -77,41 +77,15 @@ async function handleFedaPay({ amount, reference, session, prestation, prestatio
     return NextResponse.json({ error: "FedaPay: " + errMsg }, { status: 400 });
   }
 
-  // FedaPay peut retourner l'ID dans plusieurs structures selon la version de l'API
-  const transactionId =
-    txData.v1?.transaction?.id   // format v1 enveloppé
-    ?? txData.transaction?.id    // format sans v1
-    ?? txData.id;                // format plat
+  // La clé de la réponse FedaPay est "v1/transaction" (avec slash)
+  const tx = txData["v1/transaction"];
+  const transactionId = tx?.id;
+  const checkoutUrl = tx?.payment_url; // payment_url est déjà dans la réponse
 
-  console.log("FedaPay transaction response:", JSON.stringify(txData));
-
-  if (!transactionId) {
-    console.error("FedaPay: transaction ID manquant. Réponse complète:", JSON.stringify(txData));
-    return NextResponse.json({ error: "FedaPay: ID de transaction non reçu. Vérifiez les logs Vercel." }, { status: 500 });
+  if (!transactionId || !checkoutUrl) {
+    console.error("FedaPay: réponse incomplète:", JSON.stringify(txData));
+    return NextResponse.json({ error: "FedaPay: réponse incomplète de l'API." }, { status: 500 });
   }
-
-  // Étape 2 : générer le token de checkout
-  const tokenRes = await fetch(`${apiBase}/v1/transactions/${transactionId}/token`, {
-    method: "POST",
-    headers: authHeader,
-  });
-
-  const tokenData = await tokenRes.json();
-
-  if (!tokenRes.ok) {
-    console.error("FedaPay token error:", JSON.stringify(tokenData));
-    const errMsg = tokenData.message || tokenData.error || JSON.stringify(tokenData);
-    return NextResponse.json({ error: "FedaPay token: " + errMsg }, { status: 400 });
-  }
-
-  const token = tokenData.v1?.token?.token || tokenData.token;
-  if (!token) {
-    console.error("FedaPay: token manquant dans la réponse", JSON.stringify(tokenData));
-    return NextResponse.json({ error: "FedaPay: token de paiement non reçu." }, { status: 500 });
-  }
-
-  // URL de checkout finale
-  const checkoutUrl = `${checkoutBase}/checkout/v1/token/${token}`;
 
   // Sauvegarder le paiement
   await prisma.payment.create({
