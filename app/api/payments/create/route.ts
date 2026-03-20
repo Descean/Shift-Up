@@ -50,22 +50,33 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleFedaPay({ amount, reference, session, prestation, prestationId }: any) {
+async function handleFedaPay({ amount, reference, session, prestation, prestationId, phone }: any) {
   const isLive = process.env.FEDAPAY_ENVIRONMENT === "live";
   const apiBase = isLive ? "https://api.fedapay.com" : "https://sandbox-api.fedapay.com";
-  const checkoutBase = isLive ? "https://web.fedapay.com" : "https://sandbox.fedapay.com";
   const authHeader = { Authorization: `Bearer ${process.env.FEDAPAY_SECRET_KEY}`, "Content-Type": "application/json" };
+
+  // Décompose le nom complet en prénom / nom
+  const fullName: string = session.user.name ?? "";
+  const spaceIndex = fullName.indexOf(" ");
+  const firstname = spaceIndex > 0 ? fullName.slice(0, spaceIndex) : fullName;
+  const lastname  = spaceIndex > 0 ? fullName.slice(spaceIndex + 1) : "";
+
+  // Construction du client FedaPay
+  const customer: Record<string, unknown> = { email: session.user.email };
+  if (firstname) customer.firstname = firstname;
+  if (lastname)  customer.lastname  = lastname;
+  if (phone)     customer.phone_number = { number: phone, country: "BJ" };
 
   // Étape 1 : créer la transaction
   const txRes = await fetch(`${apiBase}/v1/transactions`, {
     method: "POST",
     headers: authHeader,
     body: JSON.stringify({
-      description: `Paiement SHIFT UP — ${prestation.id}`,
+      description: `Prestation #${(prestation.id as string).slice(-8).toUpperCase()}`,
       amount,
       currency: { iso: "XOF" },
       callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/webhook/fedapay`,
-      customer: { email: session.user.email },
+      customer,
     }),
   });
 

@@ -14,6 +14,7 @@ interface Msg {
   date: string;
   isRead: boolean;
   isFromTeam: boolean;
+  isSent?: boolean;
 }
 
 export default function MessagesPage() {
@@ -156,33 +157,41 @@ export default function MessagesPage() {
                   <div className="p-6 border-b border-gray-100">
                     <h2 className="font-syne font-bold text-lg text-primary mb-1">{selected.subject}</h2>
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <span>De : <strong className="text-primary">{selected.from}</strong></span>
+                      {selected.isSent
+                        ? <span>Envoyé à : <strong className="text-primary">Équipe SHIFT UP</strong></span>
+                        : <span>De : <strong className="text-primary">{selected.from}</strong></span>
+                      }
                       <span>·</span>
                       <span>{selected.date}</span>
+                      {selected.isSent && (
+                        <span className="ml-auto text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Envoyé</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex-1 p-6 overflow-y-auto">
-                    <div className="flex gap-3 mb-6">
+                    <div className={`flex gap-3 mb-6 ${selected.isSent ? "flex-row-reverse" : ""}`}>
                       <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        {selected.initials}
+                        {selected.isSent ? "Moi" : selected.initials}
                       </div>
-                      <div className="bg-gray-50 rounded-2xl rounded-tl-sm p-4 text-sm text-gray-700 leading-relaxed max-w-lg">
+                      <div className={`rounded-2xl p-4 text-sm text-gray-700 leading-relaxed max-w-lg ${selected.isSent ? "bg-accent/10 rounded-tr-sm" : "bg-gray-50 rounded-tl-sm"}`}>
                         {selected.content}
                       </div>
                     </div>
                   </div>
-                  <div className="p-4 border-t border-gray-100">
-                    <div className="flex gap-3">
-                      <input type="text" placeholder="Répondre à ce message..." value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && sendReply()}
-                        className="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all" />
-                      <button disabled={!newMessage.trim() || sending} onClick={sendReply}
-                        className="w-11 h-11 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white hover:opacity-90 transition-opacity disabled:opacity-40">
-                        <i className="fas fa-paper-plane text-sm" />
-                      </button>
+                  {!selected.isSent && (
+                    <div className="p-4 border-t border-gray-100">
+                      <div className="flex gap-3">
+                        <input type="text" placeholder="Répondre à ce message..." value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && sendReply()}
+                          className="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all" />
+                        <button disabled={!newMessage.trim() || sending} onClick={sendReply}
+                          className="w-11 h-11 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white hover:opacity-90 transition-opacity disabled:opacity-40">
+                          <i className="fas fa-paper-plane text-sm" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               ) : composing ? (
                 <div className="p-6 flex flex-col h-full">

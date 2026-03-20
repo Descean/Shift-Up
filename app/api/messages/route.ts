@@ -14,28 +14,58 @@ export async function GET() {
   }
 
   try {
-    const messages = await prisma.message.findMany({
-      where: { recipientId: session.user.id },
-      include: { sender: { select: { name: true, role: true } } },
-      orderBy: { createdAt: "desc" },
-    });
+    const userId = session.user.id;
 
-    const items = messages.map((m) => ({
-      id: m.id,
-      from: m.sender.name ?? "Équipe SHIFT UP",
-      initials: (m.sender.name ?? "SU")
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2),
-      subject: m.subject ?? "(Sans objet)",
-      preview: m.content.slice(0, 80) + (m.content.length > 80 ? "…" : ""),
-      content: m.content,
-      date: new Date(m.createdAt).toLocaleDateString("fr-FR"),
-      isRead: m.isRead,
-      isFromTeam: ["ADMIN", "DEVELOPER"].includes(m.sender.role),
-    }));
+    // Pour les admins : seulement les messages reçus (des clients)
+    // Pour les clients : messages reçus + messages envoyés (pour voir leur fil de discussion)
+    const isAdmin = ["ADMIN", "DEVELOPER"].includes(session.user.role as string);
+
+    const [received, sent] = await Promise.all([
+      prisma.message.findMany({
+        where: { recipientId: userId },
+        include: { sender: { select: { name: true, role: true } } },
+        orderBy: { createdAt: "desc" },
+      }),
+      isAdmin
+        ? Promise.resolve([])
+        : prisma.message.findMany({
+            where: { senderId: userId },
+            include: { sender: { select: { name: true, role: true } } },
+            orderBy: { createdAt: "desc" },
+          }),
+    ]);
+
+    // Dédupliquer (au cas où un message serait à la fois envoyé et reçu par le même user)
+    const seen = new Set<string>();
+    const all = [...received, ...sent].filter((m) => {
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return true;
+    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const items = all.map((m) => {
+      const isSent = m.senderId === userId;
+      const displayName = isSent
+        ? "Moi → Équipe SHIFT UP"
+        : (m.sender.name ?? "Équipe SHIFT UP");
+      const initials = isSent
+        ? "→"
+        : (m.sender.name ?? "SU").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+
+      return {
+        id: m.id,
+        from: displayName,
+        initials,
+        subject: m.subject ?? "(Sans objet)",
+        preview: m.content.slice(0, 80) + (m.content.length > 80 ? "…" : ""),
+        content: m.content,
+        date: new Date(m.createdAt).toLocaleDateString("fr-FR"),
+        isRead: isSent ? true : m.isRead,
+        isFromTeam: !isSent && ["ADMIN", "DEVELOPER"].includes(m.sender.role),
+        isSent,
+        senderId: m.senderId,
+      };
+    });
 
     return NextResponse.json({ messages: items });
   } catch (error) {
