@@ -77,10 +77,17 @@ async function handleFedaPay({ amount, reference, session, prestation, prestatio
     return NextResponse.json({ error: "FedaPay: " + errMsg }, { status: 400 });
   }
 
-  const transactionId = txData.v1?.transaction?.id;
+  // FedaPay peut retourner l'ID dans plusieurs structures selon la version de l'API
+  const transactionId =
+    txData.v1?.transaction?.id   // format v1 enveloppé
+    ?? txData.transaction?.id    // format sans v1
+    ?? txData.id;                // format plat
+
+  console.log("FedaPay transaction response:", JSON.stringify(txData));
+
   if (!transactionId) {
-    console.error("FedaPay: transaction ID manquant dans la réponse", JSON.stringify(txData));
-    return NextResponse.json({ error: "FedaPay: ID de transaction non reçu." }, { status: 500 });
+    console.error("FedaPay: transaction ID manquant. Réponse complète:", JSON.stringify(txData));
+    return NextResponse.json({ error: "FedaPay: ID de transaction non reçu. Vérifiez les logs Vercel." }, { status: 500 });
   }
 
   // Étape 2 : générer le token de checkout
