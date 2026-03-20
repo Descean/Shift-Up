@@ -50,36 +50,63 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleFedaPay({ amount, reference, phone, session, prestation, prestationId }: any) {
-  // FedaPay API integration
-  const fedapayRes = await fetch(
-    `https://${process.env.FEDAPAY_ENVIRONMENT === "live" ? "api" : "sandbox-api"}.fedapay.com/v1/transactions`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.FEDAPAY_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        description: `Paiement SHIFT UP — ${prestation.id}`,
-        amount,
-        currency: { iso: "XOF" },
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/webhook/fedapay`,
-        customer: { email: session.user.email },
-      }),
-    }
-  );
+async function handleFedaPay({ amount, reference, session, prestation, prestationId }: any) {
+  const isLive = process.env.FEDAPAY_ENVIRONMENT === "live";
+  const apiBase = isLive ? "https://api.fedapay.com" : "https://sandbox-api.fedapay.com";
+  const checkoutBase = isLive ? "https://web.fedapay.com" : "https://sandbox.fedapay.com";
+  const authHeader = { Authorization: `Bearer ${process.env.FEDAPAY_SECRET_KEY}`, "Content-Type": "application/json" };
 
-  const fedaData = await fedapayRes.json();
+  // Étape 1 : créer la transaction
+  const txRes = await fetch(`${apiBase}/v1/transactions`, {
+    method: "POST",
+    headers: authHeader,
+    body: JSON.stringify({
+      description: `Paiement SHIFT UP — ${prestation.id}`,
+      amount,
+      currency: { iso: "XOF" },
+      callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/webhook/fedapay`,
+      customer: { email: session.user.email },
+    }),
+  });
 
-  if (!fedapayRes.ok) {
-    console.error("FedaPay error response:", JSON.stringify(fedaData));
-    console.error("FedaPay env:", { env: process.env.FEDAPAY_ENVIRONMENT, keyPresent: !!process.env.FEDAPAY_SECRET_KEY });
-    const errMsg = fedaData.message || fedaData.error || JSON.stringify(fedaData);
+  const txData = await txRes.json();
+
+  if (!txRes.ok) {
+    console.error("FedaPay create transaction error:", JSON.stringify(txData));
+    const errMsg = txData.message || txData.error || JSON.stringify(txData);
     return NextResponse.json({ error: "FedaPay: " + errMsg }, { status: 400 });
   }
 
-  // Save payment record
+  const transactionId = txData.v1?.transaction?.id;
+  if (!transactionId) {
+    console.error("FedaPay: transaction ID manquant dans la réponse", JSON.stringify(txData));
+    return NextResponse.json({ error: "FedaPay: ID de transaction non reçu." }, { status: 500 });
+  }
+
+  // Étape 2 : générer le token de checkout
+  const tokenRes = await fetch(`${apiBase}/v1/transactions/${transactionId}/token`, {
+    method: "POST",
+    headers: authHeader,
+  });
+
+  const tokenData = await tokenRes.json();
+
+  if (!tokenRes.ok) {
+    console.error("FedaPay token error:", JSON.stringify(tokenData));
+    const errMsg = tokenData.message || tokenData.error || JSON.stringify(tokenData);
+    return NextResponse.json({ error: "FedaPay token: " + errMsg }, { status: 400 });
+  }
+
+  const token = tokenData.v1?.token?.token || tokenData.token;
+  if (!token) {
+    console.error("FedaPay: token manquant dans la réponse", JSON.stringify(tokenData));
+    return NextResponse.json({ error: "FedaPay: token de paiement non reçu." }, { status: 500 });
+  }
+
+  // URL de checkout finale
+  const checkoutUrl = `${checkoutBase}/checkout/v1/token/${token}`;
+
+  // Sauvegarder le paiement
   await prisma.payment.create({
     data: {
       prestationId,
@@ -90,15 +117,11 @@ async function handleFedaPay({ amount, reference, phone, session, prestation, pr
       provider: "FEDAPAY",
       status: "PENDING",
       reference,
-      providerRef: String(fedaData.v1?.transaction?.id || fedaData.id),
+      providerRef: String(transactionId),
     },
   });
 
-  return NextResponse.json({
-    success: true,
-    checkoutUrl: fedaData.v1?.payment_url || fedaData.payment_url,
-    reference,
-  });
+  return NextResponse.json({ success: true, checkoutUrl, reference });
 }
 
 async function handleStripe({ amount, reference, session, prestation, prestationId }: any) {
