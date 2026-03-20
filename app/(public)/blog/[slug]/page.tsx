@@ -39,12 +39,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await prisma.blogPost.findUnique({
     where: { slug },
-    select: { title: true, excerpt: true },
+    select: { title: true, excerpt: true, category: true },
   });
   if (!post) return { title: "Article introuvable | SHIFT UP" };
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://shiftup.bj";
   return {
     title: `${post.title} | SHIFT UP Blog`,
-    description: post.excerpt,
+    description: post.excerpt ?? undefined,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt ?? undefined,
+      type: "article",
+      url: `${baseUrl}/blog/${slug}`,
+      siteName: "SHIFT UP",
+      images: [{ url: `${baseUrl}/assets/og-image.png`, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt ?? undefined,
+      images: [`${baseUrl}/assets/og-image.png`],
+    },
   };
 }
 
