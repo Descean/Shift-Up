@@ -18,9 +18,11 @@ async function requireAdmin() {
   return session;
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
+
+  const { id } = await params;
 
   try {
     const body = await req.json();
@@ -32,13 +34,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (!quote?.total) return NextResponse.json({ error: "Le devis doit contenir un montant total." }, { status: 400 });
 
     const prestation = await prisma.prestation.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { client: true, service: true },
     });
     if (!prestation) return NextResponse.json({ error: "Prestation introuvable." }, { status: 404 });
 
     const updated = await prisma.prestation.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         quote,
         plan,
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const depositAmount = quote.deposit ?? Math.round(quote.total * 0.4);
 
     if (clientEmail) {
-      sendDevisClient({ to: clientEmail, name: clientName, serviceName, depositAmount, prestationId: params.id })
+      sendDevisClient({ to: clientEmail, name: clientName, serviceName, depositAmount, prestationId: id })
         .catch((e) => console.error("Email error:", e));
     }
 

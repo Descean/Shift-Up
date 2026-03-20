@@ -16,25 +16,27 @@ async function requireAdmin() {
   return session;
 }
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
+  const { id } = await params;
   const phases = await prisma.prestationPhase.findMany({
-    where: { prestationId: params.id },
+    where: { prestationId: id },
     orderBy: { order: "asc" },
   });
   return NextResponse.json({ phases });
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
+  const { id } = await params;
   try {
     const { title, description, order, status, progress } = await req.json();
     const phase = await prisma.prestationPhase.create({
-      data: { prestationId: params.id, title, description, order: order ?? 0, status: status ?? "PENDING", progress: progress ?? 0 },
+      data: { prestationId: id, title, description, order: order ?? 0, status: status ?? "PENDING", progress: progress ?? 0 },
     });
     return NextResponse.json({ phase });
   } catch (error) {
@@ -43,10 +45,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
+  const { id } = await params;
   try {
     const { phaseId, status, progress, startDate, endDate } = await req.json();
     if (!phaseId) return NextResponse.json({ error: "phaseId requis." }, { status: 400 });
@@ -62,13 +65,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     });
 
     // Recalcule le progress global de la prestation
-    const allPhases = await prisma.prestationPhase.findMany({ where: { prestationId: params.id } });
+    const allPhases = await prisma.prestationPhase.findMany({ where: { prestationId: id } });
     const globalProgress = allPhases.length > 0
       ? Math.round(allPhases.reduce((s, p) => s + p.progress, 0) / allPhases.length)
       : 0;
 
     await prisma.prestation.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         globalProgress,
         ...(allPhases.every((p) => p.status === "DONE") && { status: "LIVRAISON" }),

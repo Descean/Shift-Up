@@ -16,22 +16,24 @@ async function requireAdmin() {
   return session;
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
+
+  const { id } = await params;
 
   try {
     const { title, description, type, url, isAvailable } = await req.json();
     if (!title?.trim()) return NextResponse.json({ error: "Titre requis." }, { status: 400 });
 
     const livrable = await prisma.livrable.create({
-      data: { prestationId: params.id, title, description, type: type ?? "LINK", url: url || null, isAvailable: isAvailable ?? false },
+      data: { prestationId: id, title, description, type: type ?? "LINK", url: url || null, isAvailable: isAvailable ?? false },
     });
 
     // Si disponible immédiatement → notifier le client
     if (isAvailable) {
       const prestation = await prisma.prestation.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: { client: true, service: true },
       });
       if (prestation?.client?.email) {
@@ -48,9 +50,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
+
+  const { id } = await params;
 
   try {
     const { livrableId, isAvailable, url } = await req.json();
@@ -67,7 +71,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // Email si on rend disponible maintenant
     if (isAvailable === true) {
       const prestation = await prisma.prestation.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: { client: true, service: true },
       });
       if (prestation?.client?.email) {

@@ -55,9 +55,8 @@ const nextConfig = {
 
   // ── Packages Node.js à ne pas bundler côté serveur ────────────────────────
   // Prisma et bcryptjs utilisent des binaires natifs — doivent rester externes.
-  experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
-  },
+  // (déplacé hors de experimental depuis Next.js 15)
+  serverExternalPackages: ["@prisma/client", "bcryptjs"],
 
   // ── En-têtes de sécurité HTTP ─────────────────────────────────────────────
   // Appliqués à toutes les routes (source: "/(.*)" = pattern regex catch-all).

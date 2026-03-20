@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient as createSSRServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -17,7 +17,19 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Server Component client (uses cookies for auth)
-export function createServerClient() {
-  return createServerComponentClient({ cookies });
+// Server Component client (uses cookies for auth) — @supabase/ssr
+export async function createServerClient() {
+  const cookieStore = await cookies();
+  return createSSRServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() { return cookieStore.getAll(); },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch { /* Server Component — les cookies ne peuvent pas être définis */ }
+      },
+    },
+  });
 }
