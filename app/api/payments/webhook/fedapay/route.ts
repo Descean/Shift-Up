@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac } from "crypto";
 import prisma from "@/lib/prisma";
 import { getPhaseTemplates } from "@/lib/service-templates";
 
@@ -97,7 +98,27 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
+    // Lire le corps brut une seule fois (nécessaire pour la vérification HMAC)
+    const rawBody = await req.text();
+
+    // Vérification de la signature FedaPay (si la clé secrète est configurée ET si FedaPay envoie le header)
+    const webhookSecret = process.env.FEDAPAY_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const signature = req.headers.get("x-fedapay-signature") ?? req.headers.get("x-webhook-signature");
+      if (signature) {
+        // FedaPay envoie une signature → on la vérifie
+        const expectedSig = createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
+        if (expectedSig !== signature) {
+          console.error("FedaPay webhook POST: signature invalide — requête rejetée");
+          return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+        }
+      } else {
+        // Pas de header de signature — FedaPay ne l'envoie pas toujours (on laisse passer)
+        console.warn("FedaPay webhook POST: aucun header de signature reçu");
+      }
+    }
+
+    const payload = JSON.parse(rawBody);
 
     // FedaPay webhook payload: { name: "transaction.approved", entity: { id, status, ... } }
     // (différent du champ "transaction" — c'est "entity")
