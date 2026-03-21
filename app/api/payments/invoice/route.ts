@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
 
     const buffer = await renderToBuffer(InvoicePDF({ data }));
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
