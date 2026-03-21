@@ -6,7 +6,7 @@
  * Structure :
  *  - `sections` : tableau de 12 articles (id, titre, contenu) couvrant :
  *    objet, identification du prestataire, description des services, formation
- *    du contrat, tarifs & modalités de paiement (acompte 40% / solde 60%),
+ *    du contrat, tarifs & modalités de paiement (acompte 60% / solde 40%),
  *    exécution, livraison, annulation, responsabilité, données personnelles,
  *    droit applicable (droit béninois + OHADA), dispositions diverses.
  *  - La sidebar est sticky sur desktop avec la table des matières.
@@ -70,7 +70,7 @@ Les caractéristiques détaillées de chaque service sont disponibles sur la pag
 1. **La demande** : le Client soumet sa demande via le formulaire en ligne, par email ou lors d'un rendez-vous.
 2. **Le devis** : SHIFT UP établit un devis personnalisé précisant la nature de la prestation, le délai et le montant.
 3. **L'acceptation** : le Client retourne le devis signé (ou accepte par email explicite).
-4. **L'acompte** : le versement de l'acompte (40% du montant total) vaut confirmation définitive de la commande et déclenche le démarrage de la prestation.
+4. **L'acompte** : le versement de l'acompte (60% du montant total) vaut confirmation définitive de la commande et déclenche le démarrage de la prestation.
 
 Toute commande n'est définitivement validée qu'à réception de l'acompte. SHIFT UP se réserve le droit de refuser toute commande sans obligation de justification.`,
   },
@@ -79,9 +79,9 @@ Toute commande n'est définitivement validée qu'à réception de l'acompte. SHI
     title: "Article 5 — Tarifs et modalités de paiement",
     content: `**Prix** : Les tarifs affichés sur le site sont indicatifs et exprimés en Francs CFA (FCFA) hors taxes. Un devis personnalisé est établi pour chaque prestation.
 
-**Acompte** : 40% du montant total de la prestation est exigible à la signature du devis, avant tout démarrage de travaux.
+**Acompte** : 60% du montant total de la prestation est exigible à la signature du devis, avant tout démarrage de travaux.
 
-**Solde** : Le solde (60%) est dû à la livraison finale du service, avant remise des livrables définitifs.
+**Solde** : Le solde (40%) est dû à la livraison finale du service, avant remise des livrables définitifs.
 
 **Modes de paiement acceptés** :
 - MTN Mobile Money (Bénin)

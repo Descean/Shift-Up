@@ -20,9 +20,9 @@ const servicesList = [
 const steps = [
   { icon: "fa-file-alt", label: "Votre demande", desc: "Décrivez votre besoin" },
   { icon: "fa-calculator", label: "Devis sous 48h", desc: "Nous préparons votre offre" },
-  { icon: "fa-hand-holding-usd", label: "Acompte 40%", desc: "Validation & démarrage" },
+  { icon: "fa-hand-holding-usd", label: "Acompte 60%", desc: "Validation & démarrage" },
   { icon: "fa-rocket", label: "Prestation", desc: "Réalisation de votre projet" },
-  { icon: "fa-flag-checkered", label: "Livraison & solde", desc: "60% restants à la livraison" },
+  { icon: "fa-flag-checkered", label: "Livraison & solde", desc: "40% restants à la livraison" },
 ];
 
 function SubscriptionForm() {

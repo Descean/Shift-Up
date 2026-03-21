@@ -782,7 +782,7 @@ export default function ServicesPage() {
                     </div>
                     <div className="flex items-center gap-2 text-white/50 text-xs">
                       <i className="fas fa-lock-open text-accent" />
-                      <span>Acompte <strong className="text-white">40%</strong> au démarrage</span>
+                      <span>Acompte <strong className="text-white">60%</strong> au démarrage</span>
                     </div>
                   </div>
                 </div>

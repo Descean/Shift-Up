@@ -9,36 +9,27 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
-
-Font.register({
-  family: "Inter",
-  fonts: [
-    { src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff", fontWeight: 400 },
-    { src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff", fontWeight: 700 },
-  ],
-});
 
 const PRIMARY = "#0A2533";
 const ACCENT  = "#1E9FD4";
 const LIGHT   = "#F8FAFC";
 
 const s = StyleSheet.create({
-  page:          { fontFamily: "Inter", fontSize: 9, color: PRIMARY, backgroundColor: "#FFFFFF", padding: 40 },
+  page:          { fontFamily: "Helvetica", fontSize: 9, color: PRIMARY, backgroundColor: "#FFFFFF", padding: 40 },
   header:        { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 },
   logoBox:       { backgroundColor: ACCENT, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
-  logoText:      { color: "#FFFFFF", fontWeight: 700, fontSize: 16, letterSpacing: 1 },
-  invoiceTitle:  { fontSize: 20, fontWeight: 700, color: PRIMARY },
+  logoText:      { color: "#FFFFFF", fontFamily: "Helvetica-Bold", fontSize: 16, letterSpacing: 1 },
+  invoiceTitle:  { fontSize: 20, fontFamily: "Helvetica-Bold", color: PRIMARY },
   invoiceNum:    { fontSize: 9, color: "#64748B", marginTop: 2 },
   divider:       { borderBottomWidth: 1, borderBottomColor: "#E2E8F0", marginVertical: 20 },
   row2:          { flexDirection: "row", gap: 20, marginBottom: 24 },
   infoBox:       { flex: 1, backgroundColor: LIGHT, borderRadius: 8, padding: 12 },
-  infoLabel:     { fontSize: 7, color: "#94A3B8", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
-  infoName:      { fontWeight: 700, fontSize: 10, marginBottom: 2 },
+  infoLabel:     { fontSize: 7, color: "#94A3B8", fontFamily: "Helvetica-Bold", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
+  infoName:      { fontFamily: "Helvetica-Bold", fontSize: 10, marginBottom: 2 },
   infoLine:      { color: "#475569", marginBottom: 1.5 },
   tableHead:     { flexDirection: "row", backgroundColor: PRIMARY, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 6, marginBottom: 2 },
-  tableHeadText: { color: "#FFFFFF", fontWeight: 700, fontSize: 8 },
+  tableHeadText: { color: "#FFFFFF", fontFamily: "Helvetica-Bold", fontSize: 8 },
   tableRow:      { flexDirection: "row", paddingHorizontal: 10, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#F1F5F9" },
   colDesc:       { flex: 1 },
   colQty:        { width: 50, textAlign: "center" },
@@ -48,12 +39,12 @@ const s = StyleSheet.create({
   totalBox:      { width: 200 },
   totalRow:      { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
   totalLabel:    { color: "#64748B" },
-  totalValue:    { fontWeight: 700 },
+  totalValue:    { fontFamily: "Helvetica-Bold" },
   grandTotal:    { flexDirection: "row", justifyContent: "space-between", backgroundColor: ACCENT, borderRadius: 6, padding: 10, marginTop: 6 },
-  grandLabel:    { color: "#FFFFFF", fontWeight: 700, fontSize: 10 },
-  grandValue:    { color: "#FFFFFF", fontWeight: 700, fontSize: 10 },
+  grandLabel:    { color: "#FFFFFF", fontFamily: "Helvetica-Bold", fontSize: 10 },
+  grandValue:    { color: "#FFFFFF", fontFamily: "Helvetica-Bold", fontSize: 10 },
   badgeRow:      { flexDirection: "row", marginTop: 24, gap: 8 },
-  badge:         { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, fontSize: 8, fontWeight: 700 },
+  badge:         { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, fontSize: 8, fontFamily: "Helvetica-Bold" },
   badgePaid:     { backgroundColor: "#D1FAE5", color: "#065F46" },
   badgePending:  { backgroundColor: "#FEF3C7", color: "#92400E" },
   footer:        { position: "absolute", bottom: 30, left: 40, right: 40, borderTopWidth: 1, borderTopColor: "#E2E8F0", paddingTop: 10, flexDirection: "row", justifyContent: "space-between" },
@@ -131,7 +122,7 @@ export function InvoicePDF({ data }: { data: InvoiceData }) {
         </View>
         <View style={s.tableRow}>
           <View style={s.colDesc}>
-            <Text style={{ fontWeight: 700 }}>{data.prestation.title}</Text>
+            <Text style={{ fontFamily: "Helvetica-Bold" }}>{data.prestation.title}</Text>
             {data.prestation.sector && (
               <Text style={{ color: "#94A3B8", fontSize: 7.5, marginTop: 1 }}>Secteur : {data.prestation.sector}</Text>
             )}
@@ -139,7 +130,7 @@ export function InvoicePDF({ data }: { data: InvoiceData }) {
           </View>
           <Text style={{ ...s.colQty, ...s.infoLine }}>1</Text>
           <Text style={{ ...s.colUnit, ...s.infoLine }}>{fmt(data.amount, data.currency)}</Text>
-          <Text style={{ ...s.colTotal, fontWeight: 700 }}>{fmt(data.amount, data.currency)}</Text>
+          <Text style={{ ...s.colTotal, fontFamily: "Helvetica-Bold" }}>{fmt(data.amount, data.currency)}</Text>
         </View>
 
         {/* Totals */}
@@ -165,7 +156,7 @@ export function InvoicePDF({ data }: { data: InvoiceData }) {
           <View style={[s.badge, isPaid ? s.badgePaid : s.badgePending]}>
             <Text>{isPaid ? "✓ Paiement reçu" : "En attente de paiement"}</Text>
           </View>
-          <View style={[s.badge, { backgroundColor: "#EFF6FF", color: "#1E40AF" }]}>
+          <View style={[s.badge, { backgroundColor: "#EFF6FF", color: "#1E40AF" }]}> 
             <Text>Via {data.provider} ({data.method})</Text>
           </View>
         </View>

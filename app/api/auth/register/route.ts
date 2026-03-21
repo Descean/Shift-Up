@@ -12,6 +12,10 @@ const schema = z.object({
   role: z.enum(["CLIENT", "APPORTEUR", "ETUDIANT"]),
   affiliationCode: z.string().optional(),
   ifu: z.string().optional(),
+  companyName: z.string().optional(),
+  rccm: z.string().optional(),
+  cnss: z.string().optional(),
+  rib: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -50,6 +54,11 @@ export async function POST(req: NextRequest) {
         data: {
           userId: user.id,
           affiliatedBy: data.affiliationCode || null,
+          companyName: data.companyName || null,
+          rccm: data.rccm || null,
+          ifu: data.ifu || null,
+          cnss: data.cnss || null,
+          rib: data.rib || null,
         },
       });
     } else if (data.role === "APPORTEUR") {

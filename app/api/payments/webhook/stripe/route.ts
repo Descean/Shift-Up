@@ -94,10 +94,10 @@ export async function POST(req: NextRequest) {
             /**
              * Règle d'avancement automatique :
              * Si la prestation était EN_ATTENTE et que le client a payé au moins
-             * 40% du montant total → passer en EN_COURS (début des travaux).
-             * Cela correspond à l'acompte de 40% défini dans les CGV.
+             * 60% du montant total → passer en EN_COURS (début des travaux).
+             * Cela correspond à l'acompte de 60% défini dans les CGV.
              */
-            if (prestation.status === "EN_ATTENTE" && totalPaid >= prestation.amount * 0.4) {
+            if (prestation.status === "EN_ATTENTE" && totalPaid >= prestation.amount * 0.6) {
               await prisma.prestation.update({
                 where: { id: prestationId },
                 data:  { status: "EN_COURS" },

@@ -278,6 +278,11 @@ export const registerSchema = z.object({
   affiliationCode: affiliationCodeSchema,
   ifu:             ifuOptionalSchema,
   acceptTerms:     z.boolean().refine((v) => v === true, "Vous devez accepter les conditions d'utilisation."),
+  // Informations entreprise (optionnelles, CLIENT uniquement)
+  companyName:     z.string().max(150).optional().or(z.literal("")),
+  rccm:            z.string().max(50).optional().or(z.literal("")),
+  cnss:            z.string().max(50).optional().or(z.literal("")),
+  rib:             z.string().max(80).optional().or(z.literal("")),
 }).refine(
   (d) => d.password === d.confirmPassword,
   { message: "Les mots de passe ne correspondent pas.", path: ["confirmPassword"] }

@@ -2,7 +2,7 @@
  * app/(public)/paiement/page.tsx — Page de paiement universelle SHIFT UP
  *
  * Gère deux types de transactions :
- *  - "service"  : acompte (40%) ou solde (60%) d'une prestation
+ *  - "service"  : acompte (60%) ou solde (40%) d'une prestation
  *  - "boutique" : achat d'un produit numérique
  *
  * Paramètres URL :

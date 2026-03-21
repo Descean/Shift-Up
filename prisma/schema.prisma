@@ -99,11 +99,17 @@ model User {
 }
 
 model ClientProfile {
-  id          String @id @default(cuid())
-  userId      String @unique
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   affiliatedBy String?
-  totalSpent  Float  @default(0)
+  totalSpent   Float   @default(0)
+  // Informations entreprise
+  companyName  String?
+  rccm         String?
+  ifu          String?
+  cnss         String?
+  rib          String?
 }
 
 model ApporteurProfile {
@@ -273,16 +279,18 @@ model PrestationPhase {
 }
 
 model Livrable {
-  id           String     @id @default(cuid())
-  prestationId String
-  prestation   Prestation @relation(fields: [prestationId], references: [id], onDelete: Cascade)
-  title        String
-  description  String?
-  type         String     // PDF | LINK | VIDEO | CODE | DESIGN | ARCHIVE
-  url          String?
-  isAvailable  Boolean    @default(false)
-  viewedAt     DateTime?
-  createdAt    DateTime   @default(now())
+  id             String     @id @default(cuid())
+  prestationId   String
+  prestation     Prestation @relation(fields: [prestationId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?
+  type           String     // PDF | LINK | VIDEO | CODE | DESIGN | ARCHIVE
+  url            String?
+  isAvailable    Boolean    @default(false)
+  viewedAt       DateTime?
+  observation    String?    // Observation client
+  observationAt  DateTime?
+  createdAt      DateTime   @default(now())
 }
 
 // ============================================================

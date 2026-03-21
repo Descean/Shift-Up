@@ -30,9 +30,11 @@ const DOWNLOAD_LINKS: Record<string, { url: string; filename: string }> = {
 function SuccesContent() {
   const params      = useSearchParams();
   const type        = params.get("type") || "boutique";
+  const step        = params.get("step") || "acompte"; // "acompte" | "solde"
   const productId   = params.get("id") || "";
   const productName = params.get("name") || "votre commande";
   const ref         = params.get("ref") || "";
+  const isSolde     = step === "solde";
 
   const download = DOWNLOAD_LINKS[productId];
 
@@ -55,11 +57,13 @@ function SuccesContent() {
         </motion.div>
 
         <h1 className="font-syne font-black text-2xl text-primary mb-2">
-          Paiement confirmé !
+          {type === "service" && isSolde ? "Prestation soldée !" : "Paiement confirmé !"}
         </h1>
         <p className="text-gray-500 mb-6">
-          {type === "service"
-            ? "Votre acompte a bien été reçu. Notre équipe prendra contact avec vous très prochainement."
+          {type === "service" && isSolde
+            ? "Votre solde a bien été reçu. Les livrables définitifs vont vous être remis très prochainement."
+            : type === "service"
+            ? "Votre acompte de 60% a bien été reçu. Notre équipe prendra contact avec vous sous 48h."
             : `Merci pour votre achat. "${productName}" est prêt à être téléchargé.`}
         </p>
 
@@ -91,8 +95,8 @@ function SuccesContent() {
           </div>
         )}
 
-        {/* ── Service : prochaines étapes ─────────────────────────────────── */}
-        {type === "service" && (
+        {/* ── Service acompte : prochaines étapes ─────────────────────────── */}
+        {type === "service" && !isSolde && (
           <div className="bg-accent/5 rounded-xl p-4 mb-6 text-left">
             <p className="text-sm font-semibold text-accent mb-3">
               <i className="fas fa-list-check mr-2" />
@@ -101,7 +105,7 @@ function SuccesContent() {
             <ol className="space-y-2 text-sm text-gray-600">
               <li className="flex gap-2">
                 <span className="w-5 h-5 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
-                Acompte 40% reçu
+                Acompte 60% reçu
               </li>
               <li className="flex gap-2">
                 <span className="w-5 h-5 bg-blue-100 text-blue-700 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
@@ -109,7 +113,31 @@ function SuccesContent() {
               </li>
               <li className="flex gap-2">
                 <span className="w-5 h-5 bg-gray-100 text-gray-500 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
-                Paiement du solde 60% à la livraison
+                Paiement du solde 40% à la livraison
+              </li>
+            </ol>
+          </div>
+        )}
+
+        {/* ── Service solde : récapitulatif final ──────────────────────────── */}
+        {type === "service" && isSolde && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-left">
+            <p className="text-sm font-semibold text-green-700 mb-3">
+              <i className="fas fa-circle-check mr-2" />
+              Prestation complètement soldée
+            </p>
+            <ol className="space-y-2 text-sm text-gray-600">
+              <li className="flex gap-2">
+                <span className="w-5 h-5 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
+                Acompte 60% — réglé
+              </li>
+              <li className="flex gap-2">
+                <span className="w-5 h-5 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
+                Solde 40% — réglé
+              </li>
+              <li className="flex gap-2">
+                <span className="w-5 h-5 bg-accent/20 text-accent text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">→</span>
+                Remise des livrables définitifs en cours
               </li>
             </ol>
           </div>

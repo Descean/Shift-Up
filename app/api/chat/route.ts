@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Anthropic from "@anthropic-ai/sdk";
 import prisma from "@/lib/prisma";
 
-const SHIFT_UP_CONTEXT = `
-Tu es l'assistant IA officiel de SHIFT UP, un cabinet de conseil stratégique et solutions numériques basé à Abomey-Calavi, Bénin.
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const SHIFT_UP_CONTEXT = `Tu es l'assistant IA officiel de SHIFT UP, un cabinet de conseil stratégique et solutions numériques basé à Abomey-Calavi, Bénin.
 
 IDENTITÉ DE L'ENTREPRISE :
 - Nom : SHIFT UP
@@ -24,46 +25,36 @@ SERVICES (6 domaines) :
 5. Juridique & Fiscal : Création entreprise (100 000+ FCFA), Conformité OHADA, Contrats (50 000+ FCFA)
 6. Finance & Comptabilité : Plan financier (200 000+ FCFA), Levée de fonds, Comptabilité externalisée (75 000/mois)
 
-PAIEMENT : Acompte 40% à la souscription, solde à la livraison. MTN Mobile Money, Moov, Visa/Mastercard.
+PAIEMENT : Acompte 60% à la souscription, solde 40% à la livraison. MTN Mobile Money, Moov, Visa/Mastercard.
 
-TON RÔLE : Accueillir chaleureusement les visiteurs, comprendre leurs besoins, présenter les services appropriés, et les encourager à s'inscrire ou prendre un RDV. Sois professionnel, bienveillant et orienté solutions. Réponds TOUJOURS en français sauf si l'utilisateur écrit en anglais. Sois concis (max 3-4 phrases par réponse).
-`;
+TON RÔLE : Accueillir chaleureusement les visiteurs, comprendre leurs besoins, présenter les services appropriés, et les encourager à s'inscrire ou prendre un RDV. Sois professionnel, bienveillant et orienté solutions. Réponds TOUJOURS en français sauf si l'utilisateur écrit en anglais. Sois concis (max 3-4 phrases par réponse).`;
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, sessionId, page } = await req.json();
+    const { messages, sessionId } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: "Messages requis" }, { status: 400 });
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Convert messages to Anthropic format (user/assistant only)
+    const history = messages.map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.content,
+    })) as { role: "user" | "assistant"; content: string }[];
 
-    // Build conversation history for Gemini
-    const history = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-    const chat = model.startChat({
-      history: [
-        { role: "user", parts: [{ text: SHIFT_UP_CONTEXT }] },
-        { role: "model", parts: [{ text: "Compris ! Je suis l'assistant SHIFT UP, prêt à aider vos visiteurs." }] },
-        ...history,
-      ],
-      generationConfig: {
-        maxOutputTokens: 400,
-        temperature: 0.7,
-      },
+    const result = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 400,
+      system: SHIFT_UP_CONTEXT,
+      messages: history,
     });
 
-    const lastMessage = messages[messages.length - 1]?.content;
-    const result = await chat.sendMessage(lastMessage);
-    const response = result.response.text();
+    const response = result.content[0].type === "text" ? result.content[0].text : "";
 
     // Save to database for analytics
-    if (sessionId) {
+    if (sessionId && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]?.content;
       try {
         await prisma.chatMessage.createMany({
           data: [

@@ -56,7 +56,7 @@ export default function FacturesPage() {
               id: `FAC-${p.id.slice(-4).toUpperCase()}-${idx + 1}`,
               payId: pay.id,
               service: p.service?.title ?? "Service",
-              type: idx === 0 ? "Acompte (40%)" : "Solde (60%)",
+              type: idx === 0 ? "Acompte (60%)" : "Solde (40%)",
               amount: pay.amount,
               status: pay.status,
               method: `${pay.provider} (${pay.method})`,

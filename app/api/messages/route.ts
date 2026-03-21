@@ -1,73 +1,108 @@
 /**
- * GET  /api/messages  — Messages reçus par l'utilisateur connecté
- * POST /api/messages  — Envoyer un message à l'équipe SHIFT UP (admins)
+ * GET  /api/messages           — Liste des conversations (groupées par contact)
+ * GET  /api/messages?thread=id — Messages d'une conversation avec un contact
+ * POST /api/messages           — Envoyer un message à l'équipe SHIFT UP (admins)
+ * PATCH /api/messages          — Marquer un message comme lu
  */
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   }
 
+  const userId = session.user.id;
+  const threadWith = new URL(req.url).searchParams.get("thread");
+  const isAdmin = ["ADMIN", "DEVELOPER"].includes(session.user.role as string);
+
   try {
-    const userId = session.user.id;
-
-    // Pour les admins : seulement les messages reçus (des clients)
-    // Pour les clients : messages reçus + messages envoyés (pour voir leur fil de discussion)
-    const isAdmin = ["ADMIN", "DEVELOPER"].includes(session.user.role as string);
-
-    const [received, sent] = await Promise.all([
-      prisma.message.findMany({
-        where: { recipientId: userId },
+    // ── Mode thread : retourner tous les messages d'une conversation ──────
+    if (threadWith) {
+      const messages = await prisma.message.findMany({
+        where: {
+          OR: [
+            { senderId: userId, recipientId: threadWith },
+            { senderId: threadWith, recipientId: userId },
+          ],
+        },
         include: { sender: { select: { name: true, role: true } } },
-        orderBy: { createdAt: "desc" },
-      }),
-      isAdmin
-        ? Promise.resolve([])
-        : prisma.message.findMany({
-            where: { senderId: userId },
-            include: { sender: { select: { name: true, role: true } } },
-            orderBy: { createdAt: "desc" },
-          }),
-    ]);
+        orderBy: { createdAt: "asc" },
+      });
 
-    // Dédupliquer (au cas où un message serait à la fois envoyé et reçu par le même user)
-    const seen = new Set<string>();
-    const all = [...received, ...sent].filter((m) => {
-      if (seen.has(m.id)) return false;
-      seen.add(m.id);
-      return true;
-    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      // Mark received messages as read
+      await prisma.message.updateMany({
+        where: { senderId: threadWith, recipientId: userId, isRead: false },
+        data: { isRead: true },
+      });
 
-    const items = all.map((m) => {
-      const isSent = m.senderId === userId;
-      const displayName = isSent
-        ? "Moi → Équipe SHIFT UP"
-        : (m.sender.name ?? "Équipe SHIFT UP");
-      const initials = isSent
-        ? "→"
-        : (m.sender.name ?? "SU").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
-
-      return {
+      const items = messages.map((m) => ({
         id: m.id,
-        from: displayName,
-        initials,
-        subject: m.subject ?? "(Sans objet)",
-        preview: m.content.slice(0, 80) + (m.content.length > 80 ? "…" : ""),
         content: m.content,
-        date: new Date(m.createdAt).toLocaleDateString("fr-FR"),
-        isRead: isSent ? true : m.isRead,
-        isFromTeam: !isSent && ["ADMIN", "DEVELOPER"].includes(m.sender.role),
-        isSent,
-        senderId: m.senderId,
-      };
+        subject: m.subject,
+        isMine: m.senderId === userId,
+        senderName: m.sender.name ?? "Inconnu",
+        date: m.createdAt.toISOString(),
+        isRead: m.isRead,
+      }));
+
+      return NextResponse.json({ messages: items });
+    }
+
+    // ── Mode conversations : retourner la liste des contacts ──────────────
+    // Pour chaque conversation, on veut : contact info, dernier message, nb non lus
+    const allMessages = await prisma.message.findMany({
+      where: {
+        OR: [{ senderId: userId }, { recipientId: userId }],
+      },
+      include: {
+        sender: { select: { id: true, name: true, role: true } },
+        recipient: { select: { id: true, name: true, role: true } },
+      },
+      orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ messages: items });
+    // Group by conversation partner
+    const contactMap = new Map<string, {
+      id: string;
+      name: string;
+      role: string;
+      lastMessage: string;
+      lastDate: string;
+      unread: number;
+    }>();
+
+    for (const m of allMessages) {
+      // Determine the "other" party
+      const other = m.senderId === userId ? m.recipient : m.sender;
+      if (!other) continue;
+
+      // Skip if admin sees their own messages to other admins (show only client messages)
+      if (isAdmin && other.role !== "CLIENT") continue;
+
+      if (!contactMap.has(other.id)) {
+        contactMap.set(other.id, {
+          id: other.id,
+          name: other.name ?? "Inconnu",
+          role: other.role,
+          lastMessage: m.content.slice(0, 60) + (m.content.length > 60 ? "…" : ""),
+          lastDate: m.createdAt.toISOString(),
+          unread: (!m.isRead && m.recipientId === userId) ? 1 : 0,
+        });
+      } else {
+        // Count additional unread
+        const existing = contactMap.get(other.id)!;
+        if (!m.isRead && m.recipientId === userId) {
+          existing.unread += 1;
+        }
+      }
+    }
+
+    const conversations = Array.from(contactMap.values());
+    return NextResponse.json({ conversations });
   } catch (error) {
     console.error("GET /api/messages error:", error);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
@@ -81,29 +116,41 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { subject, content } = await req.json();
+    const { subject, content, recipientId } = await req.json();
     if (!content?.trim()) {
       return NextResponse.json({ error: "Contenu requis." }, { status: 400 });
     }
 
-    // Envoyer à tous les admins
-    const admins = await prisma.user.findMany({
-      where: { role: { in: ["ADMIN", "DEVELOPER"] } },
-      select: { id: true },
-    });
+    if (recipientId) {
+      // Direct message to a specific user
+      await prisma.message.create({
+        data: {
+          senderId: session.user.id,
+          recipientId,
+          subject: subject ?? null,
+          content,
+        },
+      });
+    } else {
+      // Send to all admins (client → team)
+      const admins = await prisma.user.findMany({
+        where: { role: { in: ["ADMIN", "DEVELOPER"] } },
+        select: { id: true },
+      });
 
-    await Promise.all(
-      admins.map((admin) =>
-        prisma.message.create({
-          data: {
-            senderId: session.user.id,
-            recipientId: admin.id,
-            subject: subject ?? null,
-            content,
-          },
-        })
-      )
-    );
+      await Promise.all(
+        admins.map((admin) =>
+          prisma.message.create({
+            data: {
+              senderId: session.user.id,
+              recipientId: admin.id,
+              subject: subject ?? null,
+              content,
+            },
+          })
+        )
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

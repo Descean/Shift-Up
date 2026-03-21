@@ -301,7 +301,7 @@ function TabDevis({
           ))}
           <div className="border-t border-gray-200 pt-2 mt-2 space-y-1">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Acompte (40%)</span>
+              <span className="text-gray-500">Acompte (60%)</span>
               <span className="text-purple-600 font-semibold">
                 {q.deposit.toLocaleString()} F
               </span>
@@ -370,7 +370,7 @@ function TabDevis({
       {/* Récapitulatif */}
       <div className="bg-gray-50 rounded-xl p-4 space-y-1.5">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Acompte (40%)</span>
+          <span className="text-gray-500">Acompte (60%)</span>
           <span className="font-semibold text-purple-600">{deposit.toLocaleString()} F</span>
         </div>
         <div className="flex justify-between text-sm font-bold border-t border-gray-200 pt-1.5">

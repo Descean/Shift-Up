@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
-interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; }
+interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; observation?: string | null; }
 interface QuoteItem { label: string; amount: number; }
 interface Quote { items: QuoteItem[]; deposit: number; total: number; validity?: string; terms?: string; }
 interface Prestation {
@@ -72,7 +73,7 @@ export default function ClientPrestationsPage() {
 
   async function pay(prestationId: string, amount: number, label: string, isDeposit: boolean) {
     setPaying(true);
-    const params = new URLSearchParams({ type: "service", prestationId, amount: String(amount), label: isDeposit ? `Acompte 40% — ${label}` : `Solde — ${label}` });
+    const params = new URLSearchParams({ type: "service", prestationId, amount: String(amount), label: isDeposit ? `Acompte 60% — ${label}` : `Solde — ${label}`, ...(isDeposit ? {} : { step: "solde" }) });
     router.push(`/paiement?${params.toString()}`);
   }
 
@@ -180,7 +181,7 @@ export default function ClientPrestationsPage() {
                           <td className="pt-3 text-right font-black text-primary text-base">{detail.quote.total.toLocaleString()} XOF</td>
                         </tr>
                         <tr>
-                          <td className="text-sm text-gray-500">Acompte pour démarrer (40%)</td>
+                          <td className="text-sm text-gray-500">Acompte pour démarrer (60%)</td>
                           <td className="text-right font-bold text-accent">{detail.quote.deposit.toLocaleString()} XOF</td>
                         </tr>
                       </tfoot>
@@ -244,24 +245,7 @@ export default function ClientPrestationsPage() {
 
               {/* Livrables disponibles */}
               {detail.livrables.filter((l) => l.isAvailable).length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Livrables disponibles</p>
-                  <div className="space-y-2">
-                    {detail.livrables.filter((l) => l.isAvailable).map((l) => (
-                      <a key={l.id} href={l.url ?? "#"} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-3 hover:bg-green-100 transition-colors">
-                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                          <i className={`fas fa-${l.type === "PDF" ? "file-pdf" : l.type === "VIDEO" ? "video" : l.type === "CODE" ? "code" : "external-link-alt"} text-green-600 text-sm`} />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-green-800">{l.title}</p>
-                          <p className="text-xs text-green-600">{l.type}</p>
-                        </div>
-                        <i className="fas fa-arrow-down text-green-600 text-xs" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
+                <LivrablesSection livrables={detail.livrables.filter((l) => l.isAvailable)} prestationId={detail.id} />
               )}
 
               {/* Infos financières (EN_COURS et au-delà) */}
@@ -308,6 +292,86 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cfg.style}`}>
       <i className={`fas ${cfg.icon} text-[10px]`} />{cfg.label}
     </span>
+  );
+}
+
+/* ─── Livrables + Observations ───────────────────────────────────────────── */
+function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; prestationId: string }) {
+  const [obs, setObs] = useState<Record<string, string>>({});
+  const [sending, setSending] = useState<string | null>(null);
+
+  const typeIcon: Record<string, string> = { PDF: "file-pdf", VIDEO: "video", CODE: "code", DESIGN: "pen-nib", ARCHIVE: "file-zipper", LINK: "external-link-alt" };
+
+  async function sendObservation(livrableId: string) {
+    const text = obs[livrableId]?.trim();
+    if (!text) return;
+    setSending(livrableId);
+    try {
+      const res = await fetch(`/api/prestations/${prestationId}/observation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ livrableId, observation: text }),
+      });
+      if (res.ok) {
+        toast.success("Observation envoyée à l'équipe SHIFT UP !");
+        setObs((prev) => ({ ...prev, [livrableId]: "" }));
+      } else {
+        toast.error("Erreur lors de l'envoi.");
+      }
+    } catch {
+      toast.error("Erreur réseau.");
+    } finally {
+      setSending(null);
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Livrables disponibles</p>
+      <div className="space-y-3">
+        {livrables.map((l) => (
+          <div key={l.id} className="bg-green-50 border border-green-200 rounded-xl overflow-hidden">
+            <a href={l.url ?? "#"} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 p-3 hover:bg-green-100 transition-colors">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i className={`fas fa-${typeIcon[l.type] ?? "file"} text-green-600 text-sm`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-green-800">{l.title}</p>
+                <p className="text-xs text-green-600">{l.type}</p>
+              </div>
+              <i className="fas fa-arrow-up-right-from-square text-green-600 text-xs" />
+            </a>
+            {/* Observation */}
+            <div className="px-3 pb-3 border-t border-green-200 pt-2">
+              {l.observation && (
+                <p className="text-xs text-gray-500 mb-2 italic">
+                  <i className="fas fa-comment mr-1" />Votre dernière observation : {l.observation}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <textarea
+                  rows={2}
+                  placeholder="Ajouter une observation ou retour sur ce livrable…"
+                  value={obs[l.id] ?? ""}
+                  onChange={(e) => setObs((prev) => ({ ...prev, [l.id]: e.target.value }))}
+                  className="flex-1 text-xs border border-green-200 rounded-lg px-3 py-2 focus:outline-none focus:border-accent resize-none bg-white"
+                />
+                <button
+                  onClick={() => sendObservation(l.id)}
+                  disabled={!obs[l.id]?.trim() || sending === l.id}
+                  className="self-end w-9 h-9 bg-accent rounded-lg flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 flex-shrink-0"
+                >
+                  {sending === l.id
+                    ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    : <i className="fas fa-paper-plane text-xs" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

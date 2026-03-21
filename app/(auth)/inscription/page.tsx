@@ -190,7 +190,50 @@ export default function InscriptionPage() {
           </div>
         </div>
 
-        {/* Conditional fields */}
+        {/* Conditional fields — CLIENT */}
+        <AnimatePresence>
+          {selectedRole === "CLIENT" && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+              <div className="bg-accent/5 border border-accent/20 rounded-xl p-4 space-y-3">
+                <p className="text-sm font-semibold text-accent flex items-center gap-2">
+                  <i className="fas fa-building" />Informations entreprise (optionnel)
+                </p>
+                <input
+                  {...register("companyName")}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
+                  placeholder="Nom de l'entreprise"
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    {...register("rccm")}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
+                    placeholder="N° RCCM"
+                  />
+                  <input
+                    {...register("ifu")}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
+                    placeholder="N° IFU"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    {...register("cnss")}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
+                    placeholder="N° CNSS"
+                  />
+                  <input
+                    {...register("rib")}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
+                    placeholder="RIB bancaire"
+                  />
+                </div>
+                <p className="text-xs text-gray-400">Ces informations sont utilisées pour la facturation et peuvent être complétées depuis votre profil.</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Conditional fields — APPORTEUR */}
         <AnimatePresence>
           {selectedRole === "APPORTEUR" && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
