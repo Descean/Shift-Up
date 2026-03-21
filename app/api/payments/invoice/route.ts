@@ -9,7 +9,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { createElement } from "react";
 import { InvoicePDF, type InvoiceData } from "@/components/pdf/InvoicePDF";
 
 export async function GET(req: NextRequest) {
@@ -65,7 +64,7 @@ export async function GET(req: NextRequest) {
       status: payment.status as InvoiceData["status"],
     };
 
-    const buffer = await renderToBuffer(createElement(InvoicePDF, { data }));
+    const buffer = await renderToBuffer(InvoicePDF({ data }));
 
     return new NextResponse(buffer, {
       status: 200,
