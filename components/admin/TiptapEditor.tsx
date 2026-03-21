@@ -62,7 +62,7 @@ export default function TiptapEditor({ value, onChange, placeholder }: Props) {
   // Sync external value changes (e.g. when switching between posts)
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value, false, { preserveWhitespace: "full" });
+      editor.commands.setContent(value, { emitUpdate: false, preserveWhitespace: "full" });
     }
   }, [value, editor]);
 
