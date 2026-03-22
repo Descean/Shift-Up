@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -299,22 +299,69 @@ function StatusBadge({ status }: { status: string }) {
 function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; prestationId: string }) {
   const [obs, setObs] = useState<Record<string, string>>({});
   const [sending, setSending] = useState<string | null>(null);
+  const [recording, setRecording] = useState<string | null>(null); // livrableId en cours d'enregistrement
+  const [voiceUrls, setVoiceUrls] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const typeIcon: Record<string, string> = { PDF: "file-pdf", VIDEO: "video", CODE: "code", DESIGN: "pen-nib", ARCHIVE: "file-zipper", LINK: "external-link-alt" };
 
+  async function toggleRecording(livrableId: string) {
+    if (recording === livrableId) {
+      // Stop
+      mediaRef.current?.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setRecording(null);
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const file = new File([blob], `voicenote-${Date.now()}.webm`, { type: "audio/webm" });
+        setUploading(livrableId);
+        try {
+          const fd = new FormData();
+          fd.append("file", file);
+          const res = await fetch("/api/upload", { method: "POST", body: fd });
+          if (res.ok) {
+            const { url } = await res.json();
+            setVoiceUrls((prev) => ({ ...prev, [livrableId]: url }));
+            toast.success("Note vocale enregistrée !");
+          } else {
+            toast.error("Erreur lors de l'upload audio.");
+          }
+        } finally {
+          setUploading(null);
+        }
+      };
+      mr.start();
+      mediaRef.current = mr;
+      setRecording(livrableId);
+    } catch {
+      toast.error("Microphone inaccessible. Vérifiez les permissions.");
+    }
+  }
+
   async function sendObservation(livrableId: string) {
-    const text = obs[livrableId]?.trim();
-    if (!text) return;
+    const text = obs[livrableId]?.trim() ?? "";
+    const voiceNoteUrl = voiceUrls[livrableId] ?? null;
+    if (!text && !voiceNoteUrl) return;
     setSending(livrableId);
     try {
       const res = await fetch(`/api/prestations/${prestationId}/observation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ livrableId, observation: text }),
+        body: JSON.stringify({ livrableId, observation: text, voiceNoteUrl }),
       });
       if (res.ok) {
         toast.success("Observation envoyée à l'équipe SHIFT UP !");
         setObs((prev) => ({ ...prev, [livrableId]: "" }));
+        setVoiceUrls((prev) => { const n = { ...prev }; delete n[livrableId]; return n; });
       } else {
         toast.error("Erreur lors de l'envoi.");
       }
@@ -343,28 +390,61 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
               <i className="fas fa-arrow-up-right-from-square text-green-600 text-xs" />
             </a>
             {/* Observation */}
-            <div className="px-3 pb-3 border-t border-green-200 pt-2">
+            <div className="px-3 pb-3 border-t border-green-200 pt-2 space-y-2">
               {l.observation && (
-                <p className="text-xs text-gray-500 mb-2 italic">
+                <p className="text-xs text-gray-500 italic">
                   <i className="fas fa-comment mr-1" />Votre dernière observation : {l.observation}
                 </p>
               )}
+              <textarea
+                rows={2}
+                placeholder="Ajouter une observation ou retour sur ce livrable…"
+                value={obs[l.id] ?? ""}
+                onChange={(e) => setObs((prev) => ({ ...prev, [l.id]: e.target.value }))}
+                className="w-full text-xs border border-green-200 rounded-lg px-3 py-2 focus:outline-none focus:border-accent resize-none bg-white"
+              />
+              {/* Voice note status */}
+              {uploading === l.id && (
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                  Upload de la note vocale…
+                </div>
+              )}
+              {voiceUrls[l.id] && (
+                <div className="flex items-center gap-2 text-xs text-green-700 bg-green-100 rounded-lg px-3 py-1.5">
+                  <i className="fas fa-check-circle" />
+                  Note vocale prête
+                  <button onClick={() => setVoiceUrls((prev) => { const n = { ...prev }; delete n[l.id]; return n; })}
+                    className="ml-auto text-red-400 hover:text-red-600">
+                    <i className="fas fa-times" />
+                  </button>
+                </div>
+              )}
               <div className="flex gap-2">
-                <textarea
-                  rows={2}
-                  placeholder="Ajouter une observation ou retour sur ce livrable…"
-                  value={obs[l.id] ?? ""}
-                  onChange={(e) => setObs((prev) => ({ ...prev, [l.id]: e.target.value }))}
-                  className="flex-1 text-xs border border-green-200 rounded-lg px-3 py-2 focus:outline-none focus:border-accent resize-none bg-white"
-                />
+                {/* Mic button */}
+                <button
+                  onClick={() => toggleRecording(l.id)}
+                  disabled={uploading === l.id}
+                  title={recording === l.id ? "Arrêter l'enregistrement" : "Démarrer une note vocale"}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                    recording === l.id
+                      ? "bg-red-500 text-white animate-pulse"
+                      : voiceUrls[l.id]
+                      ? "bg-green-200 text-green-700"
+                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  } disabled:opacity-40`}
+                >
+                  <i className={`fas fa-${recording === l.id ? "stop" : "microphone"} text-xs`} />
+                </button>
+                {/* Send button */}
                 <button
                   onClick={() => sendObservation(l.id)}
-                  disabled={!obs[l.id]?.trim() || sending === l.id}
-                  className="self-end w-9 h-9 bg-accent rounded-lg flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 flex-shrink-0"
+                  disabled={(!obs[l.id]?.trim() && !voiceUrls[l.id]) || sending === l.id}
+                  className="flex-1 h-9 bg-accent rounded-lg flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 gap-1.5 text-xs font-medium"
                 >
                   {sending === l.id
                     ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    : <i className="fas fa-paper-plane text-xs" />}
+                    : <><i className="fas fa-paper-plane text-xs" />Envoyer</>}
                 </button>
               </div>
             </div>

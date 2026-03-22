@@ -22,6 +22,12 @@ const ALLOWED_TYPES = [
   "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/zip", "application/x-zip-compressed",
   "text/plain",
+  // Audio (notes vocales)
+  "audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav",
+  // Video livrables
+  "video/mp4", "video/webm", "video/quicktime",
+  // Design files
+  "application/octet-stream",
 ];
 
 export async function POST(req: NextRequest) {

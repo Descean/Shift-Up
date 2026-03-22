@@ -112,6 +112,29 @@ export async function sendLivrableClient({ to, name, livrableTitle, serviceName 
   return resend.emails.send({ from: FROM, to, subject: `Livrable disponible — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Livrable disponible") });
 }
 
+/** Notification admin : observation client sur un livrable */
+export async function sendObservationAdmin({ to, clientName, serviceName, livrableTitle, observation, voiceNoteUrl, prestationId }: {
+  to: string; clientName: string; serviceName: string; livrableTitle: string; observation: string; voiceNoteUrl?: string | null; prestationId: string;
+}) {
+  const voiceSection = voiceNoteUrl
+    ? `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin:16px 0;"><p style="margin:0 0 4px;color:#166534;font-weight:600;font-size:13px;">🎙️ Note vocale jointe</p><a href="${voiceNoteUrl}" style="color:#1E9FD4;word-break:break-all;font-size:13px;">${voiceNoteUrl}</a></div>`
+    : "";
+  const content = `
+    <h2 style="color:#1a2535;font-size:20px;margin:0 0 8px;">📋 Nouvelle observation client</h2>
+    <p style="color:#555;margin:0 0 16px;">Le client <strong>${clientName}</strong> a soumis une observation sur son projet <strong>${serviceName}</strong>.</p>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
+      <p style="margin:0 0 6px;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Livrable concerné</p>
+      <p style="margin:0;color:#1a2535;font-weight:700;">${livrableTitle}</p>
+    </div>
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
+      <p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Observation</p>
+      <p style="margin:0;color:#333;white-space:pre-wrap;line-height:1.6;">${observation}</p>
+    </div>
+    ${voiceSection}
+    ${btn("Voir dans les messages →", `${APP_URL}/dashboard/admin/messages`)}`;
+  return resend.emails.send({ from: FROM, to, subject: `Observation client — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Observation client") });
+}
+
 /** Création auto-compte pour visiteur non inscrit */
 export async function sendAutoAccountEmail({ to, name, password, serviceName, prestationId }: {
   to: string; name: string; password: string; serviceName: string; prestationId: string;

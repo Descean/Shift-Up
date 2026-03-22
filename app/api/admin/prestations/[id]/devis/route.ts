@@ -55,7 +55,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const clientEmail = prestation.client.email;
     const clientName  = prestation.client.name ?? clientEmail ?? "Client";
     const serviceName = prestation.service?.title ?? prestation.customService ?? prestation.sector ?? "Prestation";
-    const depositAmount = quote.deposit ?? Math.round(quote.total * 0.4);
+    const depositAmount = quote.deposit ?? Math.round(quote.total * 0.6);
 
     if (clientEmail) {
       sendDevisClient({ to: clientEmail, name: clientName, serviceName, depositAmount, prestationId: id })

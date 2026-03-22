@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
@@ -202,7 +202,7 @@ function TabDevis({
   const [sending, setSending] = useState(false);
 
   const total = items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
-  const deposit = Math.round(total * 0.4);
+  const deposit = Math.round(total * 0.6);
 
   function addItem() {
     setItems((prev) => [...prev, { label: "", amount: 0 }]);
@@ -479,6 +479,83 @@ function TabDevis({
 
 // ─── Tab "Phases" ─────────────────────────────────────────────────────────────
 
+function PhaseLivrableForm({ prestation, phase, onDone }: { prestation: Prestation; phase: PrestationPhase; onDone: () => void }) {
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [type, setType] = useState("LINK");
+  const [uploading, setUploading] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function detectType(filename: string): string {
+    const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+    if (ext === "pdf") return "PDF";
+    if (["mp4", "mov", "avi", "webm"].includes(ext)) return "VIDEO";
+    if (["zip", "tar", "gz", "rar", "7z"].includes(ext)) return "ARCHIVE";
+    if (["fig", "sketch", "xd", "psd", "ai"].includes(ext)) return "DESIGN";
+    if (["js", "ts", "py", "html", "css", "json", "xml", "sql", "sh"].includes(ext)) return "CODE";
+    return "LINK";
+  }
+
+  async function uploadFile(file: File) {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) { toast.error("Erreur téléchargement."); return; }
+      const { url: fileUrl } = await res.json();
+      setUrl(fileUrl);
+      if (!title) setTitle(file.name.replace(/\.[^.]+$/, ""));
+      setType(detectType(file.name));
+    } catch { toast.error("Erreur réseau."); }
+    finally { setUploading(false); }
+  }
+
+  async function submit() {
+    if (!title.trim()) { toast.error("Titre requis."); return; }
+    setAdding(true);
+    try {
+      const res = await fetch(`/api/admin/prestations/${prestation.id}/livrable`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: `[${phase.title}] ${title}`, type, url: url || null, isAvailable: true }),
+      });
+      if (res.ok) { toast.success("Livrable ajouté et disponible pour le client."); setTitle(""); setUrl(""); onDone(); }
+      else { toast.error("Erreur lors de l'ajout."); }
+    } catch { toast.error("Erreur réseau."); }
+    finally { setAdding(false); }
+  }
+
+  return (
+    <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
+      <p className="text-xs font-semibold text-green-700 flex items-center gap-1.5"><i className="fas fa-upload" />Livrable pour cette phase</p>
+      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du livrable"
+        className="w-full border border-green-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent bg-white" />
+      <div className="flex gap-2">
+        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="URL ou télécharger ci-dessous"
+          className="flex-1 border border-green-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent bg-white" />
+        <select value={type} onChange={(e) => setType(e.target.value)}
+          className="border border-green-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-accent bg-white">
+          {["PDF","LINK","VIDEO","CODE","DESIGN","ARCHIVE"].map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <input ref={fileInputRef} type="file" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); }} />
+      <div className="flex gap-2">
+        <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+          className="flex-1 border border-green-200 bg-white rounded-lg py-1.5 text-xs text-green-700 hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
+          {uploading ? <><Spinner sm />Upload…</> : url.startsWith("http") ? <><i className="fas fa-check" />Fichier prêt</> : <><i className="fas fa-cloud-upload-alt" />Télécharger</>}
+        </button>
+        <button onClick={submit} disabled={adding || uploading}
+          className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-lg py-1.5 text-xs font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-1.5">
+          {adding ? <><Spinner sm />Ajout…</> : <><i className="fas fa-check" />Valider</>}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TabPhases({
   prestation,
   onRefresh,
@@ -491,6 +568,7 @@ function TabPhases({
   const [addingPhase, setAddingPhase] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [showLivrableForm, setShowLivrableForm] = useState<string | null>(null);
 
   async function updatePhase(
     phase: PrestationPhase,
@@ -635,6 +713,26 @@ function TabPhases({
               </button>
             </div>
           </div>
+
+          {/* Bouton livrable pour phase terminée */}
+          {phase.status === "DONE" && (
+            <div>
+              <button
+                onClick={() => setShowLivrableForm((prev) => prev === phase.id ? null : phase.id)}
+                className="text-xs text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+              >
+                <i className="fas fa-upload" />
+                {showLivrableForm === phase.id ? "Annuler" : "Charger le livrable"}
+              </button>
+              {showLivrableForm === phase.id && (
+                <PhaseLivrableForm
+                  prestation={prestation}
+                  phase={phase}
+                  onDone={() => { setShowLivrableForm(null); onRefresh(); }}
+                />
+              )}
+            </div>
+          )}
         </div>
       ))}
 
@@ -688,11 +786,41 @@ function TabLivrables({
   const [livrables, setLivrables] = useState<Livrable[]>(prestation.livrables);
   const [toggling, setToggling] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [newTitle, setNewTitle] = useState("");
   const [newType, setNewType] = useState("LINK");
   const [newUrl, setNewUrl] = useState("");
   const [newAvailable, setNewAvailable] = useState(false);
+
+  function detectType(filename: string): string {
+    const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+    if (ext === "pdf") return "PDF";
+    if (["mp4", "mov", "avi", "webm"].includes(ext)) return "VIDEO";
+    if (["zip", "tar", "gz", "rar", "7z"].includes(ext)) return "ARCHIVE";
+    if (["fig", "sketch", "xd", "psd", "ai"].includes(ext)) return "DESIGN";
+    if (["js", "ts", "py", "html", "css", "json", "xml", "sql", "sh"].includes(ext)) return "CODE";
+    return "LINK";
+  }
+
+  async function uploadFile(file: File) {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) { toast.error("Erreur lors du téléchargement."); return; }
+      const { url } = await res.json();
+      setNewUrl(url);
+      if (!newTitle) setNewTitle(file.name.replace(/\.[^.]+$/, ""));
+      setNewType(detectType(file.name));
+    } catch {
+      toast.error("Erreur réseau lors du téléchargement.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function toggleLivrable(livrable: Livrable) {
     setToggling(livrable.id);
@@ -851,12 +979,43 @@ function TabLivrables({
             ))}
           </select>
         </div>
-        <input
-          value={newUrl}
-          onChange={(e) => setNewUrl(e.target.value)}
-          placeholder="URL (optionnel)"
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
-        />
+
+        {/* URL ou Fichier */}
+        <div className="space-y-2">
+          <input
+            value={newUrl}
+            onChange={(e) => setNewUrl(e.target.value)}
+            placeholder="URL du livrable"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
+          />
+          <div className="flex items-center gap-2">
+            <div className="flex-1 border-t border-gray-200" />
+            <span className="text-xs text-gray-400">ou</span>
+            <div className="flex-1 border-t border-gray-200" />
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            className="hidden"
+            accept=".pdf,.zip,.tar,.gz,.rar,.7z,.mp4,.mov,.avi,.webm,.fig,.sketch,.xd,.psd,.ai,.js,.ts,.py,.html,.css,.json,.xml,.sql,.sh,.docx,.xlsx,.pptx"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="w-full border border-gray-200 rounded-lg py-2 text-sm text-gray-600 hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {uploading ? (
+              <><Spinner sm /> Téléchargement en cours…</>
+            ) : newUrl.startsWith("http") ? (
+              <><i className="fas fa-check text-green-600" /><span className="text-green-600 text-xs truncate max-w-[200px]">Fichier prêt</span></>
+            ) : (
+              <><i className="fas fa-cloud-upload-alt" /> Télécharger un fichier</>
+            )}
+          </button>
+        </div>
+
         <div className="flex items-center justify-between">
           <label className="text-sm text-gray-600">Disponible dès maintenant</label>
           <button
@@ -874,7 +1033,7 @@ function TabLivrables({
         </div>
         <button
           onClick={addLivrable}
-          disabled={adding}
+          disabled={adding || uploading}
           className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {adding ? (

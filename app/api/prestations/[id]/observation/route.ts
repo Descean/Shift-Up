@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { sendObservationAdmin } from "@/lib/email";
 
 export async function POST(
   req: NextRequest,
@@ -20,9 +21,9 @@ export async function POST(
   const { id: prestationId } = await params;
 
   try {
-    const { livrableId, observation } = await req.json();
-    if (!livrableId || !observation?.trim()) {
-      return NextResponse.json({ error: "livrableId et observation requis." }, { status: 400 });
+    const { livrableId, observation, voiceNoteUrl } = await req.json();
+    if (!livrableId || (!observation?.trim() && !voiceNoteUrl)) {
+      return NextResponse.json({ error: "livrableId et observation (texte ou vocal) requis." }, { status: 400 });
     }
 
     // Verify prestation belongs to client
@@ -35,17 +36,27 @@ export async function POST(
     }
 
     // Save observation on livrable
+    const observationText = observation?.trim() ?? "";
     const livrable = await prisma.livrable.update({
       where: { id: livrableId, prestationId },
-      data: { observation: observation.trim(), observationAt: new Date() },
+      data: {
+        observation: observationText || (voiceNoteUrl ? "[Note vocale]" : ""),
+        observationAt: new Date(),
+      },
     });
 
     // Send as message to all admins
     const serviceName = prestation.service?.title ?? prestation.customService ?? "Prestation";
     const admins = await prisma.user.findMany({
       where: { role: { in: ["ADMIN", "DEVELOPER"] } },
-      select: { id: true },
+      select: { id: true, email: true },
     });
+
+    const messageContent = [
+      `📋 Livrable : "${livrable.title}"`,
+      observationText ? `\nObservation :\n${observationText}` : "",
+      voiceNoteUrl ? `\n🎙️ Note vocale : ${voiceNoteUrl}` : "",
+    ].join("");
 
     await Promise.all(
       admins.map((admin) =>
@@ -54,8 +65,25 @@ export async function POST(
             senderId: session.user.id,
             recipientId: admin.id,
             subject: `Observation livrable — ${serviceName}`,
-            content: `📋 Livrable : "${livrable.title}"\n\nObservation du client :\n${observation.trim()}`,
+            content: messageContent,
           },
+        })
+      )
+    );
+
+    // Email notification to all admins
+    const clientName = (session.user as { name?: string }).name ?? "Client";
+    const adminEmails = admins.map((a) => a.email).filter(Boolean) as string[];
+    await Promise.allSettled(
+      adminEmails.map((email) =>
+        sendObservationAdmin({
+          to: email,
+          clientName,
+          serviceName,
+          livrableTitle: livrable.title,
+          observation: observationText || "(note vocale uniquement)",
+          voiceNoteUrl: voiceNoteUrl ?? null,
+          prestationId,
         })
       )
     );
