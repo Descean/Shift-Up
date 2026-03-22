@@ -1,7 +1,7 @@
 /**
  * POST /api/upload — Upload un fichier vers Supabase Storage
  * Retourne l'URL publique du fichier uploadé.
- * Bucket attendu : "prestations" (créer dans Supabase Dashboard > Storage)
+ * Le bucket "prestations" est créé automatiquement s'il n'existe pas.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
     const ext = file.name.split(".").pop() ?? "bin";
     const path = `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Créer le bucket s'il n'existe pas encore
+    const { data: buckets } = await supabase.storage.listBuckets();
+    if (!buckets?.find((b) => b.name === "prestations")) {
+      await supabase.storage.createBucket("prestations", { public: true, allowedMimeTypes: undefined, fileSizeLimit: null });
+    }
 
     const { error: uploadError } = await supabase.storage
       .from("prestations")
