@@ -157,6 +157,44 @@ export default function ClientPrestationsPage() {
                 </div>
               )}
 
+              {/* Phases de réalisation */}
+              {detail.prestationPhases.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                    <i className="fas fa-tasks mr-1.5" />Phases du projet
+                  </p>
+                  <div className="space-y-2">
+                    {detail.prestationPhases.map((ph) => (
+                      <div key={ph.id} className="flex items-start gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          ph.status === "DONE"        ? "bg-green-100 text-green-600" :
+                          ph.status === "IN_PROGRESS" ? "bg-cyan-100 text-cyan-600" :
+                          "bg-gray-100 text-gray-400"
+                        }`}>
+                          <i className={`fas fa-${ph.status === "DONE" ? "check" : ph.status === "IN_PROGRESS" ? "circle-dot" : "clock"} text-[9px]`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-sm ${ph.status === "DONE" ? "text-gray-400 line-through" : ph.status === "IN_PROGRESS" ? "font-semibold text-primary" : "text-gray-500"}`}>
+                              {ph.title}
+                            </p>
+                            <span className="text-xs text-gray-400 flex-shrink-0">{ph.progress}%</span>
+                          </div>
+                          {ph.status !== "PENDING" && (
+                            <div className="h-1 bg-gray-100 rounded-full mt-1.5">
+                              <div
+                                className={`h-full rounded-full transition-all ${ph.status === "DONE" ? "bg-green-400" : "bg-gradient-to-r from-accent to-secondary"}`}
+                                style={{ width: `${ph.progress}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ── VUE DEVIS (status DEVIS_ENVOYE ou EN_ATTENTE_PAIEMENT) ── */}
               {(detail.status === "DEVIS_ENVOYE" || detail.status === "EN_ATTENTE_PAIEMENT") && detail.quote && (
                 <div className="border-2 border-blue-200 rounded-2xl overflow-hidden">
