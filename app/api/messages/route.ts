@@ -80,8 +80,8 @@ export async function GET(req: NextRequest) {
       const other = m.senderId === userId ? m.recipient : m.sender;
       if (!other) continue;
 
-      // Skip if admin sees their own messages to other admins (show only client messages)
-      if (isAdmin && other.role !== "CLIENT") continue;
+      // Skip inter-admin messages (admin↔admin, admin↔developer)
+      if (isAdmin && ["ADMIN", "DEVELOPER"].includes(other.role)) continue;
 
       if (!contactMap.has(other.id)) {
         contactMap.set(other.id, {
