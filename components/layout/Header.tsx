@@ -29,14 +29,16 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const role = session?.user?.role;
   const dashboardHref =
-    session?.user?.role === "ADMIN" || session?.user?.role === "DEVELOPER"
-      ? "/dashboard/admin"
-      : session?.user?.role === "APPORTEUR"
-      ? "/dashboard/apporteur"
-      : session?.user?.role === "ETUDIANT"
-      ? "/dashboard/etudiant"
-      : "/dashboard/client";
+    role === "ADMIN" || role === "DEVELOPER" ? "/dashboard/admin" :
+    role === "APPORTEUR" ? "/dashboard/apporteur" :
+    role === "ETUDIANT"  ? "/dashboard/etudiant"  : "/dashboard/client";
+
+  const profilHref =
+    role === "ADMIN" || role === "DEVELOPER" ? "/dashboard/admin" :
+    role === "APPORTEUR" ? "/dashboard/apporteur/profil" :
+    role === "ETUDIANT"  ? "/dashboard/etudiant/profil"  : "/dashboard/client/profil";
 
   return (
     <header
@@ -115,7 +117,8 @@ export default function Header() {
                       Mon tableau de bord
                     </Link>
                     <Link
-                      href="/dashboard/profil"
+                      href={profilHref}
+                      onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       <i className="fas fa-user text-accent w-4" />

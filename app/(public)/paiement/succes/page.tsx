@@ -15,17 +15,9 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-// Liens de téléchargement fictifs par produit (en production : URLs Supabase Storage)
-const DOWNLOAD_LINKS: Record<string, { url: string; filename: string }> = {
-  "1": { url: "#", filename: "template-business-plan-pro.zip" },
-  "2": { url: "#", filename: "pack-dossier-financement.zip" },
-  "3": { url: "#", filename: "guide-creer-entreprise-benin.pdf" },
-  "4": { url: "#", filename: "tableau-bord-pme-excel.xlsx" },
-  "5": { url: "#", filename: "guide-marketing-digital-pmea.pdf" },
-  "6": { url: "#", filename: "mini-formation-comptabilite.zip" },
-  "7": { url: "#", filename: "pack-contrats-ohada.zip" },
-  "8": { url: "#", filename: "simulateur-appel-offres.xlsx" },
-};
+// Liens de téléchargement par produit (à renseigner depuis Supabase Storage)
+// Pour l'instant tous les produits sont livrés par email automatiquement.
+const DOWNLOAD_LINKS: Record<string, { url: string; filename: string }> = {};
 
 function SuccesContent() {
   const params      = useSearchParams();

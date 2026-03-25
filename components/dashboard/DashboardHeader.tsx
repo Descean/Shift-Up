@@ -8,8 +8,15 @@ interface DashboardHeaderProps {
   user?: {
     name?: string | null;
     email?: string | null;
-    role?: string;
+    role?: string | null;
   };
+}
+
+function profilHref(role?: string | null) {
+  if (role === "APPORTEUR") return "/dashboard/apporteur/profil";
+  if (role === "ETUDIANT")  return "/dashboard/etudiant/profil";
+  if (role === "ADMIN" || role === "DEVELOPER") return "/dashboard/admin";
+  return "/dashboard/client/profil";
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
@@ -63,7 +70,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
           {menuOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
-              <Link href="/dashboard/profil" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+              <Link href={profilHref(user?.role)} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
                 <i className="fas fa-user text-accent w-4" />
                 Mon profil
               </Link>
