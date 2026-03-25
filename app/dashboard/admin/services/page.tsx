@@ -18,6 +18,25 @@ interface Service {
   order: number;
 }
 
+interface ApporteurService {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  features: string[];
+  priceMin: number;
+  priceMax: number | null;
+  currency: string;
+  duration: string | null;
+  isApproved: boolean;
+  isActive: boolean;
+  commissionRate: number;
+  ordersCount: number;
+  completedOrders: number;
+  createdAt: string;
+  apporteur: { id: string; name: string | null; email: string };
+}
+
 const DOMAINS = [
   "Conseil Stratégique",
   "Marchés Publics & Dossiers",
@@ -39,6 +58,9 @@ const emptyForm = {
 };
 
 export default function AdminServicesPage() {
+  const [tab, setTab] = useState<"platform" | "apporteurs">("platform");
+
+  // — Services plateforme —
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading]   = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -47,12 +69,53 @@ export default function AdminServicesPage() {
   const [saving, setSaving]     = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
+  // — Services apporteurs —
+  const [apServices, setApServices]       = useState<ApporteurService[]>([]);
+  const [apLoading, setApLoading]         = useState(false);
+  const [apFilter, setApFilter]           = useState<"all" | "pending" | "approved">("pending");
+  const [approving, setApproving]         = useState<string | null>(null);
+  const [rejectNote, setRejectNote]       = useState("");
+  const [rejectTarget, setRejectTarget]   = useState<string | null>(null);
+
   useEffect(() => {
     fetch("/api/admin/services")
       .then((r) => r.json())
       .then((d) => setServices(d.services ?? []))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (tab !== "apporteurs") return;
+    setApLoading(true);
+    fetch(`/api/admin/apporteur-services?filter=${apFilter}`)
+      .then((r) => r.json())
+      .then((d) => setApServices(d.services ?? []))
+      .finally(() => setApLoading(false));
+  }, [tab, apFilter]);
+
+  async function approveService(id: string, approve: boolean, note?: string) {
+    setApproving(id);
+    try {
+      const r = await fetch("/api/admin/apporteur-services", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isApproved: approve, adminNote: note }),
+      });
+      if (!r.ok) throw new Error();
+      setApServices((prev) =>
+        apFilter === "all"
+          ? prev.map((s) => s.id === id ? { ...s, isApproved: approve } : s)
+          : prev.filter((s) => s.id !== id)
+      );
+      toast.success(approve ? "Service approuvé ✓" : "Service rejeté.");
+    } catch {
+      toast.error("Erreur lors de la validation.");
+    } finally {
+      setApproving(null);
+      setRejectTarget(null);
+      setRejectNote("");
+    }
+  }
 
   function openCreate() {
     setEditing(null);
@@ -122,12 +185,158 @@ export default function AdminServicesPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
           <h1 className="font-syne font-black text-2xl text-primary">Services & CMS</h1>
-          <p className="text-gray-500 text-sm">{services.length} service(s) configuré(s)</p>
+          <p className="text-gray-500 text-sm">{services.length} service(s) plateforme · {apServices.length > 0 ? `${apServices.filter(s=>!s.isApproved).length} en attente` : ""}</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
-          <i className="fas fa-plus" />Nouveau service
-        </button>
+        {tab === "platform" && (
+          <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
+            <i className="fas fa-plus" />Nouveau service
+          </button>
+        )}
       </motion.div>
+
+      {/* Onglets */}
+      <div className="flex gap-2 border-b border-gray-100 pb-0">
+        {(["platform", "apporteurs"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-5 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 transition-colors ${
+              tab === t
+                ? "border-accent text-accent bg-accent/5"
+                : "border-transparent text-gray-400 hover:text-gray-600"
+            }`}
+          >
+            {t === "platform" ? (
+              <><i className="fas fa-cubes mr-2" />Services SHIFT UP</>
+            ) : (
+              <><i className="fas fa-handshake mr-2" />Services apporteurs</>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* ─── TAB : SERVICES APPORTEURS ─── */}
+      {tab === "apporteurs" && (
+        <div className="space-y-4">
+          {/* Filtres */}
+          <div className="flex gap-2">
+            {(["pending", "approved", "all"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setApFilter(f)}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  apFilter === f
+                    ? "bg-accent text-white border-accent"
+                    : "border-gray-200 text-gray-500 hover:border-accent/40"
+                }`}
+              >
+                {f === "pending" ? "En attente" : f === "approved" ? "Approuvés" : "Tous"}
+              </button>
+            ))}
+          </div>
+
+          {apLoading ? (
+            <div className="flex justify-center py-12"><span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>
+          ) : apServices.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+              {apFilter === "pending" ? "Aucun service en attente de validation." : "Aucun service trouvé."}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {apServices.map((s) => (
+                <motion.div key={s.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-1 self-stretch rounded-full flex-shrink-0 ${s.isApproved ? "bg-green-400" : "bg-orange-300"}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{s.category}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.isApproved ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"}`}>
+                          {s.isApproved ? "Approuvé" : "En attente"}
+                        </span>
+                        <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                          <i className="fas fa-user mr-1" />{s.apporteur.name ?? s.apporteur.email}
+                        </span>
+                      </div>
+                      <h3 className="font-syne font-bold text-primary text-sm mb-0.5">{s.title}</h3>
+                      <p className="text-xs text-gray-500 line-clamp-2 mb-2">{s.description}</p>
+                      <div className="flex flex-wrap gap-3 text-xs text-gray-400">
+                        <span><i className="fas fa-tag mr-1" />{s.priceMin.toLocaleString()}{s.priceMax ? ` – ${s.priceMax.toLocaleString()}` : "+"} {s.currency}</span>
+                        {s.duration && <span><i className="fas fa-clock mr-1" />{s.duration}</span>}
+                        <span><i className="fas fa-percent mr-1" />Commission SHIFT UP : {(s.commissionRate * 100).toFixed(0)}%</span>
+                        <span><i className="fas fa-shopping-bag mr-1" />{s.ordersCount} commande(s)</span>
+                      </div>
+                      {s.features.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {s.features.map((f, i) => (
+                            <span key={i} className="text-xs bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full text-gray-500">{f}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2 flex-shrink-0">
+                      {!s.isApproved && (
+                        <button
+                          onClick={() => approveService(s.id, true)}
+                          disabled={approving === s.id}
+                          className="text-xs px-4 py-2 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 disabled:opacity-50 flex items-center gap-1"
+                        >
+                          <i className="fas fa-check" />Approuver
+                        </button>
+                      )}
+                      {s.isApproved && (
+                        <button
+                          onClick={() => approveService(s.id, false)}
+                          disabled={approving === s.id}
+                          className="text-xs px-4 py-2 border border-orange-200 text-orange-600 rounded-xl font-semibold hover:bg-orange-50 disabled:opacity-50 flex items-center gap-1"
+                        >
+                          <i className="fas fa-pause" />Suspendre
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setRejectTarget(s.id)}
+                        disabled={approving === s.id}
+                        className="text-xs px-4 py-2 border border-red-100 text-red-400 rounded-xl hover:bg-red-50 disabled:opacity-50 flex items-center gap-1"
+                      >
+                        <i className="fas fa-xmark" />Rejeter
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal rejet avec note */}
+      <AnimatePresence>
+        {rejectTarget && (
+          <>
+            <motion.div className="fixed inset-0 bg-black/40 z-40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setRejectTarget(null)} />
+            <motion.div className="fixed inset-0 flex items-center justify-center z-50 p-4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
+                <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto"><i className="fas fa-xmark text-red-500 text-xl" /></div>
+                <h3 className="font-syne font-bold text-primary text-center">Rejeter ce service ?</h3>
+                <p className="text-gray-500 text-sm text-center">Un message sera envoyé à l'apporteur.</p>
+                <textarea
+                  value={rejectNote}
+                  onChange={(e) => setRejectNote(e.target.value)}
+                  rows={3}
+                  placeholder="Motif du rejet (optionnel)"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-none"
+                />
+                <div className="flex gap-3">
+                  <button onClick={() => setRejectTarget(null)} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600">Annuler</button>
+                  <button onClick={() => approveService(rejectTarget, false, rejectNote || undefined)} className="flex-1 bg-red-500 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-600">Rejeter</button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ─── TAB : SERVICES PLATEFORME ─── */}
+      {tab === "platform" && <>
 
       {/* Flux devis → client */}
       <div className="bg-accent/5 border border-accent/20 rounded-2xl p-4 text-sm text-accent">
@@ -269,6 +478,8 @@ export default function AdminServicesPage() {
           </>
         )}
       </AnimatePresence>
+      </>}
+
     </div>
   );
 }
