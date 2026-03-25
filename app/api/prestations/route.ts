@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
         service: true,
         payments: true,
         prestationPhases: { orderBy: { order: "asc" } },
-        livrables: { orderBy: { createdAt: "asc" } },
+        livrables: { orderBy: { createdAt: "asc" }, include: { phase: { select: { id: true, title: true, order: true } } } },
       },
       orderBy: { createdAt: "desc" },
     });

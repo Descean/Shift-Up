@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
-interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; observation?: string | null; }
+interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
 interface QuoteItem { label: string; amount: number; }
 interface Quote { items: QuoteItem[]; deposit: number; total: number; validity?: string; terms?: string; }
 interface Prestation {
@@ -410,11 +410,34 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
     }
   }
 
+  // Grouper par phase (les livrables sans phase vont dans "Sans phase")
+  const grouped: { phaseId: string | null; phaseTitle: string | null; phaseOrder: number; items: Livrable[] }[] = [];
+  for (const l of livrables) {
+    const key = l.phase?.id ?? null;
+    const existing = grouped.find((g) => g.phaseId === key);
+    if (existing) {
+      existing.items.push(l);
+    } else {
+      grouped.push({ phaseId: key, phaseTitle: l.phase?.title ?? null, phaseOrder: l.phase?.order ?? 999, items: [l] });
+    }
+  }
+  grouped.sort((a, b) => a.phaseOrder - b.phaseOrder);
+
   return (
     <div>
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Livrables disponibles</p>
-      <div className="space-y-3">
-        {livrables.map((l) => (
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        <i className="fas fa-box-open mr-1.5" />Livrables disponibles
+      </p>
+      <div className="space-y-4">
+        {grouped.map((group) => (
+          <div key={group.phaseId ?? "no-phase"}>
+            {group.phaseTitle && (
+              <p className="text-xs font-semibold text-accent mb-1.5 flex items-center gap-1">
+                <i className="fas fa-layer-group text-[10px]" />{group.phaseTitle}
+              </p>
+            )}
+            <div className="space-y-3">
+        {group.items.map((l) => (
           <div key={l.id} className="bg-green-50 border border-green-200 rounded-xl overflow-hidden">
             <a href={l.url ?? "#"} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 p-3 hover:bg-green-100 transition-colors">
@@ -485,6 +508,9 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
                     : <><i className="fas fa-paper-plane text-xs" />Envoyer</>}
                 </button>
               </div>
+            </div>
+          </div>
+        ))}
             </div>
           </div>
         ))}

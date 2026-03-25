@@ -276,21 +276,24 @@ model PrestationPhase {
   endDate      DateTime?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  livrables    Livrable[]
 }
 
 model Livrable {
-  id             String     @id @default(cuid())
+  id             String            @id @default(cuid())
   prestationId   String
-  prestation     Prestation @relation(fields: [prestationId], references: [id], onDelete: Cascade)
+  prestation     Prestation        @relation(fields: [prestationId], references: [id], onDelete: Cascade)
+  phaseId        String?
+  phase          PrestationPhase?  @relation(fields: [phaseId], references: [id], onDelete: SetNull)
   title          String
   description    String?
-  type           String     // PDF | LINK | VIDEO | CODE | DESIGN | ARCHIVE
+  type           String            // PDF | LINK | VIDEO | CODE | DESIGN | ARCHIVE
   url            String?
-  isAvailable    Boolean    @default(false)
+  isAvailable    Boolean           @default(false)
   viewedAt       DateTime?
-  observation    String?    // Observation client
+  observation    String?           // Observation client
   observationAt  DateTime?
-  createdAt      DateTime   @default(now())
+  createdAt      DateTime          @default(now())
 }
 
 // ============================================================

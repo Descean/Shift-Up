@@ -23,11 +23,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
 
   try {
-    const { title, description, type, url, isAvailable } = await req.json();
+    const { title, description, type, url, isAvailable, phaseId } = await req.json();
     if (!title?.trim()) return NextResponse.json({ error: "Titre requis." }, { status: 400 });
 
     const livrable = await prisma.livrable.create({
-      data: { prestationId: id, title, description, type: type ?? "LINK", url: url || null, isAvailable: isAvailable ?? false },
+      data: {
+        prestationId: id,
+        title,
+        description,
+        type: type ?? "LINK",
+        url: url || null,
+        isAvailable: isAvailable ?? false,
+        phaseId: phaseId || null,
+      },
     });
 
     // Si disponible immédiatement → notifier le client

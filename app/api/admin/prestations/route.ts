@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
           assignedTo:      { select: { id: true, name: true } },
           payments:        { select: { status: true, amount: true } },
           prestationPhases: { orderBy: { order: "asc" } },
-          livrables:       { orderBy: { createdAt: "asc" } },
+          livrables:       { orderBy: { createdAt: "asc" }, include: { phase: { select: { id: true, title: true, order: true } } } },
         },
       }),
       prisma.prestation.count({ where }),

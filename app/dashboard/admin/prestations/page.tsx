@@ -31,6 +31,7 @@ interface Livrable {
   type: string;
   url: string | null;
   isAvailable: boolean;
+  phase?: { id: string; title: string; order: number } | null;
 }
 
 interface QuoteItem {
@@ -519,7 +520,7 @@ function PhaseLivrableForm({ prestation, phase, onDone }: { prestation: Prestati
       const res = await fetch(`/api/admin/prestations/${prestation.id}/livrable`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: `[${phase.title}] ${title}`, type, url: url || null, isAvailable: true }),
+        body: JSON.stringify({ title, type, url: url || null, isAvailable: true, phaseId: phase.id }),
       });
       if (res.ok) { toast.success("Livrable ajouté et disponible pour le client."); setTitle(""); setUrl(""); onDone(); }
       else { toast.error("Erreur lors de l'ajout."); }
@@ -920,17 +921,24 @@ function TabLivrables({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-primary truncate">{livrable.title}</p>
+            <div className="flex items-center gap-2 flex-wrap mt-0.5">
+              <span className="text-xs text-gray-400">{livrable.type}</span>
+              {livrable.phase && (
+                <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
+                  <i className="fas fa-layer-group mr-1 text-[9px]" />{livrable.phase.title}
+                </span>
+              )}
+            </div>
             {livrable.url && (
               <a
                 href={livrable.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-accent hover:text-secondary truncate block"
+                className="text-xs text-accent hover:text-secondary truncate block mt-0.5"
               >
                 {livrable.url}
               </a>
             )}
-            <span className="text-xs text-gray-400">{livrable.type}</span>
           </div>
           <button
             onClick={() => toggleLivrable(livrable)}

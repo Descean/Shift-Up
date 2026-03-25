@@ -55,7 +55,8 @@
       "Bash(ls -la app/\\\\\\(public\\\\\\)/)",
       "Bash(ls -la app/\\\\\\(auth\\\\\\)/)",
       "Bash(xargs -I {} basename {})",
-      "Bash(node -e \"require\\(''@tiptap/react''\\); require\\(''@fortawesome/fontawesome-free''\\); console.log\\(''OK''\\)\")"
+      "Bash(node -e \"require\\(''@tiptap/react''\\); require\\(''@fortawesome/fontawesome-free''\\); console.log\\(''OK''\\)\")",
+      "Bash(ls \"c:\\\\Users\\\\DELL\\\\Downloads\\\\SHIFT_UP\\\\Site SHIFT UP\\\\app\\\\\\(public\\)\")"
     ]
   }
 }
