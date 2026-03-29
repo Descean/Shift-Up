@@ -56,7 +56,10 @@
       "Bash(ls -la app/\\\\\\(auth\\\\\\)/)",
       "Bash(xargs -I {} basename {})",
       "Bash(node -e \"require\\(''@tiptap/react''\\); require\\(''@fortawesome/fontawesome-free''\\); console.log\\(''OK''\\)\")",
-      "Bash(ls \"c:\\\\Users\\\\DELL\\\\Downloads\\\\SHIFT_UP\\\\Site SHIFT UP\\\\app\\\\\\(public\\)\")"
+      "Bash(ls \"c:\\\\Users\\\\DELL\\\\Downloads\\\\SHIFT_UP\\\\Site SHIFT UP\\\\app\\\\\\(public\\)\")",
+      "Bash(xargs grep:*)",
+      "Bash(grep -rn dashboard/profil --include=*.tsx --include=*.ts)",
+      "Bash(find 'c:\\\\Users\\\\DELL\\\\Downloads\\\\SHIFT_UP\\\\Site SHIFT UP' -maxdepth 2 -type f -name package.json -o -name README* -o -name .env* -o -name prisma.schema -o -name schema.prisma)"
     ]
   }
 }
