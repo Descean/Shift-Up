@@ -50,10 +50,12 @@ const config: Config = {
         },
         dark: "#0A2533",
         light: "#F8FAFC",
+        paper: "#FAFAF7",
       },
       fontFamily: {
         syne: ["var(--font-syne)", "sans-serif"],
         grotesk: ["var(--font-space-grotesk)", "sans-serif"],
+        cormorant: ["var(--font-cormorant)", "Georgia", "serif"],
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out forwards",

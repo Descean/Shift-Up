@@ -21,7 +21,7 @@
  */
 
 import type { Metadata, Viewport } from "next";
-import { Syne, Space_Grotesk } from "next/font/google";
+import { Syne, Space_Grotesk, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Toaster } from "react-hot-toast";
@@ -40,6 +40,14 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-cormorant",
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -120,7 +128,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${syne.variable} ${spaceGrotesk.variable}`}>
+    <html lang="fr" className={`${syne.variable} ${spaceGrotesk.variable} ${cormorant.variable}`}>
       <head>
         {/* PWA — iOS Safari */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

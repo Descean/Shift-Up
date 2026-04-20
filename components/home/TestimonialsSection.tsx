@@ -1,167 +1,131 @@
-"use client";
-
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
 const testimonials = [
   {
     name: "Kossi Adigbli",
-    role: "Directeur Général",
-    company: "TechBenin SARL",
-    initials: "KA",
-    color: "from-blue-500 to-accent",
-    rating: 5,
-    service: "Solutions Numériques",
+    role: "Directeur Général — TechBenin SARL",
     content:
-      "SHIFT UP a transformé notre présence digitale en 3 mois. Leur approche structurée, leur expertise technique et leur suivi personnalisé ont dépassé toutes nos attentes. Je recommande vivement !",
+      "SHIFT UP a transformé notre présence digitale en 3 mois. Leur approche structurée, leur expertise technique et leur suivi personnalisé ont dépassé toutes nos attentes.",
   },
   {
     name: "Amina Soumaïla",
-    role: "Entrepreneur",
-    company: "AgroTech Bénin",
-    initials: "AS",
-    color: "from-secondary to-green-400",
-    rating: 5,
-    service: "Conseil Stratégique",
+    role: "Entrepreneur — AgroTech Bénin",
     content:
-      "Grâce au business plan réalisé par SHIFT UP, j'ai pu lever 50M FCFA auprès d'investisseurs. Leur expertise en stratégie est remarquable et leur accompagnement très professionnel.",
+      "Grâce au business plan réalisé par SHIFT UP, j'ai pu lever 50M FCFA auprès d'investisseurs. Leur expertise en stratégie est remarquable.",
   },
   {
     name: "Pierre Dossa",
-    role: "PDG",
-    company: "Groupe Dossa International",
-    initials: "PD",
-    color: "from-purple-500 to-accent",
-    rating: 5,
-    service: "Formation & Marketing",
+    role: "PDG — Groupe Dossa International",
     content:
       "Les formations délivrées par SHIFT UP ont renforcé les compétences de toute notre équipe. La qualité pédagogique et la praticité des contenus sont excellentes.",
   },
-  {
-    name: "Marie-Claire Adjovi",
-    role: "DRH",
-    company: "Palmci Bénin",
-    initials: "MA",
-    color: "from-orange-400 to-yellow-400",
-    rating: 5,
-    service: "Juridique & Fiscal",
-    content:
-      "SHIFT UP nous a accompagnés dans notre restructuration légale et fiscale. Compétents, réactifs et de confiance. Un partenaire stratégique indispensable pour notre entreprise.",
-  },
+];
+
+const legalInfo = [
+  { label: "Dénomination", value: "SHIFT UP" },
+  { label: "Forme juridique", value: "SARL" },
+  { label: "RCCM", value: "RB/ABC/24 B 3021" },
+  { label: "IFU", value: "3202412001792" },
+  { label: "Siège social", value: "Abomey-Calavi, Bénin" },
+  { label: "Téléphone", value: "+229 01 95 03 50 99" },
+  { label: "Email", value: "contact@shiftup.bj" },
 ];
 
 export default function TestimonialsSection() {
-  const [active, setActive] = useState(0);
+  const featured = testimonials[0];
 
   return (
-    <section className="section-padding bg-white">
+    <section className="bg-white border-y border-primary/10 py-20">
       <div className="container-custom">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center max-w-2xl mx-auto mb-12"
-        >
-          <span className="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <i className="fas fa-quote-left" />
-            Témoignages clients
-          </span>
-          <h2 className="font-syne font-black text-3xl sm:text-4xl text-primary mb-4">
-            Ils nous font <span className="gradient-text">confiance</span>
-          </h2>
-          <p className="text-gray-500">Des résultats concrets pour des clients satisfaits</p>
-        </motion.div>
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          {/* Left — featured testimonial + list */}
+          <div>
+            <span className="text-accent text-sm font-semibold uppercase tracking-widest block mb-8">
+              Ils nous font confiance
+            </span>
 
-        <div className="grid lg:grid-cols-5 gap-8 items-start">
-          {/* Selector */}
-          <div className="lg:col-span-2 space-y-3">
-            {testimonials.map((t, i) => (
-              <motion.button
-                key={i}
-                whileHover={{ x: 4 }}
-                onClick={() => setActive(i)}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-300 ${
-                  active === i
-                    ? "bg-primary shadow-lg"
-                    : "bg-gray-50 hover:bg-gray-100"
-                }`}
+            {/* Featured blockquote */}
+            <blockquote className="mb-8">
+              <p
+                className="text-3xl sm:text-4xl font-bold text-primary leading-snug mb-6"
+                style={{
+                  fontFamily: "var(--font-cormorant), Georgia, serif",
+                  fontStyle: "italic",
+                }}
               >
+                &ldquo;{featured.content}&rdquo;
+              </p>
+              <footer>
+                <div className="flex items-center gap-1 mb-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <i key={i} className="fas fa-star text-secondary text-xs" />
+                  ))}
+                </div>
+                <cite className="not-italic text-sm text-primary/50 font-medium">
+                  {featured.name} — {featured.role}
+                </cite>
+              </footer>
+            </blockquote>
+
+            {/* Mini testimonials list */}
+            <div className="space-y-4 border-t border-primary/10 pt-8">
+              {testimonials.slice(1).map((t) => (
                 <div
-                  className={`w-12 h-12 bg-gradient-to-br ${t.color} rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold`}
+                  key={t.name}
+                  className="flex gap-4 items-start pb-4 border-b border-primary/5 last:border-0"
                 >
-                  {t.initials}
+                  <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-accent text-xs font-bold">
+                      {t.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-primary/70 text-sm italic leading-relaxed">
+                      &ldquo;{t.content.slice(0, 90)}…&rdquo;
+                    </p>
+                    <p className="text-primary/40 text-xs mt-1">{t.name} — {t.role}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className={`font-semibold text-sm ${active === i ? "text-white" : "text-primary"}`}>
-                    {t.name}
-                  </p>
-                  <p className={`text-xs ${active === i ? "text-white/60" : "text-gray-400"}`}>
-                    {t.role} — {t.company}
-                  </p>
-                </div>
-              </motion.button>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Active testimonial */}
-          <div className="lg:col-span-3">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4 }}
-                className="bg-gradient-to-br from-primary to-primary/90 rounded-3xl p-8 relative overflow-hidden"
-              >
-                {/* Background quote */}
-                <div className="absolute top-4 right-6 text-white/5 text-9xl font-serif leading-none">"</div>
-
-                {/* Rating */}
-                <div className="flex gap-1 mb-6">
-                  {Array.from({ length: testimonials[active].rating }).map((_, i) => (
-                    <i key={i} className="fas fa-star text-secondary text-sm" />
-                  ))}
-                </div>
-
-                {/* Quote */}
-                <blockquote className="text-white/90 text-lg leading-relaxed mb-8 italic relative z-10">
-                  "{testimonials[active].content}"
-                </blockquote>
-
-                {/* Author */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-14 h-14 bg-gradient-to-br ${testimonials[active].color} rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-glow`}
+          {/* Right — legal & company info */}
+          <div className="lg:pt-12">
+            <div className="bg-paper border border-primary/8 rounded-2xl p-8">
+              <p className="text-xs font-semibold text-primary/30 uppercase tracking-widest mb-6">
+                Informations légales
+              </p>
+              <table className="w-full text-sm">
+                <tbody>
+                  {legalInfo.map((row) => (
+                    <tr
+                      key={row.label}
+                      className="border-b border-primary/6 last:border-0"
                     >
-                      {testimonials[active].initials}
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold">{testimonials[active].name}</p>
-                      <p className="text-white/50 text-sm">{testimonials[active].role}</p>
-                      <p className="text-accent text-sm font-medium">{testimonials[active].company}</p>
-                    </div>
-                  </div>
-                  <span className="bg-accent/20 text-accent px-3 py-1.5 rounded-full text-xs font-semibold">
-                    {testimonials[active].service}
-                  </span>
-                </div>
-
-                {/* Navigation dots */}
-                <div className="flex gap-2 mt-6">
-                  {testimonials.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActive(i)}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        active === i ? "bg-accent w-6" : "bg-white/20 w-1.5"
-                      }`}
-                    />
+                      <td className="py-3 pr-4 text-primary/40 font-medium w-2/5">
+                        {row.label}
+                      </td>
+                      <td className="py-3 text-primary font-semibold">
+                        {row.value}
+                      </td>
+                    </tr>
                   ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                </tbody>
+              </table>
+
+              {/* Reassurance */}
+              <div className="mt-8 pt-6 border-t border-primary/8 space-y-3">
+                {[
+                  { icon: "fas fa-shield-check", text: "Entreprise enregistrée & conforme OHADA" },
+                  { icon: "fas fa-medal", text: "Excellence — Innovation — Performance" },
+                  { icon: "fas fa-handshake", text: "Partenaire de confiance depuis 2024" },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center gap-3 text-sm text-primary/50">
+                    <i className={`${item.icon} text-accent text-xs w-4`} />
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

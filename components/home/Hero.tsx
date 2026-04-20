@@ -1,234 +1,89 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import Button from "@/components/ui/Button";
-
-const particles = Array.from({ length: 20 });
+import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-primary">
-      {/* Animated background mesh */}
-      <div className="absolute inset-0 bg-mesh-gradient opacity-60" />
-
-      {/* Grid pattern */}
+    <section className="bg-paper min-h-screen flex items-center relative overflow-hidden">
+      {/* Subtle grid texture */}
       <div
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(30,159,212,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30,159,212,0.5) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
+            "linear-gradient(#0A2533 1px, transparent 1px), linear-gradient(90deg, #0A2533 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
         }}
       />
 
-      {/* Floating orbs */}
-      <motion.div
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 6, repeat: Infinity }}
-        className="absolute top-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
-        transition={{ duration: 8, repeat: Infinity }}
-        className="absolute bottom-1/4 left-1/6 w-72 h-72 bg-secondary/15 rounded-full blur-3xl"
-      />
+      {/* Subtle accent glow top-right */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
-      {/* Floating particles */}
-      {particles.map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 rounded-full bg-accent/40"
-          style={{
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.8, 0.2],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 4,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-          }}
-        />
-      ))}
-
-      <div className="container-custom relative z-10 pt-24 pb-16">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left: Text content */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 px-4 py-2 rounded-full mb-6"
-            >
-              <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
-              <span className="text-accent text-sm font-medium">
-                Cabinet de Conseil & Solutions Numériques — Bénin
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
-              className="font-syne font-black text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white leading-[1.05] mb-6"
-            >
-              Transformez{" "}
-              <span className="gradient-text">votre vision</span>{" "}
-              en succès réel
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-white/70 text-lg sm:text-xl leading-relaxed mb-8 max-w-xl"
-            >
-              SHIFT UP accompagne entreprises et entrepreneurs dans leur transformation
-              stratégique et digitale. Conseil expert, solutions sur mesure, résultats mesurables.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-wrap gap-4 mb-12"
-            >
-              <Button href="/services" variant="gradient" size="lg">
-                Découvrir nos services
-                <i className="fas fa-arrow-right" />
-              </Button>
-              <Button href="/contact" variant="outline" size="lg" className="border-white/30 text-white hover:bg-white hover:text-primary">
-                <i className="fas fa-calendar-alt" />
-                Prendre RDV
-              </Button>
-            </motion.div>
-
-            {/* Trust badges */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="flex flex-wrap items-center gap-6"
-            >
-              {[
-                { icon: "fas fa-shield-check", label: "RCCM Officiel" },
-                { icon: "fas fa-star", label: "4.9/5 Satisfaction" },
-                { icon: "fas fa-bolt", label: "Résultats Rapides" },
-              ].map((b) => (
-                <div key={b.label} className="flex items-center gap-2">
-                  <i className={`${b.icon} text-secondary text-sm`} />
-                  <span className="text-white/50 text-sm">{b.label}</span>
-                </div>
-              ))}
-            </motion.div>
+      <div className="container-custom relative z-10 pt-32 pb-20 w-full">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Tag pill */}
+          <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 px-5 py-2 rounded-full mb-8">
+            <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+            <span className="text-primary/60 text-sm font-medium tracking-wide uppercase">
+              Cabinet de Conseil & Solutions Numériques — Bénin
+            </span>
           </div>
 
-          {/* Right: Visual card */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative hidden lg:block"
+          {/* Serif headline */}
+          <h1
+            className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05] text-primary mb-8"
+            style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
           >
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity }}
-              className="relative"
+            Transformez votre{" "}
+            <em
+              className="not-italic"
+              style={{ color: "#1E9FD4", fontStyle: "italic" }}
             >
-              {/* Main card */}
-              <div className="glass-card p-8 rounded-3xl">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <p className="text-white/50 text-sm">Progression globale</p>
-                    <p className="text-white font-syne font-bold text-2xl">87%</p>
-                  </div>
-                  <div className="w-16 h-16 bg-gradient-to-br from-accent to-secondary rounded-2xl flex items-center justify-center shadow-glow">
-                    <i className="fas fa-chart-line text-white text-2xl" />
-                  </div>
-                </div>
+              vision
+            </em>{" "}
+            en succès réel
+          </h1>
 
-                {/* Phases */}
-                {[
-                  { label: "Analyse & Diagnostic", pct: 100, done: true },
-                  { label: "Stratégie & Plan", pct: 100, done: true },
-                  { label: "Déploiement", pct: 65, done: false },
-                  { label: "Optimisation", pct: 20, done: false },
-                ].map((phase) => (
-                  <div key={phase.label} className="mb-4">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-white/70 text-sm flex items-center gap-2">
-                        {phase.done && <i className="fas fa-check-circle text-secondary text-xs" />}
-                        {phase.label}
-                      </span>
-                      <span className="text-white/50 text-xs">{phase.pct}%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${phase.pct}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+          {/* Subtitle */}
+          <p className="text-primary/55 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto font-grotesk">
+            SHIFT UP accompagne entreprises et entrepreneurs dans leur
+            transformation stratégique et digitale. Conseil expert, solutions
+            sur mesure, résultats mesurables.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-wrap gap-4 justify-center mb-16">
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-2 bg-accent text-white px-8 py-4 rounded-full text-sm font-semibold hover:bg-accent/90 transition-colors duration-200 shadow-glow"
+            >
+              Découvrir nos services
+              <i className="fas fa-arrow-right text-xs" />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 border border-primary/20 text-primary px-8 py-4 rounded-full text-sm font-semibold hover:bg-primary hover:text-white transition-colors duration-200"
+            >
+              <i className="fas fa-calendar-alt text-xs" />
+              Prendre RDV
+            </Link>
+          </div>
+
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-primary/40">
+            {[
+              { icon: "fas fa-shield-check", label: "RCCM Officiel" },
+              { icon: "fas fa-star", label: "4.9 / 5 satisfaction" },
+              { icon: "fas fa-bolt", label: "Résultats rapides" },
+            ].map((b) => (
+              <div key={b.label} className="flex items-center gap-2">
+                <i className={`${b.icon} text-accent/70`} />
+                <span>{b.label}</span>
               </div>
-
-              {/* Floating mini cards */}
-              <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                className="absolute -top-6 -right-6 glass-card px-4 py-3 rounded-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center">
-                    <i className="fas fa-users text-secondary text-sm" />
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-bold">+120</p>
-                    <p className="text-white/40 text-xs">Clients actifs</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, delay: 1 }}
-                className="absolute -bottom-6 -left-6 glass-card px-4 py-3 rounded-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-                    <i className="fas fa-trophy text-accent text-sm" />
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-bold">98%</p>
-                    <p className="text-white/40 text-xs">Taux succès</p>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </motion.div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      >
-        <span className="text-white/30 text-xs uppercase tracking-widest">Défiler</span>
-        <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2">
-          <motion.div
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-1 h-2 bg-accent rounded-full"
-          />
-        </div>
-      </motion.div>
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-paper to-transparent pointer-events-none" />
     </section>
   );
 }
