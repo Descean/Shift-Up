@@ -9,13 +9,35 @@ import { cn } from "@/lib/utils";
 
 type NavItem = { href: string; icon: string; label: string; badge?: string };
 
+interface BadgeCounts { messages: number; tasks: number; pending: number; prestations: number; }
+
+function useBadges() {
+  const [counts, setCounts] = useState<BadgeCounts>({ messages: 0, tasks: 0, pending: 0, prestations: 0 });
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const r = await fetch("/api/badges");
+        if (!r.ok || cancelled) return;
+        const d = await r.json();
+        setCounts(d);
+      } catch { /* silent */ }
+    }
+    load();
+    // Refresh every 30s
+    const id = setInterval(load, 30_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+  return counts;
+}
+
 const navByRole: Record<string, NavItem[]> = {
   CLIENT: [
     { href: "/dashboard/client", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/client/nouvelle-demande", icon: "fas fa-plus-circle", label: "Nouvelle demande" },
     { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Mes prestations" },
     { href: "/dashboard/client/suivi", icon: "fas fa-chart-line", label: "Suivi en temps réel" },
-    { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messagerie", badge: "3" },
+    { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messagerie", badge: "messages" },
     { href: "/dashboard/client/affiliation", icon: "fas fa-users", label: "Affiliation & gains" },
     { href: "/dashboard/client/factures", icon: "fas fa-file-invoice", label: "Factures" },
     { href: "/dashboard/client/profil", icon: "fas fa-user-circle", label: "Mon profil" },
@@ -32,7 +54,7 @@ const navByRole: Record<string, NavItem[]> = {
   ETUDIANT: [
     { href: "/dashboard/etudiant", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/etudiant/ressources", icon: "fas fa-book", label: "Ressources & Cours" },
-    { href: "/dashboard/etudiant/taches", icon: "fas fa-tasks", label: "Micro-tâches", badge: "5" },
+    { href: "/dashboard/etudiant/taches", icon: "fas fa-tasks", label: "Micro-tâches", badge: "tasks" },
     { href: "/dashboard/etudiant/badges", icon: "fas fa-award", label: "Mes badges" },
     { href: "/dashboard/etudiant/portfolio", icon: "fas fa-folder-open", label: "Portfolio" },
     { href: "/dashboard/etudiant/profil", icon: "fas fa-user-circle", label: "Mon profil" },
@@ -41,8 +63,8 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/admin", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
     { href: "/dashboard/admin/utilisateurs", icon: "fas fa-users", label: "Utilisateurs" },
-    { href: "/dashboard/admin/messages", icon: "fas fa-envelope", label: "Messages" },
-    { href: "/dashboard/admin/services", icon: "fas fa-cog", label: "Services & CMS" },
+    { href: "/dashboard/admin/messages", icon: "fas fa-envelope", label: "Messages", badge: "messages" },
+    { href: "/dashboard/admin/services", icon: "fas fa-cog", label: "Services & CMS", badge: "pending" },
     { href: "/dashboard/admin/produits", icon: "fas fa-shop", label: "Produits" },
     { href: "/dashboard/admin/blog", icon: "fas fa-newspaper", label: "Blog" },
     { href: "/dashboard/admin/ressources", icon: "fas fa-book-open", label: "Ressources" },
@@ -55,8 +77,8 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/admin", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
     { href: "/dashboard/admin/utilisateurs", icon: "fas fa-users", label: "Utilisateurs" },
-    { href: "/dashboard/admin/messages", icon: "fas fa-envelope", label: "Messages" },
-    { href: "/dashboard/admin/services", icon: "fas fa-cog", label: "Services & CMS" },
+    { href: "/dashboard/admin/messages", icon: "fas fa-envelope", label: "Messages", badge: "messages" },
+    { href: "/dashboard/admin/services", icon: "fas fa-cog", label: "Services & CMS", badge: "pending" },
     { href: "/dashboard/admin/produits", icon: "fas fa-shop", label: "Produits" },
     { href: "/dashboard/admin/blog", icon: "fas fa-newspaper", label: "Blog" },
     { href: "/dashboard/admin/ressources", icon: "fas fa-book-open", label: "Ressources" },
@@ -72,7 +94,7 @@ const mobileTabsByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/client", icon: "fas fa-grid-2", label: "Accueil" },
     { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Projets" },
     { href: "/dashboard/client/suivi", icon: "fas fa-chart-line", label: "Suivi" },
-    { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messages", badge: "3" },
+    { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messages", badge: "messages" },
     { href: "/dashboard/client/profil", icon: "fas fa-user-circle", label: "Profil" },
   ],
   APPORTEUR: [
@@ -84,7 +106,7 @@ const mobileTabsByRole: Record<string, NavItem[]> = {
   ],
   ETUDIANT: [
     { href: "/dashboard/etudiant", icon: "fas fa-grid-2", label: "Accueil" },
-    { href: "/dashboard/etudiant/taches", icon: "fas fa-tasks", label: "Tâches", badge: "5" },
+    { href: "/dashboard/etudiant/taches", icon: "fas fa-tasks", label: "Tâches", badge: "tasks" },
     { href: "/dashboard/etudiant/badges", icon: "fas fa-award", label: "Badges" },
     { href: "/dashboard/etudiant/portfolio", icon: "fas fa-folder-open", label: "Portfolio" },
     { href: "/dashboard/etudiant/profil", icon: "fas fa-user-circle", label: "Profil" },
@@ -110,9 +132,20 @@ const mobileTabsByRole: Record<string, NavItem[]> = {
 export default function DashboardSidebar({ role }: { role: string }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const pathname = usePathname();
-  const navItems = navByRole[role] || navByRole["CLIENT"];
+  const pathname  = usePathname();
+  const badges    = useBadges();
+  const navItems    = navByRole[role]    || navByRole["CLIENT"];
   const mobileItems = mobileTabsByRole[role] || mobileTabsByRole["CLIENT"];
+
+  // Résout un badge: clé dynamique → valeur numérique, ou valeur littérale
+  function resolveBadge(badge?: string): string | undefined {
+    if (!badge) return undefined;
+    if (badge === "messages")    return badges.messages    > 0 ? String(badges.messages)    : undefined;
+    if (badge === "tasks")       return badges.tasks       > 0 ? String(badges.tasks)       : undefined;
+    if (badge === "pending")     return badges.pending     > 0 ? String(badges.pending)     : undefined;
+    if (badge === "prestations") return badges.prestations > 0 ? String(badges.prestations) : undefined;
+    return badge; // valeur littérale (ne devrait plus arriver)
+  }
 
   // Close drawer when route changes
   useEffect(() => {
@@ -192,9 +225,9 @@ export default function DashboardSidebar({ role }: { role: string }) {
                     </motion.span>
                   )}
                 </AnimatePresence>
-                {item.badge && !collapsed && (
+                {resolveBadge(item.badge) && !collapsed && (
                   <span className="bg-accent text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                    {item.badge}
+                    {resolveBadge(item.badge)}
                   </span>
                 )}
               </Link>
@@ -291,9 +324,9 @@ export default function DashboardSidebar({ role }: { role: string }) {
                     >
                       <i className={`${item.icon} ${isActive ? "text-accent" : "text-gray-400"} w-4 text-center`} />
                       <span className="flex-1">{item.label}</span>
-                      {item.badge && (
+                      {resolveBadge(item.badge) && (
                         <span className="bg-accent text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                          {item.badge}
+                          {resolveBadge(item.badge)}
                         </span>
                       )}
                     </Link>
@@ -334,9 +367,9 @@ export default function DashboardSidebar({ role }: { role: string }) {
                   isActive ? "text-accent" : "text-gray-400 hover:text-white"
                 )}
               >
-                {item.badge && (
+                {resolveBadge(item.badge) && (
                   <span className="absolute top-1.5 right-1/4 bg-accent text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                    {item.badge}
+                    {resolveBadge(item.badge)}
                   </span>
                 )}
                 <i className={`${item.icon} text-lg`} />
