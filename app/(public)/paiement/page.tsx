@@ -179,7 +179,7 @@ function PaiementContent() {
 
   // ─── Rendu ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-paper py-8 px-4">
       {/* Bandeau sécurisé */}
       <div className="max-w-4xl mx-auto mb-6 flex items-center justify-between flex-wrap gap-3">
         <Link href="/" className="flex items-center gap-2">

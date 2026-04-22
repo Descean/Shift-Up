@@ -35,7 +35,7 @@ function EchecContent() {
   const retryHref = `/paiement?${retryParams.toString()}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-paper flex items-center justify-center px-4 py-16">
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}

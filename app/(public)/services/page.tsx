@@ -527,7 +527,7 @@ export default function ServicesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-paper">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="bg-primary pt-28 pb-14 relative overflow-hidden">
         <div className="absolute inset-0 bg-mesh-gradient opacity-40" />

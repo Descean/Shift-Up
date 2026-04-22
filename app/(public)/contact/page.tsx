@@ -100,7 +100,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-paper">
         <div className="container-custom">
           <div className="grid lg:grid-cols-5 gap-10">
             {/* Contact info */}

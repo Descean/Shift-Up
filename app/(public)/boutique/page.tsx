@@ -200,7 +200,7 @@ export default function BoutiquePage() {
         </div>
       </section>
 
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-paper">
         <div className="container-custom">
           {/* Filters */}
           <div className="flex gap-2 flex-wrap mb-8">

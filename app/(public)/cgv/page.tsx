@@ -189,7 +189,7 @@ export default function CGVPage() {
         </div>
       </section>
 
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-paper">
         <div className="container-custom">
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Table of contents */}

@@ -273,7 +273,7 @@ function SubscriptionForm() {
 
 export default function SouscrirePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-paper">
       {/* Hero */}
       <section className="bg-primary pt-28 pb-12">
         <div className="container-custom">

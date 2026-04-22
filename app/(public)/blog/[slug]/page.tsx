@@ -195,7 +195,7 @@ export default async function BlogPostPage({ params }: Props) {
       </div>
 
       {/* ── Corps + sidebar ── */}
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-paper">
         <div className="container-custom">
           <div className="grid lg:grid-cols-3 gap-10">
 

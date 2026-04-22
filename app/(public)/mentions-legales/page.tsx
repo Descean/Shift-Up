@@ -226,7 +226,7 @@ function renderContent(text: string): React.ReactNode {
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-paper">
 
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="bg-primary pt-28 pb-14">

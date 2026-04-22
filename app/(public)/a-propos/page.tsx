@@ -156,7 +156,7 @@ export default function AProposPage() {
       </section>
 
       {/* Methodology */}
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-paper">
         <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="font-syne font-black text-3xl sm:text-4xl text-primary mb-4">
