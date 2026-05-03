@@ -3,10 +3,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await params;
   const formation = await prisma.formation.findUnique({
-    where: { slug: params.slug, isActive: true },
+    where: { slug, isActive: true },
     select: {
       id: true,
       slug: true,

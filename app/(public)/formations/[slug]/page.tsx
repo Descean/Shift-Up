@@ -3,13 +3,14 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import FormationForm from "./FormationForm";
 
-interface Props {
-  params: { slug: string };
-  searchParams: { succes?: string; ref?: string; echec?: string };
-}
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ succes?: string; ref?: string; echec?: string }>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const f = await prisma.formation.findUnique({ where: { slug: params.slug, isActive: true } });
+  const { slug } = await params;
+  const f = await prisma.formation.findUnique({ where: { slug, isActive: true } });
   if (!f) return { title: "Formation introuvable" };
   return {
     title: f.titre,
@@ -19,8 +20,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function FormationPage({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const sp = await searchParams;
+
   const formation = await prisma.formation.findUnique({
-    where: { slug: params.slug, isActive: true },
+    where: { slug, isActive: true },
     include: {
       _count: { select: { inscriptions: { where: { status: "PAIEMENT_CONFIRME" } } } },
     },
@@ -30,10 +34,6 @@ export default async function FormationPage({ params, searchParams }: Props) {
 
   const placesRestantes = Math.max(0, formation.placesMax - formation._count.inscriptions);
   const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-
-  const succes = searchParams.succes === "1";
-  const echec = searchParams.echec === "1";
-  const reference = searchParams.ref ?? "";
 
   return (
     <FormationForm
@@ -46,9 +46,9 @@ export default async function FormationPage({ params, searchParams }: Props) {
         lieu: formation.lieu,
         prixFCFA: formation.prixFCFA,
         placesRestantes,
-        succes,
-        echec,
-        reference,
+        succes: sp.succes === "1",
+        echec: sp.echec === "1",
+        reference: sp.ref ?? "",
       }}
     />
   );

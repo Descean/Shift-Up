@@ -17,25 +17,26 @@ async function requireAdmin() {
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
   }
 
   try {
+    const { id } = await params;
     const body = await req.json();
     const { status } = schema.parse(body);
 
     const prev = await prisma.formationInscription.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { formation: true },
     });
 
     if (!prev) return NextResponse.json({ error: "Inscription introuvable." }, { status: 404 });
 
     const updated = await prisma.formationInscription.update({
-      where: { id: params.id },
+      where: { id },
       data: { status },
     });
 
