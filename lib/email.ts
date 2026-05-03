@@ -135,6 +135,93 @@ export async function sendObservationAdmin({ to, clientName, serviceName, livrab
   return resend.emails.send({ from: FROM, to, subject: `Observation client — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Observation client") });
 }
 
+// ─── Emails formations ────────────────────────────────────────────────────────
+
+/** Reçu-billet envoyé au participant après paiement confirmé */
+export async function sendFormationReceipt({ to, prenom, nom, formation, dateDebut, dateFin, lieu, prixFCFA, reference, methodePaiement }: {
+  to: string; prenom: string; nom: string; formation: string;
+  dateDebut: string; dateFin: string; lieu: string;
+  prixFCFA: number; reference: string; methodePaiement: string;
+}) {
+  const content = `
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="display:inline-block;background:linear-gradient(135deg,#1E9FD4,#00D4A0);border-radius:16px;padding:20px 32px;">
+        <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">BILLET D'ENTRÉE OFFICIEL</div>
+        <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">${formation}</div>
+      </div>
+    </div>
+    <div style="background:#f0fdf9;border:2px solid #00D4A0;border-radius:12px;padding:20px 24px;margin-bottom:20px;text-align:center;">
+      <div style="font-size:11px;color:#059669;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Numéro de billet</div>
+      <div style="font-size:26px;font-weight:900;color:#0A2533;letter-spacing:2px;font-family:monospace;">${reference}</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:4px;">Présentez ce billet à l'accueil le jour J</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <tr style="border-bottom:1px solid #f0f0f0;">
+        <td style="padding:10px 0;color:#777;font-size:14px;width:40%;">Participant</td>
+        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${prenom} ${nom}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f0f0f0;">
+        <td style="padding:10px 0;color:#777;font-size:14px;">Formation</td>
+        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${formation}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f0f0f0;">
+        <td style="padding:10px 0;color:#777;font-size:14px;">Dates</td>
+        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${dateDebut} → ${dateFin}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f0f0f0;">
+        <td style="padding:10px 0;color:#777;font-size:14px;">Lieu</td>
+        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${lieu}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f0f0f0;">
+        <td style="padding:10px 0;color:#777;font-size:14px;">Montant payé</td>
+        <td style="padding:10px 0;font-weight:700;color:#059669;font-size:14px;">${prixFCFA.toLocaleString("fr-FR")} FCFA ✅</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;color:#777;font-size:14px;">Mode de paiement</td>
+        <td style="padding:10px 0;font-weight:600;color:#0A2533;font-size:14px;">${methodePaiement}</td>
+      </tr>
+    </table>
+    <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+      <p style="margin:0 0 6px;color:#92400e;font-weight:700;font-size:14px;">📋 Que faire maintenant ?</p>
+      <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">1. Conservez cet email — il vous servira de billet d'entrée.</p>
+      <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">2. Le lieu exact vous sera communiqué <strong>3 jours avant</strong> la formation.</p>
+      <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">3. Pour toute question : <a href="mailto:support@shiftup.com" style="color:#1E9FD4;">support@shiftup.com</a></p>
+    </div>
+    <p style="color:#333;font-weight:600;margin:0;">À très bientôt — L'équipe SHIFT UP</p>`;
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `✅ Votre billet pour "${formation}" — Réf. ${reference}`,
+    html: baseLayout(content, "Billet de formation"),
+  });
+}
+
+/** Notification admin : nouvelle inscription formation confirmée */
+export async function sendFormationInscriptionAdmin({ prenom, nom, email, telephone, formation, reference, structure, secteur, methodePaiement }: {
+  prenom: string; nom: string; email: string; telephone: string;
+  formation: string; reference: string; structure: string; secteur: string; methodePaiement: string;
+}) {
+  const supportEmail = "support@shiftup.com";
+  const content = `
+    <h2 style="color:#1a2535;font-size:20px;margin:0 0 16px;">🎓 Nouvelle inscription confirmée — ${formation}</h2>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;width:35%;">Référence</td><td style="padding:8px 0;font-weight:700;color:#0A2533;font-family:monospace;">${reference}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Participant</td><td style="padding:8px 0;font-weight:600;color:#333;">${prenom} ${nom}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Email</td><td style="padding:8px 0;color:#333;">${email}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Téléphone</td><td style="padding:8px 0;color:#333;">${telephone}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Structure</td><td style="padding:8px 0;color:#333;">${structure}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Secteur</td><td style="padding:8px 0;color:#333;">${secteur}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Paiement</td><td style="padding:8px 0;font-weight:600;color:#059669;">${methodePaiement} ✅</td></tr>
+    </table>
+    ${btn("Voir les inscriptions →", `${APP_URL}/dashboard/admin/formations`)}`;
+  return resend.emails.send({
+    from: FROM,
+    to: supportEmail,
+    subject: `[SHIFT UP] Inscription confirmée — ${prenom} ${nom} — ${formation}`,
+    html: baseLayout(content, "Nouvelle inscription formation"),
+  });
+}
+
 /** Création auto-compte pour visiteur non inscrit */
 export async function sendAutoAccountEmail({ to, name, password, serviceName, prestationId }: {
   to: string; name: string; password: string; serviceName: string; prestationId: string;

@@ -602,3 +602,52 @@ model AuditLog {
   userAgent String?
   createdAt DateTime @default(now())
 }
+
+// ============================================================
+// FORMATIONS (Inscriptions publiques avec paiement Kkiapay)
+// ============================================================
+
+model Formation {
+  id           String                 @id @default(cuid())
+  slug         String                 @unique
+  titre        String
+  description  String?
+  dateDebut    DateTime
+  dateFin      DateTime
+  lieu         String
+  prixFCFA     Int
+  placesMax    Int                    @default(30)
+  isActive     Boolean                @default(true)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  inscriptions FormationInscription[]
+}
+
+model FormationInscription {
+  id                   String                     @id @default(cuid())
+  reference            String                     @unique
+  formationId          String
+  formation            Formation                  @relation(fields: [formationId], references: [id])
+  prenom               String
+  nom                  String
+  email                String
+  telephone            String
+  ville                String
+  structure            String
+  poste                String
+  secteur              String
+  attente              String
+  detail               String?
+  source               String
+  methodePaiement      String
+  status               FormationInscriptionStatus @default(EN_ATTENTE_PAIEMENT)
+  transactionRef       String?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+}
+
+enum FormationInscriptionStatus {
+  EN_ATTENTE_PAIEMENT
+  PAIEMENT_CONFIRME
+  ANNULEE
+}

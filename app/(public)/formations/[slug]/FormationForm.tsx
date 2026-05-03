@@ -1,0 +1,448 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import toast from "react-hot-toast";
+
+// ─── Props ────────────────────────────────────────────────────────────────────
+export interface FormationProps {
+  id: string;
+  titre: string;
+  description: string;
+  dateDebut: string;
+  dateFin: string;
+  lieu: string;
+  prixFCFA: number;
+  placesRestantes: number;
+  // Succès : set par la page parente après retour FedaPay
+  succes?: boolean;
+  reference?: string;
+  echec?: boolean;
+}
+
+// ─── Schéma Zod ───────────────────────────────────────────────────────────────
+const schema = z.object({
+  prenom: z.string().min(1, "Prénom requis"),
+  nom: z.string().min(1, "Nom requis"),
+  email: z.string().email("Email invalide"),
+  telephone: z.string().min(6, "Téléphone requis"),
+  ville: z.string().min(1, "Ville requise"),
+  structure: z.string().min(1, "Structure requise"),
+  poste: z.string().min(1, "Poste requis"),
+  secteur: z.string().min(1, "Secteur requis"),
+  attente: z.string().min(1, "Sélectionnez votre attente"),
+  detail: z.string().max(1000).optional(),
+  source: z.string().min(1, "Indiquez comment vous nous avez trouvés"),
+  methodePaiement: z.enum(
+    ["MTN Mobile Money", "Moov / Flooz", "Wave", "Virement bancaire"],
+    { errorMap: () => ({ message: "Moyen de paiement requis" }) }
+  ),
+  consent: z.boolean().refine((v) => v === true, { message: "Consentement requis" }),
+});
+
+type FormData = z.infer<typeof schema>;
+
+const ATTENTES = [
+  { value: "Apprendre à utiliser l'IA pour rédiger mes DAO", sub: "Partir de zéro et maîtriser les outils IA appliqués aux marchés" },
+  { value: "Améliorer la qualité de mes offres existantes", sub: "Je réponds déjà aux DAO, je veux être plus compétitif" },
+  { value: "Gagner du temps sur la préparation des dossiers", sub: "Automatiser les tâches répétitives avec l'IA" },
+  { value: "Comprendre les marchés publics et décrocher mes 1ers contrats", sub: "Formation complète pour débutants en marchés publics" },
+];
+
+const SOURCES = ["LinkedIn", "WhatsApp / Groupe WhatsApp", "Facebook / Réseaux sociaux", "Bouche à oreille / collègue", "Site web Shift Up", "Autre"];
+const VILLES = ["Cotonou", "Porto-Novo", "Abomey-Calavi", "Parakou", "Bohicon", "Natitingou", "Autre ville du Bénin", "Hors Bénin"];
+const SECTEURS = [
+  "BTP / Génie civil", "Conseil & Audit", "Informatique & Numérique", "Santé",
+  "Agriculture & Agroalimentaire", "Éducation & Formation", "Commerce & Distribution",
+  "Services & Prestation", "Administration publique", "ONG / Association", "Autre",
+];
+
+export default function FormationForm({ formation }: { formation: FormationProps }) {
+  const [submitting, setSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const watchedAttente = watch("attente");
+  const watchedSource = watch("source");
+
+  // ── Page de succès ─────────────────────────────────────────────────────────
+  if (formation.succes) {
+    return (
+      <div className="min-h-screen bg-paper">
+        <section className="bg-primary py-28 relative overflow-hidden">
+          <div className="absolute inset-0 bg-mesh-gradient opacity-40" />
+          <div className="container-custom relative z-10 text-center">
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring" }}>
+              <div className="w-20 h-20 bg-secondary/20 border-2 border-secondary/40 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">✅</div>
+              <h1 className="font-syne font-black text-3xl sm:text-4xl text-white mb-3">Inscription confirmée !</h1>
+              <p className="text-white/60 text-lg max-w-lg mx-auto">
+                Votre paiement a été reçu. Un reçu-billet vous a été envoyé par email.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="section-padding">
+          <div className="container-custom max-w-2xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <div className="bg-white rounded-2xl shadow-card overflow-hidden mb-6">
+                <div className="bg-gradient-to-r from-accent to-secondary p-5 text-center">
+                  <p className="text-xs font-bold tracking-widest text-white/70 uppercase mb-1">Billet d'entrée officiel</p>
+                  <p className="font-syne font-black text-xl text-white">{formation.titre}</p>
+                </div>
+                <div className="p-6">
+                  <div className="bg-secondary/10 border-2 border-secondary/30 rounded-xl p-4 text-center mb-6">
+                    <p className="text-xs font-bold tracking-widest text-secondary uppercase mb-1">Numéro de billet</p>
+                    <p className="font-mono font-black text-2xl text-primary tracking-widest">{formation.reference}</p>
+                    <p className="text-xs text-gray-400 mt-1">Présentez cet email à l'accueil le jour J</p>
+                  </div>
+                  <dl className="space-y-3">
+                    {[
+                      ["Formation", formation.titre],
+                      ["Dates", `${formation.dateDebut} → ${formation.dateFin}`],
+                      ["Lieu", `${formation.lieu} (détails à J-3)`],
+                      ["Montant payé", `${formation.prixFCFA.toLocaleString("fr-FR")} FCFA`],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex justify-between text-sm border-b border-gray-100 pb-2 last:border-0">
+                        <dt className="text-gray-400">{label}</dt>
+                        <dd className="font-semibold text-primary text-right">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-3">Prochaines étapes</p>
+                {[
+                  ["1", "Vérifiez votre email — votre billet vous a été envoyé"],
+                  ["2", "Conservez le billet : il est votre passe d'entrée le jour J"],
+                  ["3", "Le lieu exact sera communiqué 3 jours avant la formation"],
+                ].map(([n, text]) => (
+                  <div key={n} className="flex gap-3 items-start text-sm text-amber-800 mb-2 last:mb-0">
+                    <span className="w-6 h-6 bg-amber-200 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">{n}</span>
+                    <span>{text}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // ── Bannière d'échec de paiement ───────────────────────────────────────────
+  const echecBanner = formation.echec ? (
+    <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
+      <i className="fas fa-circle-exclamation text-red-500 mt-0.5" />
+      <div>
+        <p className="font-semibold text-red-700 text-sm">Paiement annulé ou échoué</p>
+        <p className="text-xs text-red-600 mt-0.5">Votre inscription n'a pas été validée. Vous pouvez réessayer ci-dessous.</p>
+      </div>
+    </div>
+  ) : null;
+
+  // ── Formulaire ─────────────────────────────────────────────────────────────
+  const onSubmit = async (data: FormData) => {
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/formations/inscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, formationId: formation.id }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Erreur d'inscription");
+      // Redirection vers la page de paiement FedaPay
+      window.location.href = json.checkoutUrl;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur lors de l'inscription";
+      toast.error(msg);
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="bg-primary pt-28 pb-0 relative overflow-hidden">
+        <div className="absolute inset-0 bg-mesh-gradient opacity-40 pointer-events-none" />
+        <div className="container-custom relative z-10 text-center pb-16">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-5">
+              <span className="w-2 h-2 bg-accent rounded-full animate-pulse-slow" />
+              Inscriptions ouvertes · Places limitées
+            </span>
+            <h1 className="font-syne font-black text-3xl sm:text-5xl text-white leading-tight mb-4">
+              {formation.titre.includes("&") ? (
+                <>
+                  <span className="gradient-text">{formation.titre.split("&")[0].trim()}</span>
+                  {" & "}
+                  <span className="text-amber-400">{formation.titre.split("&")[1].trim()}</span>
+                </>
+              ) : (
+                <span className="gradient-text">{formation.titre}</span>
+              )}
+            </h1>
+            {formation.description && (
+              <p className="text-white/55 text-lg max-w-xl mx-auto mb-6">{formation.description}</p>
+            )}
+            <div className="flex flex-wrap justify-center gap-3">
+              <Chip icon="fas fa-calendar-days" color="white">
+                <strong className="text-white">{formation.dateDebut}</strong> → {formation.dateFin}
+              </Chip>
+              <Chip icon="fas fa-tag" color="amber">
+                <strong>{formation.prixFCFA.toLocaleString("fr-FR")} FCFA</strong> · Tout compris
+              </Chip>
+              <Chip icon="fas fa-location-dot" color="white">
+                Présentiel · {formation.lieu}
+              </Chip>
+              {formation.placesRestantes > 0 && formation.placesRestantes <= 8 && (
+                <Chip icon="fas fa-fire" color="red">
+                  Plus que <strong>{formation.placesRestantes} place{formation.placesRestantes > 1 ? "s" : ""}</strong>
+                </Chip>
+              )}
+            </div>
+          </motion.div>
+        </div>
+        <div className="h-16 bg-paper" style={{ clipPath: "ellipse(60% 100% at 50% 100%)" }} />
+      </section>
+
+      {/* Formulaire */}
+      <section className="bg-paper pb-20 -mt-1">
+        <div className="container-custom max-w-2xl">
+          {echecBanner}
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+
+            {/* Bloc 1 */}
+            <Card num="1" title="Vos informations personnelles">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Prénom" error={errors.prenom?.message} required>
+                  <input {...register("prenom")} placeholder="Votre prénom" className={inputCls(!!errors.prenom)} />
+                </Field>
+                <Field label="Nom" error={errors.nom?.message} required>
+                  <input {...register("nom")} placeholder="Votre nom" className={inputCls(!!errors.nom)} />
+                </Field>
+              </div>
+              <Field label="Adresse e-mail" error={errors.email?.message} required>
+                <input type="email" {...register("email")} placeholder="votre@email.com" className={inputCls(!!errors.email)} />
+              </Field>
+              <Field label="Numéro WhatsApp / Téléphone" error={errors.telephone?.message} required hint="Nous vous enverrons les informations pratiques sur ce numéro.">
+                <input type="tel" {...register("telephone")} placeholder="+229 01 XX XX XX" className={inputCls(!!errors.telephone)} />
+              </Field>
+              <Field label="Ville de résidence" error={errors.ville?.message} required>
+                <select {...register("ville")} className={selectCls(!!errors.ville)}>
+                  <option value="">— Sélectionner —</option>
+                  {VILLES.map((v) => <option key={v}>{v}</option>)}
+                </select>
+              </Field>
+            </Card>
+
+            {/* Bloc 2 */}
+            <Card num="2" title="Votre structure & activité">
+              <Field label="Nom de votre structure / entreprise" error={errors.structure?.message} required>
+                <input {...register("structure")} placeholder="Cabinet, entreprise, ONG, administration..." className={inputCls(!!errors.structure)} />
+              </Field>
+              <Field label="Votre poste / fonction" error={errors.poste?.message} required>
+                <input {...register("poste")} placeholder="Ex : Directeur, Chef de projet, Consultant..." className={inputCls(!!errors.poste)} />
+              </Field>
+              <Field label="Secteur d'activité" error={errors.secteur?.message} required>
+                <select {...register("secteur")} className={selectCls(!!errors.secteur)}>
+                  <option value="">— Sélectionner —</option>
+                  {SECTEURS.map((s) => <option key={s}>{s}</option>)}
+                </select>
+              </Field>
+            </Card>
+
+            {/* Bloc 3 */}
+            <Card num="3" title="Vos attentes & comment vous nous avez trouvés">
+              <Field label="Qu'attendez-vous principalement de cette formation ?" error={errors.attente?.message} required hint="Cela nous permet d'adapter les exercices pratiques à votre réalité.">
+                <div className="space-y-2 mt-1">
+                  {ATTENTES.map((a) => (
+                    <RadioOpt key={a.value} label={a.value} sub={a.sub}
+                      checked={watchedAttente === a.value}
+                      onChange={() => setValue("attente", a.value, { shouldValidate: true })} />
+                  ))}
+                </div>
+              </Field>
+              <Field label="Précisez votre défi ou attente spécifique" hint="Optionnel">
+                <textarea {...register("detail")} rows={2} placeholder="Ex : je perds souvent des marchés sur la note technique..." className={inputCls(false) + " resize-y min-h-[72px]"} />
+              </Field>
+              <Field label="Comment avez-vous connu cette formation ?" error={errors.source?.message} required>
+                <div className="space-y-2 mt-1">
+                  {SOURCES.map((s) => (
+                    <RadioOpt key={s} label={s} checked={watchedSource === s}
+                      onChange={() => setValue("source", s, { shouldValidate: true })} />
+                  ))}
+                </div>
+              </Field>
+            </Card>
+
+            {/* Bloc 4 */}
+            <Card num="4" title="Paiement & confirmation">
+              <div className="bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20 rounded-xl p-4 flex gap-4 mb-1">
+                <span className="text-3xl leading-none">💳</span>
+                <div>
+                  <p className="font-syne font-black text-2xl text-primary">
+                    {formation.prixFCFA.toLocaleString("fr-FR")} FCFA
+                    <span className="text-sm font-normal text-gray-400 ml-2">· paiement unique</span>
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Inclus : formation 3 jours, supports PDF, accès outils IA,{" "}
+                    <strong className="text-primary">certificat professionnel Shift Up</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <Field label="Moyen de paiement" error={errors.methodePaiement?.message} required hint="Vous serez redirigé vers FedaPay pour finaliser le paiement en toute sécurité.">
+                <select {...register("methodePaiement")} className={selectCls(!!errors.methodePaiement)}>
+                  <option value="">— Sélectionner —</option>
+                  {(["MTN Mobile Money", "Moov / Flooz", "Wave", "Virement bancaire"] as const).map((m) => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
+              </Field>
+
+              {formation.placesRestantes > 0 && formation.placesRestantes <= 10 && (
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+                  <i className="fas fa-fire-flame-curved" />
+                  Seulement <strong className="mx-1">{formation.placesRestantes} place{formation.placesRestantes > 1 ? "s" : ""}</strong> restante{formation.placesRestantes > 1 ? "s" : ""}.
+                </div>
+              )}
+
+              <label className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 cursor-pointer mt-1">
+                <input type="checkbox" {...register("consent")} className="mt-0.5 accent-accent flex-shrink-0" />
+                <p className="text-sm text-amber-900 leading-relaxed">
+                  J'accepte que <strong>Shift Up</strong> utilise mes informations pour gérer mon inscription.
+                  Je comprends que ma place est confirmée à réception du paiement de{" "}
+                  <strong>{formation.prixFCFA.toLocaleString("fr-FR")} FCFA</strong>.<span className="text-red-500 ml-0.5">*</span>
+                </p>
+              </label>
+              <AnimatePresence>
+                {errors.consent && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-red-500 mt-1">
+                    {errors.consent.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </Card>
+
+            {/* Submit */}
+            <div className="mt-2">
+              <button
+                type="submit"
+                disabled={submitting || formation.placesRestantes === 0}
+                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-accent to-primary text-white font-syne font-bold text-lg py-4 px-8 rounded-2xl shadow-glow hover:shadow-card-hover hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {submitting ? (
+                  <><i className="fas fa-spinner fa-spin" /> Redirection vers FedaPay…</>
+                ) : formation.placesRestantes === 0 ? (
+                  "Formation complète"
+                ) : (
+                  <><i className="fas fa-shield-check" /> Payer {formation.prixFCFA.toLocaleString("fr-FR")} FCFA via FedaPay</>
+                )}
+              </button>
+              <p className="text-center text-xs text-gray-400 mt-3">
+                Paiement sécurisé via FedaPay (MTN MoMo, Moov, Wave) · Billet envoyé immédiatement par email
+              </p>
+            </div>
+
+          </form>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── Composants UI ──────────────────────────────────────────────────────────
+
+function Chip({ icon, color, children }: { icon: string; color: "white" | "amber" | "red"; children: React.ReactNode }) {
+  const cls = {
+    white: "bg-white/8 border-white/10 text-white/80",
+    amber: "bg-amber-500/15 border-amber-500/30 text-amber-300",
+    red: "bg-red-500/15 border-red-500/30 text-red-300",
+  }[color];
+  return (
+    <span className={`inline-flex items-center gap-2 border rounded-full px-4 py-2 text-sm ${cls}`}>
+      <i className={`${icon} text-xs`} />
+      {children}
+    </span>
+  );
+}
+
+function Card({ num, title, children }: { num: string; title: string; children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 mb-4 shadow-card space-y-4"
+    >
+      <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+        <span className="w-7 h-7 bg-accent text-white rounded-lg text-xs font-bold flex items-center justify-center">{num}</span>
+        <span className="text-xs font-bold text-accent uppercase tracking-widest">{title}</span>
+      </div>
+      {children}
+    </motion.div>
+  );
+}
+
+function Field({ label, children, error, required, hint }: {
+  label: string; children: React.ReactNode; error?: string; required?: boolean; hint?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-primary mb-1">
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      {hint && <p className="text-xs text-gray-400 mb-1.5">{hint}</p>}
+      {children}
+      <AnimatePresence>
+        {error && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-red-500 mt-1">
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function RadioOpt({ label, sub, checked, onChange }: { label: string; sub?: string; checked: boolean; onChange: () => void }) {
+  return (
+    <label
+      onClick={onChange}
+      className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${
+        checked ? "border-accent bg-accent/5" : "border-gray-200 bg-gray-50 hover:border-accent/40"
+      }`}
+    >
+      <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${checked ? "border-accent" : "border-gray-300"}`}>
+        {checked && <span className="w-2 h-2 rounded-full bg-accent" />}
+      </span>
+      <span>
+        <span className="text-sm font-medium text-primary block">{label}</span>
+        {sub && <span className="text-xs text-gray-400 mt-0.5 block">{sub}</span>}
+      </span>
+    </label>
+  );
+}
+
+const inputCls = (err: boolean) =>
+  `w-full font-grotesk text-sm text-primary bg-gray-50 border rounded-xl px-3.5 py-2.5 outline-none transition-all focus:bg-white focus:ring-2 ${
+    err ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-gray-200 focus:border-accent focus:ring-accent/10"
+  }`;
+
+const selectCls = (err: boolean) =>
+  `w-full font-grotesk text-sm text-primary bg-gray-50 border rounded-xl px-3.5 py-2.5 outline-none transition-all focus:bg-white focus:ring-2 cursor-pointer appearance-none ${
+    err ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-gray-200 focus:border-accent focus:ring-accent/10"
+  }`;

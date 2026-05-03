@@ -87,8 +87,8 @@ const nextConfig = {
               // Fonts : notre domaine + Google Fonts + fonts gstatic pour PDF invoices
               "font-src 'self' https://fonts.gstatic.com",
               // Connexions fetch/WebSocket : notre domaine + APIs externes
-              "connect-src 'self' https://www.google-analytics.com https://*.supabase.co https://api.fedapay.com",
-              // Iframes : Stripe Payment Element (iframes de paiement sécurisé)
+              "connect-src 'self' https://www.google-analytics.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com",
+              // Iframes : Stripe Payment Element
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
               // Toute ressource non couverte : uniquement notre domaine
               "default-src 'self'",
