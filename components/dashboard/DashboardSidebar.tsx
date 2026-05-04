@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -182,8 +183,14 @@ export default function DashboardSidebar({ role }: { role: string }) {
                 exit={{ opacity: 0, x: -10 }}
                 className="flex items-center gap-2"
               >
-                <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-syne font-black text-sm">SU</span>
+                <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
+                  <Image
+                    src="/assets/logo-icon.png"
+                    alt="SHIFT UP"
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-contain brightness-0 invert"
+                  />
                 </div>
                 <span className="text-white font-syne font-bold">SHIFT UP</span>
               </motion.div>

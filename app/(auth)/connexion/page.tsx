@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
+import Image from "next/image";
 
 const schema = z.object({
   email: z.string().email("Email invalide"),
@@ -56,6 +57,23 @@ export default function ConnexionPage() {
 
   return (
     <div>
+      {/* Logo desktop */}
+      <Link href="/" className="hidden lg:flex items-center gap-2 mb-8">
+        <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+          <Image
+            src="/assets/logo-icon.png"
+            alt="SHIFT UP"
+            width={40}
+            height={40}
+            className="w-full h-full object-contain brightness-0"
+          />
+        </div>
+        <div>
+          <p className="font-syne font-bold text-primary text-lg leading-none">SHIFT UP</p>
+          <p className="text-accent text-[9px] tracking-widest uppercase">Excellence • Innovation</p>
+        </div>
+      </Link>
+
       <h1 className="font-syne font-black text-3xl text-primary mb-2">Bon retour !</h1>
       <p className="text-gray-500 mb-8">
         Pas encore de compte ?{" "}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,8 +17,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Logo */}
         <Link href="/" className="relative z-10 flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center shadow-glow">
-            <span className="text-white font-syne font-black text-xl">SU</span>
+          <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+            <Image
+              src="/assets/logo-icon.png"
+              alt="SHIFT UP"
+              width={48}
+              height={48}
+              className="w-full h-full object-contain brightness-0 invert"
+              priority
+            />
           </div>
           <div>
             <p className="text-white font-syne font-bold text-2xl leading-none">SHIFT UP</p>
@@ -63,10 +71,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-white lg:rounded-l-3xl overflow-y-auto">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
+          {/* Logo (mobile uniquement — desktop : panneau gauche) */}
           <Link href="/" className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-syne font-black text-sm">SU</span>
+            <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
+              <Image
+                src="/assets/logo-icon.png"
+                alt="SHIFT UP"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain brightness-0"
+              />
             </div>
             <span className="font-syne font-bold text-primary text-xl">SHIFT UP</span>
           </Link>
