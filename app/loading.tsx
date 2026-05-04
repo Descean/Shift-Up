@@ -1,11 +1,4 @@
-/**
- * app/loading.tsx — Écran de chargement global SHIFT UP
- *
- * Affiché par Next.js (Suspense) pendant le chargement initial d'une page
- * (navigation entre routes côté client, streaming SSR).
- *
- * Affiche un logo centré avec un anneau de progression animé.
- */
+import Image from "next/image";
 
 export default function Loading() {
   return (
@@ -15,64 +8,57 @@ export default function Loading() {
         {/* Anneau animé */}
         <svg
           className="animate-spin"
-          width={72}
-          height={72}
-          viewBox="0 0 72 72"
+          width={96}
+          height={96}
+          viewBox="0 0 96 96"
           fill="none"
           aria-hidden
         >
           <circle
-            cx={36}
-            cy={36}
-            r={30}
-            stroke="rgba(30,159,212,0.2)"
+            cx={48}
+            cy={48}
+            r={42}
+            stroke="rgba(30,159,212,0.15)"
             strokeWidth={4}
           />
           <path
-            d="M 36 6 A 30 30 0 0 1 66 36"
+            d="M 48 6 A 42 42 0 0 1 90 48"
             stroke="url(#spin-gradient)"
             strokeWidth={4}
             strokeLinecap="round"
           />
           <defs>
-            <linearGradient id="spin-gradient" x1="36" y1="6" x2="66" y2="36" gradientUnits="userSpaceOnUse">
+            <linearGradient id="spin-gradient" x1="48" y1="6" x2="90" y2="48" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#1E9FD4" />
               <stop offset="100%" stopColor="#00D4A0" />
             </linearGradient>
           </defs>
         </svg>
 
-        {/* Logo au centre */}
+        {/* Logo centré */}
         <div className="absolute inset-0 flex items-center justify-center">
-          {/* Flèche SHIFT UP */}
-          <div className="flex flex-col items-center" style={{ gap: 3 }}>
-            <div
-              style={{
-                width: 0,
-                height: 0,
-                borderLeft: "8px solid transparent",
-                borderRight: "8px solid transparent",
-                borderBottom: "10px solid #00D4A0",
-              }}
-            />
-            <div
-              style={{
-                width: 6,
-                height: 11,
-                background: "linear-gradient(180deg, #00D4A0 0%, #1E9FD4 100%)",
-                borderRadius: 2,
-              }}
-            />
-          </div>
+          <Image
+            src="/assets/logo-icon.png"
+            alt="SHIFT UP"
+            width={48}
+            height={48}
+            className="object-contain brightness-0 invert"
+            priority
+          />
         </div>
       </div>
 
       {/* Nom de la marque */}
       <div className="text-center">
-        <p className="font-syne font-black text-white text-lg tracking-widest">
-          SHIFT <span style={{ color: "#1E9FD4" }}>UP</span>
-        </p>
-        <p className="text-white/40 text-xs mt-1">Chargement…</p>
+        <Image
+          src="/assets/logo-full.png"
+          alt="SHIFT UP"
+          width={160}
+          height={48}
+          className="object-contain brightness-0 invert mx-auto"
+          priority
+        />
+        <p className="text-white/40 text-xs mt-3">Chargement…</p>
       </div>
     </div>
   );
