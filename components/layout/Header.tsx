@@ -46,7 +46,7 @@ export default function Header() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
           ? "bg-primary/98 backdrop-blur-md shadow-lg py-3"
-          : "bg-primary/85 backdrop-blur-md py-4"
+          : "bg-primary/98 backdrop-blur-md py-4"
       )}
     >
       <div className="container-custom flex items-center justify-between">

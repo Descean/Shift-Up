@@ -8,12 +8,6 @@ export default function CTASection() {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/8 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container-custom relative z-10 text-center">
-        {/* Tag */}
-        <div className="inline-flex items-center gap-2 border border-accent/25 text-accent/80 px-5 py-2 rounded-full text-sm mb-8">
-          <i className="fas fa-rocket text-xs" />
-          Commencez votre transformation dès aujourd'hui
-        </div>
-
         {/* Serif headline */}
         <h2
           className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 max-w-3xl mx-auto"

@@ -21,7 +21,7 @@
  */
 
 import type { Metadata, Viewport } from "next";
-import { Syne, Space_Grotesk, Cormorant_Garamond } from "next/font/google";
+import { Poppins, Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Toaster } from "react-hot-toast";
@@ -29,14 +29,14 @@ import ChatWidget from "@/components/chatbot/ChatWidget";
 import AuthProvider from "@/components/providers/AuthProvider";
 import CookieConsent from "@/components/legal/CookieConsent";
 
-const syne = Syne({
+const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-syne",
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
   weight: ["300", "400", "500", "600", "700"],
@@ -128,7 +128,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${syne.variable} ${spaceGrotesk.variable} ${cormorant.variable}`}>
+    <html lang="fr" className={`${poppins.variable} ${inter.variable} ${cormorant.variable}`}>
       <head>
         {/* PWA — iOS Safari */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

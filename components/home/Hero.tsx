@@ -18,14 +18,6 @@ export default function Hero() {
 
       <div className="container-custom relative z-10 pt-32 pb-20 w-full">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Tag pill */}
-          <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 px-5 py-2 rounded-full mb-8">
-            <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-            <span className="text-primary/60 text-sm font-medium tracking-wide uppercase">
-              Cabinet de Conseil & Solutions Numériques — Bénin
-            </span>
-          </div>
-
           {/* Serif headline */}
           <h1
             className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05] text-primary mb-8"
