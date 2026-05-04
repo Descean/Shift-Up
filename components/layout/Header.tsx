@@ -40,13 +40,15 @@ export default function Header() {
     role === "APPORTEUR" ? "/dashboard/apporteur/profil" :
     role === "ETUDIANT"  ? "/dashboard/etudiant/profil"  : "/dashboard/client/profil";
 
+  const isDark = scrolled;
+
   return (
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled
+        isDark
           ? "bg-primary/98 backdrop-blur-md shadow-lg py-3"
-          : "bg-primary/98 backdrop-blur-md py-4"
+          : "bg-white/95 backdrop-blur-md border-b border-primary/8 py-4"
       )}
     >
       <div className="container-custom flex items-center justify-between">
@@ -58,13 +60,21 @@ export default function Header() {
               alt="SHIFT UP"
               width={40}
               height={40}
-              className="w-full h-full object-contain brightness-0 invert"
+              className={cn(
+                "w-full h-full object-contain transition-all duration-300",
+                isDark ? "brightness-0 invert" : "brightness-0"
+              )}
               priority
             />
           </div>
           <div className="hidden sm:block">
-            <p className="text-white font-syne font-bold text-xl leading-none">SHIFT UP</p>
-            <p className="text-accent/80 text-[10px] tracking-widest uppercase">
+            <p className={cn(
+              "font-syne font-bold text-xl leading-none transition-colors duration-300",
+              isDark ? "text-white" : "text-primary"
+            )}>
+              SHIFT UP
+            </p>
+            <p className="text-accent text-[10px] tracking-widest uppercase">
               Excellence • Innovation
             </p>
           </div>
@@ -76,7 +86,12 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white rounded-lg hover:bg-white/10 transition-all duration-200"
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                isDark
+                  ? "text-white/80 hover:text-white hover:bg-white/10"
+                  : "text-primary/70 hover:text-primary hover:bg-primary/8"
+              )}
             >
               {link.label}
             </Link>
@@ -89,17 +104,26 @@ export default function Header() {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl transition-all duration-200"
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200",
+                  isDark ? "bg-white/10 hover:bg-white/20" : "bg-primary/8 hover:bg-primary/15"
+                )}
               >
                 <div className="w-7 h-7 bg-gradient-to-br from-accent to-secondary rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-bold">
                     {session.user?.name?.charAt(0) || "U"}
                   </span>
                 </div>
-                <span className="text-white text-sm font-medium max-w-[120px] truncate">
+                <span className={cn(
+                  "text-sm font-medium max-w-[120px] truncate transition-colors duration-300",
+                  isDark ? "text-white" : "text-primary"
+                )}>
                   {session.user?.name}
                 </span>
-                <i className="fas fa-chevron-down text-white/60 text-xs" />
+                <i className={cn(
+                  "fas fa-chevron-down text-xs transition-colors duration-300",
+                  isDark ? "text-white/60" : "text-primary/50"
+                )} />
               </button>
               <AnimatePresence>
                 {userMenuOpen && (
@@ -138,7 +162,12 @@ export default function Header() {
             </div>
           ) : (
             <>
-              <Button href="/connexion" variant="ghost" size="sm" className="text-white hover:bg-white/10">
+              <Button
+                href="/connexion"
+                variant="ghost"
+                size="sm"
+                className={isDark ? "text-white hover:bg-white/10" : "text-primary hover:bg-primary/8"}
+              >
                 Connexion
               </Button>
               <Button href="/inscription" variant="gradient" size="sm" animate={false}>
@@ -154,9 +183,21 @@ export default function Header() {
           onClick={() => setMobileOpen(!mobileOpen)}
           className="lg:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5"
         >
-          <span className={cn("block w-6 h-0.5 bg-white transition-all duration-300", mobileOpen && "rotate-45 translate-y-2")} />
-          <span className={cn("block w-6 h-0.5 bg-white transition-all duration-300", mobileOpen && "opacity-0")} />
-          <span className={cn("block w-6 h-0.5 bg-white transition-all duration-300", mobileOpen && "-rotate-45 -translate-y-2")} />
+          <span className={cn(
+            "block w-6 h-0.5 transition-all duration-300",
+            isDark ? "bg-white" : "bg-primary",
+            mobileOpen && "rotate-45 translate-y-2"
+          )} />
+          <span className={cn(
+            "block w-6 h-0.5 transition-all duration-300",
+            isDark ? "bg-white" : "bg-primary",
+            mobileOpen && "opacity-0"
+          )} />
+          <span className={cn(
+            "block w-6 h-0.5 transition-all duration-300",
+            isDark ? "bg-white" : "bg-primary",
+            mobileOpen && "-rotate-45 -translate-y-2"
+          )} />
         </button>
       </div>
 
@@ -167,7 +208,12 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-primary/98 backdrop-blur-md border-t border-white/10 overflow-hidden"
+            className={cn(
+              "lg:hidden backdrop-blur-md border-t overflow-hidden",
+              isDark
+                ? "bg-primary/98 border-white/10"
+                : "bg-white/98 border-primary/8"
+            )}
           >
             <div className="container-custom py-4 flex flex-col gap-1">
               {navLinks.map((link) => (
@@ -175,15 +221,20 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                  className={cn(
+                    "px-4 py-3 rounded-xl transition-colors",
+                    isDark
+                      ? "text-white/80 hover:text-white hover:bg-white/10"
+                      : "text-primary/70 hover:text-primary hover:bg-primary/8"
+                  )}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
+              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-primary/10">
                 {session ? (
                   <>
-                    <Button href={dashboardHref} variant="outline" size="md" className="border-white/30 text-white">
+                    <Button href={dashboardHref} variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-primary/30 text-primary"}>
                       <i className="fas fa-grid-2" />
                       Mon tableau de bord
                     </Button>
@@ -193,7 +244,7 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Button href="/connexion" variant="outline" size="md" className="border-white/30 text-white">
+                    <Button href="/connexion" variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-primary/30 text-primary"}>
                       Connexion
                     </Button>
                     <Button href="/inscription" variant="gradient" size="md">
