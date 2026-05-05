@@ -303,6 +303,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
                       width={560}
                       height={420}
                       className="w-full object-cover"
+                      unoptimized
                       priority
                     />
                   </div>
