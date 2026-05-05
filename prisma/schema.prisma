@@ -77,6 +77,10 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  // 2FA TOTP
+  totpSecret      String?   // secret chiffré (base32), null si 2FA non activé
+  totpEnabled     Boolean   @default(false)
+
   // NextAuth relations
   accounts    Account[]
   sessions    Session[]

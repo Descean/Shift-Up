@@ -10,7 +10,8 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { registerSchema } from "@/lib/validation";
+import { registerSchema, passwordStrength } from "@/lib/validation";
+import { HCaptchaField } from "@/components/ui/HCaptchaField";
 
 const schema = registerSchema;
 
@@ -44,6 +45,8 @@ export default function InscriptionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [pwdValue, setPwdValue] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const {
     register,
@@ -59,12 +62,16 @@ export default function InscriptionPage() {
   const selectedRole = watch("role");
 
   const onSubmit = async (data: FormData) => {
+    if (process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY && !captchaToken) {
+      toast.error("Veuillez compléter le captcha.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, captchaToken }),
       });
 
       const json = await res.json();
@@ -170,12 +177,14 @@ export default function InscriptionPage() {
                 {...register("password")}
                 type={showPwd ? "text" : "password"}
                 className="w-full border border-gray-200 rounded-xl px-4 pr-11 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
-                placeholder="Min 8 caractères"
+                placeholder="Min 8 car., majuscule, chiffre, symbole"
+                onChange={(e) => { register("password").onChange(e); setPwdValue(e.target.value); }}
               />
               <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <i className={`fas fa-${showPwd ? "eye-slash" : "eye"} text-sm`} />
               </button>
             </div>
+            {pwdValue && <PasswordStrengthBar value={pwdValue} />}
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
           <div>
@@ -279,11 +288,49 @@ export default function InscriptionPage() {
         </label>
         {errors.acceptTerms && <p className="text-red-500 text-xs -mt-3">{errors.acceptTerms.message}</p>}
 
+        <div className="flex justify-center">
+          <HCaptchaField onVerify={setCaptchaToken} onExpire={() => setCaptchaToken("")} />
+        </div>
+
         <Button type="submit" variant="gradient" size="lg" loading={loading} className="w-full">
           {loading ? "Création du compte..." : "Créer mon compte"}
           {!loading && <i className="fas fa-user-plus" />}
         </Button>
       </form>
+    </div>
+  );
+}
+
+function PasswordStrengthBar({ value }: { value: string }) {
+  const score = passwordStrength(value);
+  const labels = ["", "Faible", "Moyen", "Fort", "Très fort"];
+  const colors = ["", "bg-red-400", "bg-amber-400", "bg-lime-400", "bg-emerald-500"];
+  const textColors = ["", "text-red-500", "text-amber-500", "text-lime-600", "text-emerald-600"];
+  const rules = [
+    { ok: value.length >= 8,           label: "8 caractères min." },
+    { ok: /[A-Z]/.test(value),         label: "Majuscule" },
+    { ok: /[a-z]/.test(value),         label: "Minuscule" },
+    { ok: /[0-9]/.test(value),         label: "Chiffre" },
+    { ok: /[^A-Za-z0-9]/.test(value),  label: "Caractère spécial" },
+  ];
+  return (
+    <div className="mt-2 space-y-1.5">
+      <div className="flex gap-1 h-1.5">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className={`flex-1 rounded-full transition-colors duration-300 ${score >= i ? colors[score] : "bg-gray-200"}`} />
+        ))}
+      </div>
+      {score > 0 && (
+        <p className={`text-xs font-medium ${textColors[score]}`}>{labels[score]}</p>
+      )}
+      <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+        {rules.map((r) => (
+          <span key={r.label} className={`text-[11px] flex items-center gap-1 ${r.ok ? "text-emerald-600" : "text-gray-400"}`}>
+            <i className={`fas fa-${r.ok ? "check" : "times"} text-[9px]`} />
+            {r.label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

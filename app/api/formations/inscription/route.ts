@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { verifyCaptcha } from "@/lib/captcha";
 
 // trim AVANT min() : rejette les champs composés uniquement d'espaces
 // .max() → .transform(trim) → .pipe(min) garantit l'ordre correct des validations
@@ -22,6 +23,7 @@ const schema = z.object({
   detail: z.string().max(1000).transform((s) => s.trim()).optional(),
   source: z.string().min(1),
   methodePaiement: z.enum(["MTN Mobile Money", "Moov / Flooz", "Wave", "Virement bancaire"]),
+  captchaToken: z.string().optional(),
 });
 
 function generateReference(): string {
@@ -43,6 +45,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const data = schema.parse(body);
+
+    if (!(await verifyCaptcha(data.captchaToken))) {
+      return NextResponse.json({ error: "Vérification captcha échouée." }, { status: 403 });
+    }
 
     const formation = await prisma.formation.findUnique({
       where: { id: data.formationId, isActive: true },

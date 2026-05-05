@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
+import { HCaptchaField } from "@/components/ui/HCaptchaField";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 export interface FormationProps {
@@ -62,6 +63,7 @@ const SECTEURS = [
 
 export default function FormationForm({ formation }: { formation: FormationProps }) {
   const [submitting, setSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const {
     register,
@@ -154,12 +156,16 @@ export default function FormationForm({ formation }: { formation: FormationProps
 
   // ── Formulaire ─────────────────────────────────────────────────────────────
   const onSubmit = async (data: FormData) => {
+    if (process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY && !captchaToken) {
+      toast.error("Veuillez compléter le captcha.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/formations/inscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, formationId: formation.id }),
+        body: JSON.stringify({ ...data, formationId: formation.id, captchaToken }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Erreur d'inscription");
@@ -336,6 +342,11 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 )}
               </AnimatePresence>
             </Card>
+
+            {/* Captcha */}
+            <div className="flex justify-center mt-1">
+              <HCaptchaField onVerify={setCaptchaToken} onExpire={() => setCaptchaToken("")} />
+            </div>
 
             {/* Submit */}
             <div className="mt-2">

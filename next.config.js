@@ -78,18 +78,18 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: [
-              // Scripts : notre domaine + Google (Analytics) + Stripe
-              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
-              // Styles : notre domaine + Google Fonts (FontAwesome est désormais self-hosted via npm)
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              // Scripts : notre domaine + Google (Analytics) + Stripe + hCaptcha
+              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
+              // Styles : notre domaine + Google Fonts + hCaptcha
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://hcaptcha.com https://*.hcaptcha.com",
               // Images : notre domaine + Google Analytics + Supabase + data: URIs (SVG inline)
               "img-src 'self' data: https://www.google-analytics.com https://*.supabase.co https://lh3.googleusercontent.com",
               // Fonts : notre domaine + Google Fonts + fonts gstatic pour PDF invoices
               "font-src 'self' https://fonts.gstatic.com",
               // Connexions fetch/WebSocket : notre domaine + APIs externes
-              "connect-src 'self' https://www.google-analytics.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com",
-              // Iframes : Stripe Payment Element
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+              "connect-src 'self' https://www.google-analytics.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com https://hcaptcha.com https://*.hcaptcha.com",
+              // Iframes : Stripe + hCaptcha
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
               // Toute ressource non couverte : uniquement notre domaine
               "default-src 'self'",
               // Bloque les formulaires qui soumettent vers des sites tiers non listés

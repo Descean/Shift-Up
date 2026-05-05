@@ -38,6 +38,7 @@ export async function GET() {
         stars: true,
         isActive: true,
         createdAt: true,
+        totpEnabled: true,
         // Profils métier (un seul sera non-null selon le rôle)
         clientProfile:   true,
         apporteurProfile: true,

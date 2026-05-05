@@ -4,11 +4,13 @@ import prisma from "@/lib/prisma";
 import { generateAffiliationCode } from "@/lib/utils";
 import { z } from "zod";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { verifyCaptcha } from "@/lib/captcha";
 
 const schema = z.object({
   name: z.string().refine((s) => s.trim().length >= 2, { message: "Nom requis (min. 2 caractères)" }),
   email: z.string().email().transform((s) => s.trim().toLowerCase()),
   password: z.string().min(8),
+  captchaToken: z.string().optional(),
   phone: z.string().optional(),
   role: z.enum(["CLIENT", "APPORTEUR", "ETUDIANT"]),
   affiliationCode: z.string().optional(),
@@ -32,6 +34,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const data = schema.parse(body);
+
+    if (!(await verifyCaptcha(data.captchaToken))) {
+      return NextResponse.json({ error: "Vérification captcha échouée." }, { status: 403 });
+    }
 
     // Check if email already exists
     const existing = await prisma.user.findUnique({ where: { email: data.email } });

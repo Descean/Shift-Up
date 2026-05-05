@@ -233,15 +233,21 @@ export const ifuOptionalSchema = z.string().optional().refine(
 export const passwordSchema = z.string()
   .min(8, "Minimum 8 caractères.")
   .max(128, "Maximum 128 caractères.")
-  .refine(
-    (v) => /[A-Z]/.test(v) || /[a-z]/.test(v),
-    "Le mot de passe doit contenir au moins une lettre."
-  )
-  .refine(
-    (v) => /[0-9]/.test(v),
-    "Le mot de passe doit contenir au moins un chiffre."
-  )
+  .refine((v) => /[A-Z]/.test(v), "Au moins une lettre majuscule requise.")
+  .refine((v) => /[a-z]/.test(v), "Au moins une lettre minuscule requise.")
+  .refine((v) => /[0-9]/.test(v), "Au moins un chiffre requis.")
+  .refine((v) => /[^A-Za-z0-9]/.test(v), "Au moins un caractère spécial requis (!, @, #, …).")
   .refine(isSafe, "Caractères non autorisés dans le mot de passe.");
+
+/** Calcule un score de force 0-4 pour l'indicateur visuel */
+export function passwordStrength(v: string): number {
+  let score = 0;
+  if (v.length >= 8) score++;
+  if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+  if (/[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  return score;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TEXTE LIBRE (description, message, etc.)

@@ -42,6 +42,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/client/affiliation", icon: "fas fa-users", label: "Affiliation & gains" },
     { href: "/dashboard/client/factures", icon: "fas fa-file-invoice", label: "Factures" },
     { href: "/dashboard/client/profil", icon: "fas fa-user-circle", label: "Mon profil" },
+    { href: "/dashboard/securite", icon: "fas fa-shield-halved", label: "Sécurité (2FA)" },
   ],
   APPORTEUR: [
     { href: "/dashboard/apporteur", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
@@ -51,6 +52,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/apporteur/commissions", icon: "fas fa-coins", label: "Commissions" },
     { href: "/dashboard/apporteur/classement", icon: "fas fa-trophy", label: "Classement" },
     { href: "/dashboard/apporteur/profil", icon: "fas fa-user-circle", label: "Mon profil" },
+    { href: "/dashboard/securite", icon: "fas fa-shield-halved", label: "Sécurité (2FA)" },
   ],
   ETUDIANT: [
     { href: "/dashboard/etudiant", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
@@ -59,6 +61,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/etudiant/badges", icon: "fas fa-award", label: "Mes badges" },
     { href: "/dashboard/etudiant/portfolio", icon: "fas fa-folder-open", label: "Portfolio" },
     { href: "/dashboard/etudiant/profil", icon: "fas fa-user-circle", label: "Mon profil" },
+    { href: "/dashboard/securite", icon: "fas fa-shield-halved", label: "Sécurité (2FA)" },
   ],
   ADMIN: [
     { href: "/dashboard/admin", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
@@ -74,6 +77,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/admin/analytics", icon: "fas fa-chart-bar", label: "Analytics" },
     { href: "/dashboard/admin/finances", icon: "fas fa-coins", label: "Finances (DG)" },
     { href: "/dashboard/admin/finances/versements", icon: "fas fa-money-bill-transfer", label: "Versements" },
+    { href: "/dashboard/securite", icon: "fas fa-shield-halved", label: "Sécurité (2FA)" },
   ],
   DEVELOPER: [
     { href: "/dashboard/admin", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
@@ -88,6 +92,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/admin/formations", icon: "fas fa-graduation-cap", label: "Formations" },
     { href: "/dashboard/admin/analytics", icon: "fas fa-chart-bar", label: "Analytics" },
     { href: "/dashboard/admin/finances/versements", icon: "fas fa-money-bill-transfer", label: "Versements" },
+    { href: "/dashboard/securite", icon: "fas fa-shield-halved", label: "Sécurité (2FA)" },
   ],
 };
 

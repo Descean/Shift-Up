@@ -10,6 +10,7 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import Image from "next/image";
+import { HCaptchaField } from "@/components/ui/HCaptchaField";
 
 const schema = z.object({
   email: z.string().email("Email invalide"),
@@ -23,12 +24,17 @@ export default function ConnexionPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: FormData) => {
+    if (process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY && !captchaToken) {
+      toast.error("Veuillez compléter le captcha.");
+      return;
+    }
     setLoading(true);
     try {
       const result = await signIn("credentials", {
@@ -146,6 +152,10 @@ export default function ConnexionPage() {
             </button>
           </div>
           {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+        </div>
+
+        <div className="flex justify-center">
+          <HCaptchaField onVerify={setCaptchaToken} onExpire={() => setCaptchaToken("")} />
         </div>
 
         <Button type="submit" variant="gradient" size="lg" loading={loading} className="w-full">
