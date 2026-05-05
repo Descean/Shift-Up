@@ -10,27 +10,55 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Formation "IA & Marchés Publics — 28-30 mai 2026"
-  const existing = await prisma.formation.findUnique({ where: { slug: "ia-marches-publics" } });
-  if (!existing) {
-    await prisma.formation.create({
-      data: {
-        slug: "ia-marches-publics",
-        titre: "Intelligence Artificielle & Marchés Publics",
-        description:
-          "Apprenez à utiliser l'IA pour rédiger des offres DAO gagnantes et décrocher plus de marchés publics.",
-        dateDebut: new Date("2026-05-28T08:00:00Z"),
-        dateFin: new Date("2026-05-30T18:00:00Z"),
-        lieu: "Cotonou, Bénin",
-        prixFCFA: 50000,
-        placesMax: 30,
-        isActive: true,
-      },
-    });
-    console.log("✅ Formation 'ia-marches-publics' créée.");
-  } else {
-    console.log("ℹ️  Formation 'ia-marches-publics' déjà existante — ignorée.");
-  }
+  // Formation présentielle "IA & Marchés Publics — 28-30 mai 2026"
+  await prisma.formation.upsert({
+    where: { slug: "ia-marches-publics" },
+    create: {
+      slug: "ia-marches-publics",
+      titre: "Intelligence Artificielle & Marchés Publics",
+      description:
+        "Apprenez à utiliser l'IA pour rédiger des offres DAO gagnantes, structurer des propositions compétitives et décrocher plus de marchés publics.",
+      dateDebut: new Date("2026-05-28T08:00:00Z"),
+      dateFin: new Date("2026-05-30T18:00:00Z"),
+      lieu: "Cotonou, Bénin",
+      prixFCFA: 50000,
+      placesMax: 30,
+      isActive: true,
+    },
+    update: {
+      titre:       "Intelligence Artificielle & Marchés Publics",
+      description: "Apprenez à utiliser l'IA pour rédiger des offres DAO gagnantes, structurer des propositions compétitives et décrocher plus de marchés publics.",
+      dateDebut:   new Date("2026-05-28T08:00:00Z"),
+      dateFin:     new Date("2026-05-30T18:00:00Z"),
+      lieu:        "Cotonou, Bénin",
+      prixFCFA:    50000,
+    },
+  });
+  console.log("✅ Formation 'ia-marches-publics' (présentiel) synchronisée.");
+
+  // Formation en ligne "IA & Marchés Publics — 4-6 juin 2026"
+  await prisma.formation.upsert({
+    where: { slug: "ia-marches-publics-enligne" },
+    create: {
+      slug: "ia-marches-publics-enligne",
+      titre: "Intelligence Artificielle & Marchés Publics",
+      description:
+        "Apprenez à utiliser l'IA pour rédiger des offres DAO gagnantes, structurer des propositions compétitives et décrocher plus de marchés publics.",
+      dateDebut: new Date("2026-06-04T08:00:00Z"),
+      dateFin: new Date("2026-06-06T18:00:00Z"),
+      lieu: "Classe virtuelle (Zoom)",
+      prixFCFA: 35500,
+      placesMax: 50,
+      isActive: true,
+    },
+    update: {
+      dateDebut: new Date("2026-06-04T08:00:00Z"),
+      dateFin:   new Date("2026-06-06T18:00:00Z"),
+      lieu:      "Classe virtuelle (Zoom)",
+      prixFCFA:  35500,
+    },
+  });
+  console.log("✅ Formation 'ia-marches-publics-enligne' synchronisée.");
 }
 
 main()

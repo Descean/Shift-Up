@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +10,23 @@ import toast from "react-hot-toast";
 import { HCaptchaField } from "@/components/ui/HCaptchaField";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
+export interface FormationHighlight {
+  icon: string;
+  text: string;
+}
+
+export interface FormationSession {
+  formationId: string;
+  label: string;        // "Présentiel" | "En ligne"
+  icon: string;         // icône Font Awesome représentant le mode
+  dateDebut: string;
+  dateFin: string;
+  lieu: string;         // ex: "Présentiel · Cotonou, Bénin" ou "En ligne · Classe virtuelle"
+  prixFCFA: number;
+  placesRestantes: number;
+  badge?: string;       // ex: "Meilleure offre"
+}
+
 export interface FormationProps {
   id: string;
   titre: string;
@@ -18,6 +36,12 @@ export interface FormationProps {
   lieu: string;
   prixFCFA: number;
   placesRestantes: number;
+  // Sélecteur de sessions (optionnel — affiche un picker si présent)
+  sessions?: FormationSession[];
+  // Contenu riche (optionnel)
+  about?: string;
+  highlights?: FormationHighlight[];
+  heroImage?: string;
   // Succès : set par la page parente après retour FedaPay
   succes?: boolean;
   reference?: string;
@@ -25,18 +49,22 @@ export interface FormationProps {
 }
 
 // ─── Schéma Zod ───────────────────────────────────────────────────────────────
+// max → transform(trim) → pipe(min) : garantit le rejet des espaces-only et le trim côté client
+const t = (min: number, max: number, msg: string) =>
+  z.string().max(max).transform((s) => s.trim()).pipe(z.string().min(min, msg));
+
 const schema = z.object({
-  prenom: z.string().refine((s) => s.trim().length >= 2, "Prénom requis"),
-  nom: z.string().refine((s) => s.trim().length >= 2, "Nom requis"),
-  email: z.string().email("Email invalide"),
-  telephone: z.string().refine((s) => s.trim().length >= 6, "Téléphone requis"),
-  ville: z.string().min(1, "Ville requise"),
-  structure: z.string().refine((s) => s.trim().length >= 2, "Structure requise"),
-  poste: z.string().refine((s) => s.trim().length >= 2, "Poste requis"),
-  secteur: z.string().min(1, "Secteur requis"),
-  attente: z.string().min(1, "Sélectionnez votre attente"),
-  detail: z.string().max(1000).optional(),
-  source: z.string().min(1, "Indiquez comment vous nous avez trouvés"),
+  prenom:   t(2, 80,  "Prénom requis (2 caractères min)"),
+  nom:      t(2, 80,  "Nom requis (2 caractères min)"),
+  email:    z.string().email("Email invalide"),
+  telephone: z.string().max(30).transform((s) => s.trim()).pipe(z.string().min(6, "Téléphone requis")),
+  ville:    z.string().min(1, "Ville requise"),
+  structure: t(2, 120, "Structure requise (2 caractères min)"),
+  poste:    t(2, 120, "Poste requis (2 caractères min)"),
+  secteur:  z.string().min(1, "Secteur requis"),
+  attente:  z.string().min(1, "Sélectionnez votre attente"),
+  detail:   z.string().max(1000).transform((s) => s.trim()).optional(),
+  source:   z.string().min(1, "Indiquez comment vous nous avez trouvés"),
   methodePaiement: z.enum(
     ["MTN Mobile Money", "Moov / Flooz", "Wave", "Virement bancaire"],
     { errorMap: () => ({ message: "Moyen de paiement requis" }) }
@@ -64,6 +92,17 @@ const SECTEURS = [
 export default function FormationForm({ formation }: { formation: FormationProps }) {
   const [submitting, setSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
+  const [selectedSession, setSelectedSession] = useState<FormationSession | null>(
+    formation.sessions?.[0] ?? null
+  );
+
+  // Valeurs effectives : session sélectionnée ou fallback sur les props
+  const effectiveId     = selectedSession?.formationId     ?? formation.id;
+  const effectivePrix   = selectedSession?.prixFCFA        ?? formation.prixFCFA;
+  const effectiveDebut  = selectedSession?.dateDebut       ?? formation.dateDebut;
+  const effectiveFin    = selectedSession?.dateFin         ?? formation.dateFin;
+  const effectiveLieu   = selectedSession?.lieu            ?? formation.lieu;
+  const effectivePlaces = selectedSession?.placesRestantes ?? formation.placesRestantes;
 
   const {
     register,
@@ -165,7 +204,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
       const res = await fetch("/api/formations/inscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, formationId: formation.id, captchaToken }),
+        body: JSON.stringify({ ...data, formationId: effectiveId, captchaToken }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Erreur d'inscription");
@@ -205,17 +244,17 @@ export default function FormationForm({ formation }: { formation: FormationProps
             )}
             <div className="flex flex-wrap justify-center gap-3">
               <Chip icon="fas fa-calendar-days" color="white">
-                <strong className="text-white">{formation.dateDebut}</strong> → {formation.dateFin}
+                <strong className="text-white">{effectiveDebut}</strong> → {effectiveFin}
               </Chip>
               <Chip icon="fas fa-tag" color="amber">
-                <strong>{formation.prixFCFA.toLocaleString("fr-FR")} FCFA</strong> · Tout compris
+                <strong>{effectivePrix.toLocaleString("fr-FR")} FCFA</strong> · Tout compris
               </Chip>
-              <Chip icon="fas fa-location-dot" color="white">
-                Présentiel · {formation.lieu}
+              <Chip icon={selectedSession?.icon ?? "fas fa-location-dot"} color="white">
+                {effectiveLieu}
               </Chip>
-              {formation.placesRestantes > 0 && formation.placesRestantes <= 8 && (
+              {effectivePlaces > 0 && effectivePlaces <= 8 && (
                 <Chip icon="fas fa-fire" color="red">
-                  Plus que <strong>{formation.placesRestantes} place{formation.placesRestantes > 1 ? "s" : ""}</strong>
+                  Plus que <strong>{effectivePlaces} place{effectivePlaces > 1 ? "s" : ""}</strong>
                 </Chip>
               )}
             </div>
@@ -224,11 +263,71 @@ export default function FormationForm({ formation }: { formation: FormationProps
         <div className="h-16 bg-paper" style={{ clipPath: "ellipse(60% 100% at 50% 100%)" }} />
       </section>
 
+      {/* Section : description riche + image */}
+      {(formation.about || formation.highlights?.length || formation.heroImage) && (
+        <section className="bg-white border-b border-gray-100 py-12 -mt-1">
+          <div className="container-custom max-w-5xl">
+            <div className="grid md:grid-cols-5 gap-8 items-start">
+
+              {/* Texte + highlights (3/5) */}
+              <div className="md:col-span-3 space-y-6">
+                {formation.about && (
+                  <p className="text-gray-600 leading-relaxed text-base">{formation.about}</p>
+                )}
+                {formation.highlights?.length ? (
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-accent mb-3 flex items-center gap-2">
+                      <i className="fas fa-list-check" /> Ce que vous allez maîtriser
+                    </p>
+                    <ul className="grid sm:grid-cols-2 gap-2.5">
+                      {formation.highlights.map((h, i) => (
+                        <li key={i} className="flex items-start gap-2.5 bg-gray-50 hover:bg-accent/5 transition-colors rounded-xl p-3">
+                          <span className="w-7 h-7 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i className={`${h.icon} text-accent text-xs`} />
+                          </span>
+                          <span className="text-sm text-gray-700 leading-snug pt-0.5">{h.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Image (2/5) */}
+              {formation.heroImage && (
+                <div className="md:col-span-2 order-first md:order-last">
+                  <div className="rounded-2xl overflow-hidden shadow-lg ring-1 ring-gray-100">
+                    <Image
+                      src={formation.heroImage}
+                      alt={`Formation ${formation.titre}`}
+                      width={560}
+                      height={420}
+                      className="w-full object-cover"
+                      priority
+                    />
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Formulaire */}
       <section className="bg-paper pb-20 -mt-1">
         <div className="container-custom max-w-2xl">
           {echecBanner}
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
+
+            {/* Sélecteur de session */}
+            {formation.sessions?.length ? (
+              <SessionPicker
+                sessions={formation.sessions}
+                selected={selectedSession}
+                onSelect={setSelectedSession}
+              />
+            ) : null}
 
             {/* Bloc 1 */}
             <Card num="1" title="Vos informations personnelles">
@@ -300,7 +399,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 <span className="text-3xl leading-none">💳</span>
                 <div>
                   <p className="font-syne font-black text-2xl text-primary">
-                    {formation.prixFCFA.toLocaleString("fr-FR")} FCFA
+                    {effectivePrix.toLocaleString("fr-FR")} FCFA
                     <span className="text-sm font-normal text-gray-400 ml-2">· paiement unique</span>
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -319,10 +418,10 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 </select>
               </Field>
 
-              {formation.placesRestantes > 0 && formation.placesRestantes <= 10 && (
+              {effectivePlaces > 0 && effectivePlaces <= 10 && (
                 <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex items-center gap-2">
                   <i className="fas fa-fire-flame-curved" />
-                  Seulement <strong className="mx-1">{formation.placesRestantes} place{formation.placesRestantes > 1 ? "s" : ""}</strong> restante{formation.placesRestantes > 1 ? "s" : ""}.
+                  Seulement <strong className="mx-1">{effectivePlaces} place{effectivePlaces > 1 ? "s" : ""}</strong> restante{effectivePlaces > 1 ? "s" : ""}.
                 </div>
               )}
 
@@ -331,7 +430,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 <p className="text-sm text-amber-900 leading-relaxed">
                   J'accepte que <strong>Shift Up</strong> utilise mes informations pour gérer mon inscription.
                   Je comprends que ma place est confirmée à réception du paiement de{" "}
-                  <strong>{formation.prixFCFA.toLocaleString("fr-FR")} FCFA</strong>.<span className="text-red-500 ml-0.5">*</span>
+                  <strong>{effectivePrix.toLocaleString("fr-FR")} FCFA</strong>.<span className="text-red-500 ml-0.5">*</span>
                 </p>
               </label>
               <AnimatePresence>
@@ -352,15 +451,15 @@ export default function FormationForm({ formation }: { formation: FormationProps
             <div className="mt-2">
               <button
                 type="submit"
-                disabled={submitting || formation.placesRestantes === 0}
+                disabled={submitting || effectivePlaces === 0}
                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-accent to-primary text-white font-syne font-bold text-lg py-4 px-8 rounded-2xl shadow-glow hover:shadow-card-hover hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {submitting ? (
                   <><i className="fas fa-spinner fa-spin" /> Redirection vers FedaPay…</>
-                ) : formation.placesRestantes === 0 ? (
+                ) : effectivePlaces === 0 ? (
                   "Formation complète"
                 ) : (
-                  <><i className="fas fa-shield-check" /> Payer {formation.prixFCFA.toLocaleString("fr-FR")} FCFA via FedaPay</>
+                  <><i className="fas fa-shield-check" /> Payer {effectivePrix.toLocaleString("fr-FR")} FCFA via FedaPay</>
                 )}
               </button>
               <p className="text-center text-xs text-gray-400 mt-3">
@@ -371,6 +470,68 @@ export default function FormationForm({ formation }: { formation: FormationProps
           </form>
         </div>
       </section>
+    </div>
+  );
+}
+
+// ─── Session picker ─────────────────────────────────────────────────────────
+
+function SessionPicker({ sessions, selected, onSelect }: {
+  sessions: FormationSession[];
+  selected: FormationSession | null;
+  onSelect: (s: FormationSession) => void;
+}) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-4 shadow-card">
+      <p className="text-xs font-bold uppercase tracking-widest text-accent mb-3 flex items-center gap-2">
+        <i className="fas fa-layer-group" /> Choisissez votre formule
+      </p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {sessions.map((s) => {
+          const active = selected?.formationId === s.formationId;
+          return (
+            <button
+              key={s.formationId}
+              type="button"
+              onClick={() => onSelect(s)}
+              className={`relative text-left border-2 rounded-xl p-4 transition-all ${
+                active ? "border-accent bg-accent/5" : "border-gray-200 bg-gray-50 hover:border-accent/40"
+              }`}
+            >
+              {s.badge && (
+                <span className="absolute -top-2.5 right-3 bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                  {s.badge}
+                </span>
+              )}
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${active ? "bg-accent text-white" : "bg-gray-200 text-gray-500"}`}>
+                  <i className={`${s.icon} text-xs`} />
+                </span>
+                <span className={`font-bold text-sm flex-1 ${active ? "text-accent" : "text-primary"}`}>{s.label}</span>
+                {active && <i className="fas fa-circle-check text-accent text-sm" />}
+              </div>
+              <p className="text-xs text-gray-500 mb-0.5">
+                <i className="fas fa-calendar-days mr-1.5 text-gray-400" />
+                {s.dateDebut} → {s.dateFin}
+              </p>
+              <p className="text-xs text-gray-500 mb-2">
+                <i className="fas fa-location-dot mr-1.5 text-gray-400" />
+                {s.lieu}
+              </p>
+              <p className={`font-syne font-black text-xl ${active ? "text-accent" : "text-primary"}`}>
+                {s.prixFCFA.toLocaleString("fr-FR")}
+                <span className="text-sm font-normal text-gray-400 ml-1">FCFA</span>
+              </p>
+              {s.placesRestantes > 0 && s.placesRestantes <= 8 && (
+                <p className="text-[11px] text-red-500 mt-1">
+                  <i className="fas fa-fire mr-1" />
+                  {s.placesRestantes} place{s.placesRestantes > 1 ? "s" : ""} restante{s.placesRestantes > 1 ? "s" : ""}
+                </p>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
