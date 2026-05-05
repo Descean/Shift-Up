@@ -25,13 +25,13 @@ export interface FormationProps {
 
 // ─── Schéma Zod ───────────────────────────────────────────────────────────────
 const schema = z.object({
-  prenom: z.string().min(1, "Prénom requis"),
-  nom: z.string().min(1, "Nom requis"),
+  prenom: z.string().refine((s) => s.trim().length >= 2, "Prénom requis"),
+  nom: z.string().refine((s) => s.trim().length >= 2, "Nom requis"),
   email: z.string().email("Email invalide"),
-  telephone: z.string().min(6, "Téléphone requis"),
+  telephone: z.string().refine((s) => s.trim().length >= 6, "Téléphone requis"),
   ville: z.string().min(1, "Ville requise"),
-  structure: z.string().min(1, "Structure requise"),
-  poste: z.string().min(1, "Poste requis"),
+  structure: z.string().refine((s) => s.trim().length >= 2, "Structure requise"),
+  poste: z.string().refine((s) => s.trim().length >= 2, "Poste requis"),
   secteur: z.string().min(1, "Secteur requis"),
   attente: z.string().min(1, "Sélectionnez votre attente"),
   detail: z.string().max(1000).optional(),

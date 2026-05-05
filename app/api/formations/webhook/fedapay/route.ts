@@ -7,14 +7,14 @@ import { sendFormationReceipt, sendFormationInscriptionAdmin } from "@/lib/email
  *   ?inscriptionId={id}&status=approved&id={fedapayTransactionId}
  *
  * FedaPay redirige l'utilisateur ici après le paiement.
- * On confirme l'inscription, on envoie les emails, puis on redirige vers la page de succès.
+ * Sécurité : on NE fait jamais confiance à ?status=approved — on vérifie
+ * la transaction directement via l'API FedaPay avant toute confirmation.
  */
 export async function GET(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const { searchParams } = new URL(req.url);
 
   const inscriptionId = searchParams.get("inscriptionId");
-  const status = searchParams.get("status");
   const fedapayTransactionId = searchParams.get("id");
 
   if (!inscriptionId) {
@@ -31,29 +31,74 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=formation&reason=not_found`));
     }
 
-    // Déjà confirmée — rediriger vers le succès directement
+    // Déjà confirmée — rediriger vers le succès directement (idempotent)
     if (inscription.status === "PAIEMENT_CONFIRME") {
       return NextResponse.redirect(
         new URL(`${appUrl}/formations/${inscription.formation.slug}?succes=1&ref=${inscription.reference}`)
       );
     }
 
-    if (status !== "approved") {
+    // ── Vérification obligatoire via l'API FedaPay ──────────────────────────
+    // On ne fait JAMAIS confiance au paramètre ?status de l'URL.
+    // Un attaquant connaissant l'inscriptionId pourrait forger ce paramètre.
+    if (!fedapayTransactionId) {
       await prisma.formationInscription.update({
         where: { id: inscriptionId },
         data: { status: "ANNULEE" },
       });
       return NextResponse.redirect(
-        new URL(`${appUrl}/formations/${inscription.formation.slug}?echec=1&reason=${status ?? "declined"}`)
+        new URL(`${appUrl}/formations/${inscription.formation.slug}?echec=1&reason=no_transaction`)
       );
     }
 
-    // Confirmer le paiement
+    // Vérification croisée : l'ID de transaction doit correspondre à ce qu'on
+    // a stocké en base lors de la création de la transaction.
+    if (inscription.transactionRef && inscription.transactionRef !== fedapayTransactionId) {
+      await prisma.formationInscription.update({
+        where: { id: inscriptionId },
+        data: { status: "ANNULEE" },
+      });
+      return NextResponse.redirect(
+        new URL(`${appUrl}/formations/${inscription.formation.slug}?echec=1&reason=transaction_mismatch`)
+      );
+    }
+
+    // Appel API FedaPay pour vérifier le statut réel de la transaction
+    const isLive = process.env.FEDAPAY_ENVIRONMENT === "live";
+    const apiBase = isLive ? "https://api.fedapay.com" : "https://sandbox-api.fedapay.com";
+
+    const verifyRes = await fetch(`${apiBase}/v1/transactions/${fedapayTransactionId}`, {
+      headers: { Authorization: `Bearer ${process.env.FEDAPAY_SECRET_KEY}` },
+    });
+
+    if (!verifyRes.ok) {
+      // Impossible de vérifier — on n'annule pas mais on refuse de confirmer
+      return NextResponse.redirect(
+        new URL(`${appUrl}/formations/${inscription.formation.slug}?echec=1&reason=verify_failed`)
+      );
+    }
+
+    const verifyData = await verifyRes.json();
+    const verifiedTx = verifyData["v1/transaction"];
+    const verifiedStatus: string = verifiedTx?.status ?? "";
+
+    if (verifiedStatus !== "approved") {
+      await prisma.formationInscription.update({
+        where: { id: inscriptionId },
+        data: { status: "ANNULEE" },
+      });
+      return NextResponse.redirect(
+        new URL(`${appUrl}/formations/${inscription.formation.slug}?echec=1&reason=${verifiedStatus || "declined"}`)
+      );
+    }
+    // ── Fin vérification FedaPay ────────────────────────────────────────────
+
+    // Confirmer le paiement (statut vérifié côté FedaPay)
     const confirmed = await prisma.formationInscription.update({
       where: { id: inscriptionId },
       data: {
         status: "PAIEMENT_CONFIRME",
-        transactionRef: fedapayTransactionId ?? inscription.transactionRef,
+        transactionRef: fedapayTransactionId,
       },
     });
 

@@ -108,7 +108,7 @@ const nextConfig = {
           // ── Empêche le clickjacking (notre site ne peut être mis en iframe) ─
           {
             key: "X-Frame-Options",
-            value: "SAMEORIGIN",
+            value: "DENY",
           },
 
           // ── Filtre XSS des anciens navigateurs ────────────────────────────

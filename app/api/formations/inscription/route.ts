@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/ratelimit";
+
+// trim AVANT min() : rejette les champs composés uniquement d'espaces
+// .max() → .transform(trim) → .pipe(min) garantit l'ordre correct des validations
+const t = (min: number, max: number, msg: string) =>
+  z.string().max(max).transform((s) => s.trim()).pipe(z.string().min(min, msg));
 
 const schema = z.object({
   formationId: z.string().min(1),
-  prenom: z.string().min(1).max(80),
-  nom: z.string().min(1).max(80),
-  email: z.string().email(),
-  telephone: z.string().min(6).max(30),
+  prenom: t(2, 80, "Prénom requis"),
+  nom: t(2, 80, "Nom requis"),
+  email: z.string().email("Email invalide").transform((s) => s.trim().toLowerCase()),
+  telephone: z.string().max(30).transform((s) => s.trim()).pipe(z.string().min(6, "Téléphone requis")),
   ville: z.string().min(1),
-  structure: z.string().min(1).max(120),
-  poste: z.string().min(1).max(120),
+  structure: t(2, 120, "Structure requise"),
+  poste: t(2, 120, "Poste requis"),
   secteur: z.string().min(1),
   attente: z.string().min(1),
-  detail: z.string().max(1000).optional(),
+  detail: z.string().max(1000).transform((s) => s.trim()).optional(),
   source: z.string().min(1),
   methodePaiement: z.enum(["MTN Mobile Money", "Moov / Flooz", "Wave", "Virement bancaire"]),
 });
@@ -25,6 +31,15 @@ function generateReference(): string {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { allowed, retryAfter } = rateLimit(`inscription:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   try {
     const body = await req.json();
     const data = schema.parse(body);
@@ -116,7 +131,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ inscriptionId: inscription.id, reference, checkoutUrl });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Données invalides.", details: err.errors }, { status: 422 });
+      return NextResponse.json({ error: "Données invalides." }, { status: 422 });
     }
     console.error("Inscription error:", err);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });

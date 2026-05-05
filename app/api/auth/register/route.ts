@@ -3,10 +3,11 @@ import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { generateAffiliationCode } from "@/lib/utils";
 import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/ratelimit";
 
 const schema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
+  name: z.string().refine((s) => s.trim().length >= 2, { message: "Nom requis (min. 2 caractères)" }),
+  email: z.string().email().transform((s) => s.trim().toLowerCase()),
   password: z.string().min(8),
   phone: z.string().optional(),
   role: z.enum(["CLIENT", "APPORTEUR", "ETUDIANT"]),
@@ -19,6 +20,15 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { allowed, retryAfter } = rateLimit(`register:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Trop de tentatives. Réessayez plus tard." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   try {
     const body = await req.json();
     const data = schema.parse(body);

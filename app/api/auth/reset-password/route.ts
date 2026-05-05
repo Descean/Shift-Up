@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/ratelimit";
 
 // ── Schémas de validation Zod ─────────────────────────────────────────────────
 
@@ -38,6 +39,15 @@ const confirmSchema = z.object({
 // POST /api/auth/reset-password — Demande de lien de réinitialisation
 // ══════════════════════════════════════════════════════════════════════════════
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { allowed, retryAfter } = rateLimit(`reset:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Trop de tentatives. Réessayez plus tard." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   try {
     const body = await req.json();
     const { email } = requestSchema.parse(body); // Valide l'email ou lève ZodError
