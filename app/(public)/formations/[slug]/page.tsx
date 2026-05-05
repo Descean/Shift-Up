@@ -22,7 +22,7 @@ const FORMATION_RICH_CONTENT: Record<string, {
       { icon: "fas fa-screwdriver-wrench",  text: "Outils professionnels immédiatement applicables" },
       { icon: "fas fa-certificate",         text: "Certificat professionnel Shift Up délivré à l'issue" },
     ],
-    heroImage: "/images/formations/ia-marches-publics.jpg",
+    heroImage: "/images/formations/ia-marches-publics.png",
   },
 };
 
