@@ -95,6 +95,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
   const [selectedSession, setSelectedSession] = useState<FormationSession | null>(
     formation.sessions?.[0] ?? null
   );
+  const [typeInscription, setTypeInscription] = useState<"COMPLET" | "ACOMPTE">("COMPLET");
 
   // Valeurs effectives : session sélectionnée ou fallback sur les props
   const effectiveId     = selectedSession?.formationId     ?? formation.id;
@@ -103,6 +104,10 @@ export default function FormationForm({ formation }: { formation: FormationProps
   const effectiveFin    = selectedSession?.dateFin         ?? formation.dateFin;
   const effectiveLieu   = selectedSession?.lieu            ?? formation.lieu;
   const effectivePlaces = selectedSession?.placesRestantes ?? formation.placesRestantes;
+
+  const ACOMPTE = 15_000;
+  const montantAPayer  = typeInscription === "ACOMPTE" ? ACOMPTE : effectivePrix;
+  const soldeRestant   = typeInscription === "ACOMPTE" ? effectivePrix - ACOMPTE : 0;
 
   const {
     register,
@@ -182,16 +187,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
     );
   }
 
-  // ── Bannière d'échec de paiement ───────────────────────────────────────────
-  const echecBanner = formation.echec ? (
-    <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
-      <i className="fas fa-circle-exclamation text-red-500 mt-0.5" />
-      <div>
-        <p className="font-semibold text-red-700 text-sm">Paiement annulé ou échoué</p>
-        <p className="text-xs text-red-600 mt-0.5">Votre inscription n'a pas été validée. Vous pouvez réessayer ci-dessous.</p>
-      </div>
-    </div>
-  ) : null;
+  // (banner echec supprimé — l'utilisateur recommence simplement)
 
   // ── Formulaire ─────────────────────────────────────────────────────────────
   const onSubmit = async (data: FormData) => {
@@ -204,7 +200,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
       const res = await fetch("/api/formations/inscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, formationId: effectiveId, captchaToken }),
+        body: JSON.stringify({ ...data, formationId: effectiveId, typeInscription, captchaToken }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Erreur d'inscription");
@@ -318,7 +314,17 @@ export default function FormationForm({ formation }: { formation: FormationProps
       {/* Formulaire */}
       <section className="bg-paper pb-20 -mt-1">
         <div className="container-custom max-w-2xl">
-          {echecBanner}
+          {/* Bouton WhatsApp flottant */}
+          <a
+            href="https://wa.me/2290195035099"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+            aria-label="Nous contacter sur WhatsApp"
+          >
+            <i className="fab fa-whatsapp text-2xl" />
+          </a>
+
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
             {/* Sélecteur de session */}
@@ -340,7 +346,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
                   <input {...register("nom")} placeholder="Votre nom" className={inputCls(!!errors.nom)} />
                 </Field>
               </div>
-              <Field label="Adresse e-mail" error={errors.email?.message} required>
+              <Field label="Adresse e-mail" error={errors.email?.message} required hint="Votre billet d'entrée et la confirmation de paiement seront envoyés à cette adresse. Vérifiez qu'elle est correcte et active.">
                 <input type="email" {...register("email")} placeholder="votre@email.com" className={inputCls(!!errors.email)} />
               </Field>
               <Field label="Numéro WhatsApp / Téléphone" error={errors.telephone?.message} required hint="Nous vous enverrons les informations pratiques sur ce numéro.">
@@ -396,17 +402,79 @@ export default function FormationForm({ formation }: { formation: FormationProps
 
             {/* Bloc 4 */}
             <Card num="4" title="Paiement & confirmation">
-              <div className="bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20 rounded-xl p-4 flex gap-4 mb-1">
-                <span className="text-3xl leading-none">💳</span>
-                <div>
-                  <p className="font-syne font-black text-2xl text-primary">
-                    {effectivePrix.toLocaleString("fr-FR")} FCFA
-                    <span className="text-sm font-normal text-gray-400 ml-2">· paiement unique</span>
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Inclus : formation 3 jours, supports PDF, accès outils IA,{" "}
-                    <strong className="text-primary">certificat professionnel Shift Up</strong>.
-                  </p>
+
+              {/* Sélecteur : paiement complet vs acompte */}
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-accent mb-2 flex items-center gap-2">
+                  <i className="fas fa-wallet" /> Mode de règlement
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3 mb-3">
+                  {/* Paiement complet */}
+                  <button
+                    type="button"
+                    onClick={() => setTypeInscription("COMPLET")}
+                    className={`relative text-left border-2 rounded-xl p-4 transition-all ${
+                      typeInscription === "COMPLET"
+                        ? "border-accent bg-accent/5"
+                        : "border-gray-200 bg-gray-50 hover:border-accent/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${typeInscription === "COMPLET" ? "bg-accent text-white" : "bg-gray-200 text-gray-500"}`}>
+                        <i className="fas fa-circle-check text-xs" />
+                      </span>
+                      <span className={`font-bold text-sm ${typeInscription === "COMPLET" ? "text-accent" : "text-primary"}`}>Paiement intégral</span>
+                    </div>
+                    <p className={`font-syne font-black text-xl ${typeInscription === "COMPLET" ? "text-accent" : "text-primary"}`}>
+                      {effectivePrix.toLocaleString("fr-FR")} <span className="text-sm font-normal text-gray-400">FCFA</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Place confirmée immédiatement</p>
+                  </button>
+
+                  {/* Acompte */}
+                  <button
+                    type="button"
+                    onClick={() => setTypeInscription("ACOMPTE")}
+                    className={`relative text-left border-2 rounded-xl p-4 transition-all ${
+                      typeInscription === "ACOMPTE"
+                        ? "border-secondary bg-secondary/5"
+                        : "border-gray-200 bg-gray-50 hover:border-secondary/40"
+                    }`}
+                  >
+                    <span className="absolute -top-2.5 right-3 bg-secondary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                      Réserver
+                    </span>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${typeInscription === "ACOMPTE" ? "bg-secondary text-white" : "bg-gray-200 text-gray-500"}`}>
+                        <i className="fas fa-bookmark text-xs" />
+                      </span>
+                      <span className={`font-bold text-sm ${typeInscription === "ACOMPTE" ? "text-secondary" : "text-primary"}`}>Réserver ma place</span>
+                    </div>
+                    <p className={`font-syne font-black text-xl ${typeInscription === "ACOMPTE" ? "text-secondary" : "text-primary"}`}>
+                      {ACOMPTE.toLocaleString("fr-FR")} <span className="text-sm font-normal text-gray-400">FCFA</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Acompte non remboursable · solde{" "}
+                      <strong>{soldeRestant.toLocaleString("fr-FR")} F</strong> dû le jour J
+                    </p>
+                  </button>
+                </div>
+
+                {/* Récap montant */}
+                <div className={`rounded-xl p-4 flex gap-4 mb-1 ${typeInscription === "ACOMPTE" ? "bg-secondary/5 border border-secondary/20" : "bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20"}`}>
+                  <i className={`fas fa-credit-card text-2xl mt-0.5 ${typeInscription === "ACOMPTE" ? "text-secondary" : "text-accent"}`} />
+                  <div>
+                    <p className="font-syne font-black text-2xl text-primary">
+                      {montantAPayer.toLocaleString("fr-FR")} FCFA
+                      <span className="text-sm font-normal text-gray-400 ml-2">
+                        {typeInscription === "ACOMPTE" ? "· acompte de réservation" : "· paiement unique"}
+                      </span>
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Inclus : formation 3 jours, supports PDF, accès outils IA,{" "}
+                      <strong className="text-primary">certificat professionnel Shift Up</strong>.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -430,8 +498,10 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 <input type="checkbox" {...register("consent")} className="mt-0.5 accent-accent flex-shrink-0" />
                 <p className="text-sm text-amber-900 leading-relaxed">
                   J'accepte que <strong>Shift Up</strong> utilise mes informations pour gérer mon inscription.
-                  Je comprends que ma place est confirmée à réception du paiement de{" "}
-                  <strong>{effectivePrix.toLocaleString("fr-FR")} FCFA</strong>.<span className="text-red-500 ml-0.5">*</span>
+                  Je comprends que ma place est {typeInscription === "ACOMPTE" ? "réservée" : "confirmée"} à réception du paiement de{" "}
+                  <strong>{montantAPayer.toLocaleString("fr-FR")} FCFA</strong>
+                  {typeInscription === "ACOMPTE" && <span className="text-gray-500"> (acompte — solde de {soldeRestant.toLocaleString("fr-FR")} F à régler le jour J)</span>}
+                  .<span className="text-red-500 ml-0.5">*</span>
                 </p>
               </label>
               <AnimatePresence>
@@ -460,7 +530,9 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 ) : effectivePlaces === 0 ? (
                   "Formation complète"
                 ) : (
-                  <><i className="fas fa-shield-check" /> Payer {effectivePrix.toLocaleString("fr-FR")} FCFA via FedaPay</>
+                  typeInscription === "ACOMPTE"
+                    ? <><i className="fas fa-bookmark" /> Réserver — {montantAPayer.toLocaleString("fr-FR")} FCFA via FedaPay</>
+                    : <><i className="fas fa-shield-check" /> Payer {montantAPayer.toLocaleString("fr-FR")} FCFA via FedaPay</>
                 )}
               </button>
               <p className="text-center text-xs text-gray-400 mt-3">

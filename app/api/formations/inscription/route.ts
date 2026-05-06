@@ -23,8 +23,11 @@ const schema = z.object({
   detail: z.string().max(1000).transform((s) => s.trim()).optional(),
   source: z.string().min(1),
   methodePaiement: z.enum(["MTN Mobile Money", "Moov / Flooz", "Wave", "Virement bancaire"]),
+  typeInscription: z.enum(["COMPLET", "ACOMPTE"]).default("COMPLET"),
   captchaToken: z.string().optional(),
 });
+
+const ACOMPTE_MONTANT = 15_000;
 
 function generateReference(): string {
   const year = new Date().getFullYear();
@@ -71,10 +74,17 @@ export async function POST(req: NextRequest) {
     }
 
     const reference = generateReference();
+    const montantPaye = data.typeInscription === "ACOMPTE" ? ACOMPTE_MONTANT : formation.prixFCFA;
 
     // Créer l'inscription en attente de paiement
     const inscription = await prisma.formationInscription.create({
-      data: { ...data, reference, detail: data.detail ?? null },
+      data: {
+        ...data,
+        reference,
+        detail: data.detail ?? null,
+        typeInscription: data.typeInscription,
+        montantPaye,
+      },
     });
 
     // Créer la transaction FedaPay
@@ -102,8 +112,10 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: authHeader,
       body: JSON.stringify({
-        description: `Formation : ${formation.titre} — Réf. ${reference}`,
-        amount: formation.prixFCFA,
+        description: data.typeInscription === "ACOMPTE"
+          ? `Acompte réservation : ${formation.titre} — Réf. ${reference}`
+          : `Formation : ${formation.titre} — Réf. ${reference}`,
+        amount: montantPaye,
         currency: { iso: "XOF" },
         callback_url: callbackUrl,
         customer,

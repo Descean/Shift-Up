@@ -129,7 +129,7 @@ function EchecContent() {
         {/* Garantie */}
         <p className="text-xs text-gray-300 mt-6">
           Aucun prélèvement n'a été effectué. Pour toute question&nbsp;:{" "}
-          <strong>shiftup.eudes@gmail.com</strong>
+          <strong>contact@shiftup.bj</strong>
         </p>
       </motion.div>
     </div>

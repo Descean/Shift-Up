@@ -122,8 +122,8 @@ export default function ContactPage() {
                 {
                   icon: "fas fa-envelope",
                   title: "Email",
-                  lines: ["shiftup.eudes@gmail.com"],
-                  href: "mailto:shiftup.eudes@gmail.com",
+                  lines: ["contact@shiftup.bj"],
+                  href: "mailto:contact@shiftup.bj",
                   color: "from-purple-500 to-accent",
                 },
                 {

@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
               </p>
               <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
               <p style="color:#ccc;font-size:12px">
-                SHIFT UP — Abomey-Calavi, Bénin | shiftup.eudes@gmail.com
+                SHIFT UP — Abomey-Calavi, Bénin | contact@shiftup.bj
               </p>
             </div>
           `,

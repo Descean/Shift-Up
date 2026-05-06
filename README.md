@@ -239,14 +239,14 @@ https://shiftup.bj/api/payments/webhook/fedapay
 | IFU | 0202113434116 |
 | Date immatriculation | 30 mai 2025 |
 | Siège | Abomey-Calavi, Atlantique, Bénin |
-| Email | shiftup.eudes@gmail.com |
+| Email | contact@shiftup.bj |
 | Tél | (+229) 01 95 03 50 99 |
 
 ---
 
 ## Support & Contact
 
-- **Email** : shiftup.eudes@gmail.com
+- **Email** : contact@shiftup.bj
 - **WhatsApp** : (+229) 01 95 03 50 99
 - **RDV** : Page [/contact](https://shiftup.bj/contact) (Calendly à configurer)
 

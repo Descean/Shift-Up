@@ -154,7 +154,7 @@ function SuccesContent() {
         {/* Note de bas */}
         <p className="text-xs text-gray-300 mt-6">
           Un reçu a été envoyé à votre adresse email.
-          Pour toute question : <strong>shiftup.eudes@gmail.com</strong>
+          Pour toute question : <strong>contact@shiftup.bj</strong>
         </p>
       </motion.div>
     </div>

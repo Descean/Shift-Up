@@ -13,7 +13,7 @@ IDENTITÉ DE L'ENTREPRISE :
 - RCCM : RB/ABC/25 A 124734
 - IFU : 0202113434116
 - Adresse : Abomey-Calavi, Atlantique, Bénin
-- Email : shiftup.eudes@gmail.com
+- Email : contact@shiftup.bj
 - Tél : (+229) 01 95 03 50 99
 - Site : shiftup.bj
 

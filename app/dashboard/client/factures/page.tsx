@@ -176,7 +176,7 @@ export default function FacturesPage() {
           <p className="text-xs text-gray-400">
             <i className="fas fa-info-circle mr-1" />
             Les factures PDF sont générées automatiquement après confirmation du paiement.
-            Pour tout litige, contactez <strong>shiftup.eudes@gmail.com</strong>.
+            Pour tout litige, contactez <strong>contact@shiftup.bj</strong>.
           </p>
         </div>
       </div>

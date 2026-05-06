@@ -66,7 +66,7 @@ const sections = [
 Propriétaire-exploitant : La Direction SHIFT UP
 RCCM : RB/ABC/25 A 124734 — IFU : 0202113434116
 Siège : Maison Léopold TCHIBOZO, Tankpe, Abomey-Calavi, Atlantique, Bénin
-Email : shiftup.eudes@gmail.com — Tél : (+229) 01 95 03 50 99
+Email : contact@shiftup.bj — Tél : (+229) 01 95 03 50 99
 
 **Délégué à la Protection des Données (DPO)** :
 Conformément à l'Article 75 du Code du Numérique, SHIFT UP a désigné un DPO joignable à l'adresse : **dpo@shiftup.bj**
@@ -150,7 +150,7 @@ Ces prestataires n'utilisent vos données que pour les finalités pour lesquelle
 - **Droit d'opposition** : vous opposer au traitement de vos données à des fins de marketing.
 - **Droit de retrait du consentement** : à tout moment, pour les traitements fondés sur votre consentement.
 
-Pour exercer ces droits, contactez-nous à : **shiftup.eudes@gmail.com** ou par courrier à notre siège social (Abomey-Calavi, Atlantique, Bénin).
+Pour exercer ces droits, contactez-nous à : **contact@shiftup.bj** ou par courrier à notre siège social (Abomey-Calavi, Atlantique, Bénin).
 
 Nous nous engageons à répondre dans un délai maximum de **30 jours**.`,
   },

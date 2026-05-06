@@ -44,7 +44,7 @@ Toute commande de service implique l'acceptation pleine et entière des présent
 **IFU** : 0202113434116
 **Siège social** : Abomey-Calavi, Atlantique, République du Bénin
 **Dirigeant** : La Direction SHIFT UP
-**Email** : shiftup.eudes@gmail.com
+**Email** : contact@shiftup.bj
 **Téléphone** : (+229) 01 95 03 50 99
 **Site web** : https://shiftup.bj`,
   },
@@ -142,14 +142,14 @@ Toute commande n'est définitivement validée qu'à réception de l'acompte. SHI
     title: "Article 10 — Données personnelles",
     content: `Le traitement des données personnelles collectées dans le cadre de la relation commerciale est régi par notre Politique de Confidentialité, disponible sur shiftup.bj/confidentialite.
 
-Conformément aux lois applicables, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits, contactez-nous à shiftup.eudes@gmail.com.`,
+Conformément aux lois applicables, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits, contactez-nous à contact@shiftup.bj.`,
   },
   {
     id: "droit",
     title: "Article 11 — Droit applicable et litiges",
     content: `Les présentes CGV sont régies par le droit béninois et le droit OHADA en vigueur.
 
-**Règlement amiable** : En cas de litige, les parties s'engagent à chercher une solution amiable avant tout recours judiciaire. Le Client peut adresser une réclamation écrite à shiftup.eudes@gmail.com. SHIFT UP s'engage à répondre dans un délai de 15 jours ouvrables.
+**Règlement amiable** : En cas de litige, les parties s'engagent à chercher une solution amiable avant tout recours judiciaire. Le Client peut adresser une réclamation écrite à contact@shiftup.bj. SHIFT UP s'engage à répondre dans un délai de 15 jours ouvrables.
 
 **Juridiction compétente** : À défaut de règlement amiable, tout litige sera soumis à la compétence exclusive des tribunaux d'Abomey-Calavi ou de Cotonou, République du Bénin.`,
   },
@@ -269,7 +269,7 @@ export default function CGVPage() {
                     Nous contacter
                   </Link>
                   <a
-                    href="mailto:shiftup.eudes@gmail.com"
+                    href="mailto:contact@shiftup.bj"
                     className="bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
                   >
                     Email direct

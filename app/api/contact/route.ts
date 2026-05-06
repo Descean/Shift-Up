@@ -43,7 +43,7 @@ async function sendContactEmail(data: { name: string; email: string; subject: st
 
   await resend.emails.send({
     from: process.env.EMAIL_FROM!,
-    to: "shiftup.eudes@gmail.com",
+    to: "contact@shiftup.bj",
     subject: `[SHIFT UP] Nouveau message : ${data.subject}`,
     html: `
       <div style="font-family: 'Space Grotesk', sans-serif; max-width: 600px; margin: 0 auto;">

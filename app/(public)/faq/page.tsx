@@ -148,7 +148,7 @@ export default function FAQPage() {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <a
-                href="mailto:shiftup.eudes@gmail.com"
+                href="mailto:contact@shiftup.bj"
                 className="flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors"
               >
                 <i className="fas fa-envelope" />

@@ -210,7 +210,7 @@ export default function AProposPage() {
                 <a href="#" className="w-9 h-9 bg-white/10 hover:bg-accent rounded-lg flex items-center justify-center transition-all">
                   <i className="fab fa-linkedin-in text-white text-sm" />
                 </a>
-                <a href="mailto:shiftup.eudes@gmail.com" className="w-9 h-9 bg-white/10 hover:bg-accent rounded-lg flex items-center justify-center transition-all">
+                <a href="mailto:contact@shiftup.bj" className="w-9 h-9 bg-white/10 hover:bg-accent rounded-lg flex items-center justify-center transition-all">
                   <i className="fas fa-envelope text-white text-sm" />
                 </a>
               </div>

@@ -118,10 +118,10 @@ export default function Footer() {
               <li className="flex items-center gap-3">
                 <i className="fas fa-envelope text-accent w-4" />
                 <a
-                  href="mailto:shiftup.eudes@gmail.com"
+                  href="mailto:contact@shiftup.bj"
                   className="text-white/60 hover:text-accent text-sm transition-colors"
                 >
-                  shiftup.eudes@gmail.com
+                  contact@shiftup.bj
                 </a>
               </li>
               <li className="flex items-center gap-3">

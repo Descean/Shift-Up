@@ -60,7 +60,7 @@ const sections = [
 **N° RCCM** : RB/ABC/25 A 124734 (Greffe du Tribunal de Commerce de Cotonou — 30/05/2025)
 **N° IFU** : 0202113434116 (Centre des impôts : CIPE 3 AB-CAL)
 **Siège social** : Maison Léopold TCHIBOZO, Tankpe, Abomey-Calavi, Département de l'Atlantique, République du Bénin
-**Email** : shiftup.eudes@gmail.com
+**Email** : contact@shiftup.bj
 **Téléphone** : (+229) 01 95 03 50 99
 **Activité exercée** : Activités juridiques, comptables et de conseil de gestion ; Bureau d'études ; Édition de logiciels et solutions numériques ; Conseil en transformation numérique ; Formation et Coaching ; Marketing et communication ; Gestion de projets ; Analyses de données et Business Intelligence`,
   },
@@ -157,7 +157,7 @@ En cas de litige relatif à l'interprétation ou à l'exécution des présentes,
     title: "9. Contact",
     content: `Pour toute question relative aux présentes mentions légales, vous pouvez nous contacter :
 
-**Par email** : shiftup.eudes@gmail.com
+**Par email** : contact@shiftup.bj
 **Par téléphone** : (+229) 01 95 03 50 99
 **Par courrier** : SHIFT UP — Abomey-Calavi, Atlantique, République du Bénin
 **Via notre formulaire** : [/contact](/contact)
