@@ -106,14 +106,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico" },
-    ],
-    shortcut: "/favicon.svg",
-    apple: "/apple-touch-icon.png",
-  },
   manifest: "/manifest.json",
 };
 
@@ -138,8 +130,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SHIFT UP" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
         {/*
          * ── Google Analytics avec Consent Mode v2 ─────────────────────────
          *
