@@ -56,6 +56,8 @@ function SuccesContent() {
             ? "Votre solde a bien été reçu. Les livrables définitifs vont vous être remis très prochainement."
             : type === "service"
             ? "Votre acompte de 60% a bien été reçu. Notre équipe prendra contact avec vous sous 48h."
+            : type === "apporteur-service"
+            ? "Votre paiement a bien été reçu. Le prestataire a été notifié et va démarrer votre commande."
             : `Merci pour votre achat. "${productName}" est prêt à être téléchargé.`}
         </p>
 
@@ -138,10 +140,10 @@ function SuccesContent() {
         {/* Actions */}
         <div className="flex flex-col gap-3">
           <Link
-            href={type === "service" ? "/dashboard/client/prestations" : "/boutique"}
+            href={type === "service" ? "/dashboard/client/prestations" : type === "apporteur-service" ? "/" : "/boutique"}
             className="w-full border border-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors text-sm"
           >
-            {type === "service" ? "Voir mes prestations" : "Continuer mes achats"}
+            {type === "service" ? "Voir mes prestations" : type === "apporteur-service" ? "Retour à l'accueil" : "Continuer mes achats"}
           </Link>
           <Link
             href="/"

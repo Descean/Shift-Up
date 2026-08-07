@@ -9,6 +9,9 @@ const FORMATION_RICH_CONTENT: Record<string, {
   about?: string;
   highlights?: FormationHighlight[];
   heroImage?: string;
+  audience?: string[];
+  inclusText?: string;
+  whatsapp?: string; // format local, ex: "01 40 80 91 08" — converti en lien wa.me
 }> = {
   "ia-marches-publics": {
     about:
@@ -23,6 +26,30 @@ const FORMATION_RICH_CONTENT: Record<string, {
       { icon: "fas fa-certificate",         text: "Certificat professionnel Shift Up délivré à l'issue" },
     ],
     heroImage: "/images/formations/ia-marches-publics.png",
+    inclusText: "supports PDF, accès outils IA",
+  },
+  "montage-dossiers-soumission": {
+    about:
+      "Ne perdez plus un marché à cause d'un dossier mal monté. Cette formation pratique vous fait passer de la lecture du dossier d'appel d'offres à la préparation d'une soumission structurée, conforme et professionnelle — selon les procédures béninoises et celles de la Banque mondiale.",
+    highlights: [
+      { icon: "fas fa-magnifying-glass",    text: "Analyser un dossier d'appel d'offres" },
+      { icon: "fas fa-list-check",          text: "Critères d'éligibilité et de qualification" },
+      { icon: "fas fa-folder-open",         text: "Pièces administratives du dossier" },
+      { icon: "fas fa-toolbox",             text: "Montage de l'offre technique" },
+      { icon: "fas fa-calculator",          text: "Construction de l'offre financière" },
+      { icon: "fas fa-circle-check",        text: "Conformité et cohérence du dossier" },
+      { icon: "fas fa-landmark",            text: "Passation des marchés publics au Bénin" },
+      { icon: "fas fa-globe",               text: "Marchés financés par la Banque mondiale" },
+      { icon: "fas fa-triangle-exclamation",text: "Erreurs fréquentes et causes de rejet" },
+      { icon: "fas fa-trophy",              text: "Soumission professionnelle et compétitive" },
+    ],
+    audience: [
+      "Entreprises et PME", "Entrepreneurs", "Responsables administratifs",
+      "Chargés des marchés publics", "Consultants", "Bureaux d'études",
+      "ONG et associations", "Fournisseurs et prestataires",
+    ],
+    inclusText: "méthodologie complète, supports PDF, accompagnement post-formation",
+    whatsapp: "01 40 80 91 08",
   },
 };
 
@@ -115,6 +142,10 @@ export default async function FormationPage({ params, searchParams }: Props) {
   }
 
   const placesRestantes = Math.max(0, formation.placesMax - formation._count.inscriptions);
+  const dureeJours = Math.max(
+    1,
+    Math.round((formation.dateFin.getTime() - formation.dateDebut.getTime()) / 86_400_000) + 1
+  );
 
   return (
     <FormationForm
@@ -127,6 +158,7 @@ export default async function FormationPage({ params, searchParams }: Props) {
         lieu: formation.lieu,
         prixFCFA: formation.prixFCFA,
         placesRestantes,
+        dureeJours,
         sessions,
         succes: sp.succes === "1",
         echec: sp.echec === "1",

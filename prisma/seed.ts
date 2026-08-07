@@ -59,6 +59,32 @@ async function main() {
     },
   });
   console.log("✅ Formation 'ia-marches-publics-enligne' synchronisée.");
+
+  // Formation présentielle "Montage de dossiers de soumission — 3-5 septembre 2026"
+  await prisma.formation.upsert({
+    where: { slug: "montage-dossiers-soumission" },
+    create: {
+      slug: "montage-dossiers-soumission",
+      titre: "Montage de dossiers de soumission",
+      description:
+        "Maîtrisez la préparation des offres selon les procédures béninoises et celles de la Banque mondiale.",
+      dateDebut: new Date("2026-09-03T08:00:00Z"),
+      dateFin: new Date("2026-09-05T18:00:00Z"),
+      lieu: "Cotonou, Bénin",
+      prixFCFA: 50000,
+      placesMax: 30,
+      isActive: true,
+    },
+    update: {
+      titre:       "Montage de dossiers de soumission",
+      description: "Maîtrisez la préparation des offres selon les procédures béninoises et celles de la Banque mondiale.",
+      dateDebut:   new Date("2026-09-03T08:00:00Z"),
+      dateFin:     new Date("2026-09-05T18:00:00Z"),
+      lieu:        "Cotonou, Bénin",
+      prixFCFA:    50000,
+    },
+  });
+  console.log("✅ Formation 'montage-dossiers-soumission' synchronisée.");
 }
 
 main()

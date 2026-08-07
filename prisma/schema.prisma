@@ -166,7 +166,11 @@ model ApporteurServiceOrder {
   commission       Float                          // 10 % → SHIFT UP
   apporteurRevenue Float                          // 90 % → apporteur
   status           String   @default("EN_ATTENTE") // EN_ATTENTE | EN_COURS | TERMINEE | ANNULEE
-  paymentId        String?
+  paymentId        String?                        // ID transaction FedaPay (lien de paiement généré)
+  paidAt           DateTime?                      // paiement confirmé (vérifié via l'API FedaPay)
+  documentUrl      String?                        // livrable final envoyé au client
+  documentName     String?
+  deliveredAt      DateTime?
   notes            String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

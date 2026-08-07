@@ -36,16 +36,26 @@ export interface FormationProps {
   lieu: string;
   prixFCFA: number;
   placesRestantes: number;
+  dureeJours?: number;
   // Sélecteur de sessions (optionnel — affiche un picker si présent)
   sessions?: FormationSession[];
   // Contenu riche (optionnel)
   about?: string;
   highlights?: FormationHighlight[];
   heroImage?: string;
+  audience?: string[];
+  inclusText?: string;
+  whatsapp?: string; // format local, ex: "01 40 80 91 08"
   // Succès : set par la page parente après retour FedaPay
   succes?: boolean;
   reference?: string;
   echec?: boolean;
+}
+
+// Convertit un numéro local béninois ("01 40 80 91 08") en lien wa.me
+function waLink(local?: string): string {
+  const digits = (local ?? "01 95 03 50 99").replace(/\D/g, "");
+  return `https://wa.me/229${digits}`;
 }
 
 // ─── Schéma Zod ───────────────────────────────────────────────────────────────
@@ -265,8 +275,8 @@ export default function FormationForm({ formation }: { formation: FormationProps
           <div className="container-custom max-w-5xl">
             <div className="grid md:grid-cols-5 gap-8 items-start">
 
-              {/* Texte + highlights (3/5) */}
-              <div className="md:col-span-3 space-y-6">
+              {/* Texte + highlights */}
+              <div className={`space-y-6 ${formation.heroImage ? "md:col-span-3" : "md:col-span-5"}`}>
                 {formation.about && (
                   <p className="text-gray-600 leading-relaxed text-base">{formation.about}</p>
                 )}
@@ -282,6 +292,21 @@ export default function FormationForm({ formation }: { formation: FormationProps
                             <i className={`${h.icon} text-accent text-xs`} />
                           </span>
                           <span className="text-sm text-gray-700 leading-snug pt-0.5">{h.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {formation.audience?.length ? (
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-accent mb-3 flex items-center gap-2">
+                      <i className="fas fa-users" /> Pour qui ?
+                    </p>
+                    <ul className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                      {formation.audience.map((a, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                          <i className="fas fa-check text-secondary text-[10px] flex-shrink-0" />
+                          {a}
                         </li>
                       ))}
                     </ul>
@@ -316,7 +341,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
         <div className="container-custom max-w-2xl">
           {/* Bouton WhatsApp flottant */}
           <a
-            href="https://wa.me/2290195035099"
+            href={waLink(formation.whatsapp)}
             target="_blank"
             rel="noopener noreferrer"
             className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
@@ -471,7 +496,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
                       </span>
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
-                      Inclus : formation 3 jours, supports PDF, accès outils IA,{" "}
+                      Inclus : formation {formation.dureeJours ?? 3} jours, {formation.inclusText ?? "supports PDF, accès outils IA"},{" "}
                       <strong className="text-primary">certificat professionnel Shift Up</strong>.
                     </p>
                   </div>

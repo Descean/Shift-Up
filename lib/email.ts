@@ -240,3 +240,50 @@ export async function sendAutoAccountEmail({ to, name, password, serviceName, pr
     <p style="color:#e11d48;font-size:13px;margin-top:12px;">⚠️ Pour votre sécurité, changez ce mot de passe dès votre première connexion.</p>`;
   return resend.emails.send({ from: FROM, to, subject: "Votre compte SHIFT UP a été créé — Accédez à votre espace", html: baseLayout(content, "Compte créé") });
 }
+
+// ─── Emails services apporteurs ────────────────────────────────────────────────
+
+/** Confirmation au prospect : sa demande pour un service apporteur a été reçue */
+export async function sendApporteurServiceLeadClient({ to, name, serviceTitle }: {
+  to: string; name: string; serviceTitle: string;
+}) {
+  const content = `
+    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
+    <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${name}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Votre demande pour <strong>"${serviceTitle}"</strong> a bien été transmise au prestataire partenaire SHIFT UP. Il vous contactera très prochainement pour finaliser les modalités et le paiement.</p>
+    <p style="color:#555;line-height:1.6;margin-top:16px;">Merci de votre confiance.</p>
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, subject: `Votre demande "${serviceTitle}" a été reçue — SHIFT UP`, html: baseLayout(content, "Demande reçue") });
+}
+
+/** Notification interne à l'apporteur : nouvelle demande sur un de ses services */
+export async function sendApporteurServiceLeadOwner({ to, apporteurName, serviceTitle, clientName, clientEmail, clientPhone, brief }: {
+  to: string; apporteurName: string; serviceTitle: string; clientName: string; clientEmail: string; clientPhone?: string | null; brief?: string | null;
+}) {
+  const content = `
+    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Nouvelle demande sur votre service 🔔</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${apporteurName}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Vous avez reçu une nouvelle demande pour <strong>"${serviceTitle}"</strong>.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;width:35%;">Client</td><td style="padding:8px 0;font-weight:600;color:#333;">${clientName}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Email</td><td style="padding:8px 0;color:#333;">${clientEmail}</td></tr>
+      ${clientPhone ? `<tr><td style="padding:8px 0;color:#777;font-size:14px;">Téléphone</td><td style="padding:8px 0;color:#333;">${clientPhone}</td></tr>` : ""}
+      ${brief ? `<tr><td style="padding:8px 0;color:#777;font-size:14px;vertical-align:top;">Besoin exprimé</td><td style="padding:8px 0;color:#333;line-height:1.5;">${brief}</td></tr>` : ""}
+    </table>
+    <p style="color:#555;">Rendez-vous dans "Mes Services" pour fixer le tarif définitif et générer le lien de paiement.</p>
+    ${btn("Gérer mes services →", `${APP_URL}/dashboard/apporteur/mes-services`)}`;
+  return resend.emails.send({ from: FROM, to, subject: `Nouvelle demande — ${serviceTitle} — SHIFT UP`, html: baseLayout(content, "Nouvelle demande") });
+}
+
+/** Livraison du service au client (document final) */
+export async function sendApporteurServiceDelivered({ to, name, serviceTitle, documentUrl }: {
+  to: string; name: string; serviceTitle: string; documentUrl: string;
+}) {
+  const content = `
+    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Votre commande est livrée 📦</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Le prestataire a livré votre commande <strong>"${serviceTitle}"</strong>. Vous pouvez y accéder dès maintenant :</p>
+    ${btn("Accéder au document →", documentUrl)}
+    <p style="color:#555;line-height:1.6;margin-top:16px;">Merci de votre confiance en SHIFT UP.</p>`;
+  return resend.emails.send({ from: FROM, to, subject: `Votre commande "${serviceTitle}" est livrée — SHIFT UP`, html: baseLayout(content, "Commande livrée") });
+}

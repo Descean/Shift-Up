@@ -44,6 +44,32 @@ interface ServiceItem {
   createdAt: string;
 }
 
+interface OrderItem {
+  id: string;
+  serviceId: string;
+  service: { id: string; title: string };
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string | null;
+  brief: string | null;
+  amount: number;
+  apporteurRevenue: number;
+  status: string;
+  paymentId: string | null;
+  paidAt: string | null;
+  documentUrl: string | null;
+  documentName: string | null;
+  deliveredAt: string | null;
+  paymentStatus: "attente_tarif" | "lien_genere" | "paye";
+  createdAt: string;
+}
+
+const ORDER_STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+  attente_tarif: { label: "En attente de tarif", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  lien_genere:   { label: "Lien envoyé — en attente de paiement", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+  paye:          { label: "Payé", cls: "bg-green-50 text-green-700 border-green-200" },
+};
+
 const emptyForm = {
   title: "", description: "", category: CATEGORIES[0],
   features: [""], priceMin: "", priceMax: "", currency: "XOF", duration: "",
@@ -59,13 +85,123 @@ export default function ApporteurMesServicesPage() {
 
   const [form, setForm] = useState(emptyForm);
 
-  // ── Chargement des services ────────────────────────────────────────────
+  // ── Commandes reçues ─────────────────────────────────────────────────────
+  const [orders, setOrders]           = useState<OrderItem[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [amountDraft, setAmountDraft] = useState<Record<string, string>>({});
+  const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
+  const [deliverModal, setDeliverModal] = useState<OrderItem | null>(null);
+  const [deliverUrl, setDeliverUrl] = useState("");
+  const [deliverName, setDeliverName] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  function loadOrders() {
+    setOrdersLoading(true);
+    fetch("/api/apporteur/services/orders")
+      .then((r) => r.json())
+      .then((d) => setOrders(d.orders ?? []))
+      .finally(() => setOrdersLoading(false));
+  }
+
+  // ── Chargement des services + commandes ─────────────────────────────────
   useEffect(() => {
     fetch("/api/apporteur/services")
       .then((r) => r.json())
       .then((d) => setServices(d.services ?? []))
       .finally(() => setLoading(false));
+    loadOrders();
   }, []);
+
+  // ── Partage : copier le lien public du service ──────────────────────────
+  function copyServiceLink(id: string) {
+    const url = `${window.location.origin}/services-apporteurs/${id}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Lien copié ! Partagez-le à vos prospects.");
+  }
+
+  // ── Fixer / modifier le tarif d'une commande ─────────────────────────────
+  async function saveAmount(order: OrderItem) {
+    const raw = amountDraft[order.id];
+    const amount = parseFloat(raw);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Montant invalide.");
+      return;
+    }
+    setBusyOrderId(order.id);
+    const res = await fetch("/api/apporteur/services/orders", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: order.id, amount }),
+    });
+    const data = await res.json();
+    setBusyOrderId(null);
+    if (!res.ok) { toast.error(data.error ?? "Erreur."); return; }
+    toast.success("Tarif enregistré.");
+    loadOrders();
+  }
+
+  // ── Générer le lien de paiement (encaissement) ───────────────────────────
+  async function generatePaymentLink(order: OrderItem) {
+    setBusyOrderId(order.id);
+    const res = await fetch(`/api/apporteur/services/orders/${order.id}/payment-link`, { method: "POST" });
+    const data = await res.json();
+    setBusyOrderId(null);
+    if (!res.ok) { toast.error(data.error ?? "Erreur."); return; }
+    navigator.clipboard.writeText(data.checkoutUrl);
+    toast.success("Lien de paiement généré et copié ! Envoyez-le au client.");
+    loadOrders();
+  }
+
+  // ── Annuler une commande non payée ───────────────────────────────────────
+  async function cancelOrder(order: OrderItem) {
+    setBusyOrderId(order.id);
+    const res = await fetch("/api/apporteur/services/orders", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: order.id, status: "ANNULEE" }),
+    });
+    const data = await res.json();
+    setBusyOrderId(null);
+    if (!res.ok) { toast.error(data.error ?? "Erreur."); return; }
+    toast.success("Commande annulée.");
+    loadOrders();
+  }
+
+  // ── Livrer le service (documentation) ────────────────────────────────────
+  function openDeliverModal(order: OrderItem) {
+    setDeliverModal(order);
+    setDeliverUrl(order.documentUrl ?? "");
+    setDeliverName(order.documentName ?? "");
+  }
+
+  async function handleUploadDocument(file: File) {
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    setUploading(false);
+    if (!res.ok) { toast.error(data.error ?? "Erreur d'upload."); return; }
+    setDeliverUrl(data.url);
+    setDeliverName(data.name);
+  }
+
+  async function submitDeliver() {
+    if (!deliverModal) return;
+    if (!deliverUrl.trim()) { toast.error("Ajoutez un lien ou un fichier à livrer."); return; }
+    setBusyOrderId(deliverModal.id);
+    const res = await fetch("/api/apporteur/services/orders", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: deliverModal.id, documentUrl: deliverUrl.trim(), documentName: deliverName.trim() || undefined }),
+    });
+    const data = await res.json();
+    setBusyOrderId(null);
+    if (!res.ok) { toast.error(data.error ?? "Erreur."); return; }
+    toast.success("Service livré ! Le client a été notifié par email.");
+    setDeliverModal(null);
+    loadOrders();
+  }
 
   // ── Ouvrir formulaire création ─────────────────────────────────────────
   function openCreate() {
@@ -259,6 +395,15 @@ export default function ApporteurMesServicesPage() {
                 <h3 className="font-syne font-bold text-primary leading-snug line-clamp-2">{s.title}</h3>
               </div>
               <div className="flex gap-1.5 flex-shrink-0">
+                {s.isApproved && s.isActive && (
+                  <button
+                    onClick={() => copyServiceLink(s.id)}
+                    title="Copier le lien de partage"
+                    className="w-8 h-8 rounded-lg border border-gray-200 hover:border-secondary text-gray-400 hover:text-secondary flex items-center justify-center transition-colors"
+                  >
+                    <i className="fas fa-share-nodes text-xs" />
+                  </button>
+                )}
                 <button
                   onClick={() => openEdit(s)}
                   className="w-8 h-8 rounded-lg border border-gray-200 hover:border-accent text-gray-400 hover:text-accent flex items-center justify-center transition-colors"
@@ -308,6 +453,193 @@ export default function ApporteurMesServicesPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* ── Commandes reçues ─────────────────────────────────────────────── */}
+      <div className="pt-4">
+        <h2 className="font-syne font-black text-xl text-primary mb-1">Commandes reçues</h2>
+        <p className="text-gray-500 text-sm mb-4">
+          Enregistrement des clients, fixation du tarif, encaissement et livraison de vos prestations.
+        </p>
+
+        {ordersLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-card p-8 text-center text-gray-400 text-sm">
+            Aucune commande pour l'instant. Partagez le lien de vos services pour recevoir vos premières demandes.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {orders.map((o) => {
+              const badge = o.status === "ANNULEE"
+                ? { label: "Annulée", cls: "bg-gray-100 text-gray-500 border-gray-200" }
+                : o.status === "TERMINEE"
+                ? { label: "Livrée", cls: "bg-green-50 text-green-700 border-green-200" }
+                : ORDER_STATUS_LABEL[o.paymentStatus];
+              const busy = busyOrderId === o.id;
+
+              return (
+                <motion.div
+                  key={o.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-2xl shadow-card p-5 flex flex-col gap-3"
+                >
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                      <p className="text-xs text-gray-400">{o.service.title}</p>
+                      <p className="font-syne font-bold text-primary">{o.clientName}</p>
+                      <p className="text-xs text-gray-500">{o.clientEmail}{o.clientPhone ? ` · ${o.clientPhone}` : ""}</p>
+                    </div>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${badge.cls}`}>{badge.label}</span>
+                  </div>
+
+                  {o.brief && <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3">{o.brief}</p>}
+
+                  {o.status !== "ANNULEE" && o.status !== "TERMINEE" && (
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      {!o.paymentId ? (
+                        <>
+                          <input
+                            type="number" min={0} step={500}
+                            defaultValue={o.amount}
+                            onChange={(e) => setAmountDraft((p) => ({ ...p, [o.id]: e.target.value }))}
+                            className="w-32 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
+                          />
+                          <button
+                            disabled={busy}
+                            onClick={() => saveAmount(o)}
+                            className="px-3 py-2 rounded-lg bg-gray-100 text-primary text-xs font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50"
+                          >
+                            Enregistrer le tarif
+                          </button>
+                          <button
+                            disabled={busy}
+                            onClick={() => generatePaymentLink(o)}
+                            className="px-3 py-2 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                          >
+                            <i className="fas fa-link" /> Générer le lien de paiement
+                          </button>
+                          <button
+                            disabled={busy}
+                            onClick={() => cancelOrder(o)}
+                            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs font-medium hover:border-red-300 hover:text-red-500 transition-colors disabled:opacity-50"
+                          >
+                            Annuler
+                          </button>
+                        </>
+                      ) : !o.paidAt ? (
+                        <>
+                          <span className="text-sm font-semibold text-primary">{o.amount.toLocaleString("fr-FR")} FCFA</span>
+                          <button
+                            disabled={busy}
+                            onClick={() => generatePaymentLink(o)}
+                            className="px-3 py-2 rounded-lg border border-accent text-accent text-xs font-semibold hover:bg-accent/5 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                          >
+                            <i className="fas fa-copy" /> Recopier le lien de paiement
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm font-semibold text-primary">{o.amount.toLocaleString("fr-FR")} FCFA payés</span>
+                          <span className="text-xs text-accent font-medium">· {o.apporteurRevenue.toLocaleString("fr-FR")} FCFA pour vous</span>
+                          <button
+                            onClick={() => openDeliverModal(o)}
+                            className="px-3 py-2 rounded-lg bg-gradient-to-r from-accent to-secondary text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                          >
+                            <i className="fas fa-paper-plane" /> Livrer le service
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {o.status === "TERMINEE" && o.documentUrl && (
+                    <a href={o.documentUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-accent font-medium inline-flex items-center gap-1.5 w-fit">
+                      <i className="fas fa-file-arrow-down" /> {o.documentName || "Voir le document livré"}
+                    </a>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Modal livraison ──────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {deliverModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-40"
+              onClick={() => setDeliverModal(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-4">
+                <h2 className="font-syne font-bold text-primary text-lg">Livrer le service</h2>
+                <p className="text-sm text-gray-500">
+                  Commande de <strong>{deliverModal.clientName}</strong> — {deliverModal.service.title}
+                </p>
+
+                <div>
+                  <label className="block text-sm font-semibold text-primary mb-1.5">Uploader un fichier</label>
+                  <input
+                    type="file"
+                    disabled={uploading}
+                    onChange={(e) => e.target.files?.[0] && handleUploadDocument(e.target.files[0])}
+                    className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-accent/10 file:text-accent file:text-sm file:font-semibold"
+                  />
+                  {uploading && <p className="text-xs text-gray-400 mt-1">Envoi en cours…</p>}
+                </div>
+
+                <div className="text-center text-xs text-gray-400">— ou —</div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-primary mb-1.5">Lien du document (Drive, Dropbox…)</label>
+                  <input
+                    value={deliverUrl}
+                    onChange={(e) => setDeliverUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-primary mb-1.5">Nom du document</label>
+                  <input
+                    value={deliverName}
+                    onChange={(e) => setDeliverName(e.target.value)}
+                    placeholder="Ex: Rapport final.pdf"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end pt-2">
+                  <button
+                    onClick={() => setDeliverModal(null)}
+                    className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={submitDeliver}
+                    disabled={busyOrderId === deliverModal.id}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-accent to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  >
+                    Envoyer au client
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── Modal formulaire ────────────────────────────────────────────── */}
       <AnimatePresence>
