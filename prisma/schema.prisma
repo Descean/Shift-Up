@@ -327,7 +327,7 @@ model Payment {
   provider     String        // FEDAPAY | STRIPE
   status       PaymentStatus @default(PENDING)
   reference    String        @unique
-  providerRef  String?
+  providerRef  String?       @unique
   invoiceUrl   String?
   metadata     Json?
   createdAt    DateTime      @default(now())
@@ -545,13 +545,16 @@ model Product {
 }
 
 model ProductPurchase {
-  id        String   @id @default(cuid())
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  userId    String
-  amount    Float
-  reference String   @unique
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  userId      String
+  amount      Float
+  reference   String   @unique
+  status      String   @default("PENDING") // PENDING | COMPLETED | FAILED
+  providerRef String?  @unique             // ID transaction FedaPay/Stripe (vérifié serveur)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // ============================================================

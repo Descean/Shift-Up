@@ -2,126 +2,171 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac } from "crypto";
 import prisma from "@/lib/prisma";
 import { getPhaseTemplates } from "@/lib/service-templates";
+import type { Payment, Prestation } from "@prisma/client";
 
 /**
- * GET /api/payments/webhook/fedapay?status=approved&id={transactionId}
- * FedaPay redirige l'utilisateur vers cette URL après le paiement.
+ * Webhooks FedaPay pour les paiements de prestations.
+ *
+ * Sécurité : on NE fait JAMAIS confiance à un statut fourni par le client
+ * (paramètres d'URL du GET) ou par le corps du POST — la confirmation d'un
+ * paiement repose TOUJOURS sur une vérification serveur-à-serveur directe
+ * auprès de l'API FedaPay (GET /v1/transactions/{id}), exactement comme pour
+ * /api/formations/webhook/fedapay.
+ */
+
+function fedapayApiBase() {
+  const isLive = process.env.FEDAPAY_ENVIRONMENT === "live";
+  return isLive ? "https://api.fedapay.com" : "https://sandbox-api.fedapay.com";
+}
+
+async function verifyFedapayTransaction(transactionId: string): Promise<string | null> {
+  const res = await fetch(`${fedapayApiBase()}/v1/transactions/${transactionId}`, {
+    headers: { Authorization: `Bearer ${process.env.FEDAPAY_SECRET_KEY}` },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data["v1/transaction"]?.status ?? null;
+}
+
+/** Confirme un paiement déjà vérifié comme "approved" auprès de FedaPay. Idempotent. */
+async function confirmPayment(payment: Payment & { prestation: Prestation }) {
+  if (payment.status === "COMPLETED") return; // déjà traité
+
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: { status: "COMPLETED" },
+  });
+
+  await prisma.prestation.update({
+    where: { id: payment.prestationId },
+    data: {
+      amountPaid: { increment: payment.amount },
+      status: "EN_COURS",
+      startDate: payment.prestation.startDate ?? new Date(),
+    },
+  });
+
+  const existingPhases = await prisma.prestationPhase.count({ where: { prestationId: payment.prestationId } });
+  if (existingPhases === 0) {
+    const prestation = await prisma.prestation.findUnique({ where: { id: payment.prestationId } });
+    const templates = getPhaseTemplates(prestation?.sector ?? null);
+    if (templates.length > 0) {
+      await prisma.prestationPhase.createMany({
+        data: templates.map((t) => ({
+          prestationId: payment.prestationId,
+          title: t.title,
+          description: t.description,
+          order: t.order,
+          status: t.order === 0 ? "IN_PROGRESS" : "PENDING",
+          progress: 0,
+        })),
+      });
+    }
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      userId: payment.userId,
+      action: "PAYMENT_COMPLETED",
+      entity: "Payment",
+      entityId: payment.id,
+      details: { amount: payment.amount, provider: "FEDAPAY", reference: payment.reference },
+    },
+  });
+}
+
+/**
+ * GET /api/payments/webhook/fedapay?paymentId={id}&id={fedapayTransactionId}
+ * FedaPay redirige le navigateur du client ici après le paiement.
  */
 export async function GET(req: NextRequest) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const { searchParams } = new URL(req.url);
+
+  const paymentId = searchParams.get("paymentId");
+  const fedapayTransactionId = searchParams.get("id");
+
+  if (!paymentId) {
+    return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=missing_id`));
+  }
+
   try {
-    const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status");
-    const transactionId = searchParams.get("id");
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-
-    if (!transactionId) {
-      return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=missing_id`));
-    }
-
-    const payment = await prisma.payment.findFirst({
-      where: { providerRef: transactionId },
+    const payment = await prisma.payment.findUnique({
+      where: { id: paymentId },
       include: { prestation: true },
     });
 
     if (!payment) {
-      console.error("FedaPay webhook GET: payment not found for transactionId", transactionId);
       return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=not_found`));
     }
 
-    if (status === "approved") {
-      // Mettre à jour le paiement
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: "COMPLETED" },
-      });
-
-      // Faire avancer la prestation
-      await prisma.prestation.update({
-        where: { id: payment.prestationId },
-        data: {
-          amountPaid: { increment: payment.amount },
-          status: "EN_COURS",
-          startDate: payment.prestation.startDate ?? new Date(),
-        },
-      });
-
-      // Générer les phases depuis le template du secteur (si pas encore créées)
-      const existingPhases = await prisma.prestationPhase.count({ where: { prestationId: payment.prestationId } });
-      if (existingPhases === 0) {
-        const prestation = await prisma.prestation.findUnique({ where: { id: payment.prestationId } });
-        const templates = getPhaseTemplates(prestation?.sector ?? null);
-        if (templates.length > 0) {
-          await prisma.prestationPhase.createMany({
-            data: templates.map((t) => ({
-              prestationId: payment.prestationId,
-              title: t.title,
-              description: t.description,
-              order: t.order,
-              status: t.order === 0 ? "IN_PROGRESS" : "PENDING",
-              progress: 0,
-            })),
-          });
-        }
-      }
-
-      // Log audit
-      await prisma.auditLog.create({
-        data: {
-          userId: payment.userId,
-          action: "PAYMENT_COMPLETED",
-          entity: "Payment",
-          entityId: payment.id,
-          details: { amount: payment.amount, provider: "FEDAPAY", reference: payment.reference },
-        },
-      });
-
+    // Déjà confirmé — idempotent, on ne revérifie pas
+    if (payment.status === "COMPLETED") {
       return NextResponse.redirect(
         new URL(`${appUrl}/paiement/succes?type=service&prestationId=${payment.prestationId}&ref=${payment.reference}`)
       );
     }
 
-    // Paiement annulé ou refusé
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: "FAILED" },
-    });
+    if (!fedapayTransactionId) {
+      return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=no_transaction`));
+    }
+
+    // Vérification croisée : l'ID de transaction doit correspondre à celui
+    // enregistré au moment de la création du paiement (jamais fourni par le client).
+    if (payment.providerRef && payment.providerRef !== fedapayTransactionId) {
+      return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=transaction_mismatch`));
+    }
+
+    // Vérification obligatoire auprès de l'API FedaPay — jamais via ?status=
+    const verifiedStatus = await verifyFedapayTransaction(fedapayTransactionId);
+
+    if (verifiedStatus === null) {
+      // Impossible de vérifier — on ne confirme pas, mais on ne marque pas non plus en échec définitif
+      return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=verify_failed`));
+    }
+
+    if (verifiedStatus !== "approved") {
+      await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
+      return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=${verifiedStatus || "declined"}`));
+    }
+
+    await confirmPayment(payment);
 
     return NextResponse.redirect(
-      new URL(`${appUrl}/paiement/echec?type=service&reason=${status ?? "declined"}`)
+      new URL(`${appUrl}/paiement/succes?type=service&prestationId=${payment.prestationId}&ref=${payment.reference}`)
     );
   } catch (error) {
     console.error("FedaPay webhook GET error:", error);
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
     return NextResponse.redirect(new URL(`${appUrl}/paiement/echec?type=service&reason=error`));
   }
 }
 
+/**
+ * POST /api/payments/webhook/fedapay
+ * Notification serveur-à-serveur FedaPay. Le statut du payload n'est utilisé
+ * que pour retrouver le paiement concerné — la confirmation elle-même est
+ * toujours revérifiée auprès de l'API FedaPay avant d'être appliquée.
+ */
 export async function POST(req: NextRequest) {
   try {
-    // Lire le corps brut une seule fois (nécessaire pour la vérification HMAC)
     const rawBody = await req.text();
 
-    // Vérification de la signature FedaPay (si la clé secrète est configurée ET si FedaPay envoie le header)
+    // Vérification de la signature FedaPay (fail-closed si une clé est configurée)
     const webhookSecret = process.env.FEDAPAY_WEBHOOK_SECRET;
     if (webhookSecret) {
       const signature = req.headers.get("x-fedapay-signature") ?? req.headers.get("x-webhook-signature");
-      if (signature) {
-        // FedaPay envoie une signature → on la vérifie
-        const expectedSig = createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
-        if (expectedSig !== signature) {
-          console.error("FedaPay webhook POST: signature invalide — requête rejetée");
-          return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-        }
-      } else {
-        // Pas de header de signature — FedaPay ne l'envoie pas toujours (on laisse passer)
-        console.warn("FedaPay webhook POST: aucun header de signature reçu");
+      if (!signature) {
+        console.error("FedaPay webhook POST: signature manquante — requête rejetée");
+        return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+      }
+      const expectedSig = createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
+      if (expectedSig !== signature) {
+        console.error("FedaPay webhook POST: signature invalide — requête rejetée");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
       }
     }
 
     const payload = JSON.parse(rawBody);
-
-    // FedaPay webhook payload: { name: "transaction.approved", entity: { id, status, ... } }
-    // (différent du champ "transaction" — c'est "entity")
     const entity = payload.entity ?? payload.transaction;
 
     if (!entity?.id) {
@@ -136,74 +181,27 @@ export async function POST(req: NextRequest) {
 
     if (!payment) {
       console.error("FedaPay webhook POST: paiement introuvable pour entity.id =", entity.id);
-      // Retourner 200 pour éviter que FedaPay ne réessaie indéfiniment
+      // 200 pour éviter que FedaPay ne réessaie indéfiniment un événement qui ne nous concerne pas
       return NextResponse.json({ received: true, warning: "Payment not found" });
     }
 
-    // Éviter le double traitement si déjà COMPLETED
     if (payment.status === "COMPLETED") {
       return NextResponse.json({ received: true, info: "Already processed" });
     }
 
-    const eventName: string = payload.name ?? "";
-    const entityStatus: string = entity.status ?? "";
+    // Ne jamais se fier au statut du payload — revérifier systématiquement auprès de l'API FedaPay
+    const verifiedStatus = await verifyFedapayTransaction(String(entity.id));
 
-    const newStatus =
-      entityStatus === "approved" || eventName === "transaction.approved" ? "COMPLETED" :
-      entityStatus === "declined" || eventName === "transaction.declined" ? "FAILED" :
-      entityStatus === "canceled" || eventName === "transaction.canceled" ? "FAILED" :
-      "PENDING";
-
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: newStatus as any },
-    });
-
-    if (newStatus === "COMPLETED") {
-      // Faire avancer la prestation
-      await prisma.prestation.update({
-        where: { id: payment.prestationId },
-        data: {
-          amountPaid: { increment: payment.amount },
-          status: "EN_COURS",
-          startDate: payment.prestation.startDate ?? new Date(),
-        },
-      });
-
-      // Générer automatiquement les phases depuis le template du secteur
-      const existingPhases = await prisma.prestationPhase.count({ where: { prestationId: payment.prestationId } });
-      if (existingPhases === 0) {
-        const prestation = await prisma.prestation.findUnique({ where: { id: payment.prestationId } });
-        const templates = getPhaseTemplates(prestation?.sector ?? null);
-        if (templates.length > 0) {
-          await prisma.prestationPhase.createMany({
-            data: templates.map((t) => ({
-              prestationId: payment.prestationId,
-              title: t.title,
-              description: t.description,
-              order: t.order,
-              status: t.order === 0 ? "IN_PROGRESS" : "PENDING",
-              progress: 0,
-            })),
-          });
-        }
-      }
-
-      // Log audit
-      await prisma.auditLog.create({
-        data: {
-          userId: payment.userId,
-          action: "PAYMENT_COMPLETED",
-          entity: "Payment",
-          entityId: payment.id,
-          details: { amount: payment.amount, provider: "FEDAPAY", reference: payment.reference },
-        },
-      });
+    if (verifiedStatus === "approved") {
+      await confirmPayment(payment);
+    } else if (verifiedStatus === "declined" || verifiedStatus === "canceled") {
+      await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
     }
+    // Autre statut (ex: "pending") ou vérification impossible → on ne change rien, FedaPay renverra l'événement plus tard
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("FedaPay webhook error:", error);
+    console.error("FedaPay webhook POST error:", error);
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 }

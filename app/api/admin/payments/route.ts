@@ -2,7 +2,7 @@
  * app/api/admin/payments/route.ts — Finances (admin)
  *
  * GET /api/admin/payments → Paiements reçus + commissions apporteurs
- * Accès réservé ADMIN / DEVELOPER.
+ * Accès réservé ADMIN uniquement (pas DEVELOPER — données financières).
  */
 
 import { NextResponse } from "next/server";
@@ -13,7 +13,7 @@ import prisma from "@/lib/prisma";
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
-  if (session.user.role !== "ADMIN" && session.user.role !== "DEVELOPER") return null;
+  if (session.user.role !== "ADMIN") return null;
   return session;
 }
 

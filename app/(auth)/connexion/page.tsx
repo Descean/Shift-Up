@@ -19,6 +19,12 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+const codeSchema = z.object({
+  code: z.string().min(6, "Code à 6 chiffres requis").max(6),
+});
+
+type CodeFormData = z.infer<typeof codeSchema>;
+
 export default function ConnexionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -26,9 +32,50 @@ export default function ConnexionPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
 
+  // ── Étape 2FA : credentials déjà validés, code TOTP requis ─────────────────
+  const [needs2FA, setNeeds2FA] = useState(false);
+  const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
+  const [codeError, setCodeError] = useState("");
+
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  const {
+    register: registerCode,
+    handleSubmit: handleSubmitCode,
+    formState: { errors: codeErrors },
+  } = useForm<CodeFormData>({ resolver: zodResolver(codeSchema) });
+
+  async function trySignIn(email: string, password: string, code?: string) {
+    const result = await signIn("credentials", {
+      email,
+      password,
+      ...(code ? { code } : {}),
+      redirect: false,
+    });
+
+    if (result?.error === "2FA_REQUIRED") {
+      setPendingCreds({ email, password });
+      setNeeds2FA(true);
+      return;
+    }
+    if (result?.error === "2FA_INVALID") {
+      setCodeError("Code incorrect. Réessayez.");
+      return;
+    }
+    if (result?.error === "RATE_LIMITED") {
+      toast.error("Trop de tentatives. Réessayez dans quelques minutes.");
+      return;
+    }
+    if (result?.error) {
+      toast.error("Email ou mot de passe incorrect");
+      return;
+    }
+
+    toast.success("Connexion réussie !");
+    router.push("/dashboard/client");
+  }
 
   const onSubmit = async (data: FormData) => {
     if (process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY && !captchaToken) {
@@ -37,24 +84,64 @@ export default function ConnexionPage() {
     }
     setLoading(true);
     try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.error("Email ou mot de passe incorrect");
-      } else {
-        toast.success("Connexion réussie !");
-        router.push("/dashboard/client");
-      }
+      await trySignIn(data.email, data.password);
     } catch {
       toast.error("Erreur de connexion. Réessayez.");
     } finally {
       setLoading(false);
     }
   };
+
+  const onSubmitCode = async (data: CodeFormData) => {
+    if (!pendingCreds) return;
+    setLoading(true);
+    setCodeError("");
+    try {
+      await trySignIn(pendingCreds.email, pendingCreds.password, data.code);
+    } catch {
+      toast.error("Erreur de connexion. Réessayez.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Écran 2FA ────────────────────────────────────────────────────────────
+  if (needs2FA) {
+    return (
+      <div>
+        <h1 className="font-syne font-black text-3xl text-primary mb-2">Vérification en 2 étapes</h1>
+        <p className="text-gray-500 mb-8">
+          Entrez le code à 6 chiffres généré par votre application d&apos;authentification.
+        </p>
+        <form onSubmit={handleSubmitCode(onSubmitCode)} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Code de vérification</label>
+            <input
+              {...registerCode("code")}
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              autoFocus
+              className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-center text-2xl tracking-[0.5em] font-mono focus:outline-none focus:border-accent transition-colors"
+              placeholder="······"
+            />
+            {codeErrors.code && <p className="text-red-500 text-xs mt-1">{codeErrors.code.message}</p>}
+            {codeError && <p className="text-red-500 text-xs mt-1">{codeError}</p>}
+          </div>
+          <Button type="submit" variant="gradient" size="lg" loading={loading} className="w-full">
+            {loading ? "Vérification..." : "Valider"}
+          </Button>
+          <button
+            type="button"
+            onClick={() => { setNeeds2FA(false); setPendingCreds(null); setCodeError(""); }}
+            className="w-full text-sm text-gray-400 hover:text-gray-600 text-center"
+          >
+            ← Retour
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   const handleGoogle = async () => {
     setGoogleLoading(true);

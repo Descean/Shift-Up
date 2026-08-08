@@ -4,6 +4,8 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
+import { verifyTOTPCode } from "@/lib/totp";
+import { rateLimit } from "@/lib/ratelimit";
 
 // Extend next-auth types
 declare module "next-auth" {
@@ -52,9 +54,20 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        code: { label: "Code 2FA", type: "text" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) return null;
+
+        // Rate limiting anti brute-force — proxy.ts ne peut pas protéger cette
+        // route (next-auth court-circuite son propre middleware pour tout
+        // chemin /api/auth/*), donc la protection est posée ici directement.
+        const forwarded = (req.headers as Record<string, string> | undefined)?.["x-forwarded-for"];
+        const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
+        const { allowed } = rateLimit(`login:${ip}`, { limit: 8, windowMs: 15 * 60 * 1000 });
+        if (!allowed) {
+          throw new Error("RATE_LIMITED");
+        }
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
@@ -64,6 +77,19 @@ export const authOptions: NextAuthOptions = {
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
+
+        // 2FA — si activé sur le compte, un code TOTP valide est obligatoire
+        // pour terminer la connexion (auparavant vérifié nulle part : un mot
+        // de passe seul suffisait même avec le 2FA "activé").
+        if (user.totpEnabled) {
+          if (!user.totpSecret) return null; // état incohérent, refuse par sécurité
+          if (!credentials.code) {
+            throw new Error("2FA_REQUIRED");
+          }
+          if (!verifyTOTPCode(credentials.code, user.totpSecret)) {
+            throw new Error("2FA_INVALID");
+          }
+        }
 
         return {
           id: user.id,

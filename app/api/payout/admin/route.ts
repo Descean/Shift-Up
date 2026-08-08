@@ -4,7 +4,7 @@
  * GET  — Liste les PayoutRequests (filtre par status)
  * PATCH — Met à jour le statut d'une PayoutRequest (PROCESSING | PAID | REJECTED)
  *
- * Réservé aux ADMIN / DEVELOPER.
+ * Réservé à ADMIN uniquement (pas DEVELOPER — mouvement d'argent réel).
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -16,7 +16,7 @@ import { z } from "zod";
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
-  if (session.user.role !== "ADMIN" && session.user.role !== "DEVELOPER") return null;
+  if (session.user.role !== "ADMIN") return null;
   return session;
 }
 

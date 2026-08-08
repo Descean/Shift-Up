@@ -87,6 +87,25 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { userId, ...data } = patchSchema.parse(body);
 
+    // Personne ne peut modifier son propre compte depuis cette interface —
+    // empêche notamment un DEVELOPER de s'auto-promouvoir ADMIN, et évite
+    // tout auto-verrouillage (isActive: false sur soi-même).
+    if (userId === session.user.id) {
+      return NextResponse.json(
+        { error: "Vous ne pouvez pas modifier votre propre compte depuis cette interface." },
+        { status: 403 }
+      );
+    }
+
+    // Seul un ADMIN peut changer un rôle (un DEVELOPER ne doit pas pouvoir
+    // s'octroyer ni octroyer à quiconque des droits ADMIN).
+    if (data.role !== undefined && session.user.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Seul un administrateur peut modifier les rôles." },
+        { status: 403 }
+      );
+    }
+
     const updated = await prisma.user.update({
       where: { id: userId },
       data,

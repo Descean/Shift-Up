@@ -15,10 +15,15 @@
  *     (Too Many Requests) sans traiter la requête.
  *
  *     Routes protégées par le rate limiter :
- *       - POST /api/auth/connexion  → protection contre le vol de comptes
  *       - POST /api/auth/register   → protection contre la création de faux comptes en masse
  *       - POST /api/auth/reset-password → protection contre l'abus de réinitialisation
  *       - POST /api/contact         → protection contre le spam
+ *
+ *     ⚠️  IMPORTANT : next-auth court-circuite en interne ce middleware pour
+ *     tout chemin commençant par le basePath NextAuth (/api/auth/*, y compris
+ *     /api/auth/callback/credentials) — ce rate limiter ne s'exécute donc
+ *     JAMAIS pour la connexion. La protection anti brute-force du login est
+ *     posée directement dans lib/auth.ts (authorize()), pas ici.
  *
  *     ⚠️  Note Edge Runtime : ce compteur est stocké en mémoire du process
  *     Node.js (Map). Dans un déploiement multi-instances (Vercel, serverless),
@@ -30,6 +35,15 @@
  *     Vérifie le JWT NextAuth de chaque requête vers /dashboard/*.
  *     Redirige vers la bonne vue selon le rôle (ADMIN, APPORTEUR, ETUDIANT, CLIENT).
  *     Un utilisateur non authentifié est redirigé vers /connexion.
+ *     Cas particulier : /dashboard/admin/finances* est réservé à ADMIN
+ *     uniquement (pas DEVELOPER) — accès aux données financières et aux
+ *     versements de commissions.
+ *
+ *  Les routes /api/payments/* ne sont PAS couvertes par ce middleware : les
+ *  routes de création (payments/create, payments/boutique) vérifient leur
+ *  propre session, et les webhooks FedaPay/Stripe sont publics par nature
+ *  (protégés par vérification de signature et/ou re-vérification serveur
+ *  auprès du fournisseur, jamais par une session utilisateur).
  */
 
 import { withAuth } from "next-auth/middleware";
@@ -65,8 +79,6 @@ const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
  * Seules les méthodes POST sont concernées (les GET ne modifient rien).
  */
 const RATE_LIMITED_PATHS = [
-  "/api/auth/connexion",
-  "/api/auth/callback/credentials", // endpoint NextAuth pour la connexion credentials
   "/api/auth/register",
   "/api/auth/reset-password",
   "/api/contact",
@@ -149,6 +161,15 @@ export default withAuth(
 
     const role = token.role as string;
 
+    // Finances : réservé au rôle ADMIN uniquement (pas DEVELOPER) — données
+    // financières et validation des versements de commissions.
+    if (
+      pathname.startsWith("/dashboard/admin/finances") &&
+      role !== "ADMIN"
+    ) {
+      return NextResponse.redirect(new URL("/dashboard/admin", req.url));
+    }
+
     // Routes réservées aux administrateurs et développeurs
     if (
       pathname.startsWith("/dashboard/admin") &&
@@ -193,12 +214,11 @@ export const config = {
   matcher: [
     // Toutes les sous-routes du dashboard (contrôle d'accès RBAC)
     "/dashboard/:path*",
-    // Routes API d'authentification (rate limiting + contrôle accès)
+    // Routes API d'authentification (rate limiting — note : sans effet réel,
+    // voir le commentaire en tête de fichier ; le vrai rate limiting du
+    // login vit dans lib/auth.ts)
     "/api/auth/register",
-    "/api/auth/connexion",
     "/api/auth/reset-password",
-    // Routes de paiement (accès authentifié uniquement)
-    "/api/payments/:path*",
     // Route de contact (rate limiting anti-spam)
     "/api/contact",
   ],

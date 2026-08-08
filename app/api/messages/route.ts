@@ -122,6 +122,33 @@ export async function POST(req: NextRequest) {
     }
 
     if (recipientId) {
+      const isAdmin = ["ADMIN", "DEVELOPER"].includes(session.user.role as string);
+
+      if (!isAdmin) {
+        // Un utilisateur non-admin ne peut écrire qu'à un admin, ou répondre
+        // dans une conversation déjà existante — pas contacter n'importe qui.
+        const recipient = await prisma.user.findUnique({ where: { id: recipientId }, select: { role: true } });
+        const recipientIsAdmin = !!recipient && ["ADMIN", "DEVELOPER"].includes(recipient.role);
+
+        if (!recipientIsAdmin) {
+          const existingThread = await prisma.message.findFirst({
+            where: {
+              OR: [
+                { senderId: session.user.id, recipientId },
+                { senderId: recipientId, recipientId: session.user.id },
+              ],
+            },
+            select: { id: true },
+          });
+          if (!existingThread) {
+            return NextResponse.json(
+              { error: "Vous ne pouvez contacter que l'équipe SHIFT UP ou répondre à une conversation existante." },
+              { status: 403 }
+            );
+          }
+        }
+      }
+
       // Direct message to a specific user
       await prisma.message.create({
         data: {
@@ -167,8 +194,22 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const { id } = await req.json();
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ error: "ID invalide." }, { status: 400 });
+    }
+
+    // findFirst d'abord : permet de distinguer "message inexistant" (404) de
+    // "message d'un autre destinataire" (403), plutôt qu'un 500 générique.
+    const message = await prisma.message.findUnique({ where: { id }, select: { recipientId: true } });
+    if (!message) {
+      return NextResponse.json({ error: "Message introuvable." }, { status: 404 });
+    }
+    if (message.recipientId !== session.user.id) {
+      return NextResponse.json({ error: "Ce message ne vous appartient pas." }, { status: 403 });
+    }
+
     await prisma.message.update({
-      where: { id, recipientId: session.user.id },
+      where: { id },
       data: { isRead: true },
     });
     return NextResponse.json({ success: true });
