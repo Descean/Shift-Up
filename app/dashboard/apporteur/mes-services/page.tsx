@@ -109,7 +109,12 @@ export default function ApporteurMesServicesPage() {
       .then((r) => r.json())
       .then((d) => setServices(d.services ?? []))
       .finally(() => setLoading(false));
-    loadOrders();
+    // ordersLoading démarre déjà à `true` (état initial) — pas besoin de le
+    // redéfinir de façon synchrone ici, seulement de le repasser à `false`.
+    fetch("/api/apporteur/services/orders")
+      .then((r) => r.json())
+      .then((d) => setOrders(d.orders ?? []))
+      .finally(() => setOrdersLoading(false));
   }, []);
 
   // ── Partage : copier le lien public du service ──────────────────────────
