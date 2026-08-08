@@ -46,6 +46,7 @@ export interface FormationProps {
   audience?: string[];
   inclusText?: string;
   whatsapp?: string; // format local, ex: "01 40 80 91 08"
+  posterUrl?: string; // affiche imprimable (A4), ouverte dans un nouvel onglet
   // Succès : set par la page parente après retour FedaPay
   succes?: boolean;
   reference?: string;
@@ -264,6 +265,17 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 </Chip>
               )}
             </div>
+            {formation.posterUrl && (
+              <a
+                href={formation.posterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-4 text-sm text-white/70 hover:text-white underline underline-offset-4 transition-colors"
+              >
+                <i className="fas fa-file-arrow-down" />
+                Télécharger l&apos;affiche (PDF)
+              </a>
+            )}
           </motion.div>
         </div>
         <div className="h-16 bg-paper" style={{ clipPath: "ellipse(60% 100% at 50% 100%)" }} />
