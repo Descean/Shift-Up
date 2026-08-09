@@ -12,6 +12,7 @@ const FORMATION_RICH_CONTENT: Record<string, {
   audience?: string[];
   inclusText?: string;
   whatsapp?: string; // format local, ex: "01 40 80 91 08" — converti en lien wa.me
+  ogImage?: { url: string; width: number; height: number }; // image de l'aperçu de lien (WhatsApp, réseaux sociaux)
 }> = {
   "ia-marches-publics": {
     about:
@@ -50,6 +51,7 @@ const FORMATION_RICH_CONTENT: Record<string, {
     ],
     inclusText: "méthodologie complète, supports PDF, accompagnement post-formation",
     whatsapp: "01 40 80 91 08",
+    ogImage: { url: "/images/formations/ia-marches-publics.png", width: 1536, height: 1024 },
   },
 };
 
@@ -62,10 +64,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const f = await prisma.formation.findUnique({ where: { slug, isActive: true } });
   if (!f) return { title: "Formation introuvable" };
+
+  const description = f.description ?? `Inscription à la formation ${f.titre} — SHIFT UP`;
+  const ogImage = FORMATION_RICH_CONTENT[slug]?.ogImage;
+
   return {
     title: f.titre,
-    description: f.description ?? `Inscription à la formation ${f.titre} — SHIFT UP`,
+    description,
     robots: { index: false, follow: false },
+    ...(ogImage && {
+      openGraph: {
+        title: f.titre,
+        description,
+        images: [{ url: ogImage.url, width: ogImage.width, height: ogImage.height, alt: f.titre }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: f.titre,
+        description,
+        images: [ogImage.url],
+      },
+    }),
   };
 }
 
