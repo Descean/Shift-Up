@@ -140,10 +140,10 @@ export default function Footer() {
             {/* Social */}
             <div className="flex items-center gap-3 mt-6">
               {[
-                { icon: "fab fa-linkedin-in", href: "#", label: "LinkedIn" },
-                { icon: "fab fa-facebook-f", href: "#", label: "Facebook" },
-                { icon: "fab fa-instagram", href: "#", label: "Instagram" },
-                { icon: "fab fa-x-twitter", href: "#", label: "X" },
+                { icon: "fab fa-linkedin-in", href: "https://www.linkedin.com/company/cshift-up/", label: "LinkedIn" },
+                { icon: "fab fa-facebook-f", href: "https://www.facebook.com/profile.php?id=61580406154960", label: "Facebook" },
+                { icon: "fab fa-instagram", href: "https://www.instagram.com/shiftup.bj?igsh=MW96Njgwd2g1dmRlYg==", label: "Instagram" },
+                { icon: "fab fa-x-twitter", href: "https://x.com/Gneudes", label: "X" },
               ].map((s) => (
                 <a
                   key={s.label}
