@@ -46,7 +46,6 @@ export interface FormationProps {
   audience?: string[];
   inclusText?: string;
   whatsapp?: string; // format local, ex: "01 40 80 91 08"
-  posterUrl?: string; // affiche imprimable (A4), ouverte dans un nouvel onglet
   // Succès : set par la page parente après retour FedaPay
   succes?: boolean;
   reference?: string;
@@ -231,10 +230,6 @@ export default function FormationForm({ formation }: { formation: FormationProps
         <div className="absolute inset-0 bg-mesh-gradient opacity-40 pointer-events-none" />
         <div className="container-custom relative z-10 text-center pb-16">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-5">
-              <span className="w-2 h-2 bg-accent rounded-full animate-pulse-slow" />
-              Inscriptions ouvertes · Places limitées
-            </span>
             <h1 className="font-syne font-black text-3xl sm:text-5xl text-white leading-tight mb-4">
               {formation.titre.includes("&") ? (
                 <>
@@ -265,17 +260,6 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 </Chip>
               )}
             </div>
-            {formation.posterUrl && (
-              <a
-                href={formation.posterUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-4 text-sm text-white/70 hover:text-white underline underline-offset-4 transition-colors"
-              >
-                <i className="fas fa-file-arrow-down" />
-                Télécharger l&apos;affiche (PDF)
-              </a>
-            )}
           </motion.div>
         </div>
         <div className="h-16 bg-paper" style={{ clipPath: "ellipse(60% 100% at 50% 100%)" }} />

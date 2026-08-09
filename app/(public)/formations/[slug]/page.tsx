@@ -12,7 +12,6 @@ const FORMATION_RICH_CONTENT: Record<string, {
   audience?: string[];
   inclusText?: string;
   whatsapp?: string; // format local, ex: "01 40 80 91 08" — converti en lien wa.me
-  posterUrl?: string; // affiche imprimable (A4), ouverte dans un nouvel onglet
 }> = {
   "ia-marches-publics": {
     about:
@@ -51,7 +50,6 @@ const FORMATION_RICH_CONTENT: Record<string, {
     ],
     inclusText: "méthodologie complète, supports PDF, accompagnement post-formation",
     whatsapp: "01 40 80 91 08",
-    posterUrl: "/design-imports/affiche-formation/Shift Up - Affiche Formation.dc.html",
   },
 };
 
