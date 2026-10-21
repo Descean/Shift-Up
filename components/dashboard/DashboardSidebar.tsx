@@ -212,7 +212,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
         {/* Role badge */}
         {!collapsed && (
           <div className="px-4 py-2">
-            <span className="bg-accent/15 text-accent text-xs font-semibold px-3 py-1 rounded-full">
+            <span className="bg-white/10 text-accent-200 text-xs font-semibold px-3 py-1 rounded-full">
               {role === "CLIENT" ? "Client" :
                role === "APPORTEUR" ? "Apporteur d'affaires" :
                role === "ETUDIANT" ? "Étudiant" : "Admin"}
@@ -223,7 +223,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive = pathname === item.href || (item.href.split("/").length > 3 && pathname.startsWith(item.href + "/"));
             return (
               <Link
                 key={item.href}
@@ -319,7 +319,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
 
               {/* Role badge */}
               <div className="px-4 py-3">
-                <span className="bg-accent/15 text-accent text-xs font-semibold px-3 py-1 rounded-full">
+                <span className="bg-white/10 text-accent-200 text-xs font-semibold px-3 py-1 rounded-full">
                   {role === "CLIENT" ? "Client" :
                    role === "APPORTEUR" ? "Apporteur d'affaires" :
                    role === "ETUDIANT" ? "Étudiant" : "Admin"}
@@ -329,7 +329,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
               {/* Nav items */}
               <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                  const isActive = pathname === item.href || (item.href.split("/").length > 3 && pathname.startsWith(item.href + "/"));
                   return (
                     <Link
                       key={item.href}
@@ -371,7 +371,7 @@ export default function DashboardSidebar({ role }: { role: string }) {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-primary border-t border-white/10 safe-area-bottom">
         <div className="flex items-stretch">
           {mobileItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive = pathname === item.href || (item.href.split("/").length > 3 && pathname.startsWith(item.href + "/"));
             return (
               <Link
                 key={item.href}

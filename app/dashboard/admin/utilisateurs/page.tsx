@@ -38,8 +38,8 @@ interface User {
 
 /** Classes CSS pour les badges de rôle */
 const roleStyle: Record<UserRole, string> = {
-  CLIENT:    "bg-blue-50 text-blue-700",
-  APPORTEUR: "bg-purple-50 text-purple-700",
+  CLIENT:    "bg-accent-50 text-accent-700",
+  APPORTEUR: "bg-accent-50 text-accent-700",
   ETUDIANT:  "bg-amber-50 text-amber-700",
   ADMIN:     "bg-red-50 text-red-700",
   DEVELOPER: "bg-gray-100 text-gray-700",
@@ -210,7 +210,7 @@ export default function AdminUtilisateursPage() {
                         <p className="text-xs text-gray-400">{u.email}</p>
                         {/* Code d'affiliation affiché uniquement pour les apporteurs */}
                         {u.affiliationCode && (
-                          <span className="text-xs font-mono text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">
+                          <span className="text-xs font-mono text-accent-600 bg-accent-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">
                             {u.affiliationCode}
                           </span>
                         )}

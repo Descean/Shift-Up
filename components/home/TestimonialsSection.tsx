@@ -59,7 +59,7 @@ export default function TestimonialsSection() {
                     <i key={i} className="fas fa-star text-secondary text-xs" />
                   ))}
                 </div>
-                <cite className="not-italic text-sm text-primary/50 font-medium">
+                <cite className="not-italic text-sm text-primary/65 font-medium">
                   {featured.name} — {featured.role}
                 </cite>
               </footer>
@@ -81,7 +81,7 @@ export default function TestimonialsSection() {
                     <p className="text-primary/70 text-sm italic leading-relaxed">
                       &ldquo;{t.content.slice(0, 90)}…&rdquo;
                     </p>
-                    <p className="text-primary/40 text-xs mt-1">{t.name} — {t.role}</p>
+                    <p className="text-primary/65 text-xs mt-1">{t.name} — {t.role}</p>
                   </div>
                 </div>
               ))}
@@ -101,7 +101,7 @@ export default function TestimonialsSection() {
                       key={row.label}
                       className="border-b border-primary/6 last:border-0"
                     >
-                      <td className="py-3 pr-4 text-primary/40 font-medium w-2/5">
+                      <td className="py-3 pr-4 text-primary/65 font-medium w-2/5">
                         {row.label}
                       </td>
                       <td className="py-3 text-primary font-semibold">
@@ -119,7 +119,7 @@ export default function TestimonialsSection() {
                   { icon: "fas fa-medal", text: "Excellence — Innovation — Performance" },
                   { icon: "fas fa-handshake", text: "Partenaire de confiance depuis 2024" },
                 ].map((item) => (
-                  <div key={item.text} className="flex items-center gap-3 text-sm text-primary/50">
+                  <div key={item.text} className="flex items-center gap-3 text-sm text-primary/65">
                     <i className={`${item.icon} text-accent text-xs w-4`} />
                     {item.text}
                   </div>

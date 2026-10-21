@@ -202,10 +202,10 @@ export default function RootLayout({
                 color: "#fff",
                 fontFamily: "var(--font-space-grotesk)",
                 borderRadius: "12px",
-                border: "1px solid rgba(30,159,212,0.2)",
+                border: "1px solid rgba(45,91,120,0.2)",
               },
               success: {
-                iconTheme: { primary: "#00D4A0", secondary: "#fff" },
+                iconTheme: { primary: "#0A2533", secondary: "#fff" },
               },
               error: {
                 iconTheme: { primary: "#ef4444", secondary: "#fff" },

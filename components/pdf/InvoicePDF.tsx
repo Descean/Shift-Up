@@ -12,7 +12,7 @@ import {
 } from "@react-pdf/renderer";
 
 const PRIMARY = "#0A2533";
-const ACCENT  = "#1E9FD4";
+const ACCENT  = "#2D5B78";
 const LIGHT   = "#F8FAFC";
 
 const s = StyleSheet.create({

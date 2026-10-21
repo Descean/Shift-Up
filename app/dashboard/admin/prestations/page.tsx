@@ -88,22 +88,22 @@ const statusLabel: Record<PrestationStatus, string> = {
 
 const statusBadge: Record<PrestationStatus, string> = {
   EN_ATTENTE: "bg-amber-100 text-amber-700 border border-amber-200",
-  DEVIS_ENVOYE: "bg-blue-100 text-blue-700 border border-blue-200",
-  EN_ATTENTE_PAIEMENT: "bg-purple-100 text-purple-700 border border-purple-200",
-  EN_COURS: "bg-cyan-100 text-cyan-700 border border-cyan-200",
+  DEVIS_ENVOYE: "bg-accent-100 text-accent-700 border border-accent-200",
+  EN_ATTENTE_PAIEMENT: "bg-accent-100 text-accent-700 border border-accent-200",
+  EN_COURS: "bg-accent-100 text-accent-700 border border-accent-200",
   LIVRAISON: "bg-green-100 text-green-700 border border-green-200",
-  REVISION: "bg-orange-100 text-orange-700 border border-orange-200",
+  REVISION: "bg-secondary-100 text-secondary-700 border border-secondary-200",
   TERMINEE: "bg-gray-100 text-gray-600 border border-gray-200",
   ANNULEE: "bg-red-100 text-red-600 border border-red-200",
 };
 
 const statusDot: Record<PrestationStatus, string> = {
   EN_ATTENTE: "bg-amber-400",
-  DEVIS_ENVOYE: "bg-blue-500",
-  EN_ATTENTE_PAIEMENT: "bg-purple-500",
-  EN_COURS: "bg-cyan-500",
+  DEVIS_ENVOYE: "bg-accent-500",
+  EN_ATTENTE_PAIEMENT: "bg-accent-500",
+  EN_COURS: "bg-accent-500",
   LIVRAISON: "bg-green-500",
-  REVISION: "bg-orange-500",
+  REVISION: "bg-secondary-500",
   TERMINEE: "bg-gray-400",
   ANNULEE: "bg-red-500",
 };
@@ -124,7 +124,7 @@ const livrableTypes = ["PDF", "LINK", "VIDEO", "CODE", "DESIGN", "ARCHIVE"];
 
 function progressBarColor(p: number): string {
   if (p === 100) return "bg-green-500";
-  if (p >= 60) return "bg-cyan-500";
+  if (p >= 60) return "bg-accent-500";
   if (p >= 30) return "bg-amber-400";
   return "bg-gray-300";
 }
@@ -303,7 +303,7 @@ function TabDevis({
           <div className="border-t border-gray-200 pt-2 mt-2 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Acompte (60%)</span>
-              <span className="text-purple-600 font-semibold">
+              <span className="text-accent-600 font-semibold">
                 {q.deposit.toLocaleString()} F
               </span>
             </div>
@@ -372,7 +372,7 @@ function TabDevis({
       <div className="bg-gray-50 rounded-xl p-4 space-y-1.5">
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">Acompte (60%)</span>
-          <span className="font-semibold text-purple-600">{deposit.toLocaleString()} F</span>
+          <span className="font-semibold text-accent-600">{deposit.toLocaleString()} F</span>
         </div>
         <div className="flex justify-between text-sm font-bold border-t border-gray-200 pt-1.5">
           <span className="text-primary">Total</span>

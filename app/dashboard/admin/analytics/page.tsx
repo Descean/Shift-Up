@@ -11,19 +11,19 @@ type Stats = {
 
 const STATUS_CONFIG: { key: string; label: string; color: string }[] = [
   { key: "EN_ATTENTE", label: "En attente",  color: "bg-gray-400" },
-  { key: "EN_COURS",   label: "En cours",    color: "bg-blue-500" },
-  { key: "LIVRAISON",  label: "Livraison",   color: "bg-purple-500" },
+  { key: "EN_COURS",   label: "En cours",    color: "bg-accent-500" },
+  { key: "LIVRAISON",  label: "Livraison",   color: "bg-accent-500" },
   { key: "REVISION",   label: "Révision",    color: "bg-amber-500" },
   { key: "TERMINEE",   label: "Terminée",    color: "bg-green-500" },
   { key: "ANNULEE",    label: "Annulée",     color: "bg-red-400" },
 ];
 
 const ROLE_CONFIG: { key: string; label: string; color: string }[] = [
-  { key: "CLIENT",    label: "Clients",    color: "bg-blue-400" },
-  { key: "APPORTEUR", label: "Apporteurs", color: "bg-purple-400" },
-  { key: "ETUDIANT",  label: "Étudiants",  color: "bg-amber-400" },
+  { key: "CLIENT",    label: "Clients",    color: "bg-accent-400" },
+  { key: "APPORTEUR", label: "Apporteurs", color: "bg-accent-400" },
+  { key: "ETUDIANT",  label: "Étudiants",  color: "bg-secondary-400" },
   { key: "DEVELOPER", label: "Équipe",     color: "bg-gray-400" },
-  { key: "ADMIN",     label: "Admins",     color: "bg-red-400" },
+  { key: "ADMIN",     label: "Admins",     color: "bg-primary" },
 ];
 
 const monthlyActivity = [
@@ -51,10 +51,10 @@ export default function AdminAnalyticsPage() {
   const totalPrestations = s?.prestations.total ?? 0;
 
   const kpis = [
-    { label: "CA Total",            value: s ? `${(s.revenue.total).toLocaleString()} F`      : "—", change: "+18%", positive: true,  icon: "fa-sack-dollar",  color: "from-accent to-secondary" },
-    { label: "CA ce mois",          value: s ? `${(s.revenue.thisMonth).toLocaleString()} F`  : "—", change: "+32%", positive: true,  icon: "fa-chart-line",   color: "from-green-400 to-teal-500" },
-    { label: "Utilisateurs",        value: s ? String(s.users.total)                          : "—", change: `+${s?.users.newThisMonth ?? 0}`, positive: true, icon: "fa-users", color: "from-purple-400 to-pink-500" },
-    { label: "Prestations actives", value: s ? String(s.prestations.active)                   : "—", change: "",     positive: true,  icon: "fa-briefcase",    color: "from-amber-400 to-orange-500" },
+    { label: "CA Total",            value: s ? `${(s.revenue.total).toLocaleString()} F`      : "—", change: "+18%", positive: true,  icon: "fa-sack-dollar",  color: "from-primary to-accent" },
+    { label: "CA ce mois",          value: s ? `${(s.revenue.thisMonth).toLocaleString()} F`  : "—", change: "+32%", positive: true,  icon: "fa-chart-line",   color: "from-primary to-accent" },
+    { label: "Utilisateurs",        value: s ? String(s.users.total)                          : "—", change: `+${s?.users.newThisMonth ?? 0}`, positive: true, icon: "fa-users", color: "from-primary to-accent" },
+    { label: "Prestations actives", value: s ? String(s.prestations.active)                   : "—", change: "",     positive: true,  icon: "fa-briefcase",    color: "from-primary to-accent" },
   ];
 
   const prestationsByStatus = STATUS_CONFIG.map((cfg) => {

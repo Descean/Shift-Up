@@ -66,7 +66,7 @@ export default function ServicesSection() {
             style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
           >
             Des solutions complètes pour{" "}
-            <em style={{ color: "#1E9FD4" }}>votre croissance</em>
+            <em style={{ color: "#2D5B78" }}>votre croissance</em>
           </h2>
         </div>
 
@@ -87,7 +87,7 @@ export default function ServicesSection() {
               <h3 className="font-syne font-bold text-lg text-primary group-hover:text-accent transition-colors duration-200">
                 {s.title}
               </h3>
-              <p className="text-primary/50 text-sm leading-relaxed flex-1">
+              <p className="text-primary/65 text-sm leading-relaxed flex-1">
                 {s.description}
               </p>
               <span className="inline-flex items-center gap-1.5 text-accent text-xs font-semibold opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-200">
@@ -108,7 +108,7 @@ export default function ServicesSection() {
             >
               Voir tous les services & tarifs
             </p>
-            <div className="flex items-center gap-2 text-accent text-sm font-semibold mt-6">
+            <div className="flex items-center gap-2 text-accent-200 text-sm font-semibold mt-6">
               Explorer
               <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform duration-200" />
             </div>

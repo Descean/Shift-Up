@@ -232,7 +232,7 @@ export default function MentionsLegalesPage() {
       <section className="bg-primary pt-28 pb-14">
         <div className="container-custom">
           <div className="flex items-center gap-3 mb-4">
-            <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-3 py-1.5 rounded-full text-xs font-medium">
+            <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-3 py-1.5 rounded-full text-xs font-medium">
               <i className="fas fa-scale-balanced" />
               Informations légales
             </span>

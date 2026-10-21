@@ -14,10 +14,10 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 const PROVIDERS = [
-  { id: "MTN_MOMO",    label: "MTN MoMo",    icon: "fa-mobile-screen-button", color: "from-yellow-400 to-yellow-300", prefix: "+229 6" },
-  { id: "MOOV_MONEY", label: "Moov Money",  icon: "fa-mobile-screen-button", color: "from-blue-500 to-blue-400",   prefix: "+229 9" },
-  { id: "WAVE",       label: "Wave",        icon: "fa-wave-square",           color: "from-cyan-500 to-teal-400",   prefix: "+229 5" },
-  { id: "CELTIIS",    label: "Celtiis",     icon: "fa-mobile-screen-button", color: "from-green-500 to-green-400", prefix: "+229 4" },
+  { id: "MTN_MOMO",    label: "MTN MoMo",    icon: "fa-mobile-screen-button", color: "from-primary to-accent", prefix: "+229 6" },
+  { id: "MOOV_MONEY", label: "Moov Money",  icon: "fa-mobile-screen-button", color: "from-primary to-accent",   prefix: "+229 9" },
+  { id: "WAVE",       label: "Wave",        icon: "fa-wave-square",           color: "from-primary to-accent",   prefix: "+229 5" },
+  { id: "CELTIIS",    label: "Celtiis",     icon: "fa-mobile-screen-button", color: "from-primary to-accent", prefix: "+229 4" },
 ];
 
 const MIN_AMOUNT = 30_000;

@@ -103,9 +103,9 @@ export default function AdminMarketingPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPI icon="fas fa-users" label="Abonnés newsletter" value={stats?.totalSubscribers ?? 0} sub={`${stats?.activeSubscribers ?? 0} actifs`} color="bg-gradient-to-br from-accent to-secondary" />
-        <KPI icon="fas fa-envelope-open-text" label="Messages non lus" value={stats?.unreadContacts ?? 0} sub="contacts entrants" color="bg-gradient-to-br from-orange-400 to-red-400" />
-        <KPI icon="fas fa-user-check" label="Utilisateurs inscrits" value={stats?.totalUsers ?? 0} sub="comptes actifs" color="bg-gradient-to-br from-purple-500 to-pink-500" />
-        <KPI icon="fas fa-chart-line" label="Taux d'activation" value={stats && stats.totalSubscribers > 0 ? `${Math.round((stats.activeSubscribers / stats.totalSubscribers) * 100)}%` : "—"} sub="abonnés actifs" color="bg-gradient-to-br from-green-500 to-emerald-400" />
+        <KPI icon="fas fa-envelope-open-text" label="Messages non lus" value={stats?.unreadContacts ?? 0} sub="contacts entrants" color="bg-gradient-to-br from-secondary-400 to-secondary-400" />
+        <KPI icon="fas fa-user-check" label="Utilisateurs inscrits" value={stats?.totalUsers ?? 0} sub="comptes actifs" color="bg-gradient-to-br from-accent-500 to-secondary-500" />
+        <KPI icon="fas fa-chart-line" label="Taux d'activation" value={stats && stats.totalSubscribers > 0 ? `${Math.round((stats.activeSubscribers / stats.totalSubscribers) * 100)}%` : "—"} sub="abonnés actifs" color="bg-gradient-to-br from-primary-500 to-primary-400" />
       </div>
 
       {/* Tabs */}

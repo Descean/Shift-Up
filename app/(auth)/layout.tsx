@@ -10,7 +10,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: "linear-gradient(rgba(30,159,212,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30,159,212,0.5) 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(rgba(45,91,120,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(45,91,120,0.5) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }}
         />
@@ -29,7 +29,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
           <div>
             <p className="text-white font-syne font-bold text-2xl leading-none">SHIFT UP</p>
-            <p className="text-accent/80 text-[10px] tracking-widest uppercase">Transforming Business</p>
+            <p className="text-accent-300 text-[10px] tracking-widest uppercase">Transforming Business</p>
           </div>
         </Link>
 

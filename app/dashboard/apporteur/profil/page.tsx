@@ -11,11 +11,11 @@ type Profile = {
 };
 
 const levelConfig: Record<string, { label: string; color: string; gradient: string; nextLevel?: string; nextThreshold?: number }> = {
-  BRONZE:  { label: "Bronze",  color: "text-amber-600", gradient: "from-amber-600 to-amber-400",  nextLevel: "Argent",  nextThreshold: 10 },
-  ARGENT:  { label: "Argent",  color: "text-gray-500",  gradient: "from-gray-500 to-gray-300",    nextLevel: "Or",      nextThreshold: 25 },
-  OR:      { label: "Or",      color: "text-yellow-500",gradient: "from-yellow-500 to-amber-300", nextLevel: "Platine", nextThreshold: 50 },
-  PLATINE: { label: "Platine", color: "text-slate-500", gradient: "from-slate-500 to-slate-300",  nextLevel: "Diamant", nextThreshold: 100 },
-  DIAMANT: { label: "Diamant", color: "text-blue-500",  gradient: "from-blue-500 to-cyan-400" },
+  BRONZE:  { label: "Bronze",  color: "text-amber-600", gradient: "from-primary to-accent",  nextLevel: "Argent",  nextThreshold: 10 },
+  ARGENT:  { label: "Argent",  color: "text-gray-500",  gradient: "from-primary to-accent",    nextLevel: "Or",      nextThreshold: 25 },
+  OR:      { label: "Or",      color: "text-secondary-500",gradient: "from-primary to-accent", nextLevel: "Platine", nextThreshold: 50 },
+  PLATINE: { label: "Platine", color: "text-gray-500", gradient: "from-primary to-accent",  nextLevel: "Diamant", nextThreshold: 100 },
+  DIAMANT: { label: "Diamant", color: "text-accent-500",  gradient: "from-primary to-accent" },
 };
 
 export default function ApporteurProfilPage() {

@@ -18,10 +18,10 @@ interface Props {
 }
 
 const typeColors: Record<string, string> = {
-  DATA_ENTRY:    "from-blue-500 to-accent",
-  REDACTION:     "from-purple-500 to-pink-500",
-  RECHERCHE:     "from-orange-400 to-yellow-400",
-  TEST_LOGICIEL: "from-secondary to-teal-500",
+  DATA_ENTRY:    "from-accent-500 to-accent",
+  REDACTION:     "from-accent-500 to-secondary-500",
+  RECHERCHE:     "from-secondary-400 to-secondary-400",
+  TEST_LOGICIEL: "from-secondary to-primary-500",
   AUTRE:         "from-gray-400 to-gray-500",
 };
 

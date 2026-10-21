@@ -5,8 +5,9 @@
 /* ----- CSS Variables ----- */
 :root {
   --primary: #0A2533;
-  --accent: #1E9FD4;
-  --secondary: #00D4A0;
+  --accent: #2D5B78;
+  --secondary: #5F6772;
+  --ink: #111315;
   --font-syne: 'Syne', sans-serif;
   --font-space-grotesk: 'Space Grotesk', sans-serif;
   --font-cormorant: 'Cormorant Garamond', Georgia, serif;
@@ -35,7 +36,7 @@
   }
 
   ::selection {
-    @apply bg-accent/20 text-accent;
+    @apply bg-primary text-white;
   }
 
   ::-webkit-scrollbar {
@@ -47,19 +48,31 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-accent/40 rounded-full;
+    @apply bg-primary/30 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-accent/70;
+    @apply bg-primary/60;
   }
 }
 
 /* ----- Component Styles ----- */
 @layer components {
   /* Gradient text */
+  /* Mot mis en valeur : italique Cormorant, nuance claire (sur fond marine) */
   .gradient-text {
-    @apply bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent;
+    font-family: var(--font-cormorant), Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    @apply text-accent-200;
+  }
+
+  /* Variante pour fond clair */
+  .accent-text {
+    font-family: var(--font-cormorant), Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    @apply text-accent;
   }
 
   /* Section padding */
@@ -84,7 +97,7 @@
 
   .btn-glow::after {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-accent/20 to-secondary/20 opacity-0 transition-opacity duration-300;
+    @apply absolute inset-0 bg-white/10 opacity-0 transition-opacity duration-300;
   }
 
   .btn-glow:hover::after {
@@ -98,7 +111,7 @@
 
   .animated-border::before {
     content: '';
-    @apply absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-accent via-secondary to-accent opacity-0 transition-opacity duration-300 -z-10;
+    @apply absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-primary via-accent to-primary opacity-0 transition-opacity duration-300 -z-10;
     background-size: 200%;
   }
 
@@ -118,7 +131,7 @@
   }
 
   .sidebar-item.active {
-    @apply bg-accent/10 text-accent;
+    @apply bg-white/10 text-white;
   }
 
   .sidebar-item:not(.active) {
@@ -136,7 +149,7 @@
   }
 
   .progress-fill {
-    @apply h-full rounded-full bg-gradient-to-r from-accent to-secondary transition-all duration-700;
+    @apply h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-700;
   }
 }
 
@@ -189,7 +202,7 @@
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #EEF0F2 25%, #E2E5E9 50%, #EEF0F2 75%);
   background-size: 200% auto;
   animation: shimmer 1.5s infinite;
 }

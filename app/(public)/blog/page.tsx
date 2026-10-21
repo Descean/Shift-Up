@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 };
 
 const COVER_COLORS = [
-  "from-blue-600 to-accent",
-  "from-purple-600 to-pink-500",
-  "from-orange-500 to-red-400",
-  "from-secondary to-teal-500",
-  "from-indigo-600 to-purple-500",
-  "from-green-600 to-teal-400",
+  "from-accent-600 to-accent",
+  "from-accent-600 to-secondary-500",
+  "from-secondary-500 to-secondary-400",
+  "from-secondary to-primary-500",
+  "from-accent-600 to-accent-500",
+  "from-primary-600 to-primary-400",
 ];
 
 const categories = [
@@ -61,7 +61,7 @@ export default async function BlogPage() {
       <section className="bg-primary pt-28 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
         <div className="container-custom relative z-10 max-w-2xl">
-          <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <i className="fas fa-newspaper" />
             Blog & Ressources
           </span>

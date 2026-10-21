@@ -204,7 +204,7 @@ export default function MotDePasseOubliePage() {
                 href="https://wa.me/2290195035099"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl text-sm font-semibold transition-colors"
+                className="flex items-center justify-center gap-2 w-full bg-accent hover:bg-accent-600 text-white py-3 rounded-xl text-sm font-semibold transition-colors"
               >
                 <i className="fab fa-whatsapp" />
                 Aide via WhatsApp

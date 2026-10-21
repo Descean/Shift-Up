@@ -25,12 +25,12 @@ interface Product {
 }
 
 const PRODUCT_TYPES = [
-  { value: "APP", label: "Application", icon: "fas fa-mobile-alt", color: "text-blue-500", bg: "bg-blue-50" },
-  { value: "LOGICIEL", label: "Logiciel", icon: "fas fa-desktop", color: "text-purple-500", bg: "bg-purple-50" },
-  { value: "FICHIER", label: "Fichier", icon: "fas fa-file-arrow-down", color: "text-orange-500", bg: "bg-orange-50" },
-  { value: "LICENCE", label: "Licence", icon: "fas fa-key", color: "text-yellow-500", bg: "bg-yellow-50" },
-  { value: "TEMPLATE", label: "Template", icon: "fas fa-layer-group", color: "text-pink-500", bg: "bg-pink-50" },
-  { value: "FORMATION", label: "Formation", icon: "fas fa-graduation-cap", color: "text-green-500", bg: "bg-green-50" },
+  { value: "APP", label: "Application", icon: "fas fa-mobile-alt", color: "text-accent-500", bg: "bg-accent-50" },
+  { value: "LOGICIEL", label: "Logiciel", icon: "fas fa-desktop", color: "text-accent-500", bg: "bg-accent-50" },
+  { value: "FICHIER", label: "Fichier", icon: "fas fa-file-arrow-down", color: "text-secondary-500", bg: "bg-secondary-50" },
+  { value: "LICENCE", label: "Licence", icon: "fas fa-key", color: "text-secondary-500", bg: "bg-secondary-50" },
+  { value: "TEMPLATE", label: "Template", icon: "fas fa-layer-group", color: "text-secondary-500", bg: "bg-secondary-50" },
+  { value: "FORMATION", label: "Formation", icon: "fas fa-graduation-cap", color: "text-accent", bg: "bg-accent-50" },
   { value: "AUTRE", label: "Autre", icon: "fas fa-box", color: "text-gray-500", bg: "bg-gray-50" },
 ];
 
@@ -498,7 +498,7 @@ export default function AdminProduitsPage() {
                     <div onClick={() => setForm({ ...form, isFeatured: !form.isFeatured })} className={`w-10 h-6 rounded-full transition-colors relative ${form.isFeatured ? "bg-accent" : "bg-gray-200"}`}>
                       <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.isFeatured ? "left-5" : "left-1"}`} />
                     </div>
-                    <span className="text-sm text-gray-700"><i className="fas fa-star mr-1 text-yellow-400" />Mis en avant</span>
+                    <span className="text-sm text-gray-700"><i className="fas fa-star mr-1 text-secondary-400" />Mis en avant</span>
                   </label>
                 </div>
 

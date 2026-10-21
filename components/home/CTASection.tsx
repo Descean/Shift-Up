@@ -14,7 +14,7 @@ export default function CTASection() {
           style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
         >
           Prêt à propulser votre entreprise vers{" "}
-          <em style={{ color: "#1E9FD4" }}>de nouveaux sommets ?</em>
+          <em style={{ color: "#BACFDC" }}>de nouveaux sommets ?</em>
         </h2>
 
         <p className="text-white/50 text-lg max-w-xl mx-auto mb-10">

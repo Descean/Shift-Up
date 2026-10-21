@@ -96,10 +96,10 @@ export default function AdminFormationsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Inscriptions totales", value: total, icon: "fas fa-users", color: "from-accent to-primary" },
-          { label: "Confirmées", value: confirmedCount, icon: "fas fa-circle-check", color: "from-green-400 to-emerald-600" },
-          { label: "En attente", value: pendingCount, icon: "fas fa-clock", color: "from-amber-400 to-orange-500" },
-          { label: "Revenus FCFA", value: totalRevenu.toLocaleString("fr-FR"), icon: "fas fa-coins", color: "from-secondary to-teal-500" },
+          { label: "Inscriptions totales", value: total, icon: "fas fa-users", color: "from-primary to-accent" },
+          { label: "Confirmées", value: confirmedCount, icon: "fas fa-circle-check", color: "from-primary to-accent" },
+          { label: "En attente", value: pendingCount, icon: "fas fa-clock", color: "from-primary to-accent" },
+          { label: "Revenus FCFA", value: totalRevenu.toLocaleString("fr-FR"), icon: "fas fa-coins", color: "from-primary to-accent" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-2xl shadow-card p-4">
             <div className={`w-9 h-9 bg-gradient-to-br ${s.color} rounded-xl flex items-center justify-center text-white text-sm mb-2`}>

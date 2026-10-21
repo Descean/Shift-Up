@@ -87,8 +87,8 @@ export default function SecuritePage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-              <i className="fas fa-shield-check text-emerald-600" />
+            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+              <i className="fas fa-shield-check text-primary-600" />
             </div>
             <div>
               <p className="font-semibold text-primary">2FA activé</p>

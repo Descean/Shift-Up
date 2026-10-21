@@ -87,7 +87,7 @@ export default function ServiceLeadForm({ service }: { service: ApporteurService
       <section className="bg-primary pt-28 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-mesh-gradient opacity-40 pointer-events-none" />
         <div className="container-custom relative z-10 text-center">
-          <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-5">
+          <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-5">
             {service.category}
           </span>
           <h1 className="font-syne font-black text-3xl sm:text-4xl text-white leading-tight mb-3">

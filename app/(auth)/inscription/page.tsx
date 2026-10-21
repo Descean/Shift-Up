@@ -23,21 +23,21 @@ const roles = [
     label: "Client",
     icon: "fas fa-briefcase",
     description: "Accédez à nos services et suivez vos prestations",
-    color: "from-accent to-blue-600",
+    color: "from-primary to-accent",
   },
   {
     value: "APPORTEUR",
     label: "Apporteur d'affaires",
     icon: "fas fa-handshake",
     description: "Recommandez nos services et gagnez des commissions",
-    color: "from-secondary to-teal-500",
+    color: "from-primary to-accent",
   },
   {
     value: "ETUDIANT",
     label: "Étudiant",
     icon: "fas fa-graduation-cap",
     description: "Accédez aux ressources, formations et micro-tâches rémunérées",
-    color: "from-purple-500 to-pink-500",
+    color: "from-primary to-accent",
   },
 ];
 
@@ -304,8 +304,8 @@ export default function InscriptionPage() {
 function PasswordStrengthBar({ value }: { value: string }) {
   const score = passwordStrength(value);
   const labels = ["", "Faible", "Moyen", "Fort", "Très fort"];
-  const colors = ["", "bg-red-400", "bg-amber-400", "bg-lime-400", "bg-emerald-500"];
-  const textColors = ["", "text-red-500", "text-amber-500", "text-lime-600", "text-emerald-600"];
+  const colors = ["", "bg-red-400", "bg-amber-400", "bg-primary-400", "bg-primary-500"];
+  const textColors = ["", "text-red-500", "text-amber-500", "text-primary-600", "text-primary-600"];
   const rules = [
     { ok: value.length >= 8,           label: "8 caractères min." },
     { ok: /[A-Z]/.test(value),         label: "Majuscule" },
@@ -325,7 +325,7 @@ function PasswordStrengthBar({ value }: { value: string }) {
       )}
       <div className="flex flex-wrap gap-x-3 gap-y-0.5">
         {rules.map((r) => (
-          <span key={r.label} className={`text-[11px] flex items-center gap-1 ${r.ok ? "text-emerald-600" : "text-gray-400"}`}>
+          <span key={r.label} className={`text-[11px] flex items-center gap-1 ${r.ok ? "text-primary-600" : "text-gray-400"}`}>
             <i className={`fas fa-${r.ok ? "check" : "times"} text-[9px]`} />
             {r.label}
           </span>

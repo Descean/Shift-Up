@@ -122,7 +122,7 @@ export default function Header() {
                 </span>
                 <i className={cn(
                   "fas fa-chevron-down text-xs transition-colors duration-300",
-                  isDark ? "text-white/60" : "text-primary/50"
+                  isDark ? "text-white/60" : "text-primary/65"
                 )} />
               </button>
               <AnimatePresence>

@@ -37,11 +37,11 @@ interface Prestation {
 /* ─── Config statuts ─────────────────────────────────────────────────────── */
 const STATUS: Record<string, { label: string; style: string; icon: string; dot: string }> = {
   EN_ATTENTE:          { label: "En attente",        style: "bg-amber-100 text-amber-700",  icon: "fa-clock",           dot: "bg-amber-400" },
-  DEVIS_ENVOYE:        { label: "Devis disponible",  style: "bg-blue-100 text-blue-700",    icon: "fa-file-invoice",    dot: "bg-blue-500" },
-  EN_ATTENTE_PAIEMENT: { label: "Attente paiement",  style: "bg-purple-100 text-purple-700",icon: "fa-credit-card",     dot: "bg-purple-500" },
-  EN_COURS:            { label: "En cours",           style: "bg-cyan-100 text-cyan-700",    icon: "fa-spinner fa-spin", dot: "bg-cyan-500" },
+  DEVIS_ENVOYE:        { label: "Devis disponible",  style: "bg-accent-100 text-accent-700",    icon: "fa-file-invoice",    dot: "bg-accent-500" },
+  EN_ATTENTE_PAIEMENT: { label: "Attente paiement",  style: "bg-accent-100 text-accent-700",icon: "fa-credit-card",     dot: "bg-accent-500" },
+  EN_COURS:            { label: "En cours",           style: "bg-accent-100 text-accent-700",    icon: "fa-spinner fa-spin", dot: "bg-accent-500" },
   LIVRAISON:           { label: "Livrables dispo",   style: "bg-green-100 text-green-700",  icon: "fa-box-open",        dot: "bg-green-500" },
-  REVISION:            { label: "En révision",       style: "bg-orange-100 text-orange-700",icon: "fa-rotate",          dot: "bg-orange-400" },
+  REVISION:            { label: "En révision",       style: "bg-secondary-100 text-secondary-700",icon: "fa-rotate",          dot: "bg-secondary-400" },
   TERMINEE:            { label: "Terminée",           style: "bg-gray-100 text-gray-600",   icon: "fa-check-circle",    dot: "bg-gray-400" },
   ANNULEE:             { label: "Annulée",            style: "bg-red-100 text-red-600",      icon: "fa-times-circle",    dot: "bg-red-400" },
 };
@@ -95,7 +95,7 @@ export default function ClientPrestationsPage() {
       {/* Prestations actives */}
       <section>
         <h2 className="font-syne font-bold text-primary mb-3 flex items-center gap-2 text-sm">
-          <span className="w-2 h-2 bg-cyan-500 rounded-full" />En cours ({active.length})
+          <span className="w-2 h-2 bg-accent-500 rounded-full" />En cours ({active.length})
         </h2>
         <div className="space-y-3">
           {active.length === 0 ? (
@@ -168,7 +168,7 @@ export default function ClientPrestationsPage() {
                       <div key={ph.id} className="flex items-start gap-3">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
                           ph.status === "DONE"        ? "bg-green-100 text-green-600" :
-                          ph.status === "IN_PROGRESS" ? "bg-cyan-100 text-cyan-600" :
+                          ph.status === "IN_PROGRESS" ? "bg-accent-100 text-accent-600" :
                           "bg-gray-100 text-gray-400"
                         }`}>
                           <i className={`fas fa-${ph.status === "DONE" ? "check" : ph.status === "IN_PROGRESS" ? "circle-dot" : "clock"} text-[9px]`} />
@@ -197,10 +197,10 @@ export default function ClientPrestationsPage() {
 
               {/* ── VUE DEVIS (status DEVIS_ENVOYE ou EN_ATTENTE_PAIEMENT) ── */}
               {(detail.status === "DEVIS_ENVOYE" || detail.status === "EN_ATTENTE_PAIEMENT") && detail.quote && (
-                <div className="border-2 border-blue-200 rounded-2xl overflow-hidden">
-                  <div className="bg-blue-50 px-5 py-3 flex items-center gap-2">
-                    <i className="fas fa-file-invoice text-blue-600" />
-                    <p className="font-syne font-bold text-blue-700 text-sm">Votre devis est prêt</p>
+                <div className="border-2 border-accent-200 rounded-2xl overflow-hidden">
+                  <div className="bg-accent-50 px-5 py-3 flex items-center gap-2">
+                    <i className="fas fa-file-invoice text-accent-600" />
+                    <p className="font-syne font-bold text-accent-700 text-sm">Votre devis est prêt</p>
                   </div>
                   <div className="p-5 space-y-3">
                     {/* Lignes devis */}
@@ -526,14 +526,14 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
     <motion.div
       initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }}
       onClick={() => onSelect(p.id)}
-      className={`bg-white rounded-2xl shadow-card p-5 cursor-pointer transition-all hover:shadow-md ${selected ? "ring-2 ring-accent" : ""} ${hasDevis ? "border-l-4 border-blue-500" : ""}`}
+      className={`bg-white rounded-2xl shadow-card p-5 cursor-pointer transition-all hover:shadow-md ${selected ? "ring-2 ring-accent" : ""} ${hasDevis ? "border-l-4 border-accent-500" : ""}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
             <p className="font-syne font-bold text-primary text-sm truncate">{name}</p>
-            {hasDevis && <span className="text-[10px] bg-blue-100 text-blue-600 font-bold px-2 py-0.5 rounded-full animate-pulse">ACTION REQUISE</span>}
+            {hasDevis && <span className="text-[10px] bg-accent-100 text-accent-600 font-bold px-2 py-0.5 rounded-full animate-pulse">ACTION REQUISE</span>}
           </div>
           <div className="flex items-center gap-3 ml-4">
             <StatusBadge status={p.status} />

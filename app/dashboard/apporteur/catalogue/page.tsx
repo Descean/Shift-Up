@@ -81,8 +81,8 @@ const services = [
 const domains = ["Tous", ...Array.from(new Set(services.map((s) => s.domain)))];
 
 const domainColors: Record<string, string> = {
-  Branding: "bg-purple-100 text-purple-700",
-  Web: "bg-blue-100 text-blue-700",
+  Branding: "bg-accent-100 text-accent-700",
+  Web: "bg-accent-100 text-accent-700",
   Dossiers: "bg-amber-100 text-amber-700",
   Marketing: "bg-green-100 text-green-700",
   Conseil: "bg-red-100 text-red-700",

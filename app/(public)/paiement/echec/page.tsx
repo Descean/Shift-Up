@@ -127,7 +127,7 @@ function EchecContent() {
         </div>
 
         {/* Garantie */}
-        <p className="text-xs text-gray-300 mt-6">
+        <p className="text-xs text-gray-500 mt-6">
           Aucun prélèvement n'a été effectué. Pour toute question&nbsp;:{" "}
           <strong>contact@shiftup.bj</strong>
         </p>

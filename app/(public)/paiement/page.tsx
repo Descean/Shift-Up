@@ -29,37 +29,37 @@ const MM_PROVIDERS = [
   {
     id: "MTN_MOMO",
     name: "MTN MoMo",
-    color: "from-yellow-400 to-amber-400",
-    bg: "bg-yellow-50 border-yellow-200",
-    activeBg: "bg-yellow-400/10 border-yellow-400 ring-1 ring-yellow-400",
+    color: "from-primary to-accent",
+    bg: "bg-secondary-50 border-secondary-200",
+    activeBg: "bg-secondary-400/10 border-secondary-400 ring-1 ring-secondary-400",
     logo: "fas fa-mobile-screen-button",
-    logoColor: "text-yellow-500",
+    logoColor: "text-secondary-500",
     prefix: "+229 (MTN)",
   },
   {
     id: "MOOV_MONEY",
     name: "Moov Money",
-    color: "from-blue-500 to-blue-400",
-    bg: "bg-blue-50 border-blue-200",
-    activeBg: "bg-blue-400/10 border-blue-500 ring-1 ring-blue-500",
+    color: "from-primary to-accent",
+    bg: "bg-accent-50 border-accent-200",
+    activeBg: "bg-accent-400/10 border-accent-500 ring-1 ring-accent-500",
     logo: "fas fa-mobile-screen-button",
-    logoColor: "text-blue-500",
+    logoColor: "text-accent-500",
     prefix: "+229 (Moov)",
   },
   {
     id: "WAVE",
     name: "Wave",
-    color: "from-sky-400 to-cyan-400",
-    bg: "bg-sky-50 border-sky-200",
-    activeBg: "bg-sky-400/10 border-sky-400 ring-1 ring-sky-400",
+    color: "from-primary to-accent",
+    bg: "bg-accent-50 border-accent-200",
+    activeBg: "bg-accent-400/10 border-accent-400 ring-1 ring-accent-400",
     logo: "fas fa-mobile-screen-button",
-    logoColor: "text-sky-500",
+    logoColor: "text-accent-500",
     prefix: "+229 (Wave)",
   },
   {
     id: "CELTIIS",
     name: "Celtiis Cash",
-    color: "from-green-500 to-emerald-400",
+    color: "from-primary to-accent",
     bg: "bg-green-50 border-green-200",
     activeBg: "bg-green-400/10 border-green-500 ring-1 ring-green-500",
     logo: "fas fa-mobile-screen-button",
@@ -246,10 +246,10 @@ function PaiementContent() {
           {/* Sécurité & garanties */}
           <div className="bg-white rounded-2xl shadow-card p-5 space-y-3">
             {[
-              { icon: "fa-shield-halved", color: "text-green-500", text: "Paiement chiffré SSL 256 bits" },
+              { icon: "fa-shield-halved", color: "text-accent", text: "Paiement chiffré SSL 256 bits" },
               { icon: "fa-clock-rotate-left", color: "text-accent", text: "Remboursement sous 48h si problème" },
-              { icon: "fa-headset", color: "text-purple-500", text: "Support WhatsApp disponible" },
-              { icon: "fa-receipt", color: "text-amber-500", text: "Reçu par email après paiement" },
+              { icon: "fa-headset", color: "text-accent-500", text: "Support WhatsApp disponible" },
+              { icon: "fa-receipt", color: "text-accent", text: "Reçu par email après paiement" },
             ].map((g) => (
               <div key={g.text} className="flex items-center gap-3 text-sm text-gray-600">
                 <i className={`fas ${g.icon} ${g.color} w-4`} />
@@ -368,7 +368,7 @@ function PaiementContent() {
                 </div>
 
                 {/* Information sur la redirection FedaPay */}
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700">
+                <div className="bg-accent-50 border border-accent-100 rounded-xl p-4 text-sm text-accent-700">
                   <i className="fas fa-circle-info mr-2" />
                   Vous serez redirigé vers la page sécurisée <strong>FedaPay</strong> pour confirmer le paiement sur votre téléphone.
                 </div>
@@ -418,9 +418,9 @@ function PaiementContent() {
                 </div>
 
                 <div className="flex gap-3 items-center">
-                  <i className="fab fa-cc-visa text-3xl text-blue-700" />
+                  <i className="fab fa-cc-visa text-3xl text-accent-700" />
                   <i className="fab fa-cc-mastercard text-3xl text-red-600" />
-                  <i className="fab fa-cc-amex text-3xl text-blue-500" />
+                  <i className="fab fa-cc-amex text-3xl text-accent-500" />
                   <span className="text-xs text-gray-400 ml-2">Toutes les cartes acceptées</span>
                 </div>
 

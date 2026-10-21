@@ -108,7 +108,7 @@ export default function EtudiantProfilPage() {
   const stats = [
     { label: "Tâches complétées", value: etudiantStats.completedTasks, icon: "fa-check-circle", color: "text-green-600" },
     { label: "Total gagné",       value: `${etudiantStats.totalEarnings.toLocaleString()} F`, icon: "fa-coins", color: "text-amber-600" },
-    { label: "Badges obtenus",    value: etudiantStats.badgesCount,    icon: "fa-award",       color: "text-purple-600" },
+    { label: "Badges obtenus",    value: etudiantStats.badgesCount,    icon: "fa-award",       color: "text-accent-600" },
     { label: "Niveau",            value: niveau,                        icon: "fa-layer-group", color: "text-accent" },
   ];
 

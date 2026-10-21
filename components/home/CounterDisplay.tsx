@@ -62,7 +62,7 @@ export default function CounterDisplay({ stats }: { stats: StatItem[] }) {
           >
             <Counter value={c.value} suffix={c.suffix} />
           </p>
-          <p className="text-primary/45 text-sm">{c.label}</p>
+          <p className="text-primary/65 text-sm">{c.label}</p>
         </div>
       ))}
     </div>

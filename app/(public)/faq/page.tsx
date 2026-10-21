@@ -74,7 +74,7 @@ export default function FAQPage() {
       <section className="bg-primary pt-28 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
         <div className="container-custom relative z-10 text-center max-w-2xl mx-auto">
-          <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <i className="fas fa-circle-question" />
             Foire aux questions
           </span>
@@ -158,7 +158,7 @@ export default function FAQPage() {
                 href="https://wa.me/2290195035099"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors"
+                className="flex items-center gap-2 bg-accent hover:bg-accent-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors"
               >
                 <i className="fab fa-whatsapp" />
                 WhatsApp

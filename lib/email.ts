@@ -21,7 +21,7 @@ function baseLayout(content: string, title: string) {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <!-- Header -->
-        <tr><td style="background:linear-gradient(135deg,#1E9FD4,#00D4A0);border-radius:16px 16px 0 0;padding:32px;text-align:center;">
+        <tr><td style="background:#0A2533;border-radius:16px 16px 0 0;padding:32px;text-align:center;">
           <div style="font-family:'Segoe UI',sans-serif;font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.5px;">SHIFT UP</div>
           <div style="color:rgba(255,255,255,0.8);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Excellence • Innovation</div>
         </td></tr>
@@ -31,7 +31,7 @@ function baseLayout(content: string, title: string) {
           <hr style="border:none;border-top:1px solid #eee;margin:32px 0;" />
           <p style="font-size:12px;color:#999;text-align:center;margin:0;">
             SHIFT UP — Votre partenaire digital au Bénin<br/>
-            <a href="${APP_URL}" style="color:#1E9FD4;text-decoration:none;">${APP_URL}</a>
+            <a href="${APP_URL}" style="color:#2D5B78;text-decoration:none;">${APP_URL}</a>
           </p>
         </td></tr>
       </table>
@@ -42,7 +42,7 @@ function baseLayout(content: string, title: string) {
 }
 
 function btn(label: string, url: string) {
-  return `<a href="${url}" style="display:inline-block;background:linear-gradient(135deg,#1E9FD4,#00D4A0);color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:15px;margin:16px 0;">${label}</a>`;
+  return `<a href="${url}" style="display:inline-block;background:#0A2533;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:15px;margin:16px 0;">${label}</a>`;
 }
 
 // ─── Emails client ────────────────────────────────────────────────────────────
@@ -52,11 +52,11 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
   to: string; name: string; serviceName: string; prestationId: string;
 }) {
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
     <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${serviceName}</strong>. Notre équipe va l'analyser et vous envoyer un devis personnalisé sous <strong>48h ouvrées</strong>.</p>
-    <div style="background:#f0fdf9;border:1px solid #00D4A0;border-radius:10px;padding:16px;margin:20px 0;">
-      <p style="margin:0;color:#059669;font-size:14px;"><strong>Référence demande :</strong> ${prestationId.slice(-8).toUpperCase()}</p>
+    <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;">
+      <p style="margin:0;color:#2D5B78;font-size:14px;"><strong>Référence demande :</strong> ${prestationId.slice(-8).toUpperCase()}</p>
     </div>
     <p style="color:#555;">Vous pouvez suivre l'état de votre demande depuis votre dashboard :</p>
     ${btn("Suivre ma demande →", `${APP_URL}/dashboard/client/prestations`)}
@@ -71,7 +71,7 @@ export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName
 }) {
   const adminEmail = process.env.ADMIN_EMAIL ?? "admin@shiftup.bj";
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 16px;">🔔 Nouvelle demande de prestation</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 16px;">🔔 Nouvelle demande de prestation</h2>
     <table style="width:100%;border-collapse:collapse;">
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Client</td><td style="padding:8px 0;font-weight:600;color:#333;">${clientName} (${clientEmail})</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Service</td><td style="padding:8px 0;font-weight:600;color:#333;">${serviceName}</td></tr>
@@ -86,12 +86,12 @@ export async function sendDevisClient({ to, name, serviceName, depositAmount, pr
   to: string; name: string; serviceName: string; depositAmount: number; prestationId: string;
 }) {
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Votre devis est prêt 📋</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre devis est prêt 📋</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Notre équipe a analysé votre demande pour <strong>${serviceName}</strong> et vous a préparé un devis détaillé accompagné d'un plan de réalisation.</p>
     <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:10px;padding:16px 20px;margin:20px 0;">
-      <p style="margin:0 0 6px;color:#1d4ed8;font-weight:700;">Acompte requis pour démarrer</p>
-      <p style="margin:0;color:#1d4ed8;font-size:24px;font-weight:900;">${depositAmount.toLocaleString("fr-FR")} XOF</p>
+      <p style="margin:0 0 6px;color:#2D5B78;font-weight:700;">Acompte requis pour démarrer</p>
+      <p style="margin:0;color:#2D5B78;font-size:24px;font-weight:900;">${depositAmount.toLocaleString("fr-FR")} XOF</p>
     </div>
     <p style="color:#555;">Consultez votre devis et lancez l'exécution en payant l'acompte :</p>
     ${btn("Voir mon devis →", `${APP_URL}/dashboard/client/prestations`)}
@@ -104,7 +104,7 @@ export async function sendLivrableClient({ to, name, livrableTitle, serviceName 
   to: string; name: string; livrableTitle: string; serviceName: string;
 }) {
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Un livrable est disponible 📦</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Un livrable est disponible 📦</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Un nouveau livrable <strong>"${livrableTitle}"</strong> est disponible pour votre projet <strong>${serviceName}</strong>.</p>
     ${btn("Accéder au livrable →", `${APP_URL}/dashboard/client/suivi`)}
@@ -117,14 +117,14 @@ export async function sendObservationAdmin({ to, clientName, serviceName, livrab
   to: string; clientName: string; serviceName: string; livrableTitle: string; observation: string; voiceNoteUrl?: string | null; prestationId: string;
 }) {
   const voiceSection = voiceNoteUrl
-    ? `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin:16px 0;"><p style="margin:0 0 4px;color:#166534;font-weight:600;font-size:13px;">🎙️ Note vocale jointe</p><a href="${voiceNoteUrl}" style="color:#1E9FD4;word-break:break-all;font-size:13px;">${voiceNoteUrl}</a></div>`
+    ? `<div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:8px;padding:12px 16px;margin:16px 0;"><p style="margin:0 0 4px;color:#0A2533;font-weight:600;font-size:13px;">🎙️ Note vocale jointe</p><a href="${voiceNoteUrl}" style="color:#2D5B78;word-break:break-all;font-size:13px;">${voiceNoteUrl}</a></div>`
     : "";
   const content = `
-    <h2 style="color:#1a2535;font-size:20px;margin:0 0 8px;">📋 Nouvelle observation client</h2>
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 8px;">📋 Nouvelle observation client</h2>
     <p style="color:#555;margin:0 0 16px;">Le client <strong>${clientName}</strong> a soumis une observation sur son projet <strong>${serviceName}</strong>.</p>
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
       <p style="margin:0 0 6px;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Livrable concerné</p>
-      <p style="margin:0;color:#1a2535;font-weight:700;">${livrableTitle}</p>
+      <p style="margin:0;color:#0A2533;font-weight:700;">${livrableTitle}</p>
     </div>
     <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
       <p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Observation</p>
@@ -145,13 +145,13 @@ export async function sendFormationReceipt({ to, prenom, nom, formation, dateDeb
 }) {
   const content = `
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="display:inline-block;background:linear-gradient(135deg,#1E9FD4,#00D4A0);border-radius:16px;padding:20px 32px;">
+      <div style="display:inline-block;background:#0A2533;border-radius:16px;padding:20px 32px;">
         <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">BILLET D'ENTRÉE OFFICIEL</div>
         <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">${formation}</div>
       </div>
     </div>
-    <div style="background:#f0fdf9;border:2px solid #00D4A0;border-radius:12px;padding:20px 24px;margin-bottom:20px;text-align:center;">
-      <div style="font-size:11px;color:#059669;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Numéro de billet</div>
+    <div style="background:#EFF4F7;border:2px solid #BACFDC;border-radius:12px;padding:20px 24px;margin-bottom:20px;text-align:center;">
+      <div style="font-size:11px;color:#2D5B78;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Numéro de billet</div>
       <div style="font-size:26px;font-weight:900;color:#0A2533;letter-spacing:2px;font-family:monospace;">${reference}</div>
       <div style="font-size:12px;color:#6b7280;margin-top:4px;">Présentez ce billet à l'accueil le jour J</div>
     </div>
@@ -174,7 +174,7 @@ export async function sendFormationReceipt({ to, prenom, nom, formation, dateDeb
       </tr>
       <tr style="border-bottom:1px solid #f0f0f0;">
         <td style="padding:10px 0;color:#777;font-size:14px;">Montant payé</td>
-        <td style="padding:10px 0;font-weight:700;color:#059669;font-size:14px;">${prixFCFA.toLocaleString("fr-FR")} FCFA ✅</td>
+        <td style="padding:10px 0;font-weight:700;color:#2D5B78;font-size:14px;">${prixFCFA.toLocaleString("fr-FR")} FCFA ✅</td>
       </tr>
       <tr>
         <td style="padding:10px 0;color:#777;font-size:14px;">Mode de paiement</td>
@@ -185,7 +185,7 @@ export async function sendFormationReceipt({ to, prenom, nom, formation, dateDeb
       <p style="margin:0 0 6px;color:#92400e;font-weight:700;font-size:14px;">📋 Que faire maintenant ?</p>
       <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">1. Conservez cet email — il vous servira de billet d'entrée.</p>
       <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">2. Le lieu exact vous sera communiqué <strong>3 jours avant</strong> la formation.</p>
-      <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">3. Pour toute question : <a href="mailto:support@shiftup.com" style="color:#1E9FD4;">support@shiftup.com</a></p>
+      <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">3. Pour toute question : <a href="mailto:support@shiftup.com" style="color:#2D5B78;">support@shiftup.com</a></p>
     </div>
     <p style="color:#333;font-weight:600;margin:0;">À très bientôt — L'équipe SHIFT UP</p>`;
   return resend.emails.send({
@@ -203,7 +203,7 @@ export async function sendFormationInscriptionAdmin({ prenom, nom, email, teleph
 }) {
   const supportEmail = "support@shiftup.com";
   const content = `
-    <h2 style="color:#1a2535;font-size:20px;margin:0 0 16px;">🎓 Nouvelle inscription confirmée — ${formation}</h2>
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 16px;">🎓 Nouvelle inscription confirmée — ${formation}</h2>
     <table style="width:100%;border-collapse:collapse;">
       <tr><td style="padding:8px 0;color:#777;font-size:14px;width:35%;">Référence</td><td style="padding:8px 0;font-weight:700;color:#0A2533;font-family:monospace;">${reference}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Participant</td><td style="padding:8px 0;font-weight:600;color:#333;">${prenom} ${nom}</td></tr>
@@ -211,7 +211,7 @@ export async function sendFormationInscriptionAdmin({ prenom, nom, email, teleph
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Téléphone</td><td style="padding:8px 0;color:#333;">${telephone}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Structure</td><td style="padding:8px 0;color:#333;">${structure}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Secteur</td><td style="padding:8px 0;color:#333;">${secteur}</td></tr>
-      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Paiement</td><td style="padding:8px 0;font-weight:600;color:#059669;">${methodePaiement} ✅</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Paiement</td><td style="padding:8px 0;font-weight:600;color:#2D5B78;">${methodePaiement} ✅</td></tr>
     </table>
     ${btn("Voir les inscriptions →", `${APP_URL}/dashboard/admin/formations`)}`;
   return resend.emails.send({
@@ -227,7 +227,7 @@ export async function sendAutoAccountEmail({ to, name, password, serviceName, pr
   to: string; name: string; password: string; serviceName: string; prestationId: string;
 }) {
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Bienvenue sur SHIFT UP 🎉</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Bienvenue sur SHIFT UP 🎉</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Votre demande pour <strong>${serviceName}</strong> a bien été enregistrée. Nous avons créé un compte client pour vous afin que vous puissiez suivre l'avancement de votre projet.</p>
     <div style="background:#fef9ec;border:1px solid #f59e0b;border-radius:10px;padding:16px 20px;margin:20px 0;">
@@ -248,7 +248,7 @@ export async function sendApporteurServiceLeadClient({ to, name, serviceTitle }:
   to: string; name: string; serviceTitle: string;
 }) {
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
     <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Votre demande pour <strong>"${serviceTitle}"</strong> a bien été transmise au prestataire partenaire SHIFT UP. Il vous contactera très prochainement pour finaliser les modalités et le paiement.</p>
     <p style="color:#555;line-height:1.6;margin-top:16px;">Merci de votre confiance.</p>
@@ -261,7 +261,7 @@ export async function sendApporteurServiceLeadOwner({ to, apporteurName, service
   to: string; apporteurName: string; serviceTitle: string; clientName: string; clientEmail: string; clientPhone?: string | null; brief?: string | null;
 }) {
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Nouvelle demande sur votre service 🔔</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Nouvelle demande sur votre service 🔔</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${apporteurName}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Vous avez reçu une nouvelle demande pour <strong>"${serviceTitle}"</strong>.</p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
@@ -280,7 +280,7 @@ export async function sendApporteurServiceDelivered({ to, name, serviceTitle, do
   to: string; name: string; serviceTitle: string; documentUrl: string;
 }) {
   const content = `
-    <h2 style="color:#1a2535;font-size:22px;margin:0 0 8px;">Votre commande est livrée 📦</h2>
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre commande est livrée 📦</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Le prestataire a livré votre commande <strong>"${serviceTitle}"</strong>. Vous pouvez y accéder dès maintenant :</p>
     ${btn("Accéder au document →", documentUrl)}

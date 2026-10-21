@@ -116,9 +116,9 @@ export default function ApporteurCampagnesPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Clics totaux",  value: totalClicks,       icon: "fa-mouse-pointer", color: "from-blue-400 to-accent" },
-          { label: "Leads générés", value: totalLeads,        icon: "fa-user-plus",     color: "from-amber-400 to-orange-400" },
-          { label: "Conversions",   value: totalConversions,  icon: "fa-check-circle",  color: "from-secondary to-teal-400" },
+          { label: "Clics totaux",  value: totalClicks,       icon: "fa-mouse-pointer", color: "from-primary to-accent" },
+          { label: "Leads générés", value: totalLeads,        icon: "fa-user-plus",     color: "from-primary to-accent" },
+          { label: "Conversions",   value: totalConversions,  icon: "fa-check-circle",  color: "from-primary to-accent" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
             <div className={`w-10 h-10 bg-gradient-to-br ${s.color} rounded-xl flex items-center justify-center text-white flex-shrink-0`}>
@@ -208,9 +208,9 @@ export default function ApporteurCampagnesPage() {
 
               <div className="grid grid-cols-3 gap-4 text-center">
                 {[
-                  { label: "Clics",       value: c.clicks,      color: "text-blue-600" },
-                  { label: "Leads",       value: c.leads,       color: "text-amber-600" },
-                  { label: "Conversions", value: c.conversions, color: "text-green-600" },
+                  { label: "Clics",       value: c.clicks,      color: "text-accent-600" },
+                  { label: "Leads",       value: c.leads,       color: "text-accent" },
+                  { label: "Conversions", value: c.conversions, color: "text-primary" },
                 ].map((stat) => (
                   <div key={stat.label} className="bg-gray-50 rounded-xl py-2">
                     <p className={`font-bold text-lg ${stat.color}`}>{stat.value}</p>

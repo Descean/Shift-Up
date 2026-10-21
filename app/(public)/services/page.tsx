@@ -32,8 +32,8 @@ const SECTORS: Sector[] = [
   {
     id: "conseil",
     icon: "fas fa-chess",
-    color: "from-blue-700 to-blue-500",
-    accent: "text-blue-600",
+    color: "from-primary to-accent",
+    accent: "text-accent-600",
     label: "Conseil & Stratégie",
     registreRef: "Gestion d'entreprise · Conseil de gestion · Bureau d'études",
     intro: "Nous analysons votre environnement, définissons votre cap stratégique et vous accompagnons dans l'exécution de votre plan de croissance.",
@@ -68,8 +68,8 @@ const SECTORS: Sector[] = [
   {
     id: "marches-publics",
     icon: "fas fa-folder-open",
-    color: "from-teal-600 to-emerald-500",
-    accent: "text-emerald-600",
+    color: "from-primary to-accent",
+    accent: "text-primary-600",
     label: "Marchés Publics & Dossiers",
     registreRef: "Montage de dossiers de soumission · Marchés Publics",
     intro: "Nous constituons et optimisons vos dossiers de soumission, de financement et de création d'entreprise pour maximiser vos chances de succès.",
@@ -104,8 +104,8 @@ const SECTORS: Sector[] = [
   {
     id: "juridique",
     icon: "fas fa-scale-balanced",
-    color: "from-purple-700 to-indigo-500",
-    accent: "text-purple-600",
+    color: "from-primary to-accent",
+    accent: "text-accent-600",
     label: "Juridique & Comptabilité",
     registreRef: "Activités juridiques, comptables et de conseil de gestion",
     intro: "Création d'entreprise, conformité légale OHADA, optimisation fiscale et gestion comptable externalisée pour votre sérénité.",
@@ -140,8 +140,8 @@ const SECTORS: Sector[] = [
   {
     id: "marketing",
     icon: "fas fa-bullhorn",
-    color: "from-orange-500 to-red-400",
-    accent: "text-orange-500",
+    color: "from-primary to-accent",
+    accent: "text-secondary-500",
     label: "Communication & Marketing",
     registreRef: "Conseils en communication et marketing",
     intro: "Stratégies de croissance, contenus percutants et campagnes ciblées pour attirer et convertir vos clients idéaux.",
@@ -176,7 +176,7 @@ const SECTORS: Sector[] = [
   {
     id: "btp",
     icon: "fas fa-hard-hat",
-    color: "from-amber-600 to-yellow-500",
+    color: "from-primary to-accent",
     accent: "text-amber-600",
     label: "BTP & Génie Civil",
     registreRef: "Études, contrôle, suivi et réalisation des travaux de BTP · Génie civil",
@@ -212,7 +212,7 @@ const SECTORS: Sector[] = [
   {
     id: "numerique",
     icon: "fas fa-laptop-code",
-    color: "from-accent to-cyan-500",
+    color: "from-primary to-accent",
     accent: "text-accent",
     label: "Solutions Numériques",
     registreRef: "Édition de logiciels et de solutions numériques · Ingénierie informatique",
@@ -248,8 +248,8 @@ const SECTORS: Sector[] = [
   {
     id: "transformation",
     icon: "fas fa-rocket",
-    color: "from-violet-600 to-purple-500",
-    accent: "text-violet-600",
+    color: "from-primary to-accent",
+    accent: "text-accent-600",
     label: "Transformation Digitale",
     registreRef: "Conseil en transformation numérique · Digitalisation des processus",
     intro: "Nous accompagnons les entreprises dans leur transition numérique : audit, stratégie, déploiement d'outils et conduite du changement.",
@@ -284,8 +284,8 @@ const SECTORS: Sector[] = [
   {
     id: "data",
     icon: "fas fa-chart-bar",
-    color: "from-cyan-600 to-teal-500",
-    accent: "text-cyan-600",
+    color: "from-primary to-accent",
+    accent: "text-accent-600",
     label: "Data & Business Intelligence",
     registreRef: "Analyses de données et Business Intelligence",
     intro: "Transformez vos données en décisions. Tableaux de bord, rapports analytiques et modèles prédictifs pour piloter votre performance.",
@@ -320,7 +320,7 @@ const SECTORS: Sector[] = [
   {
     id: "formation",
     icon: "fas fa-graduation-cap",
-    color: "from-green-600 to-emerald-500",
+    color: "from-primary to-accent",
     accent: "text-green-600",
     label: "Formation & Coaching",
     registreRef: "Formation et Coaching professionnel",
@@ -356,8 +356,8 @@ const SECTORS: Sector[] = [
   {
     id: "rse",
     icon: "fas fa-leaf",
-    color: "from-lime-600 to-green-500",
-    accent: "text-lime-600",
+    color: "from-primary to-accent",
+    accent: "text-primary-600",
     label: "RSE & Développement Durable",
     registreRef: "Développement durable et Responsabilité Sociale des Entreprises (RSE)",
     intro: "Intégrez la durabilité au cœur de votre stratégie. Nous vous aidons à construire une politique RSE crédible, conforme et créatrice de valeur.",
@@ -392,8 +392,8 @@ const SECTORS: Sector[] = [
   {
     id: "finance",
     icon: "fas fa-coins",
-    color: "from-yellow-500 to-amber-400",
-    accent: "text-yellow-600",
+    color: "from-primary to-accent",
+    accent: "text-secondary-600",
     label: "Finance & Investissement",
     registreRef: "Activités comptables · Conseil de gestion · Plan financier",
     intro: "Gestion financière, levée de fonds, comptabilité normalisée et tableaux de bord pour piloter votre performance financière.",
@@ -533,7 +533,7 @@ export default function ServicesPage() {
         <div className="absolute inset-0 bg-mesh-gradient opacity-40" />
         <div className="container-custom relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-5">
+            <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-5">
               <i className="fas fa-grid-2" />Catalogue de services
             </span>
             <h1 className="font-syne font-black text-4xl sm:text-5xl text-white mb-4 leading-tight">
@@ -718,7 +718,7 @@ export default function ServicesPage() {
                           <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center">
                             <i className="fas fa-robot text-accent text-lg" />
                           </div>
-                          <span className="text-accent text-sm font-semibold uppercase tracking-wide">Assistant SHIFT UP</span>
+                          <span className="text-accent-200 text-sm font-semibold uppercase tracking-wide">Assistant SHIFT UP</span>
                         </div>
                         <h3 className="font-syne font-black text-2xl text-white mb-2">
                           De quoi avez-vous besoin ?

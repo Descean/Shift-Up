@@ -132,8 +132,8 @@ export default function AdminFinancesPage() {
             label: "Commissions dues",
             value: totalCommissions,
             icon: "fa-hand-holding-dollar",
-            color: "text-purple-600",
-            bg: "bg-purple-50",
+            color: "text-accent-600",
+            bg: "bg-accent-50",
           },
         ].map((card) => (
           <div key={card.label} className="bg-white rounded-2xl shadow-card p-5">
@@ -250,7 +250,7 @@ export default function AdminFinancesPage() {
                 <tr key={c.code} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-primary">{c.apporteur}</td>
                   <td className="px-6 py-4">
-                    <span className="text-xs font-mono bg-purple-50 text-purple-700 px-2 py-1 rounded">
+                    <span className="text-xs font-mono bg-accent-50 text-accent-700 px-2 py-1 rounded">
                       {c.code}
                     </span>
                   </td>

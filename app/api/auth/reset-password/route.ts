@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
               </p>
               <div style="text-align:center;margin:32px 0">
                 <a href="${resetUrl}"
-                   style="background:linear-gradient(135deg,#1E9FD4,#00D4A0);color:#fff;
+                   style="background:#0A2533;color:#fff;
                           text-decoration:none;padding:14px 32px;border-radius:12px;
                           font-weight:600;font-size:15px;display:inline-block">
                   Réinitialiser mon mot de passe

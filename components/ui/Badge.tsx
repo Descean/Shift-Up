@@ -57,9 +57,9 @@ export function StarBadge({ stars }: { stars: number }) {
     "",
     "bg-amber-700/10 text-amber-700 border-amber-700/20",
     "bg-gray-400/10 text-gray-500 border-gray-400/20",
-    "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
-    "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-    "bg-purple-500/10 text-purple-600 border-purple-500/20",
+    "bg-secondary-500/10 text-secondary-600 border-secondary-500/20",
+    "bg-accent-500/10 text-accent-600 border-accent-500/20",
+    "bg-accent-500/10 text-accent-600 border-accent-500/20",
   ];
   const level = Math.min(Math.max(1, stars), 5);
   return (

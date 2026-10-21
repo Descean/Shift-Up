@@ -8,9 +8,9 @@ import { StatCard } from "@/components/ui/Card";
 const levels = [
   { name: "Bronze", icon: "fas fa-medal", color: "text-amber-700", min: 0, max: 5 },
   { name: "Argent", icon: "fas fa-medal", color: "text-gray-400", min: 5, max: 15 },
-  { name: "Or", icon: "fas fa-medal", color: "text-yellow-500", min: 15, max: 30 },
-  { name: "Platine", icon: "fas fa-gem", color: "text-cyan-500", min: 30, max: 60 },
-  { name: "Diamant", icon: "fas fa-gem", color: "text-purple-500", min: 60, max: Infinity },
+  { name: "Or", icon: "fas fa-medal", color: "text-secondary-500", min: 15, max: 30 },
+  { name: "Platine", icon: "fas fa-gem", color: "text-accent-500", min: 30, max: 60 },
+  { name: "Diamant", icon: "fas fa-gem", color: "text-accent-500", min: 60, max: Infinity },
 ];
 
 type Profile = {
@@ -82,8 +82,8 @@ export default function ApporteurDashboard({ user }: Props) {
               <i className="fas fa-arrow-right text-gray-300" />
             </Link>
             <Link href="/dashboard/apporteur/campagnes" className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <i className="fas fa-bullhorn text-purple-600 text-sm" />
+              <div className="w-10 h-10 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i className="fas fa-bullhorn text-accent-600 text-sm" />
               </div>
               <div className="flex-1">
                 <p className="font-medium text-sm text-primary">Mes campagnes</p>
@@ -117,7 +117,7 @@ export default function ApporteurDashboard({ user }: Props) {
                     </p>
                   </div>
                   {l.name === currentLevel.name && (
-                    <span className="text-accent text-xs font-bold">Actuel</span>
+                    <span className="text-accent-200 text-xs font-bold">Actuel</span>
                   )}
                 </div>
               ))}

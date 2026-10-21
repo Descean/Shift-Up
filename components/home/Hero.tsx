@@ -26,7 +26,7 @@ export default function Hero() {
             Transformez votre{" "}
             <em
               className="not-italic"
-              style={{ color: "#1E9FD4", fontStyle: "italic" }}
+              style={{ color: "#2D5B78", fontStyle: "italic" }}
             >
               vision
             </em>{" "}
@@ -34,7 +34,7 @@ export default function Hero() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-primary/55 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto font-grotesk">
+          <p className="text-primary/65 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto font-grotesk">
             SHIFT UP accompagne entreprises et entrepreneurs dans leur
             transformation stratégique et digitale. Conseil expert, solutions
             sur mesure, résultats mesurables.
@@ -59,7 +59,7 @@ export default function Hero() {
           </div>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-primary/40">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-primary/65">
             {[
               { icon: "fas fa-shield-check", label: "RCCM Officiel" },
               { icon: "fas fa-star", label: "4.9 / 5 satisfaction" },

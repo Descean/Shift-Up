@@ -19,9 +19,9 @@ interface MicroTask {
 }
 
 const statusStyle: Record<TaskStatus, string> = {
-  DISPONIBLE: "bg-blue-50 text-blue-700",
+  DISPONIBLE: "bg-accent-50 text-accent-700",
   EN_COURS:   "bg-amber-50 text-amber-700",
-  SOUMIS:     "bg-purple-50 text-purple-700",
+  SOUMIS:     "bg-accent-50 text-accent-700",
   VALIDE:     "bg-green-50 text-green-700",
   REFUSE:     "bg-red-50 text-red-600",
 };
@@ -184,11 +184,11 @@ export default function EtudiantTachesPage() {
                 )}
                 {(task.status === "EN_COURS" || task.status === "REFUSE") && (
                   <button onClick={() => { setSubmitting(task); setDeliverable(task.deliverable ?? ""); }}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:opacity-90">
+                    className="bg-accent-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:opacity-90">
                     <i className="fas fa-upload mr-1" />Soumettre
                   </button>
                 )}
-                {task.status === "SOUMIS" && <span className="text-xs text-purple-600 font-medium text-center"><i className="fas fa-clock mr-1" />En validation</span>}
+                {task.status === "SOUMIS" && <span className="text-xs text-accent-600 font-medium text-center"><i className="fas fa-clock mr-1" />En validation</span>}
                 {task.status === "VALIDE"  && <span className="text-xs text-green-600 font-medium text-center"><i className="fas fa-circle-check mr-1" />Validé</span>}
               </div>
             </div>

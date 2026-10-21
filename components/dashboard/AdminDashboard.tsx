@@ -160,8 +160,8 @@ export default function AdminDashboard() {
               {[
                 { icon: "fas fa-users", label: "Gérer les utilisateurs", href: "/dashboard/admin/utilisateurs", color: "text-accent" },
                 { icon: "fas fa-newspaper", label: "Éditeur de blog", href: "/dashboard/admin/blog", color: "text-secondary" },
-                { icon: "fas fa-bullhorn", label: "Campagnes marketing", href: "/dashboard/admin/marketing", color: "text-orange-500" },
-                { icon: "fas fa-chart-bar", label: "Analytics", href: "/dashboard/admin/analytics", color: "text-purple-500" },
+                { icon: "fas fa-bullhorn", label: "Campagnes marketing", href: "/dashboard/admin/marketing", color: "text-secondary-500" },
+                { icon: "fas fa-chart-bar", label: "Analytics", href: "/dashboard/admin/analytics", color: "text-accent-500" },
               ].map((a) => (
                 <Link key={a.label} href={a.href} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-primary transition-colors text-sm">
                   <i className={`${a.icon} ${a.color} w-4`} />

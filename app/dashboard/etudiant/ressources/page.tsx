@@ -18,10 +18,10 @@ interface Resource {
 }
 
 const typeStyle: Record<ResourceType, { bg: string; icon: string; label: string }> = {
-  VIDEO:    { bg: "bg-red-50 text-red-600",        icon: "fa-play-circle",  label: "Vidéo" },
-  PDF:      { bg: "bg-blue-50 text-blue-600",      icon: "fa-file-pdf",     label: "PDF" },
-  TEMPLATE: { bg: "bg-purple-50 text-purple-600",  icon: "fa-layer-group",  label: "Template" },
-  LIEN:     { bg: "bg-green-50 text-green-600",    icon: "fa-external-link", label: "Lien" },
+  VIDEO:    { bg: "bg-secondary-100 text-secondary-700",     icon: "fa-play-circle",  label: "Vidéo" },
+  PDF:      { bg: "bg-accent-50 text-accent-600",      icon: "fa-file-pdf",     label: "PDF" },
+  TEMPLATE: { bg: "bg-accent-50 text-accent-600",  icon: "fa-layer-group",  label: "Template" },
+  LIEN:     { bg: "bg-primary-50 text-primary",    icon: "fa-external-link", label: "Lien" },
 };
 
 const categories = ["Tous", "Développement", "Design", "Marketing", "Gestion de projet", "Outils"];

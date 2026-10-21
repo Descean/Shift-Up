@@ -86,7 +86,7 @@ export default function ContactPage() {
         <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
         <div className="container-custom relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <i className="fas fa-envelope" />
               Parlons de votre projet
             </span>
@@ -110,27 +110,27 @@ export default function ContactPage() {
                   icon: "fas fa-map-marker-alt",
                   title: "Adresse",
                   lines: ["Abomey-Calavi, Atlantique", "République du Bénin"],
-                  color: "from-blue-500 to-accent",
+                  color: "from-primary to-accent",
                 },
                 {
                   icon: "fas fa-phone",
                   title: "Téléphone",
                   lines: ["(+229) 01 95 03 50 99"],
                   href: "tel:+2290195035099",
-                  color: "from-secondary to-teal-400",
+                  color: "from-primary to-accent",
                 },
                 {
                   icon: "fas fa-envelope",
                   title: "Email",
                   lines: ["contact@shiftup.bj"],
                   href: "mailto:contact@shiftup.bj",
-                  color: "from-purple-500 to-accent",
+                  color: "from-primary to-accent",
                 },
                 {
                   icon: "fas fa-clock",
                   title: "Horaires",
                   lines: ["Lun – Ven : 8h – 18h", "Sam : 9h – 13h"],
-                  color: "from-orange-400 to-yellow-400",
+                  color: "from-primary to-accent",
                 },
               ].map((c) => (
                 <motion.div
@@ -163,7 +163,7 @@ export default function ContactPage() {
                 href="https://wa.me/2290195035099"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-4 bg-green-500 p-5 rounded-2xl text-white hover:bg-green-600 transition-colors"
+                className="flex items-center gap-4 bg-accent p-5 rounded-2xl text-white hover:bg-accent-600 transition-colors"
               >
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                   <i className="fab fa-whatsapp text-2xl" />

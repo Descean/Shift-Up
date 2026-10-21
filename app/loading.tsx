@@ -17,7 +17,7 @@ export default function Loading() {
             cx={60}
             cy={60}
             r={54}
-            stroke="rgba(30,159,212,0.15)"
+            stroke="rgba(45,91,120,0.15)"
             strokeWidth={4}
           />
           <path
@@ -28,8 +28,8 @@ export default function Loading() {
           />
           <defs>
             <linearGradient id="spin-gradient" x1="60" y1="6" x2="114" y2="60" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#1E9FD4" />
-              <stop offset="100%" stopColor="#00D4A0" />
+              <stop offset="0%" stopColor="#2D5B78" />
+              <stop offset="100%" stopColor="#8FAEC2" />
             </linearGradient>
           </defs>
         </svg>

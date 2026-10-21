@@ -19,17 +19,17 @@ type Props = { params: Promise<{ slug: string }> };
 // ── Couleur de couverture selon la catégorie ─────────────────────────────────
 function coverColorForCategory(category: string): string {
   const map: Record<string, string> = {
-    "Conseil & Stratégie":              "from-blue-600 to-accent",
-    "Marchés Publics & Dossiers":       "from-indigo-600 to-purple-500",
-    "Juridique & Comptabilité":         "from-purple-600 to-pink-500",
-    "Communication & Marketing":        "from-orange-500 to-red-400",
-    "BTP & Génie Civil":                "from-yellow-600 to-orange-500",
-    "Solutions Numériques":             "from-accent to-blue-700",
-    "Transformation Digitale":          "from-blue-600 to-accent",
-    "Data & Business Intelligence":     "from-secondary to-teal-500",
-    "Formation & Coaching":             "from-purple-500 to-pink-500",
-    "RSE & Développement Durable":      "from-green-500 to-teal-600",
-    "Finance & Investissement":         "from-emerald-600 to-teal-500",
+    "Conseil & Stratégie":              "from-accent-600 to-accent",
+    "Marchés Publics & Dossiers":       "from-accent-600 to-accent-500",
+    "Juridique & Comptabilité":         "from-accent-600 to-secondary-500",
+    "Communication & Marketing":        "from-secondary-500 to-secondary-400",
+    "BTP & Génie Civil":                "from-secondary-600 to-secondary-500",
+    "Solutions Numériques":             "from-accent to-accent-700",
+    "Transformation Digitale":          "from-accent-600 to-accent",
+    "Data & Business Intelligence":     "from-secondary to-primary-500",
+    "Formation & Coaching":             "from-accent-500 to-secondary-500",
+    "RSE & Développement Durable":      "from-primary-500 to-primary-600",
+    "Finance & Investissement":         "from-primary-600 to-primary-500",
   };
   return map[category] ?? "from-accent to-secondary";
 }
@@ -228,7 +228,7 @@ export default async function BlogPostPage({ params }: Props) {
                   href={`https://wa.me/?text=${encodeURIComponent(post.title + " — https://shiftup.bj/blog/" + post.slug)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-green-500 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-green-600 transition-colors"
+                  className="flex items-center gap-2 bg-accent text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-accent-600 transition-colors"
                 >
                   <i className="fab fa-whatsapp" />WhatsApp
                 </a>
@@ -236,7 +236,7 @@ export default async function BlogPostPage({ params }: Props) {
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=https://shiftup.bj/blog/${post.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-blue-800 transition-colors"
+                  className="flex items-center gap-2 bg-accent-700 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-accent-800 transition-colors"
                 >
                   <i className="fab fa-linkedin-in" />LinkedIn
                 </a>

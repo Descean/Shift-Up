@@ -102,7 +102,7 @@ function SuccesContent() {
                 Acompte 60% reçu
               </li>
               <li className="flex gap-2">
-                <span className="w-5 h-5 bg-blue-100 text-blue-700 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                <span className="w-5 h-5 bg-accent-100 text-accent-700 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
                 Notre équipe démarre votre prestation sous 48h
               </li>
               <li className="flex gap-2">
@@ -154,7 +154,7 @@ function SuccesContent() {
         </div>
 
         {/* Note de bas */}
-        <p className="text-xs text-gray-300 mt-6">
+        <p className="text-xs text-gray-500 mt-6">
           Un reçu a été envoyé à votre adresse email.
           Pour toute question : <strong>contact@shiftup.bj</strong>
         </p>

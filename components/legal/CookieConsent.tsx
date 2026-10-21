@@ -264,7 +264,7 @@ export default function CookieConsent() {
                     </p>
                   </div>
                   {/* Toggle désactivé (grisé) — essentiels non refusables */}
-                  <div className="w-10 h-6 bg-green-500 rounded-full flex-shrink-0 opacity-60 cursor-not-allowed" />
+                  <div className="w-10 h-6 bg-primary rounded-full flex-shrink-0 opacity-60 cursor-not-allowed" />
                 </div>
 
                 {/* Cookies analytiques — consentement requis */}

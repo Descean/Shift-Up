@@ -12,7 +12,7 @@ const products = [
     id: "1",
     category: "Templates",
     icon: "fas fa-file-powerpoint",
-    color: "from-red-500 to-orange-400",
+    color: "from-primary to-accent",
     title: "Template Business Plan Pro",
     description: "Modèle complet de business plan en Word + Excel avec tableaux financiers automatisés, projections sur 5 ans et guide de rédaction.",
     price: 15000,
@@ -31,7 +31,7 @@ const products = [
     id: "2",
     category: "Templates",
     icon: "fas fa-file-invoice",
-    color: "from-blue-500 to-accent",
+    color: "from-primary to-accent",
     title: "Pack Dossier Financement Bancaire",
     description: "Tous les documents nécessaires pour constituer un dossier de demande de crédit bancaire au Bénin et dans la sous-région UEMOA.",
     price: 12000,
@@ -50,7 +50,7 @@ const products = [
     id: "3",
     category: "Guides",
     icon: "fas fa-book",
-    color: "from-secondary to-teal-400",
+    color: "from-primary to-accent",
     title: "Guide : Créer son entreprise au Bénin",
     description: "Le guide complet pour créer votre SARL ou SAS au Bénin en 2026 : RCCM, IFU, compte bancaire, et premières obligations fiscales.",
     price: 8000,
@@ -69,7 +69,7 @@ const products = [
     id: "4",
     category: "Outils",
     icon: "fas fa-table",
-    color: "from-green-500 to-emerald-400",
+    color: "from-primary to-accent",
     title: "Tableau de Bord PME – Excel Pro",
     description: "Tableau de bord de gestion PME tout-en-un : suivi CA, charges, BFR, trésorerie, rentabilité — adapté à la réalité africaine.",
     price: 20000,
@@ -88,7 +88,7 @@ const products = [
     id: "5",
     category: "Guides",
     icon: "fas fa-bullhorn",
-    color: "from-purple-500 to-pink-400",
+    color: "from-primary to-accent",
     title: "Guide Marketing Digital PMEA",
     description: "Stratégies marketing digital éprouvées pour les PME africaines : réseaux sociaux, WhatsApp Business, Google My Business, SEO local.",
     price: 10000,
@@ -107,7 +107,7 @@ const products = [
     id: "6",
     category: "Formation",
     icon: "fas fa-graduation-cap",
-    color: "from-amber-500 to-orange-400",
+    color: "from-primary to-accent",
     title: "Mini-Formation : Maîtrisez votre comptabilité",
     description: "4 modules vidéo + PDF pour comprendre les bases comptables de votre entreprise sans être expert-comptable.",
     price: 25000,
@@ -126,7 +126,7 @@ const products = [
     id: "7",
     category: "Templates",
     icon: "fas fa-handshake",
-    color: "from-slate-600 to-slate-400",
+    color: "from-primary to-accent",
     title: "Pack Contrats Commerciaux OHADA",
     description: "10 modèles de contrats conformes au droit OHADA : contrat de prestation, partenariat, NDA, bail commercial, CGV.",
     price: 18000,
@@ -145,7 +145,7 @@ const products = [
     id: "8",
     category: "Outils",
     icon: "fas fa-chart-line",
-    color: "from-cyan-500 to-blue-400",
+    color: "from-primary to-accent",
     title: "Simulateur d'Appel d'Offres",
     description: "Outil Excel pour analyser la rentabilité d'un appel d'offres avant de répondre : calcul coûts, marge, probabilité de gain.",
     price: 15000,
@@ -185,7 +185,7 @@ export default function BoutiquePage() {
         <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
         <div className="container-custom relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <i className="fas fa-store" />
               Boutique digitale
             </span>

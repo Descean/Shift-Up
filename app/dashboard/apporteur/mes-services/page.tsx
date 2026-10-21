@@ -66,7 +66,7 @@ interface OrderItem {
 
 const ORDER_STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   attente_tarif: { label: "En attente de tarif", cls: "bg-amber-50 text-amber-700 border-amber-200" },
-  lien_genere:   { label: "Lien envoyé — en attente de paiement", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+  lien_genere:   { label: "Lien envoyé — en attente de paiement", cls: "bg-accent-50 text-accent-700 border-accent-200" },
   paye:          { label: "Payé", cls: "bg-green-50 text-green-700 border-green-200" },
 };
 

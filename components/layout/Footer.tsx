@@ -47,7 +47,7 @@ export default function Footer() {
               </div>
               <div>
                 <p className="text-white font-syne font-bold text-2xl leading-none">SHIFT UP</p>
-                <p className="text-accent/80 text-[10px] tracking-widest uppercase">Transforming Business</p>
+                <p className="text-accent-300 text-[10px] tracking-widest uppercase">Transforming Business</p>
               </div>
             </div>
             <p className="text-white/60 text-sm leading-relaxed mb-6">
@@ -56,9 +56,9 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-3">
               <span className="text-white/40 text-xs font-syne uppercase tracking-widest">Excellence</span>
-              <span className="text-accent">•</span>
+              <span className="text-accent-300">•</span>
               <span className="text-white/40 text-xs font-syne uppercase tracking-widest">Innovation</span>
-              <span className="text-secondary">•</span>
+              <span className="text-secondary-300">•</span>
               <span className="text-white/40 text-xs font-syne uppercase tracking-widest">Performance</span>
             </div>
           </div>
@@ -71,9 +71,9 @@ export default function Footer() {
                 <li key={s}>
                   <Link
                     href="/services"
-                    className="text-white/60 hover:text-accent text-sm transition-colors flex items-center gap-2 group"
+                    className="text-white/60 hover:text-white text-sm transition-colors flex items-center gap-2 group"
                   >
-                    <i className="fas fa-chevron-right text-xs text-accent/0 group-hover:text-accent transition-all duration-200" />
+                    <i className="fas fa-chevron-right text-xs text-accent/0 group-hover:text-white transition-all duration-200" />
                     {s}
                   </Link>
                 </li>
@@ -89,9 +89,9 @@ export default function Footer() {
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-white/60 hover:text-accent text-sm transition-colors flex items-center gap-2 group"
+                    className="text-white/60 hover:text-white text-sm transition-colors flex items-center gap-2 group"
                   >
-                    <i className="fas fa-chevron-right text-xs text-accent/0 group-hover:text-accent transition-all duration-200" />
+                    <i className="fas fa-chevron-right text-xs text-accent/0 group-hover:text-white transition-all duration-200" />
                     {l.label}
                   </Link>
                 </li>
@@ -104,33 +104,33 @@ export default function Footer() {
             <h4 className="font-syne font-bold text-lg mb-5">Contact</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <i className="fas fa-map-marker-alt text-accent mt-0.5 w-4" />
+                <i className="fas fa-map-marker-alt text-accent-300 mt-0.5 w-4" />
                 <span className="text-white/60 text-sm">
                   Abomey-Calavi, Atlantique<br />République du Bénin
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <i className="fas fa-phone text-accent w-4" />
-                <a href="tel:+2290195035099" className="text-white/60 hover:text-accent text-sm transition-colors">
+                <i className="fas fa-phone text-accent-300 w-4" />
+                <a href="tel:+2290195035099" className="text-white/60 hover:text-white text-sm transition-colors">
                   (+229) 01 95 03 50 99
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <i className="fas fa-envelope text-accent w-4" />
+                <i className="fas fa-envelope text-accent-300 w-4" />
                 <a
                   href="mailto:contact@shiftup.bj"
-                  className="text-white/60 hover:text-accent text-sm transition-colors"
+                  className="text-white/60 hover:text-white text-sm transition-colors"
                 >
                   contact@shiftup.bj
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <i className="fab fa-whatsapp text-accent w-4" />
+                <i className="fab fa-whatsapp text-accent-300 w-4" />
                 <a
                   href="https://wa.me/2290195035099"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/60 hover:text-accent text-sm transition-colors"
+                  className="text-white/60 hover:text-white text-sm transition-colors"
                 >
                   WhatsApp Business
                 </a>

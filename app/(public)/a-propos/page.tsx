@@ -52,7 +52,7 @@ export default function AProposPage() {
         <div className="container-custom relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="inline-flex items-center gap-2 bg-accent/15 text-accent px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <i className="fas fa-building" />
                 Notre histoire
               </span>
@@ -136,7 +136,7 @@ export default function AProposPage() {
           {/* Values */}
           <div className="text-center mb-10">
             <h2 className="font-syne font-black text-3xl sm:text-4xl text-primary mb-4">
-              Nos <span className="gradient-text">valeurs fondatrices</span>
+              Nos <span className="accent-text">valeurs fondatrices</span>
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -160,7 +160,7 @@ export default function AProposPage() {
         <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="font-syne font-black text-3xl sm:text-4xl text-primary mb-4">
-              Notre <span className="gradient-text">méthodologie en 4 phases</span>
+              Notre <span className="accent-text">méthodologie en 4 phases</span>
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Une approche structurée, éprouvée et centrée sur vos résultats.
@@ -192,7 +192,7 @@ export default function AProposPage() {
         <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="font-syne font-black text-3xl sm:text-4xl text-primary mb-4">
-              L'équipe <span className="gradient-text">SHIFT UP</span>
+              L'équipe <span className="accent-text">SHIFT UP</span>
             </h2>
           </div>
           <div className="max-w-sm mx-auto">
@@ -201,7 +201,7 @@ export default function AProposPage() {
                 SU
               </div>
               <h3 className="font-syne font-bold text-2xl text-white mb-1">Le Fondateur</h3>
-              <p className="text-accent mb-4">Directeur Général & Fondateur</p>
+              <p className="text-accent-200 mb-4">Directeur Général & Fondateur</p>
               <p className="text-white/60 text-sm leading-relaxed mb-6">
                 Entrepreneur passionné et expert en conseil stratégique, il a fondé SHIFT UP
                 avec l'ambition de transformer le paysage entrepreneurial béninois.

@@ -9,14 +9,14 @@ import prisma from "@/lib/prisma";
 
 // Définition statique des badges — débloqués dynamiquement selon completedTasks
 const BADGE_DEFINITIONS = [
-  { id: "b-001", title: "Premier Pas",        description: "Première micro-tâche complétée",                    icon: "fa-flag",            color: "from-green-400 to-teal-500",    threshold: 1,  type: "tasks" },
-  { id: "b-002", title: "Sérieux",             description: "5 tâches validées avec succès",                    icon: "fa-star",            color: "from-amber-400 to-orange-500",  threshold: 5,  type: "tasks" },
-  { id: "b-003", title: "Développeur Junior",  description: "3 tâches de développement validées",               icon: "fa-code",            color: "from-blue-400 to-indigo-500",   threshold: 3,  type: "tasks" },
-  { id: "b-004", title: "Créatif",             description: "2 tâches de design ou rédaction validées",          icon: "fa-pen-nib",         color: "from-pink-400 to-rose-500",     threshold: 2,  type: "tasks" },
-  { id: "b-005", title: "Expert",              description: "10 tâches validées au total",                      icon: "fa-trophy",          color: "from-yellow-400 to-amber-500",  threshold: 10, type: "tasks" },
-  { id: "b-006", title: "Régulier",            description: "Tâche complétée 4 semaines d'affilée",             icon: "fa-calendar-check",  color: "from-purple-400 to-violet-500", threshold: 20, type: "tasks" },
-  { id: "b-007", title: "Perfectionniste",     description: "5 tâches validées du premier coup",                icon: "fa-gem",             color: "from-cyan-400 to-blue-500",     threshold: 15, type: "tasks" },
-  { id: "b-008", title: "Ambassadeur",         description: "Profil public visible dans l'annuaire des talents", icon: "fa-medal",           color: "from-accent to-secondary",      threshold: 25, type: "tasks" },
+  { id: "b-001", title: "Premier Pas",        description: "Première micro-tâche complétée",                    icon: "fa-flag",            color: "from-primary to-accent",    threshold: 1,  type: "tasks" },
+  { id: "b-002", title: "Sérieux",             description: "5 tâches validées avec succès",                    icon: "fa-star",            color: "from-primary to-accent",  threshold: 5,  type: "tasks" },
+  { id: "b-003", title: "Développeur Junior",  description: "3 tâches de développement validées",               icon: "fa-code",            color: "from-primary to-accent",   threshold: 3,  type: "tasks" },
+  { id: "b-004", title: "Créatif",             description: "2 tâches de design ou rédaction validées",          icon: "fa-pen-nib",         color: "from-primary to-accent",     threshold: 2,  type: "tasks" },
+  { id: "b-005", title: "Expert",              description: "10 tâches validées au total",                      icon: "fa-trophy",          color: "from-primary to-accent",  threshold: 10, type: "tasks" },
+  { id: "b-006", title: "Régulier",            description: "Tâche complétée 4 semaines d'affilée",             icon: "fa-calendar-check",  color: "from-primary to-accent", threshold: 20, type: "tasks" },
+  { id: "b-007", title: "Perfectionniste",     description: "5 tâches validées du premier coup",                icon: "fa-gem",             color: "from-primary to-accent",     threshold: 15, type: "tasks" },
+  { id: "b-008", title: "Ambassadeur",         description: "Profil public visible dans l'annuaire des talents", icon: "fa-medal",           color: "from-primary to-accent",      threshold: 25, type: "tasks" },
 ];
 
 const REQUIREMENT_LABELS: Record<string, string> = {

@@ -10,11 +10,11 @@ type Stats = {
 };
 
 const levelConfig: Record<string, { color: string; icon: string; next?: string; threshold: number }> = {
-  BRONZE:  { color: "from-amber-600 to-amber-400", icon: "fa-medal",  next: "ARGENT",  threshold: 3 },
-  ARGENT:  { color: "from-gray-400 to-gray-300",   icon: "fa-medal",  next: "OR",       threshold: 10 },
-  OR:      { color: "from-yellow-500 to-amber-300", icon: "fa-crown",  next: "PLATINE",  threshold: 25 },
-  PLATINE: { color: "from-slate-500 to-slate-400",  icon: "fa-gem",    next: "DIAMANT",  threshold: 50 },
-  DIAMANT: { color: "from-blue-400 to-cyan-400",    icon: "fa-gem",    threshold: 100 },
+  BRONZE:  { color: "from-primary to-accent", icon: "fa-medal",  next: "ARGENT",  threshold: 3 },
+  ARGENT:  { color: "from-primary to-accent",   icon: "fa-medal",  next: "OR",       threshold: 10 },
+  OR:      { color: "from-primary to-accent", icon: "fa-crown",  next: "PLATINE",  threshold: 25 },
+  PLATINE: { color: "from-primary to-accent",  icon: "fa-gem",    next: "DIAMANT",  threshold: 50 },
+  DIAMANT: { color: "from-primary to-accent",    icon: "fa-gem",    threshold: 100 },
 };
 
 export default function ApporteurCommissionsPage() {
@@ -61,10 +61,10 @@ export default function ApporteurCommissionsPage() {
       {/* Stats */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total gagné",  value: `${s.totalEarnings.toLocaleString()} F`,   icon: "fa-coins",        color: "from-accent to-blue-500" },
-          { label: "À recevoir",   value: `${s.pendingEarnings.toLocaleString()} F`,  icon: "fa-clock",        color: "from-amber-400 to-orange-400" },
-          { label: "Déjà versé",   value: `${s.paidEarnings.toLocaleString()} F`,     icon: "fa-check-circle", color: "from-secondary to-teal-400" },
-          { label: "Conversions",  value: s.totalReferrals,                            icon: "fa-handshake",    color: "from-purple-500 to-accent" },
+          { label: "Total gagné",  value: `${s.totalEarnings.toLocaleString()} F`,   icon: "fa-coins",        color: "from-primary to-accent" },
+          { label: "À recevoir",   value: `${s.pendingEarnings.toLocaleString()} F`,  icon: "fa-clock",        color: "from-primary to-accent" },
+          { label: "Déjà versé",   value: `${s.paidEarnings.toLocaleString()} F`,     icon: "fa-check-circle", color: "from-primary to-accent" },
+          { label: "Conversions",  value: s.totalReferrals,                            icon: "fa-handshake",    color: "from-primary to-accent" },
         ].map((card) => (
           <motion.div key={card.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
             <div className={`w-12 h-12 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center text-white flex-shrink-0`}>

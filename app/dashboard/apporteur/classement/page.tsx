@@ -9,14 +9,14 @@ type Leader = {
 };
 
 const levelColors: Record<string, string> = {
-  BRONZE:  "from-amber-600 to-amber-400",
+  BRONZE:  "from-secondary-600 to-secondary-400",
   ARGENT:  "from-gray-400 to-gray-300",
-  OR:      "from-yellow-500 to-amber-300",
-  PLATINE: "from-slate-500 to-slate-300",
-  DIAMANT: "from-blue-400 to-cyan-400",
+  OR:      "from-secondary-500 to-secondary-300",
+  PLATINE: "from-gray-500 to-gray-300",
+  DIAMANT: "from-accent-400 to-accent-400",
 };
 
-const rankColors = ["text-yellow-500", "text-gray-400", "text-amber-600"];
+const rankColors = ["text-secondary-500", "text-gray-400", "text-amber-600"];
 const rankIcons  = ["fa-trophy", "fa-medal", "fa-award"];
 
 export default function ApporteurClassementPage() {
@@ -61,7 +61,7 @@ export default function ApporteurClassementPage() {
           {/* Podium */}
           {topThree.length >= 3 && (
             <div className="bg-white rounded-2xl shadow-card p-6">
-              <h2 className="font-syne font-bold text-primary mb-6 text-center"><i className="fas fa-trophy mr-2 text-yellow-500" />Top 3 du mois</h2>
+              <h2 className="font-syne font-bold text-primary mb-6 text-center"><i className="fas fa-trophy mr-2 text-secondary-500" />Top 3 du mois</h2>
               <div className="flex items-end justify-center gap-4">
                 {/* 2nd */}
                 <div className="flex flex-col items-center">
@@ -72,11 +72,11 @@ export default function ApporteurClassementPage() {
                 </div>
                 {/* 1st */}
                 <div className="flex flex-col items-center">
-                  <i className="fas fa-crown text-yellow-500 text-xl mb-1" />
+                  <i className="fas fa-crown text-secondary-500 text-xl mb-1" />
                   <div className={`w-16 h-16 bg-gradient-to-br ${levelColors[topThree[0].level] ?? levelColors.BRONZE} rounded-full flex items-center justify-center text-white font-syne font-bold text-xl mb-2`}>{topThree[0].avatar}</div>
                   <p className="text-sm font-semibold text-primary text-center">{topThree[0].name}</p>
                   <p className="text-xs text-gray-400">{topThree[0].conversions} conversions</p>
-                  <div className="mt-3 h-24 w-20 bg-yellow-50 rounded-t-xl flex items-center justify-center border-2 border-yellow-300"><span className="text-3xl font-syne font-black text-yellow-500">1</span></div>
+                  <div className="mt-3 h-24 w-20 bg-secondary-50 rounded-t-xl flex items-center justify-center border-2 border-secondary-300"><span className="text-3xl font-syne font-black text-secondary-500">1</span></div>
                 </div>
                 {/* 3rd */}
                 <div className="flex flex-col items-center">

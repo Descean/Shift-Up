@@ -50,10 +50,10 @@ export default function ClientAffiliationPage() {
       {/* Stats */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Filleuls parrainés",  value: referrals.length,                        icon: "fas fa-users",       color: "from-accent to-blue-500" },
-          { label: "Commissions dues",    value: `${pending.reduce((s,r)=>s+r.commission,0).toLocaleString()} F`, icon: "fas fa-clock", color: "from-amber-400 to-orange-400" },
-          { label: "Commissions perçues", value: `${totalCommission.toLocaleString()} F`,  icon: "fas fa-check-circle",color: "from-secondary to-teal-400" },
-          { label: "Taux de conversion",  value: `${conversionRate}%`,                     icon: "fas fa-chart-pie",   color: "from-purple-500 to-accent" },
+          { label: "Filleuls parrainés",  value: referrals.length,                        icon: "fas fa-users",       color: "from-primary to-accent" },
+          { label: "Commissions dues",    value: `${pending.reduce((s,r)=>s+r.commission,0).toLocaleString()} F`, icon: "fas fa-clock", color: "from-primary to-accent" },
+          { label: "Commissions perçues", value: `${totalCommission.toLocaleString()} F`,  icon: "fas fa-check-circle",color: "from-primary to-accent" },
+          { label: "Taux de conversion",  value: `${conversionRate}%`,                     icon: "fas fa-chart-pie",   color: "from-primary to-accent" },
         ].map((s) => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
             <div className={`w-12 h-12 bg-gradient-to-br ${s.color} rounded-xl flex items-center justify-center text-white flex-shrink-0`}>
