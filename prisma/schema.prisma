@@ -78,23 +78,23 @@ model User {
   updatedAt       DateTime  @updatedAt
 
   // 2FA TOTP
-  totpSecret      String?   // secret chiffré (base32), null si 2FA non activé
-  totpEnabled     Boolean   @default(false)
+  totpSecret  String? // secret chiffré (base32), null si 2FA non activé
+  totpEnabled Boolean @default(false)
 
   // NextAuth relations
-  accounts    Account[]
-  sessions    Session[]
+  accounts Account[]
+  sessions Session[]
 
   // Business relations
   clientProfile       ClientProfile?
   apporteurProfile    ApporteurProfile?
   etudiantProfile     EtudiantProfile?
-  prestations         Prestation[]      @relation("ClientPrestations")
-  assignedPrestations Prestation[]      @relation("AssignedPrestations")
+  prestations         Prestation[]        @relation("ClientPrestations")
+  assignedPrestations Prestation[]        @relation("AssignedPrestations")
   payments            Payment[]
   payoutRequests      PayoutRequest[]
-  sentMessages        Message[]         @relation("SentMessages")
-  receivedMessages    Message[]         @relation("ReceivedMessages")
+  sentMessages        Message[]           @relation("SentMessages")
+  receivedMessages    Message[]           @relation("ReceivedMessages")
   campaigns           Campaign[]
   chatSessions        ChatSession[]
   auditLogs           AuditLog[]
@@ -117,13 +117,13 @@ model ClientProfile {
 }
 
 model ApporteurProfile {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ifu          String
-  level        String   @default("BRONZE") // BRONZE | ARGENT | OR | PLATINE | DIAMANT
-  totalEarnings Float   @default(0)
-  pendingEarnings Float @default(0)
+  id              String @id @default(cuid())
+  userId          String @unique
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ifu             String
+  level           String @default("BRONZE") // BRONZE | ARGENT | OR | PLATINE | DIAMANT
+  totalEarnings   Float  @default(0)
+  pendingEarnings Float  @default(0)
 }
 
 // ============================================================
@@ -133,7 +133,7 @@ model ApporteurProfile {
 
 model ApporteurService {
   id             String   @id @default(cuid())
-  apporteurId    String                          // userId de l'apporteur
+  apporteurId    String // userId de l'apporteur
   apporteur      User     @relation(fields: [apporteurId], references: [id], onDelete: Cascade)
   title          String
   description    String
@@ -142,20 +142,20 @@ model ApporteurService {
   priceMin       Float
   priceMax       Float?
   currency       String   @default("XOF")
-  duration       String?  // ex: "3-5 jours", "1 semaine"
+  duration       String? // ex: "3-5 jours", "1 semaine"
   isActive       Boolean  @default(true)
-  isApproved     Boolean  @default(false)        // validation admin requise
-  commissionRate Float    @default(0.10)         // 10 % pour SHIFT UP
+  isApproved     Boolean  @default(false) // validation admin requise
+  commissionRate Float    @default(0.10) // 10 % pour SHIFT UP
   totalOrders    Int      @default(0)
-  totalRevenue   Float    @default(0)            // CA brut généré
+  totalRevenue   Float    @default(0) // CA brut généré
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  orders         ApporteurServiceOrder[]
+  orders ApporteurServiceOrder[]
 }
 
 model ApporteurServiceOrder {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   serviceId        String
   service          ApporteurService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   clientName       String
@@ -163,27 +163,27 @@ model ApporteurServiceOrder {
   clientPhone      String?
   brief            String?
   amount           Float
-  commission       Float                          // 10 % → SHIFT UP
-  apporteurRevenue Float                          // 90 % → apporteur
-  status           String   @default("EN_ATTENTE") // EN_ATTENTE | EN_COURS | TERMINEE | ANNULEE
-  paymentId        String?                        // ID transaction FedaPay (lien de paiement généré)
-  paidAt           DateTime?                      // paiement confirmé (vérifié via l'API FedaPay)
-  documentUrl      String?                        // livrable final envoyé au client
+  commission       Float // 10 % → SHIFT UP
+  apporteurRevenue Float // 90 % → apporteur
+  status           String           @default("EN_ATTENTE") // EN_ATTENTE | EN_COURS | TERMINEE | ANNULEE
+  paymentId        String? // ID transaction FedaPay (lien de paiement généré)
+  paidAt           DateTime? // paiement confirmé (vérifié via l'API FedaPay)
+  documentUrl      String? // livrable final envoyé au client
   documentName     String?
   deliveredAt      DateTime?
   notes            String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 }
 
 model EtudiantProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  university      String?
-  studentCardUrl  String?
-  badges          String[] @default([])
-  completedTasks  Int      @default(0)
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  university     String?
+  studentCardUrl String?
+  badges         String[] @default([])
+  completedTasks Int      @default(0)
 }
 
 // ============================================================
@@ -214,57 +214,57 @@ model Service {
 // ============================================================
 
 enum PrestationStatus {
-  EN_ATTENTE          // Demande soumise, en attente de traitement admin
-  DEVIS_ENVOYE        // Admin a envoyé devis + plan — client doit valider
+  EN_ATTENTE // Demande soumise, en attente de traitement admin
+  DEVIS_ENVOYE // Admin a envoyé devis + plan — client doit valider
   EN_ATTENTE_PAIEMENT // Client a accepté le devis, doit payer l'acompte
-  EN_COURS            // Paiement confirmé, service en exécution
-  LIVRAISON           // Livrables disponibles pour le client
-  REVISION            // Client demande des révisions
-  TERMINEE            // Projet livré et accepté
-  ANNULEE             // Annulé
+  EN_COURS // Paiement confirmé, service en exécution
+  LIVRAISON // Livrables disponibles pour le client
+  REVISION // Client demande des révisions
+  TERMINEE // Projet livré et accepté
+  ANNULEE // Annulé
 }
 
 model Prestation {
-  id               String           @id @default(cuid())
-  clientId         String
-  client           User             @relation("ClientPrestations", fields: [clientId], references: [id])
-  serviceId        String?          // Null si service personnalisé / "Autre"
-  service          Service?         @relation(fields: [serviceId], references: [id])
-  assignedToId     String?
-  assignedTo       User?            @relation("AssignedPrestations", fields: [assignedToId], references: [id])
+  id           String   @id @default(cuid())
+  clientId     String
+  client       User     @relation("ClientPrestations", fields: [clientId], references: [id])
+  serviceId    String? // Null si service personnalisé / "Autre"
+  service      Service? @relation(fields: [serviceId], references: [id])
+  assignedToId String?
+  assignedTo   User?    @relation("AssignedPrestations", fields: [assignedToId], references: [id])
 
   // ── Demande client ──────────────────────────────────────────
-  sector           String?          // Domaine choisi
-  customService    String?          // Intitulé libre si service "Autre"
-  brief            String?          // Description du besoin
-  budget           String?          // Fourchette budget
-  deadline         String?          // Délai souhaité
-  company          String?          // Entreprise / organisation
-  phone            String?          // Téléphone pour ce projet
-  attachments      String[]         @default([])  // URLs fichiers Supabase Storage
-  customFields     Json?            // Données spécifiques au type de service
+  sector        String? // Domaine choisi
+  customService String? // Intitulé libre si service "Autre"
+  brief         String? // Description du besoin
+  budget        String? // Fourchette budget
+  deadline      String? // Délai souhaité
+  company       String? // Entreprise / organisation
+  phone         String? // Téléphone pour ce projet
+  attachments   String[] @default([]) // URLs fichiers Supabase Storage
+  customFields  Json? // Données spécifiques au type de service
 
   // ── Traitement admin ────────────────────────────────────────
-  status           PrestationStatus @default(EN_ATTENTE)
-  quote            Json?            // { items:[{label,amount}], deposit, total, validity, terms }
-  plan             Json?            // { phases:[{title,description,duration,order}] }
-  adminNote        String?          // Note interne admin
+  status    PrestationStatus @default(EN_ATTENTE)
+  quote     Json? // { items:[{label,amount}], deposit, total, validity, terms }
+  plan      Json? // { phases:[{title,description,duration,order}] }
+  adminNote String? // Note interne admin
 
   // ── Suivi (legacy Json + nouveaux modèles) ──────────────────
-  phases           Json             @default("[]")  // Gardé pour compatibilité
-  currentPhase     Int              @default(0)
-  globalProgress   Int              @default(0)
+  phases         Json @default("[]") // Gardé pour compatibilité
+  currentPhase   Int  @default(0)
+  globalProgress Int  @default(0)
 
-  amount           Float            @default(0)
-  amountPaid       Float            @default(0)
+  amount           Float     @default(0)
+  amountPaid       Float     @default(0)
   notes            String?
   rating           Int?
   review           String?
-  startDate        DateTime         @default(now())
+  startDate        DateTime  @default(now())
   estimatedEndDate DateTime?
   endDate          DateTime?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   payments         Payment[]
   prestationPhases PrestationPhase[]
@@ -288,20 +288,20 @@ model PrestationPhase {
 }
 
 model Livrable {
-  id             String            @id @default(cuid())
-  prestationId   String
-  prestation     Prestation        @relation(fields: [prestationId], references: [id], onDelete: Cascade)
-  phaseId        String?
-  phase          PrestationPhase?  @relation(fields: [phaseId], references: [id], onDelete: SetNull)
-  title          String
-  description    String?
-  type           String            // PDF | LINK | VIDEO | CODE | DESIGN | ARCHIVE
-  url            String?
-  isAvailable    Boolean           @default(false)
-  viewedAt       DateTime?
-  observation    String?           // Observation client
-  observationAt  DateTime?
-  createdAt      DateTime          @default(now())
+  id            String           @id @default(cuid())
+  prestationId  String
+  prestation    Prestation       @relation(fields: [prestationId], references: [id], onDelete: Cascade)
+  phaseId       String?
+  phase         PrestationPhase? @relation(fields: [phaseId], references: [id], onDelete: SetNull)
+  title         String
+  description   String?
+  type          String // PDF | LINK | VIDEO | CODE | DESIGN | ARCHIVE
+  url           String?
+  isAvailable   Boolean          @default(false)
+  viewedAt      DateTime?
+  observation   String? // Observation client
+  observationAt DateTime?
+  createdAt     DateTime         @default(now())
 }
 
 // ============================================================
@@ -323,8 +323,8 @@ model Payment {
   user         User          @relation(fields: [userId], references: [id])
   amount       Float
   currency     String        @default("XOF")
-  method       String        // MOBILE_MONEY | CARD | BANK_TRANSFER
-  provider     String        // FEDAPAY | STRIPE
+  method       String // MOBILE_MONEY | CARD | BANK_TRANSFER
+  provider     String // FEDAPAY | STRIPE
   status       PaymentStatus @default(PENDING)
   reference    String        @unique
   providerRef  String?       @unique
@@ -348,14 +348,14 @@ model PayoutRequest {
   id             String    @id @default(cuid())
   userId         String
   user           User      @relation(fields: [userId], references: [id])
-  amount         Float                          // Montant demandé en XOF
+  amount         Float // Montant demandé en XOF
   currency       String    @default("XOF")
-  mobileProvider String                         // MTN_MOMO | MOOV_MONEY | WAVE | CELTIIS
-  mobileNumber   String                         // Numéro Mobile Money du bénéficiaire
-  status         String    @default("PENDING")  // PENDING | PROCESSING | PAID | REJECTED
-  reference      String    @unique              // SU-POUT-{timestamp}-{random}
-  notes          String?                        // Note admin (raison du rejet, etc.)
-  processedAt    DateTime?                      // Date du traitement
+  mobileProvider String // MTN_MOMO | MOOV_MONEY | WAVE | CELTIIS
+  mobileNumber   String // Numéro Mobile Money du bénéficiaire
+  status         String    @default("PENDING") // PENDING | PROCESSING | PAID | REJECTED
+  reference      String    @unique // SU-POUT-{timestamp}-{random}
+  notes          String? // Note admin (raison du rejet, etc.)
+  processedAt    DateTime? // Date du traitement
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
@@ -383,24 +383,24 @@ model Message {
 // ============================================================
 
 model ChatSession {
-  id          String    @id @default(cuid())
-  userId      String?
-  user        User?     @relation(fields: [userId], references: [id])
-  visitorId   String?
-  page        String?
-  converted   Boolean   @default(false)
-  messages    ChatMessage[]
-  startedAt   DateTime  @default(now())
-  endedAt     DateTime?
+  id        String        @id @default(cuid())
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [id])
+  visitorId String?
+  page      String?
+  converted Boolean       @default(false)
+  messages  ChatMessage[]
+  startedAt DateTime      @default(now())
+  endedAt   DateTime?
 }
 
 model ChatMessage {
-  id            String      @id @default(cuid())
-  sessionId     String
-  session       ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  role          String      // user | assistant
-  content       String
-  timestamp     DateTime    @default(now())
+  id        String      @id @default(cuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String // user | assistant
+  content   String
+  timestamp DateTime    @default(now())
 }
 
 // ============================================================
@@ -408,23 +408,23 @@ model ChatMessage {
 // ============================================================
 
 model BlogPost {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   title       String
   excerpt     String
   content     String
   authorId    String?
   authorName  String
   category    String
-  tags        String[] @default([])
+  tags        String[]  @default([])
   coverImage  String?
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  views       Int      @default(0)
-  readTime    Int      @default(5)
+  published   Boolean   @default(false)
+  featured    Boolean   @default(false)
+  views       Int       @default(0)
+  readTime    Int       @default(5)
   publishedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 // ============================================================
@@ -432,11 +432,11 @@ model BlogPost {
 // ============================================================
 
 model FAQ {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   question String
   answer   String
   category String
-  order    Int    @default(0)
+  order    Int     @default(0)
   isActive Boolean @default(true)
 }
 
@@ -445,10 +445,10 @@ model FAQ {
 // ============================================================
 
 model NewsletterSubscriber {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  name        String?
-  isActive    Boolean  @default(true)
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  isActive     Boolean  @default(true)
   subscribedAt DateTime @default(now())
 }
 
@@ -457,18 +457,18 @@ model NewsletterSubscriber {
 // ============================================================
 
 model MicroTask {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  type        String   // DATA_ENTRY | REDACTION | RECHERCHE | TEST_LOGICIEL | AUTRE
-  reward      Float
-  estimatedHours Float @default(2)
-  deadline    DateTime
-  status      String   @default("DISPONIBLE")
-  assignedToId String?
-  deliverable  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  description    String
+  type           String // DATA_ENTRY | REDACTION | RECHERCHE | TEST_LOGICIEL | AUTRE
+  reward         Float
+  estimatedHours Float    @default(2)
+  deadline       DateTime
+  status         String   @default("DISPONIBLE")
+  assignedToId   String?
+  deliverable    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 // ============================================================
@@ -524,24 +524,24 @@ model PasswordResetToken {
 // ============================================================
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   name        String
   description String
-  type        String                         // APP | LOGICIEL | FICHIER | LICENCE | TEMPLATE | FORMATION | AUTRE
+  type        String // APP | LOGICIEL | FICHIER | LICENCE | TEMPLATE | FORMATION | AUTRE
   category    String?
   price       Float
-  currency    String   @default("XOF")
-  downloadUrl String?                        // URL de téléchargement (produits numériques)
-  previewUrl  String?                        // Lien démo / aperçu
-  thumbnail   String?                        // Image de couverture (URL)
-  features    String[] @default([])          // Liste des fonctionnalités
-  tags        String[] @default([])
-  isActive    Boolean  @default(true)
-  isFeatured  Boolean  @default(false)
-  stock       Int?                           // null = illimité (numérique), entier = stock physique
+  currency    String            @default("XOF")
+  downloadUrl String? // URL de téléchargement (produits numériques)
+  previewUrl  String? // Lien démo / aperçu
+  thumbnail   String? // Image de couverture (URL)
+  features    String[]          @default([]) // Liste des fonctionnalités
+  tags        String[]          @default([])
+  isActive    Boolean           @default(true)
+  isFeatured  Boolean           @default(false)
+  stock       Int? // null = illimité (numérique), entier = stock physique
   purchases   ProductPurchase[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model ProductPurchase {
@@ -552,7 +552,7 @@ model ProductPurchase {
   amount      Float
   reference   String   @unique
   status      String   @default("PENDING") // PENDING | COMPLETED | FAILED
-  providerRef String?  @unique             // ID transaction FedaPay/Stripe (vérifié serveur)
+  providerRef String?  @unique // ID transaction FedaPay/Stripe (vérifié serveur)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -566,12 +566,12 @@ model Campaign {
   apporteurId String
   apporteur   User     @relation(fields: [apporteurId], references: [id], onDelete: Cascade)
   name        String
-  channel     String                        // WhatsApp | LinkedIn | Facebook | Instagram | Email | Autre
+  channel     String // WhatsApp | LinkedIn | Facebook | Instagram | Email | Autre
   service     String?
   clicks      Int      @default(0)
   leads       Int      @default(0)
   conversions Int      @default(0)
-  status      String   @default("ACTIVE")  // ACTIVE | PAUSEE | TERMINEE
+  status      String   @default("ACTIVE") // ACTIVE | PAUSEE | TERMINEE
   startDate   DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -585,7 +585,7 @@ model Resource {
   id          String   @id @default(cuid())
   title       String
   description String
-  type        String                        // VIDEO | PDF | TEMPLATE | LIEN
+  type        String // VIDEO | PDF | TEMPLATE | LIEN
   category    String
   url         String
   duration    String?
@@ -635,32 +635,76 @@ model Formation {
 }
 
 model FormationInscription {
-  id                   String                     @id @default(cuid())
-  reference            String                     @unique
-  formationId          String
-  formation            Formation                  @relation(fields: [formationId], references: [id])
-  prenom               String
-  nom                  String
-  email                String
-  telephone            String
-  ville                String
-  structure            String
-  poste                String
-  secteur              String
-  attente              String
-  detail               String?
-  source               String
-  methodePaiement      String
-  typeInscription      String                     @default("COMPLET") // "COMPLET" | "ACOMPTE"
-  montantPaye          Int                        @default(0)
-  status               FormationInscriptionStatus @default(EN_ATTENTE_PAIEMENT)
-  transactionRef       String?
-  createdAt            DateTime                   @default(now())
-  updatedAt            DateTime                   @updatedAt
+  id              String                     @id @default(cuid())
+  reference       String                     @unique
+  formationId     String
+  formation       Formation                  @relation(fields: [formationId], references: [id])
+  prenom          String
+  nom             String
+  email           String
+  telephone       String
+  ville           String
+  structure       String
+  poste           String
+  secteur         String
+  attente         String
+  detail          String?
+  source          String
+  methodePaiement String
+  typeInscription String                     @default("COMPLET") // "COMPLET" | "ACOMPTE"
+  montantPaye     Int                        @default(0)
+  status          FormationInscriptionStatus @default(EN_ATTENTE_PAIEMENT)
+  transactionRef  String?
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
 }
 
 enum FormationInscriptionStatus {
   EN_ATTENTE_PAIEMENT
   PAIEMENT_CONFIRME
   ANNULEE
+}
+
+// ============================================================
+// RECRUTEMENT (SHIFT UP cabinet de recrutement)
+// Les offres sont définies dans lib/recrutement/offres.ts ;
+// seules les candidatures sont stockées en base.
+// Les pièces (PDF) sont dans le bucket Supabase PRIVÉ "recrutement".
+// ============================================================
+
+model Candidature {
+  id                  String            @id @default(cuid())
+  reference           String            @unique
+  offreCode           String // ex. "DT"
+  offreTitre          String // titre au moment du dépôt
+  nom                 String
+  prenoms             String
+  email               String
+  telephone           String
+  ville               String
+  nationalite         String
+  diplome             String
+  anneeDiplome        Int
+  anneesExperience    Int
+  nbProjetsSimilaires Int
+  disponibilite       String
+  source              String? // affiche, whatsapp, facebook… (paramètre ?src=)
+  fichiers            Json // [{ type, path, nom, taille }]
+  statut              CandidatureStatut @default(NOUVELLE)
+  noteInterne         String?
+  consentement        Boolean           @default(true)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([offreCode])
+  @@index([email])
+  @@index([statut])
+}
+
+enum CandidatureStatut {
+  NOUVELLE
+  EN_REVUE
+  PRESELECTIONNEE
+  RETENUE
+  NON_RETENUE
 }

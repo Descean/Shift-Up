@@ -287,3 +287,66 @@ export async function sendApporteurServiceDelivered({ to, name, serviceTitle, do
     <p style="color:#555;line-height:1.6;margin-top:16px;">Merci de votre confiance en SHIFT UP.</p>`;
   return resend.emails.send({ from: FROM, to, subject: `Votre commande "${serviceTitle}" est livrée — SHIFT UP`, html: baseLayout(content, "Commande livrée") });
 }
+
+// ─── Recrutement (SHIFT UP cabinet de recrutement) ───────────────────────────
+
+function esc(s: string | number | null | undefined) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+
+/** Accusé de réception envoyé au candidat. */
+export async function sendCandidatureAccuse({ to, prenoms, poste, reference }: {
+  to: string; prenoms: string; poste: string; reference: string;
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Candidature reçue</h2>
+    <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre candidature au poste de <strong>${esc(poste)}</strong>. Votre dossier sera examiné avec attention ; seuls les candidats présélectionnés seront contactés.</p>
+    <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;">
+      <p style="margin:0;color:#0A2533;font-size:14px;"><strong>Votre référence :</strong> ${esc(reference)}</p>
+    </div>
+    <p style="color:#555;line-height:1.6;font-size:14px;">Merci de rappeler cette référence dans tout échange avec SHIFT UP : <a href="mailto:contact@shiftup.bj" style="color:#2D5B78;">contact@shiftup.bj</a></p>`;
+  return resend.emails.send({ from: FROM, to, subject: `Candidature reçue — ${poste} — Réf. ${reference}`, html: baseLayout(content, "Candidature reçue") });
+}
+
+/** Notification au cabinet avec le dossier complet (pièces jointes ou liens). */
+export async function sendCandidatureAdmin({ to, candidature, attachments, liens }: {
+  to: string | string[];
+  candidature: {
+    reference: string; poste: string; nom: string; prenoms: string; email: string; telephone: string;
+    ville: string; nationalite: string; diplome: string; anneeDiplome: number; anneesExperience: number;
+    nbProjetsSimilaires: number; disponibilite: string; source?: string | null;
+  };
+  attachments: { filename: string; content: Buffer }[];
+  liens: { label: string; url: string }[];
+}) {
+  const c = candidature;
+  const row = (k: string, v: string | number) =>
+    `<tr><td style="padding:7px 0;color:#777;font-size:14px;width:45%;">${k}</td><td style="padding:7px 0;font-weight:600;color:#0A2533;font-size:14px;">${esc(v)}</td></tr>`;
+  const liensHtml = liens.length
+    ? `<p style="color:#555;font-size:14px;margin:20px 0 6px;"><strong>Pièces (liens valables 7 jours) :</strong></p><ul style="margin:0;padding-left:18px;">${liens.map((l) => `<li style="margin:4px 0;"><a href="${l.url}" style="color:#2D5B78;">${esc(l.label)}</a></li>`).join("")}</ul>`
+    : `<p style="color:#555;font-size:14px;margin:20px 0 0;">Les ${attachments.length} pièce(s) du dossier sont jointes à cet e-mail.</p>`;
+  const content = `
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 4px;">Nouvelle candidature — ${esc(c.poste)}</h2>
+    <p style="color:#777;margin:0 0 16px;font-size:13px;">Réf. ${esc(c.reference)}${c.source ? ` · source : ${esc(c.source)}` : ""}</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #eee;">
+      ${row("Nom et prénoms", `${c.nom} ${c.prenoms}`)}
+      ${row("E-mail", c.email)}
+      ${row("Téléphone", c.telephone)}
+      ${row("Ville / nationalité", `${c.ville} · ${c.nationalite}`)}
+      ${row("Diplôme", `${c.diplome} (${c.anneeDiplome})`)}
+      ${row("Années d'expérience", c.anneesExperience)}
+      ${row("Projets similaires", c.nbProjetsSimilaires)}
+      ${row("Disponibilité", c.disponibilite)}
+    </table>
+    ${liensHtml}
+    ${btn("Voir dans l'espace admin", `${APP_URL}/dashboard/admin/recrutement`)}`;
+  return resend.emails.send({
+    from: FROM,
+    to,
+    replyTo: c.email,
+    subject: `[Recrutement ${c.poste}] ${c.nom} ${c.prenoms} — ${c.reference}`,
+    html: baseLayout(content, "Nouvelle candidature"),
+    attachments,
+  });
+}

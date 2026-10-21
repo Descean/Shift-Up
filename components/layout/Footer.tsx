@@ -15,6 +15,7 @@ const quickLinks = [
   { href: "/a-propos", label: "À propos" },
   { href: "/services", label: "Nos services" },
   { href: "/blog", label: "Blog & Ressources" },
+  { href: "/recrutement", label: "Recrutement" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
   { href: "/inscription", label: "S'inscrire" },
