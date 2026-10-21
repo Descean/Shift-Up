@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── E-mails (un échec d'envoi n'annule pas la candidature) ───────────────
-  const destinataires = (process.env.RECRUTEMENT_EMAIL || process.env.ADMIN_EMAIL || "contact@shiftup.bj")
+  const destinataires = (process.env.RECRUTEMENT_EMAIL || "jgnancadja@gmail.com,jeaneudes@petalmail.com")
     .split(",").map((s) => s.trim()).filter(Boolean);
   const compteur: Record<string, number> = {};
   const nomFichier = (type: string) => {
