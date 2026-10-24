@@ -62,6 +62,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Formation introuvable." }, { status: 404 });
     }
 
+    // Session commencée ou terminée : plus d'inscription ni de paiement
+    if (formation.dateDebut.getTime() <= Date.now()) {
+      return NextResponse.json({ error: "Cette session a déjà commencé : les inscriptions sont closes." }, { status: 410 });
+    }
+
     if (formation.placesMax - formation._count.inscriptions <= 0) {
       return NextResponse.json({ error: "Cette formation est complète." }, { status: 409 });
     }

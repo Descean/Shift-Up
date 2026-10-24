@@ -1,56 +1,35 @@
 import prisma from "@/lib/prisma";
+import { ENTREPRISE } from "@/lib/entreprise";
 import CounterDisplay from "./CounterDisplay";
 
-// Cache pendant 1 heure — les stats ne changent pas à la minute
-export const revalidate = 3600;
-
+/**
+ * Indicateurs de l'accueil, calculés sur les données réelles.
+ * Les compteurs clients / projets n'apparaissent qu'à partir de 10, pour ne pas afficher
+ * de petits chiffres peu parlants ; ils sont remplacés par l'offre (domaines, services, formations).
+ */
 async function getStats() {
-  const [clients, projetsTermines, domainesCount] = await Promise.all([
-    // Nombre de clients enregistrés
+  const now = new Date();
+  const [clients, projets, domaines, services, formations] = await Promise.all([
     prisma.user.count({ where: { role: "CLIENT" } }),
-
-    // Projets livrés et acceptés
     prisma.prestation.count({ where: { status: "TERMINEE" } }),
+    prisma.service.findMany({ where: { isActive: true }, select: { domain: true }, distinct: ["domain"] }).then((r) => r.length),
+    prisma.service.count({ where: { isActive: true } }),
+    prisma.formation.count({ where: { dateFin: { lt: now } } }),
+  ]).catch(() => [0, 0, 0, 0, 0] as const);
 
-    // Domaines distincts de services actifs
-    prisma.service
-      .findMany({ where: { isActive: true }, select: { domain: true }, distinct: ["domain"] })
-      .then((r) => r.length),
-  ]);
+  const candidats = [
+    projets >= 10 && { value: projets, suffix: "", label: "Projets livrés" },
+    clients >= 10 && { value: clients, suffix: "", label: "Clients accompagnés" },
+    domaines > 0 && { value: domaines, suffix: "", label: "Domaines d'expertise" },
+    services > 0 && { value: services, suffix: "", label: "Services au catalogue" },
+    formations > 0 && { value: formations, suffix: "", label: formations > 1 ? "Sessions de formation tenues" : "Session de formation tenue" },
+  ].filter(Boolean) as { value: number; suffix: string; label: string }[];
 
-  // Années d'expérience calculées depuis la création (2024)
-  const anneesExperience = new Date().getFullYear() - 2024 || 1;
-
-  return { clients, projetsTermines, domainesCount, anneesExperience };
+  return [...candidats.slice(0, 3), { value: ENTREPRISE.anneeCreation, suffix: "", label: "Année de création", static: true }];
 }
 
 export default async function CountersSection() {
-  const { clients, projetsTermines, domainesCount, anneesExperience } =
-    await getStats();
-
-  const stats = [
-    {
-      value: clients,
-      suffix: clients >= 100 ? "+" : "",
-      label: "Clients enregistrés",
-    },
-    {
-      value: projetsTermines,
-      suffix: projetsTermines >= 10 ? "+" : "",
-      label: "Projets livrés",
-    },
-    {
-      value: domainesCount || 7,
-      suffix: "",
-      label: "Domaines d'expertise",
-    },
-    {
-      value: anneesExperience,
-      suffix: anneesExperience > 1 ? " ans" : " an",
-      label: "D'expérience prouvée",
-    },
-  ];
-
+  const stats = await getStats();
   return (
     <section className="bg-white border-y border-primary/10 py-14">
       <div className="container-custom">

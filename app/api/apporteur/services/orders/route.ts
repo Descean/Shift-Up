@@ -14,6 +14,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { isSafe } from "@/lib/validation";
 import { sendApporteurServiceDelivered } from "@/lib/email";
+import { signerLien } from "@/lib/fichiers";
 
 const COMMISSION_RATE = 0.10;
 
@@ -117,7 +118,7 @@ export async function PATCH(req: NextRequest) {
         to: order.clientEmail,
         name: order.clientName,
         serviceTitle: order.service.title,
-        documentUrl: documentUrl!,
+        documentUrl: signerLien(documentUrl!, 60), // lien d'accès sans compte, valable 60 jours
       }).catch((e) => console.error("sendApporteurServiceDelivered error:", e));
     }
 

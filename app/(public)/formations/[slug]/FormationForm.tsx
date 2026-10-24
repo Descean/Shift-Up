@@ -25,6 +25,7 @@ export interface FormationSession {
   prixFCFA: number;
   placesRestantes: number;
   badge?: string;       // ex: "Meilleure offre"
+  terminee?: boolean;   // session commencée ou passée : inscription fermée
 }
 
 export interface FormationProps {
@@ -36,6 +37,7 @@ export interface FormationProps {
   lieu: string;
   prixFCFA: number;
   placesRestantes: number;
+  terminee?: boolean;
   dureeJours?: number;
   // Sélecteur de sessions (optionnel — affiche un picker si présent)
   sessions?: FormationSession[];
@@ -103,7 +105,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
   const [submitting, setSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [selectedSession, setSelectedSession] = useState<FormationSession | null>(
-    formation.sessions?.[0] ?? null
+    formation.sessions?.find((s) => !s.terminee) ?? formation.sessions?.[0] ?? null
   );
   const [typeInscription, setTypeInscription] = useState<"COMPLET" | "ACOMPTE">("COMPLET");
 
@@ -114,6 +116,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
   const effectiveFin    = selectedSession?.dateFin         ?? formation.dateFin;
   const effectiveLieu   = selectedSession?.lieu            ?? formation.lieu;
   const effectivePlaces = selectedSession?.placesRestantes ?? formation.placesRestantes;
+  const effectiveTerminee = selectedSession?.terminee ?? formation.terminee ?? false;
 
   const ACOMPTE = 15_000;
   const montantAPayer  = typeInscription === "ACOMPTE" ? ACOMPTE : effectivePrix;
@@ -254,7 +257,12 @@ export default function FormationForm({ formation }: { formation: FormationProps
               <Chip icon={selectedSession?.icon ?? "fas fa-location-dot"} color="white">
                 {effectiveLieu}
               </Chip>
-              {effectivePlaces > 0 && effectivePlaces <= 8 && (
+              {effectiveTerminee && (
+                <Chip icon="fas fa-calendar-xmark" color="white">
+                  <strong className="text-white">Session terminée</strong>
+                </Chip>
+              )}
+              {!effectiveTerminee && effectivePlaces > 0 && effectivePlaces <= 8 && (
                 <Chip icon="fas fa-fire" color="red">
                   Plus que <strong>{effectivePlaces} place{effectivePlaces > 1 ? "s" : ""}</strong>
                 </Chip>
@@ -346,7 +354,24 @@ export default function FormationForm({ formation }: { formation: FormationProps
             <i className="fab fa-whatsapp text-2xl" />
           </a>
 
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          {effectiveTerminee && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6" role="status">
+              <p className="font-syne font-bold text-primary text-lg mb-1">Session terminée — inscriptions closes</p>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                Cette session a eu lieu du {effectiveDebut} au {effectiveFin}. Laissez-nous vos coordonnées pour être prévenu(e) de la prochaine.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <a href={waLink(formation.whatsapp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 min-h-[44px] px-5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-accent">
+                  <i className="fab fa-whatsapp" aria-hidden /> Être prévenu(e) sur WhatsApp
+                </a>
+                <a href={`/contact?sujet=${encodeURIComponent("Prochaine session : " + formation.titre)}`} className="inline-flex items-center gap-2 min-h-[44px] px-5 rounded-xl border border-gray-300 text-primary text-sm font-semibold hover:border-primary">
+                  Écrire via le formulaire de contact
+                </a>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className={effectiveTerminee ? "hidden" : undefined}>
 
             {/* Sélecteur de session */}
             {formation.sessions?.length ? (
@@ -543,7 +568,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
             <div className="mt-2">
               <button
                 type="submit"
-                disabled={submitting || effectivePlaces === 0}
+                disabled={submitting || effectivePlaces === 0 || effectiveTerminee}
                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-accent to-primary text-white font-syne font-bold text-lg py-4 px-8 rounded-2xl shadow-glow hover:shadow-card-hover hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {submitting ? (
@@ -588,11 +613,15 @@ function SessionPicker({ sessions, selected, onSelect }: {
               key={s.formationId}
               type="button"
               onClick={() => onSelect(s)}
-              className={`relative text-left border-2 rounded-xl p-4 transition-all ${
+              disabled={s.terminee}
+              className={`relative text-left border-2 rounded-xl p-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                 active ? "border-accent bg-accent/5" : "border-gray-200 bg-gray-50 hover:border-accent/40"
               }`}
             >
-              {s.badge && (
+              {s.terminee && (
+                <span className="absolute -top-2.5 left-3 bg-gray-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Terminée</span>
+              )}
+              {!s.terminee && s.badge && (
                 <span className="absolute -top-2.5 right-3 bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
                   {s.badge}
                 </span>

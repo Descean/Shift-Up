@@ -1,10 +1,12 @@
 /**
  * GET /api/cron/recrutement — tâche quotidienne (Vercel Cron, voir vercel.json)
- * Relances, suppression des dossiers sans réponse ou en fin de conservation, fichiers abandonnés.
+ * Recrutement : relances, suppression des dossiers sans réponse ou en fin de conservation, fichiers abandonnés.
+ * Documents : migration unique de l'ancien bucket public « prestations » vers un accès contrôlé.
  * Protégée par CRON_SECRET : Vercel envoie « Authorization: Bearer <CRON_SECRET> ».
  */
 import { NextRequest, NextResponse } from "next/server";
 import { entretienDonnees } from "@/lib/recrutement/donnees";
+import { migrerAncienBucket } from "@/lib/fichiers";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -16,5 +18,7 @@ export async function GET(req: NextRequest) {
   }
   const bilan = await entretienDonnees();
   if (bilan.erreurs.length) console.error("[cron/recrutement]", bilan.erreurs);
-  return NextResponse.json(bilan);
+  // Documents des prestations : passage unique de l'ancien bucket public en privé
+  const fichiers = await migrerAncienBucket().catch((e) => ({ migre: false, raison: (e as Error).message }));
+  return NextResponse.json({ ...bilan, fichiers });
 }

@@ -11,6 +11,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/utils";
 import prisma from "@/lib/prisma";
+import ArticleContent from "@/components/blog/ArticleContent";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     where: { slug },
     select: { title: true, excerpt: true, category: true },
   });
-  if (!post) return { title: "Article introuvable | SHIFT UP" };
+  if (!post) return { title: "Article introuvable" };
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://shiftup.bj";
   return {
-    title: `${post.title} | SHIFT UP Blog`,
+    title: post.title,
     description: post.excerpt ?? undefined,
     openGraph: {
       title: post.title,
@@ -61,54 +62,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [`${baseUrl}/assets/og-image.png`],
     },
   };
-}
-
-// ── Parseur markdown simplifié ───────────────────────────────────────────────
-function renderContent(content: string) {
-  // Traite l'inline **bold** dans un texte
-  function parseInline(text: string) {
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
-    return parts.map((part, i) =>
-      part.startsWith("**") && part.endsWith("**")
-        ? <strong key={i}>{part.slice(2, -2)}</strong>
-        : part
-    );
-  }
-
-  return content
-    .trim()
-    .split("\n")
-    .map((line, i) => {
-      if (line.startsWith("## ")) {
-        return (
-          <h2 key={i} className="font-syne font-bold text-2xl text-primary mt-10 mb-4">
-            {line.slice(3)}
-          </h2>
-        );
-      }
-      if (line.startsWith("### ")) {
-        return (
-          <h3 key={i} className="font-syne font-bold text-lg text-primary mt-6 mb-3">
-            {line.slice(4)}
-          </h3>
-        );
-      }
-      if (line.startsWith("- ")) {
-        return (
-          <li key={i} className="flex items-start gap-2 text-gray-600 mb-1.5">
-            <i className="fas fa-check text-secondary text-xs mt-1.5 flex-shrink-0" />
-            <span>{parseInline(line.slice(2))}</span>
-          </li>
-        );
-      }
-      if (line.startsWith("|")) return null; // tableaux : ignorés
-      if (line.trim() === "") return <div key={i} className="mb-4" />;
-      return (
-        <p key={i} className="text-gray-600 leading-relaxed mb-4">
-          {parseInline(line)}
-        </p>
-      );
-    });
 }
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -201,11 +154,9 @@ export default async function BlogPostPage({ params }: Props) {
 
             {/* Article principal */}
             <article className="lg:col-span-2 bg-white rounded-3xl shadow-card p-8 md:p-10">
-              <div className="prose-custom">
-                {post.content ? renderContent(post.content) : (
-                  <p className="text-gray-400 italic">Contenu en cours de rédaction…</p>
-                )}
-              </div>
+              {post.content ? <ArticleContent contenu={post.content} /> : (
+                <p className="text-gray-500 italic">Contenu en cours de rédaction…</p>
+              )}
 
               {/* Tags */}
               {Array.isArray(post.tags) && post.tags.length > 0 && (

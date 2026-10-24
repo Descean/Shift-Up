@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
+import { televerser } from "@/lib/televerser";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
 interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
@@ -363,16 +364,11 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
         const file = new File([blob], `voicenote-${Date.now()}.webm`, { type: "audio/webm" });
         setUploading(livrableId);
         try {
-          const fd = new FormData();
-          fd.append("file", file);
-          const res = await fetch("/api/upload", { method: "POST", body: fd });
-          if (res.ok) {
-            const { url } = await res.json();
-            setVoiceUrls((prev) => ({ ...prev, [livrableId]: url }));
-            toast.success("Note vocale enregistrée !");
-          } else {
-            toast.error("Erreur lors de l'upload audio.");
-          }
+          const { url } = await televerser(file);
+          setVoiceUrls((prev) => ({ ...prev, [livrableId]: url }));
+          toast.success("Note vocale enregistrée !");
+        } catch {
+          toast.error("Erreur lors de l'envoi de la note vocale.");
         } finally {
           setUploading(null);
         }

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
+import { televerser } from "@/lib/televerser";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type PrestationStatus =
@@ -501,15 +502,11 @@ function PhaseLivrableForm({ prestation, phase, onDone }: { prestation: Prestati
   async function uploadFile(file: File) {
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) { toast.error("Erreur téléchargement."); return; }
-      const { url: fileUrl } = await res.json();
+      const { url: fileUrl } = await televerser(file);
       setUrl(fileUrl);
       if (!title) setTitle(file.name.replace(/\.[^.]+$/, ""));
       setType(detectType(file.name));
-    } catch { toast.error("Erreur réseau."); }
+    } catch (e) { toast.error((e as Error).message || "Erreur réseau."); }
     finally { setUploading(false); }
   }
 
@@ -808,16 +805,12 @@ function TabLivrables({
   async function uploadFile(file: File) {
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) { toast.error("Erreur lors du téléchargement."); return; }
-      const { url } = await res.json();
+      const { url } = await televerser(file);
       setNewUrl(url);
       if (!newTitle) setNewTitle(file.name.replace(/\.[^.]+$/, ""));
       setNewType(detectType(file.name));
-    } catch {
-      toast.error("Erreur réseau lors du téléchargement.");
+    } catch (e) {
+      toast.error((e as Error).message || "Erreur réseau lors du téléchargement.");
     } finally {
       setUploading(false);
     }

@@ -35,34 +35,21 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Center content */}
         <div className="relative z-10">
-          <blockquote className="text-white/90 text-2xl font-syne font-bold leading-relaxed mb-8">
-            "Rejoignez plus de 120 entreprises qui font confiance à SHIFT UP pour leur transformation."
+          <blockquote className="text-white/90 text-2xl font-syne font-bold leading-relaxed">
+            Votre espace SHIFT UP : demandes, devis, paiements, livrables et formations au même endroit.
           </blockquote>
-          <div className="flex -space-x-3">
-            {["KA", "AS", "PD", "MA", "OB"].map((initials, i) => (
-              <div
-                key={i}
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary border-2 border-primary flex items-center justify-center text-white text-xs font-bold"
-              >
-                {initials}
-              </div>
-            ))}
-            <div className="w-10 h-10 rounded-full bg-white/10 border-2 border-primary flex items-center justify-center text-white/60 text-xs">
-              +115
-            </div>
-          </div>
         </div>
 
         {/* Bottom stats */}
         <div className="relative z-10 grid grid-cols-3 gap-4">
           {[
-            { value: "120+", label: "Clients actifs" },
-            { value: "98%", label: "Satisfaction" },
-            { value: "6", label: "Domaines" },
+            { value: "48 h", label: "Délai de devis" },
+            { value: "100 %", label: "Suivi en ligne" },
+            { value: "MoMo", label: "Paiement mobile" },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <p className="font-syne font-black text-2xl text-white">{s.value}</p>
-              <p className="text-white/40 text-xs">{s.label}</p>
+              <p className="text-white/70 text-xs">{s.label}</p>
             </div>
           ))}
         </div>

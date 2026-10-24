@@ -3,6 +3,7 @@
  * Utilisé côté serveur via @react-pdf/renderer (renderToBuffer)
  */
 
+import { ENTREPRISE } from "@/lib/entreprise";
 import {
   Document,
   Page,
@@ -100,11 +101,11 @@ export function InvoicePDF({ data }: { data: InvoiceData }) {
         <View style={s.row2}>
           <View style={s.infoBox}>
             <Text style={s.infoLabel}>Émetteur</Text>
-            <Text style={s.infoName}>SHIFT UP SARL</Text>
-            <Text style={s.infoLine}>RCCM : Cotonou N° RB/ABC/25 A 124734</Text>
-            <Text style={s.infoLine}>IFU : 0202113434116</Text>
-            <Text style={s.infoLine}>Tel : +229 01 95 03 50 99</Text>
-            <Text style={s.infoLine}>Email : contact@shiftup.bj</Text>
+            <Text style={s.infoName}>{ENTREPRISE.nom} — {ENTREPRISE.forme}</Text>
+            <Text style={s.infoLine}>{ENTREPRISE.rccmComplet}</Text>
+            <Text style={s.infoLine}>IFU : {ENTREPRISE.ifu}</Text>
+            <Text style={s.infoLine}>Tél. : {ENTREPRISE.telephone}</Text>
+            <Text style={s.infoLine}>E-mail : {ENTREPRISE.email}</Text>
           </View>
           <View style={s.infoBox}>
             <Text style={s.infoLabel}>Facturé à</Text>

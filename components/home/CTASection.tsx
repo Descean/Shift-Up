@@ -18,7 +18,7 @@ export default function CTASection() {
         </h2>
 
         <p className="text-white/50 text-lg max-w-xl mx-auto mb-10">
-          Rejoignez plus de 120 entreprises qui font confiance à SHIFT UP.
+          Décrivez-nous votre besoin : nous revenons vers vous avec une proposition claire.
           Premier rendez-vous de diagnostic offert.
         </p>
 

@@ -29,6 +29,10 @@ import ChatWidget from "@/components/chatbot/ChatWidget";
 import AuthProvider from "@/components/providers/AuthProvider";
 import CookieConsent from "@/components/legal/CookieConsent";
 
+/** Identifiant GA4 : ignoré s'il est absent ou s'il s'agit de la valeur d'exemple « G-XXXXXXXXXX ». */
+const GA_RAW = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? "";
+const GA_ID = /^G-[A-Z0-9]{6,12}$/.test(GA_RAW) && !/^G-X+$/.test(GA_RAW) ? GA_RAW : "";
+
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-syne",
@@ -147,12 +151,12 @@ export default function RootLayout({
          * Ce mécanisme est appelé "Consent Mode v2" par Google et est conforme
          * aux exigences du Code du Numérique béninois (Loi n°2017-20, Art. 72).
          */}
-        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+        {GA_ID && (
           <>
             {/* Étape 1 : Chargement du script Google Analytics (asynchrone) */}
             <script
               async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
             />
             {/* Étape 2 : Initialisation avec consentement par DÉFAUT refusé */}
             <script
@@ -170,7 +174,7 @@ export default function RootLayout({
                   });
 
                   gtag('js', new Date());
-                  gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                  gtag('config', '${GA_ID}', {
                     anonymize_ip: true
                   });
                 `,

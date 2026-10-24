@@ -119,7 +119,8 @@ export default async function FormationPage({ params, searchParams }: Props) {
 
   if (!formation) notFound();
 
-  const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Porto-Novo" });
+  const now = Date.now();
   const richContent = FORMATION_RICH_CONTENT[mainSlug] ?? {};
 
   // Construction des sessions si des variantes existent
@@ -146,6 +147,7 @@ export default async function FormationPage({ params, searchParams }: Props) {
         lieu:           `${config.label} · ${formation.lieu}`,
         prixFCFA:       formation.prixFCFA,
         placesRestantes: mainPlaces,
+        terminee:       formation.dateDebut.getTime() <= now,
       },
       ...(sibling ? [{
         formationId:    sibling.id,
@@ -156,6 +158,7 @@ export default async function FormationPage({ params, searchParams }: Props) {
         lieu:           `${config.siblingLabel} · ${sibling.lieu}`,
         prixFCFA:       sibling.prixFCFA,
         placesRestantes: siblingPlaces,
+        terminee:       sibling.dateDebut.getTime() <= now,
       }] : []),
     ];
   }
@@ -177,6 +180,7 @@ export default async function FormationPage({ params, searchParams }: Props) {
         lieu: formation.lieu,
         prixFCFA: formation.prixFCFA,
         placesRestantes,
+        terminee: formation.dateDebut.getTime() <= now,
         dureeJours,
         sessions,
         succes: sp.succes === "1",

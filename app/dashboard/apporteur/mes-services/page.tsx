@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
+import { televerser } from "@/lib/televerser";
 /**
  * Page "Mes Services" — Dashboard Apporteur
  *
@@ -181,14 +182,15 @@ export default function ApporteurMesServicesPage() {
 
   async function handleUploadDocument(file: File) {
     setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    setUploading(false);
-    if (!res.ok) { toast.error(data.error ?? "Erreur d'upload."); return; }
-    setDeliverUrl(data.url);
-    setDeliverName(data.name);
+    try {
+      const data = await televerser(file);
+      setDeliverUrl(data.url);
+      setDeliverName(data.name);
+    } catch (e) {
+      toast.error((e as Error).message || "Erreur d'envoi.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function submitDeliver() {

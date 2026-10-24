@@ -5,6 +5,8 @@ import CountersSection from "@/components/home/CountersSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CTASection from "@/components/home/CTASection";
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "SHIFT UP | Excellence • Innovation • Performance",
   description:

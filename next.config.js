@@ -25,12 +25,7 @@
  *   → Empêche le navigateur de deviner le type MIME d'un fichier.
  *   → Protège contre les attaques de type "MIME sniffing".
  *
- * X-Frame-Options: SAMEORIGIN
- *   → Empêche l'intégration de nos pages dans un iframe d'un site tiers.
- *   → Protège contre les attaques de type "clickjacking".
- *
- * X-XSS-Protection: 1; mode=block
- *   → Active le filtre XSS natif des navigateurs plus anciens (IE, ancien Chrome).
+ * Clickjacking : directive CSP « frame-ancestors 'self' » (remplace X-Frame-Options).
  *
  * Referrer-Policy: strict-origin-when-cross-origin
  *   → Envoie le referrer complet pour les requêtes same-origin.
@@ -79,15 +74,15 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               // Scripts : notre domaine + Google (Analytics) + Stripe + hCaptcha
-              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
+              "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
               // Styles : notre domaine + Google Fonts + hCaptcha
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://hcaptcha.com https://*.hcaptcha.com",
               // Images : notre domaine + Google Analytics + Supabase + data: URIs (SVG inline)
-              "img-src 'self' data: https://www.google-analytics.com https://*.supabase.co https://lh3.googleusercontent.com",
+              "img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://*.google.com https://*.supabase.co https://lh3.googleusercontent.com",
               // Fonts : notre domaine + Google Fonts + fonts gstatic pour PDF invoices
               "font-src 'self' https://fonts.gstatic.com",
               // Connexions fetch/WebSocket : notre domaine + APIs externes
-              "connect-src 'self' https://www.google-analytics.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com https://hcaptcha.com https://*.hcaptcha.com",
+              "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.google.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com https://hcaptcha.com https://*.hcaptcha.com",
               // Iframes : Stripe + hCaptcha
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
               // Toute ressource non couverte : uniquement notre domaine
@@ -105,17 +100,9 @@ const nextConfig = {
             value: "nosniff",
           },
 
-          // ── Empêche le clickjacking (notre site ne peut être mis en iframe) ─
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-
-          // ── Filtre XSS des anciens navigateurs ────────────────────────────
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
+          // Clickjacking : géré par « frame-ancestors 'self' » dans la CSP ci-dessus
+          // (X-Frame-Options et X-XSS-Protection retirés : le premier contredisait la CSP,
+          // le second est obsolète et ignoré par les navigateurs actuels).
 
           // ── Politique de référent : limite la fuite d'URLs internes ────────
           {

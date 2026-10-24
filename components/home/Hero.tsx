@@ -62,8 +62,8 @@ export default function Hero() {
           <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-primary/65">
             {[
               { icon: "fas fa-shield-check", label: "RCCM Officiel" },
-              { icon: "fas fa-star", label: "4.9 / 5 satisfaction" },
-              { icon: "fas fa-bolt", label: "Résultats rapides" },
+              { icon: "fas fa-file-invoice", label: "Devis sous 48 h ouvrées" },
+              { icon: "fas fa-mobile-screen", label: "Paiement Mobile Money" },
             ].map((b) => (
               <div key={b.label} className="flex items-center gap-2">
                 <i className={`${b.icon} text-accent/70`} />

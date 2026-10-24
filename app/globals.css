@@ -229,3 +229,28 @@
 @media (prefers-color-scheme: dark) {
   /* Reserved for future dark mode implementation */
 }
+
+/* ── Corps des articles de blog (HTML de l'admin ou Markdown) ─────────────── */
+.article-body { color: #4b5563; line-height: 1.75; font-size: 1.0625rem; overflow-wrap: anywhere; }
+.article-body > * + * { margin-top: 1rem; }
+.article-body h2 { font-family: var(--font-syne, inherit); font-weight: 700; font-size: 1.5rem; color: #0A2533; margin-top: 2.5rem; line-height: 1.3; }
+.article-body h3 { font-family: var(--font-syne, inherit); font-weight: 700; font-size: 1.2rem; color: #0A2533; margin-top: 1.75rem; }
+.article-body h4 { font-weight: 700; color: #0A2533; margin-top: 1.5rem; }
+.article-body strong, .article-body b { color: #111315; font-weight: 600; }
+.article-body a { color: #2D5B78; text-decoration: underline; text-underline-offset: 2px; }
+.article-body a:hover { color: #0A2533; }
+.article-body ul, .article-body ol { padding-left: 1.4rem; }
+.article-body ul { list-style: disc; }
+.article-body ol { list-style: decimal; }
+.article-body li + li { margin-top: 0.35rem; }
+.article-body li::marker { color: #2D5B78; }
+.article-body blockquote { border-left: 3px solid #2D5B78; padding: 0.25rem 0 0.25rem 1rem; color: #374151; font-style: italic; }
+.article-body img { max-width: 100%; height: auto; border-radius: 0.75rem; }
+.article-body hr { border: 0; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+.article-body pre { background: #0A2533; color: #fff; padding: 1rem; border-radius: 0.75rem; overflow-x: auto; font-size: 0.875rem; }
+.article-body code { background: #EEF2F5; color: #0A2533; padding: 0.1rem 0.35rem; border-radius: 0.3rem; font-size: 0.9em; }
+.article-body pre code { background: transparent; color: inherit; padding: 0; }
+.article-body table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.article-body .article-table, .article-body > table { overflow-x: auto; display: block; }
+.article-body th, .article-body td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; }
+.article-body th { background: #EEF2F5; color: #0A2533; font-weight: 600; }

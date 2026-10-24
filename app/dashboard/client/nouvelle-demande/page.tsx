@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
+import { televerser } from "@/lib/televerser";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Service { id: string; title: string; description: string; priceMin: number; priceMax: number | null; duration: string | null; }
 
@@ -70,14 +71,10 @@ export default function NouvelleDemandePage() {
     if (!file) return;
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const r = await fetch("/api/upload", { method: "POST", body: fd });
-      const d = await r.json();
-      if (!r.ok) { toast.error(d.error ?? "Erreur upload"); return; }
+      const d = await televerser(file);
       setFiles((prev) => [...prev, { url: d.url, name: d.name ?? file.name }]);
       toast.success("Fichier joint !");
-    } catch { toast.error("Erreur lors de l'upload."); }
+    } catch (err) { toast.error((err as Error).message || "Erreur lors de l'envoi."); }
     finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
   }
 
@@ -300,7 +297,7 @@ export default function NouvelleDemandePage() {
             {/* Pièces jointes */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <i className="fas fa-paperclip mr-1.5 text-gray-400" />Pièces jointes <span className="text-gray-400 font-normal">(optionnel — max 10 MB)</span>
+                <i className="fas fa-paperclip mr-1.5 text-gray-400" />Pièces jointes <span className="text-gray-400 font-normal">(facultatif — 50 Mo maximum par fichier)</span>
               </label>
               {files.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
