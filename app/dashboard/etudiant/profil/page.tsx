@@ -160,7 +160,7 @@ export default function EtudiantProfilPage() {
               <i className="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
               <input value={phone} onChange={(e) => setPhone(e.target.value)}
                 className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-accent"
-                placeholder="+229 96 00 00 00" />
+                placeholder="+229 01 97 00 00 00" />
             </div>
           </div>
           <div>

@@ -118,6 +118,15 @@ export default function CookieConsent() {
   useEffect(() => {
     const existing = loadConsent();
     setConsent(existing); // null = pas de consentement → affiche la bannière
+    // « Modifier mes choix » (page /cookies) : rouvre la bannière en mode détaillé
+    const rouvrir = () => {
+      const actuel = loadConsent();
+      if (actuel) { setAnalytics(actuel.analytics); setMarketing(actuel.marketing); }
+      setDetails(true);
+      setConsent(null);
+    };
+    window.addEventListener("shiftup:cookies", rouvrir);
+    return () => window.removeEventListener("shiftup:cookies", rouvrir);
   }, []);
 
   // ── Ne rien afficher pendant le chargement initial (évite le flash) ──────

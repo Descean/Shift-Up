@@ -19,9 +19,9 @@ const jsonLd = {
   name: "SHIFT UP",
   description:
     "Cabinet de conseil stratégique et solutions numériques. Excellence, Innovation, Performance.",
-  url: "https://shiftup.bj",
-  logo: "https://shiftup.bj/assets/logo.png",
-  image: "https://shiftup.bj/assets/og-image.png",
+  url: "https://www.shiftup.bj",
+  logo: "https://www.shiftup.bj/assets/logo.png",
+  image: "https://www.shiftup.bj/assets/og-image.png",
   telephone: "+2290195035099",
   email: "contact@shiftup.bj",
   address: {

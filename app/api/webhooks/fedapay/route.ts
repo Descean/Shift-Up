@@ -7,7 +7,7 @@ import { sendFormationReceipt, sendFormationInscriptionAdmin } from "@/lib/email
  * POST /api/webhooks/fedapay
  *
  * Webhook serveur-à-serveur de FedaPay (distinct du callback de redirection navigateur).
- * À configurer dans le dashboard FedaPay : Settings → Webhooks → URL = https://shiftup.bj/api/webhooks/fedapay
+ * À configurer dans le dashboard FedaPay : Settings → Webhooks → URL = https://www.shiftup.bj/api/webhooks/fedapay
  *
  * Sécurité : vérification HMAC-SHA256 de la signature avant tout traitement.
  * Si FEDAPAY_WEBHOOK_SECRET n'est pas configuré, le webhook est rejeté en production.

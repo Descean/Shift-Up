@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Boutique | SHIFT UP",
+  title: "Boutique",
   description:
     "Achetez nos formations, templates et ressources professionnelles en ligne. Paiement sécurisé par Mobile Money (MTN, Moov) et carte bancaire.",
   keywords: [
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Boutique | SHIFT UP",
     description: "Formations, templates et ressources professionnelles. Paiement Mobile Money.",
-    url: "https://shiftup.bj/boutique",
+    url: "https://www.shiftup.bj/boutique",
   },
 };
 

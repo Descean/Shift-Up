@@ -9,7 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata = {
-  title: "Page introuvable | SHIFT UP",
+  title: "Page introuvable",
   description: "La page que vous cherchez n'existe pas ou a été déplacée.",
 };
 

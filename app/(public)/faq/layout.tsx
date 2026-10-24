@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FAQ | SHIFT UP",
+  title: "FAQ",
   description:
     "Trouvez les réponses à vos questions sur les services SHIFT UP : délais, tarifs, processus de commande, paiements, et plus encore.",
   keywords: [
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Foire aux questions | SHIFT UP",
     description: "Toutes les réponses à vos questions sur nos services.",
-    url: "https://shiftup.bj/faq",
+    url: "https://www.shiftup.bj/faq",
   },
 };
 

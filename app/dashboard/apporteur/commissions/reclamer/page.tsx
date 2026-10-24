@@ -8,40 +8,58 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 const PROVIDERS = [
-  { id: "MTN_MOMO",    label: "MTN MoMo",    icon: "fa-mobile-screen-button", color: "from-primary to-accent", prefix: "+229 6" },
-  { id: "MOOV_MONEY", label: "Moov Money",  icon: "fa-mobile-screen-button", color: "from-primary to-accent",   prefix: "+229 9" },
-  { id: "WAVE",       label: "Wave",        icon: "fa-wave-square",           color: "from-primary to-accent",   prefix: "+229 5" },
-  { id: "CELTIIS",    label: "Celtiis",     icon: "fa-mobile-screen-button", color: "from-primary to-accent", prefix: "+229 4" },
+  { id: "MTN_MOMO",    label: "MTN MoMo",    icon: "fa-mobile-screen-button", color: "from-primary to-accent" },
+  { id: "MOOV_MONEY", label: "Moov Money",  icon: "fa-mobile-screen-button", color: "from-primary to-accent" },
+  { id: "WAVE",       label: "Wave",        icon: "fa-wave-square",           color: "from-primary to-accent" },
+  { id: "CELTIIS",    label: "Celtiis",     icon: "fa-mobile-screen-button", color: "from-primary to-accent" },
 ];
 
 const MIN_AMOUNT = 30_000;
 
-// Mock: in production, fetch from session/API
-const MOCK_PENDING = 80_000;
+/** Numéro béninois à 10 chiffres (depuis le 30/11/2024) : 01 suivi de 8 chiffres. */
+function normaliserNumero(v: string) {
+  const d = v.replace(/\D/g, "").replace(/^(00)?229/, "");
+  return d.length === 8 ? "01" + d : d; // ancien numéro à 8 chiffres saisi : on ajoute 01
+}
+const numeroValide = (v: string) => /^01\d{8}$/.test(normaliserNumero(v));
+const formatNumero = (v: string) => normaliserNumero(v).replace(/(\d{2})(?=\d)/g, "$1 ");
 
 export default function ReclamerCommissionsPage() {
   const router = useRouter();
 
   const [provider, setProvider]     = useState<string>("");
   const [phone, setPhone]           = useState<string>("");
-  const [amount, setAmount]         = useState<string>(String(MOCK_PENDING));
+  const [solde, setSolde]           = useState<number | null>(null);
+  const [amount, setAmount]         = useState<string>("");
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState<string>("");
   const [success, setSuccess]       = useState(false);
   const [reference, setReference]   = useState<string>("");
 
+  useEffect(() => {
+    fetch("/api/apporteur/profile")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const s = Math.floor(d?.profile?.pendingEarnings ?? 0);
+        setSolde(s);
+        if (s >= MIN_AMOUNT) setAmount(String(s));
+      })
+      .catch(() => setSolde(0));
+  }, []);
+
+  const disponible = solde ?? 0;
   const numAmount = Number(amount);
   const canSubmit =
     provider &&
-    phone.trim().length >= 8 &&
+    numeroValide(phone) &&
     numAmount >= MIN_AMOUNT &&
-    numAmount <= MOCK_PENDING;
+    numAmount <= disponible;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,7 +74,7 @@ export default function ReclamerCommissionsPage() {
         body: JSON.stringify({
           amount: numAmount,
           mobileProvider: provider,
-          mobileNumber: phone.trim(),
+          mobileNumber: "+229" + normaliserNumero(phone),
         }),
       });
 
@@ -138,7 +156,7 @@ export default function ReclamerCommissionsPage() {
       <div className="bg-gradient-to-r from-accent to-secondary rounded-2xl p-5 text-white mb-6">
         <p className="text-white/70 text-sm">Commissions disponibles</p>
         <p className="font-syne font-black text-3xl mt-1">
-          {MOCK_PENDING.toLocaleString()} <span className="text-lg font-medium">F CFA</span>
+          {solde === null ? "…" : disponible.toLocaleString("fr-FR")} <span className="text-lg font-medium">F CFA</span>
         </p>
         <p className="text-white/60 text-xs mt-2">
           Minimum de retrait&nbsp;: <strong className="text-white">30 000 F</strong>
@@ -153,14 +171,15 @@ export default function ReclamerCommissionsPage() {
       >
         {/* Montant */}
         <div>
-          <label className="block text-sm font-semibold text-primary mb-2">
+          <label htmlFor="montant" className="block text-sm font-semibold text-primary mb-2">
             Montant à réclamer (F CFA)
           </label>
           <div className="relative">
             <input
+              id="montant"
               type="number"
               min={MIN_AMOUNT}
-              max={MOCK_PENDING}
+              max={disponible}
               step={1000}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -176,13 +195,18 @@ export default function ReclamerCommissionsPage() {
               Montant minimum : {MIN_AMOUNT.toLocaleString()} F CFA
             </p>
           )}
-          {numAmount > MOCK_PENDING && (
+          {solde !== null && disponible < MIN_AMOUNT && (
+            <p className="text-gray-600 text-xs mt-1">
+              Votre solde n&apos;atteint pas encore le minimum de retrait.
+            </p>
+          )}
+          {numAmount > disponible && disponible >= MIN_AMOUNT && (
             <p className="text-red-500 text-xs mt-1">
               Montant supérieur à votre solde disponible.
             </p>
           )}
           <div className="flex gap-2 mt-2">
-            {[30_000, 50_000, MOCK_PENDING].filter((v, i, arr) => arr.indexOf(v) === i).map((v) => (
+            {[30_000, 50_000, disponible].filter((v, i, arr) => v >= MIN_AMOUNT && v <= disponible && arr.indexOf(v) === i).map((v) => (
               <button
                 key={v}
                 type="button"
@@ -226,7 +250,7 @@ export default function ReclamerCommissionsPage() {
 
         {/* Phone */}
         <div>
-          <label className="block text-sm font-semibold text-primary mb-2">
+          <label htmlFor="numero" className="block text-sm font-semibold text-primary mb-2">
             Numéro Mobile Money
           </label>
           <div className="flex gap-2">
@@ -234,16 +258,24 @@ export default function ReclamerCommissionsPage() {
               <span className="text-sm text-gray-500">🇧🇯 +229</span>
             </div>
             <input
+              id="numero"
               type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder={provider ? PROVIDERS.find((p) => p.id === provider)?.prefix.replace("+229 ", "") + "XXXXXXX" : "XXXXXXXXX"}
+              onBlur={() => numeroValide(phone) && setPhone(formatNumero(phone))}
+              placeholder="01 XX XX XX XX"
               className="flex-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors"
             />
           </div>
-          <p className="text-xs text-gray-400 mt-1">
-            Assurez-vous que ce numéro est bien enregistré chez l'opérateur choisi.
-          </p>
+          {phone && !numeroValide(phone) ? (
+            <p className="text-red-600 text-xs mt-1">Numéro à 10 chiffres commençant par 01 (ex. 01 97 00 00 00).</p>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">
+              Numéro à 10 chiffres (01 XX XX XX XX), enregistré chez l&apos;opérateur choisi.
+            </p>
+          )}
         </div>
 
         {/* Error */}

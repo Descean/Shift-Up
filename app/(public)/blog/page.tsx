@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Blog & Ressources | SHIFT UP",
+  title: "Blog & Ressources",
   description: "Articles, actualités et ressources sur le conseil stratégique, le numérique et l'entrepreneuriat au Bénin.",
 };
 

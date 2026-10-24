@@ -143,7 +143,7 @@ export default function ServiceLeadForm({ service }: { service: ApporteurService
               <input type="email" {...register("email")} placeholder="votre@email.com" className={inputCls(!!errors.email)} />
             </Field>
             <Field label="Téléphone / WhatsApp" error={errors.phone?.message} required>
-              <input type="tel" {...register("phone")} placeholder="+229 01 XX XX XX" className={inputCls(!!errors.phone)} />
+              <input type="tel" {...register("phone")} placeholder="+229 01 XX XX XX XX" className={inputCls(!!errors.phone)} />
             </Field>
             <Field label="Décrivez votre besoin" hint="Optionnel">
               <textarea {...register("brief")} rows={3} placeholder="Contexte, délai souhaité, précisions utiles..." className={inputCls(false) + " resize-y min-h-[80px]"} />

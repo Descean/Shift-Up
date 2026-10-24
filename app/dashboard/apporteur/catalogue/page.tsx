@@ -92,7 +92,7 @@ export default function ApporteurCataloguePage() {
   const [filter, setFilter] = useState("Tous");
   const [copied, setCopied] = useState<string | null>(null);
   const affiliationCode = "SU-AP-7291";
-  const baseUrl = "https://shiftup.bj";
+  const baseUrl = "https://www.shiftup.bj";
 
   const filtered = filter === "Tous" ? services : services.filter((s) => s.domain === filter);
 

@@ -56,7 +56,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://shiftup.bj"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.shiftup.bj"),
   title: {
     default: "SHIFT UP | Cabinet de Conseil & Solutions Numériques — Bénin",
     template: "%s | SHIFT UP",
@@ -73,13 +73,13 @@ export const metadata: Metadata = {
     "formation entreprise Bénin",
     "juridique entreprise Bénin",
   ],
-  authors: [{ name: "SHIFT UP", url: "https://shiftup.bj" }],
+  authors: [{ name: "SHIFT UP", url: "https://www.shiftup.bj" }],
   creator: "SHIFT UP",
   publisher: "SHIFT UP",
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    url: "https://shiftup.bj",
+    url: "https://www.shiftup.bj",
     siteName: "SHIFT UP",
     title: "SHIFT UP | Excellence • Innovation • Performance",
     description:

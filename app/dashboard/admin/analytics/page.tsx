@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import GraphiqueMensuel, { evolution, type Mensuel } from "@/components/dashboard/GraphiqueMensuel";
 
 type Stats = {
-  users: { total: number; newThisMonth: number; byRole: Record<string, number> };
+  users: { total: number; newThisMonth: number; newLastMonth: number; byRole: Record<string, number> };
   prestations: { total: number; active: number; completed: number; byStatus: Record<string, number> };
-  revenue: { total: number; thisMonth: number };
+  revenue: { total: number; thisMonth: number; lastMonth: number };
+  mensuel: Mensuel;
+  topServices: { titre: string; total: number }[];
 };
 
 const STATUS_CONFIG: { key: string; label: string; color: string }[] = [
@@ -26,16 +29,6 @@ const ROLE_CONFIG: { key: string; label: string; color: string }[] = [
   { key: "ADMIN",     label: "Admins",     color: "bg-primary" },
 ];
 
-const monthlyActivity = [
-  { month: "Juil", clients: 8,  revenue: 320000 },
-  { month: "Août", clients: 12, revenue: 480000 },
-  { month: "Sept", clients: 15, revenue: 620000 },
-  { month: "Oct",  clients: 22, revenue: 890000 },
-  { month: "Nov",  clients: 18, revenue: 710000 },
-  { month: "Déc",  clients: 25, revenue: 950000 },
-];
-const maxRevenue = Math.max(...monthlyActivity.map((m) => m.revenue));
-
 export default function AdminAnalyticsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,11 +43,13 @@ export default function AdminAnalyticsPage() {
   const s = stats;
   const totalPrestations = s?.prestations.total ?? 0;
 
+  const evoCA = s ? evolution(s.revenue.thisMonth, s.revenue.lastMonth) : null;
+  const evoUsers = s ? evolution(s.users.newThisMonth, s.users.newLastMonth) : null;
   const kpis = [
-    { label: "CA Total",            value: s ? `${(s.revenue.total).toLocaleString()} F`      : "—", change: "+18%", positive: true,  icon: "fa-sack-dollar",  color: "from-primary to-accent" },
-    { label: "CA ce mois",          value: s ? `${(s.revenue.thisMonth).toLocaleString()} F`  : "—", change: "+32%", positive: true,  icon: "fa-chart-line",   color: "from-primary to-accent" },
-    { label: "Utilisateurs",        value: s ? String(s.users.total)                          : "—", change: `+${s?.users.newThisMonth ?? 0}`, positive: true, icon: "fa-users", color: "from-primary to-accent" },
-    { label: "Prestations actives", value: s ? String(s.prestations.active)                   : "—", change: "",     positive: true,  icon: "fa-briefcase",    color: "from-primary to-accent" },
+    { label: "CA total",            value: s ? `${(s.revenue.total).toLocaleString("fr-FR")} F`     : "—", change: "", positive: true, icon: "fa-sack-dollar", color: "from-primary to-accent" },
+    { label: "CA ce mois",          value: s ? `${(s.revenue.thisMonth).toLocaleString("fr-FR")} F` : "—", change: evoCA ? `${evoCA.texte} vs mois dernier` : s ? "Pas de comparaison (mois dernier à 0)" : "", positive: evoCA?.positif ?? true, icon: "fa-chart-line", color: "from-primary to-accent" },
+    { label: "Utilisateurs",        value: s ? String(s.users.total) : "—", change: s ? `${s.users.newThisMonth} inscrit(s) ce mois${evoUsers ? ` (${evoUsers.texte})` : ""}` : "", positive: evoUsers?.positif ?? true, icon: "fa-users", color: "from-primary to-accent" },
+    { label: "Prestations actives", value: s ? String(s.prestations.active) : "—", change: "", positive: true, icon: "fa-briefcase", color: "from-primary to-accent" },
   ];
 
   const prestationsByStatus = STATUS_CONFIG.map((cfg) => {
@@ -91,8 +86,8 @@ export default function AdminAnalyticsPage() {
               <p className="font-syne font-black text-2xl text-primary mb-1">{kpi.value}</p>
             )}
             {kpi.change && (
-              <span className={`text-xs font-semibold ${kpi.positive ? "text-green-600" : "text-red-500"}`}>
-                {kpi.change} vs mois dernier
+              <span className={`text-xs font-semibold ${kpi.positive ? "text-green-700" : "text-red-600"}`}>
+                {kpi.change}
               </span>
             )}
           </motion.div>
@@ -134,54 +129,27 @@ export default function AdminAnalyticsPage() {
         </div>
       </div>
 
-      {/* Activité mensuelle */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-syne font-bold text-primary">Activité mensuelle</h2>
-          <div className="flex items-center gap-4 text-xs text-gray-400">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-accent rounded-sm" />Revenus</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-secondary rounded-sm" />Nouveaux clients</span>
-          </div>
-        </div>
-        <div className="flex items-end gap-3 h-40">
-          {monthlyActivity.map((m) => (
-            <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
-              <div className="flex items-end gap-0.5 w-full">
-                <div className="flex-1 bg-accent rounded-t-sm transition-all hover:bg-accent/80" style={{ height: `${(m.revenue / maxRevenue) * 120}px` }} title={`${m.revenue.toLocaleString()} FCFA`} />
-                <div className="flex-1 bg-secondary rounded-t-sm transition-all hover:bg-secondary/80" style={{ height: `${(m.clients / 25) * 120}px` }} title={`${m.clients} clients`} />
-              </div>
-              <span className="text-xs text-gray-400">{m.month}</span>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs text-gray-400 mt-3">* Activité mensuelle basée sur les 6 derniers mois (données historiques à venir)</p>
-      </div>
+      <GraphiqueMensuel initial={s?.mensuel ?? null} titre="Encaissements mensuels" />
 
       {/* Top services */}
       <div className="bg-white rounded-2xl shadow-card p-6">
         <h2 className="font-syne font-bold text-primary mb-5">Top services demandés</h2>
-        <p className="text-xs text-gray-400 mb-4">Basé sur les prestations enregistrées en base de données.</p>
-        {s && totalPrestations === 0 ? (
-          <p className="text-center text-gray-400 text-sm py-6">Aucune prestation pour le moment.</p>
+        <p className="text-xs text-gray-500 mb-4">Nombre de demandes de prestation par service.</p>
+        {!s?.topServices?.length ? (
+          <p className="text-center text-gray-500 text-sm py-6">Aucune prestation pour le moment.</p>
         ) : (
           <div className="space-y-3">
-            {STATUS_CONFIG.map((cfg) => {
-              const count = s?.prestations.byStatus[cfg.key] ?? 0;
-              if (count === 0) return null;
-              return (
-                <div key={cfg.key} className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm text-gray-700 font-medium">{cfg.label}</span>
-                      <span className="text-xs text-gray-400">{count} prestation{count > 1 ? "s" : ""}</span>
-                    </div>
-                    <div className="bg-gray-100 rounded-full h-1.5">
-                      <div className="h-1.5 rounded-full bg-gradient-to-r from-accent to-secondary" style={{ width: `${totalPrestations > 0 ? (count / totalPrestations) * 100 : 0}%` }} />
-                    </div>
-                  </div>
+            {s.topServices.map((t) => (
+              <div key={t.titre}>
+                <div className="flex justify-between mb-1 gap-3">
+                  <span className="text-sm text-gray-700 font-medium">{t.titre}</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{t.total} demande{t.total > 1 ? "s" : ""}</span>
                 </div>
-              );
-            })}
+                <div className="bg-gray-100 rounded-full h-1.5">
+                  <div className="h-1.5 rounded-full bg-primary" style={{ width: `${(t.total / s.topServices[0].total) * 100}%` }} />
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

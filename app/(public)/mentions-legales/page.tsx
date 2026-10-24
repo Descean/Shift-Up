@@ -40,7 +40,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Mentions Légales | SHIFT UP",
+  title: "Mentions Légales",
   description: "Mentions légales de SHIFT UP — Cabinet de conseil stratégique et solutions numériques au Bénin.",
   robots: { index: true, follow: true },
 };
@@ -51,7 +51,7 @@ const sections = [
   {
     id: "editeur",
     title: "1. Éditeur du site",
-    content: `Le présent site internet accessible à l'adresse **https://shiftup.bj** est édité par :
+    content: `Le présent site internet accessible à l'adresse **https://www.shiftup.bj** est édité par :
 
 **Nom commercial** : SHIFT UP
 **Forme juridique** : Entreprise individuelle (Établissement — Personne physique)

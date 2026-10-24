@@ -22,7 +22,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Conditions Générales de Vente | SHIFT UP",
+  title: "Conditions Générales de Vente",
   description:
     "Conditions générales de vente et d'utilisation des services SHIFT UP — Cabinet de conseil stratégique et solutions numériques au Bénin.",
 };
@@ -46,7 +46,7 @@ Toute commande de service implique l'acceptation pleine et entière des présent
 **Dirigeant** : La Direction SHIFT UP
 **Email** : contact@shiftup.bj
 **Téléphone** : (+229) 01 95 03 50 99
-**Site web** : https://shiftup.bj`,
+**Site web** : https://www.shiftup.bj`,
   },
   {
     id: "services",

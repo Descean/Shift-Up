@@ -396,7 +396,7 @@ export default function FormationForm({ formation }: { formation: FormationProps
                 <input type="email" {...register("email")} placeholder="votre@email.com" className={inputCls(!!errors.email)} />
               </Field>
               <Field label="Numéro WhatsApp / Téléphone" error={errors.telephone?.message} required hint="Nous vous enverrons les informations pratiques sur ce numéro.">
-                <input type="tel" {...register("telephone")} placeholder="+229 01 XX XX XX" className={inputCls(!!errors.telephone)} />
+                <input type="tel" {...register("telephone")} placeholder="+229 01 XX XX XX XX" className={inputCls(!!errors.telephone)} />
               </Field>
               <Field label="Ville de résidence" error={errors.ville?.message} required>
                 <select {...register("ville")} className={selectCls(!!errors.ville)}>

@@ -9,7 +9,7 @@ type Referral = { id: string; name: string; email: string; date: string; status:
 export default function ClientAffiliationPage() {
   const { data: session } = useSession();
   const affiliationCode = (session?.user as any)?.affiliationCode ?? "";
-  const affiliationUrl = `https://shiftup.bj/inscription?ref=${affiliationCode}`;
+  const affiliationUrl = `https://www.shiftup.bj/inscription?ref=${affiliationCode}`;
 
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);

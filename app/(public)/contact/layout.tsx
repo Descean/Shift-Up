@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contactez-nous | SHIFT UP",
+  title: "Contactez-nous",
   description:
     "Prenez contact avec SHIFT UP pour un devis, une question ou un partenariat. Basé à Abomey-Calavi, Bénin. Réponse sous 24h.",
   keywords: [
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Contactez-nous | SHIFT UP",
     description: "Basé à Abomey-Calavi, Bénin. Réponse sous 24h.",
-    url: "https://shiftup.bj/contact",
+    url: "https://www.shiftup.bj/contact",
   },
 };
 

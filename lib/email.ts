@@ -8,7 +8,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM ?? "SHIFT UP <noreply@shiftup.bj>";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shift-up-two.vercel.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.shiftup.bj";
 
 // ─── Templates HTML partagés ─────────────────────────────────────────────────
 
@@ -185,7 +185,7 @@ export async function sendFormationReceipt({ to, prenom, nom, formation, dateDeb
       <p style="margin:0 0 6px;color:#92400e;font-weight:700;font-size:14px;">📋 Que faire maintenant ?</p>
       <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">1. Conservez cet email — il vous servira de billet d'entrée.</p>
       <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">2. Le lieu exact vous sera communiqué <strong>3 jours avant</strong> la formation.</p>
-      <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">3. Pour toute question : <a href="mailto:support@shiftup.com" style="color:#2D5B78;">support@shiftup.com</a></p>
+      <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">3. Pour toute question : <a href="mailto:contact@shiftup.bj" style="color:#2D5B78;">contact@shiftup.bj</a></p>
     </div>
     <p style="color:#333;font-weight:600;margin:0;">À très bientôt — L'équipe SHIFT UP</p>`;
   return resend.emails.send({
@@ -201,7 +201,7 @@ export async function sendFormationInscriptionAdmin({ prenom, nom, email, teleph
   prenom: string; nom: string; email: string; telephone: string;
   formation: string; reference: string; structure: string; secteur: string; methodePaiement: string;
 }) {
-  const supportEmail = "support@shiftup.com";
+  const supportEmail = "contact@shiftup.bj";
   const content = `
     <h2 style="color:#0A2533;font-size:20px;margin:0 0 16px;">🎓 Nouvelle inscription confirmée — ${formation}</h2>
     <table style="width:100%;border-collapse:collapse;">

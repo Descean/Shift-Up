@@ -16,7 +16,8 @@ const MIN_AMOUNT = 30_000;
 const schema = z.object({
   amount:         z.number().int().min(MIN_AMOUNT),
   mobileProvider: z.enum(["MTN_MOMO", "MOOV_MONEY", "WAVE", "CELTIIS"]),
-  mobileNumber:   z.string().min(8).max(20),
+  // Numérotation béninoise à 10 chiffres : +229 01 XX XX XX XX
+  mobileNumber:   z.string().transform((v) => v.replace(/[\s.-]/g, "")).pipe(z.string().regex(/^\+22901\d{8}$/, "Numéro Mobile Money invalide (10 chiffres, commençant par 01).")),
 });
 
 export async function POST(req: NextRequest) {

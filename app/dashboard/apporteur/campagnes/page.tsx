@@ -221,7 +221,7 @@ export default function ApporteurCampagnesPage() {
 
               <div className="mt-4 flex gap-2">
                 <button onClick={() => {
-                    navigator.clipboard.writeText(`https://shiftup.bj?ref=${affiliationCode}&utm_campaign=${c.id}`);
+                    navigator.clipboard.writeText(`https://www.shiftup.bj?ref=${affiliationCode}&utm_campaign=${c.id}`);
                     toast.success("Lien copié !");
                   }}
                   className="flex-1 text-center text-xs text-accent font-semibold py-2 rounded-xl bg-accent/5 hover:bg-accent/10 transition-colors">

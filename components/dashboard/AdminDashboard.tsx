@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { StatCard } from "@/components/ui/Card";
 import { PrestationStatusBadge } from "@/components/ui/Badge";
 import Link from "next/link";
+import GraphiqueMensuel, { type Mensuel } from "./GraphiqueMensuel";
 
 type Stats = {
   users: { total: number; newThisMonth: number };
@@ -12,6 +13,7 @@ type Stats = {
   revenue: { total: number; thisMonth: number };
   pendingMessages: number;
   newsletterCount: number;
+  mensuel?: Mensuel;
   recentPrestations: {
     id: string;
     status: string;
@@ -191,35 +193,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Revenue chart placeholder */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="font-syne font-bold text-lg text-primary">Chiffre d'affaires mensuel</h2>
-            <p className="text-gray-400 text-sm">12 derniers mois</p>
-          </div>
-          <select className="border border-gray-100 rounded-xl px-3 py-2 text-sm text-gray-600 focus:outline-none">
-            <option>2025</option>
-            <option>2024</option>
-          </select>
-        </div>
-        {/* Bar chart placeholder */}
-        <div className="flex items-end gap-2 h-40">
-          {[65, 45, 80, 72, 90, 60, 95, 78, 88, 70, 100, 85].map((h, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${h}%` }}
-                transition={{ duration: 0.5, delay: i * 0.05 }}
-                className="w-full bg-gradient-to-t from-accent to-secondary rounded-t-lg opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-              />
-              <span className="text-[10px] text-gray-400">
-                {["J","F","M","A","M","J","J","A","S","O","N","D"][i]}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <GraphiqueMensuel initial={stats?.mensuel ?? null} />
     </div>
   );
 }

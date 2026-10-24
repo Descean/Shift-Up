@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     select: { title: true, excerpt: true, category: true },
   });
   if (!post) return { title: "Article introuvable" };
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://shiftup.bj";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.shiftup.bj";
   return {
     title: post.title,
     description: post.excerpt ?? undefined,
@@ -176,7 +176,7 @@ export default async function BlogPostPage({ params }: Props) {
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <span className="text-sm text-gray-500">Partager :</span>
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent(post.title + " — https://shiftup.bj/blog/" + post.slug)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(post.title + " — https://www.shiftup.bj/blog/" + post.slug)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-accent text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-accent-600 transition-colors"
@@ -184,7 +184,7 @@ export default async function BlogPostPage({ params }: Props) {
                   <i className="fab fa-whatsapp" />WhatsApp
                 </a>
                 <a
-                  href={`https://www.linkedin.com/sharing/share-offsite/?url=https://shiftup.bj/blog/${post.slug}`}
+                  href={`https://www.linkedin.com/sharing/share-offsite/?url=https://www.shiftup.bj/blog/${post.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-accent-700 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-accent-800 transition-colors"

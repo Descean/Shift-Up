@@ -176,7 +176,7 @@ function SubscriptionForm() {
           <input
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            placeholder="+229 97 00 00 00"
+            placeholder="+229 01 97 00 00 00"
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none"
           />
         </div>

@@ -369,7 +369,7 @@ export default function NouvelleDemandePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone (pour ce projet)</label>
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" placeholder="+229 97 00 00 00" />
+                <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" placeholder="+229 01 97 00 00 00" />
               </div>
             </div>
 

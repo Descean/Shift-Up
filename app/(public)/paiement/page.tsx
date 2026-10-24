@@ -96,8 +96,8 @@ function PaiementContent() {
 
   // ─── Soumission Mobile Money (FedaPay) ──────────────────────────────────
   async function handleMobileMoneyPay() {
-    if (!phone.trim()) {
-      toast.error("Veuillez entrer votre numéro Mobile Money.");
+    if (!/^(\+?229)?01\d{8}$/.test(phone.replace(/[\s.-]/g, ""))) {
+      toast.error("Numéro Mobile Money à 10 chiffres, commençant par 01.");
       return;
     }
     if (!session?.user?.id) {
@@ -192,6 +192,8 @@ function PaiementContent() {
           Paiement 100% sécurisé — SSL / HTTPS
         </div>
       </div>
+
+      <h1 className="max-w-4xl mx-auto font-syne font-black text-2xl sm:text-3xl text-primary mb-6">Paiement sécurisé</h1>
 
       <div className="max-w-4xl mx-auto grid lg:grid-cols-5 gap-6">
 
@@ -346,7 +348,7 @@ function PaiementContent() {
 
                 {/* Numéro de téléphone */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="numero-momo" className="block text-sm font-medium text-gray-700 mb-2">
                     Numéro Mobile Money <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -354,7 +356,10 @@ function PaiementContent() {
                       +229
                     </div>
                     <input
+                      id="numero-momo"
                       type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="01 XX XX XX XX"
@@ -363,7 +368,7 @@ function PaiementContent() {
                     />
                   </div>
                   <p className="text-xs text-gray-400 mt-1.5">
-                    Entrez le numéro enregistré chez {MM_PROVIDERS.find(p => p.id === provider)?.name}
+                    Numéro à 10 chiffres enregistré chez {MM_PROVIDERS.find(p => p.id === provider)?.name}
                   </p>
                 </div>
 

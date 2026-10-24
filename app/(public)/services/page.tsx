@@ -683,20 +683,20 @@ export default function ServicesPage() {
               <motion.div key={sector.id} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.3 }}>
 
                 {/* En-tête du secteur */}
-                <div className="bg-white rounded-2xl shadow-card p-6 mb-6 flex items-start gap-5">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${sector.color} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                    <i className={`${sector.icon} text-white text-2xl`} />
+                <div className="bg-white rounded-2xl shadow-card p-5 sm:p-6 mb-6 flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${sector.color} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                    <i className={`${sector.icon} text-white text-xl sm:text-2xl`} aria-hidden />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h2 className="font-syne font-black text-2xl text-primary mb-1">{sector.label}</h2>
+                        <h2 className="font-syne font-black text-xl sm:text-2xl text-primary mb-1 break-words">{sector.label}</h2>
                         <p className="text-gray-500 text-sm leading-relaxed">{sector.intro}</p>
                       </div>
                     </div>
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
                       <i className="fas fa-certificate text-gray-400 text-xs" />
-                      <span className="text-xs text-gray-400 italic">{sector.registreRef}</span>
+                      <span className="text-xs text-gray-500 italic break-words">{sector.registreRef}</span>
                     </div>
                   </div>
                 </div>

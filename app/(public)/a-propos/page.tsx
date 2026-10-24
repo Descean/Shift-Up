@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Button from "@/components/ui/Button";
 
 export const metadata: Metadata = {
-  title: "À propos | SHIFT UP",
+  title: "À propos",
   description: "Découvrez SHIFT UP, cabinet de conseil stratégique et solutions numériques fondé à Abomey-Calavi, Bénin.",
 };
 

@@ -207,7 +207,7 @@ Ces transferts sont nécessaires à la fourniture de nos services. Vous pouvez r
 - Google Analytics 4 (_ga, _ga_*) : Mesure d'audience anonymisée — durée max 13 mois.
 Activés via le Consent Mode v2 de Google : aucune donnée n'est collectée avant votre accord.
 
-Vous pouvez modifier vos préférences à tout moment en cliquant sur "Gérer mes cookies" en bas de chaque page, ou en supprimant les cookies de votre navigateur.`,
+Vous pouvez modifier vos préférences à tout moment depuis la page **Cookies** (lien en bas de chaque page), ou en supprimant les cookies de votre navigateur.`,
   },
   {
     id: "securite",

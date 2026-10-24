@@ -218,9 +218,9 @@ export default function ApporteurProfilPage() {
         </div>
         <div className="mt-3 flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
           <span className="text-xs text-gray-600 truncate flex-1">
-            https://shiftup.bj/inscription?ref={profile.affiliationCode}
+            https://www.shiftup.bj/inscription?ref={profile.affiliationCode}
           </span>
-          <button onClick={() => { navigator.clipboard.writeText(`https://shiftup.bj/inscription?ref=${profile.affiliationCode}`); toast.success("Lien copié !"); }}
+          <button onClick={() => { navigator.clipboard.writeText(`https://www.shiftup.bj/inscription?ref=${profile.affiliationCode}`); toast.success("Lien copié !"); }}
             className="text-xs text-accent hover:underline flex-shrink-0">
             <i className="fas fa-copy" />
           </button>

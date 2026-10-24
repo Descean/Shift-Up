@@ -71,7 +71,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: f.titre,
     description,
-    robots: { index: false, follow: false },
+    // Session passée : retirée des moteurs de recherche
+    robots: f.dateDebut.getTime() > Date.now() ? { index: true, follow: true } : { index: false, follow: true },
     ...(ogImage && {
       openGraph: {
         title: f.titre,
