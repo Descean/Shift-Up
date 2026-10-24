@@ -4,7 +4,7 @@
  * Graphique mensuel alimenté par /api/admin/stats?annee=… (paiements réels des prestations
  * et des formations). Choix de l'année : de la première activité enregistrée à l'année en cours.
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export type Mensuel = { annee: number; annees: number[]; mois: { mois: number; prestations: number; formations: number; nouveauxClients: number }[] };
 
@@ -15,8 +15,6 @@ export default function GraphiqueMensuel({ initial, titre = "Chiffre d'affaires 
   const [donnees, setDonnees] = useState<Mensuel | null>(initial ?? null);
   const [annee, setAnnee] = useState<number>(initial?.annee ?? new Date().getFullYear());
   const [charge, setCharge] = useState(false);
-
-  useEffect(() => { if (initial) { setDonnees(initial); setAnnee(initial.annee); } }, [initial]);
 
   async function changer(a: number) {
     setAnnee(a); setCharge(true);

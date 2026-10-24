@@ -2,7 +2,7 @@
  * app/dashboard/client/factures/page.tsx — Factures et paiements (client)
  *
  * Affiche l'historique des paiements du client connecté.
- * Données mock — à remplacer par fetch /api/prestations?include=payments.
+ * Données : réelles, lues via GET /api/prestations (paiements des prestations du client).
  */
 
 "use client";

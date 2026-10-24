@@ -36,7 +36,7 @@ export default function CTASection() {
             className="inline-flex items-center gap-2 border border-white/25 text-white px-8 py-4 rounded-full text-sm font-semibold hover:bg-white/8 transition-colors duration-200"
           >
             <i className="fas fa-calendar-alt text-xs" />
-            RDV diagnostic gratuit
+            Demander un rendez-vous
           </Link>
         </div>
 

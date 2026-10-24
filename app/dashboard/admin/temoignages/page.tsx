@@ -16,7 +16,11 @@ export default function TemoignagesAdminPage() {
     const r = await fetch("/api/admin/temoignages");
     if (r.ok) setListe((await r.json()).temoignages);
   };
-  useEffect(() => { charger(); }, []);
+  useEffect(() => {
+    let actif = true;
+    fetch("/api/admin/temoignages").then((r) => (r.ok ? r.json() : null)).then((d) => { if (actif && d) setListe(d.temoignages); });
+    return () => { actif = false; };
+  }, []);
 
   async function ajouter(e: React.FormEvent) {
     e.preventDefault(); setErreur("");

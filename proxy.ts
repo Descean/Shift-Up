@@ -49,6 +49,7 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse, NextRequest } from "next/server";
 import { rateLimit } from "@/lib/ratelimit";
+import type { JWT } from "next-auth/jwt";
 
 // ─── Configuration du rate limiter ────────────────────────────────────────────
 
@@ -83,7 +84,7 @@ async function checkRateLimit(ip: string, path: string): Promise<boolean> {
 // ─── Middleware principal ──────────────────────────────────────────────────────
 
 export default withAuth(
-  async function middleware(req: NextRequest & { nextauth: { token: any } }) {
+  async function middleware(req: NextRequest & { nextauth: { token: JWT | null } }) {
     const { pathname } = req.nextUrl;
 
     // ── 1. Rate limiting sur les routes sensibles ──────────────────────────

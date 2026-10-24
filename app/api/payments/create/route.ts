@@ -161,8 +161,9 @@ async function handleFedaPay({ amount, reference, session, prestation, phone }: 
 async function handleStripe({ amount, reference, session, prestation }: {
   amount: number; reference: string; session: Session; prestation: Prestation;
 }) {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error("Paiement par carte indisponible : STRIPE_SECRET_KEY manquante.");
   const Stripe = (await import("stripe")).default;
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   // Convert XOF → EUR (approximate: 1 EUR ≈ 655.957 XOF)
   const amountEurCents = Math.round((amount / 655.957) * 100);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId, isValidElement, cloneElement } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -188,13 +188,16 @@ export default function ServiceLeadForm({ service }: { service: ApporteurService
 function Field({ label, children, error, required, hint }: {
   label: string; children: React.ReactNode; error?: string; required?: boolean; hint?: string;
 }) {
+  const id = useId();
+  const champUnique = isValidElement(children) && typeof children.type === "string" && ["input", "select", "textarea"].includes(children.type);
+  const champ = champUnique ? cloneElement(children as React.ReactElement<{ id?: string }>, { id }) : children;
   return (
     <div>
-      <label className="block text-sm font-semibold text-primary mb-1">
+      <label htmlFor={champUnique ? id : undefined} className="block text-sm font-semibold text-primary mb-1">
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
-      {hint && <p className="text-xs text-gray-400 mb-1.5">{hint}</p>}
-      {children}
+      {hint && <p className="text-xs text-gray-500 mb-1.5">{hint}</p>}
+      {champ}
       <AnimatePresence>
         {error && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-red-500 mt-1">

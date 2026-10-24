@@ -182,7 +182,9 @@ export default function Header() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5"
+          aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-expanded={mobileOpen}
+          className="lg:hidden w-11 h-11 flex flex-col justify-center items-center gap-1.5"
         >
           <span className={cn(
             "block w-6 h-0.5 transition-all duration-300",

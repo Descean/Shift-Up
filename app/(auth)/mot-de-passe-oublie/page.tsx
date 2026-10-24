@@ -101,12 +101,13 @@ export default function MotDePasseOubliePage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="f-email" className="block text-sm font-medium text-gray-700 mb-2">
                   Adresse email
                 </label>
                 <div className="relative">
                   <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
                   <input
+                    id="f-email"
                     {...register("email")}
                     type="email"
                     autoFocus

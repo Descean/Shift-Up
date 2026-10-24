@@ -35,6 +35,8 @@ export default function NewsletterForm() {
     <form onSubmit={handleSubmit} className="flex gap-3 w-full md:w-auto">
       <input
         type="email"
+        aria-label="Votre adresse e-mail pour la newsletter"
+        autoComplete="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="votre@email.com"

@@ -169,12 +169,13 @@ function ResetForm() {
 
         {/* Champ "Nouveau mot de passe" avec bouton show/hide */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="f-password" className="block text-sm font-medium text-gray-700 mb-2">
             Nouveau mot de passe
           </label>
           <div className="relative">
             <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
+              id="f-password"
               {...register("password")}
               type={showPwd ? "text" : "password"} // Bascule clair/masqué
               className="w-full border border-gray-200 rounded-xl pl-11 pr-12 py-3.5 text-sm focus:outline-none focus:border-accent transition-colors"
@@ -196,12 +197,13 @@ function ResetForm() {
 
         {/* Champ "Confirmer le mot de passe" */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="f-confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
             Confirmer le mot de passe
           </label>
           <div className="relative">
             <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
+              id="f-confirmPassword"
               {...register("confirmPassword")}
               type="password"
               className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-accent transition-colors"

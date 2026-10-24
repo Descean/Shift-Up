@@ -193,7 +193,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <GraphiqueMensuel initial={stats?.mensuel ?? null} />
+      <GraphiqueMensuel key={stats ? "pret" : "attente"} initial={stats?.mensuel ?? null} />
     </div>
   );
 }

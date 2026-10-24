@@ -29,12 +29,11 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import prisma from "@/lib/prisma";
 
-// ── Initialisation du client Stripe ──────────────────────────────────────────
-// STRIPE_SECRET_KEY est obligatoire — le `!` indique à TypeScript qu'on garantit
-// sa présence (vérification faite dans le handler).
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+// ── Client Stripe créé à l'appel (le build ne dépend pas de la clé) ──────────
+function stripeClient() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY manquante.");
+  return new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-02-25.clover" });
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // POST /api/payments/webhook/stripe — Réception des événements Stripe
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
   // ── Vérification cryptographique de la signature Stripe ───────────────────
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripeClient().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     // Signature invalide → soit requête falsifiée, soit mauvais secret
     console.error("Stripe webhook signature verification failed:", err);

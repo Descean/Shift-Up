@@ -135,8 +135,9 @@ async function handleFedaPay({ product, session, reference, phone }: {
 async function handleStripe({ product, session, reference }: {
   product: Product; session: Session; reference: string;
 }) {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error("Paiement par carte indisponible : STRIPE_SECRET_KEY manquante.");
   const Stripe = (await import("stripe")).default;
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   // Prix déjà en EUR/USD si product.currency !== "XOF", sinon conversion XOF → EUR
   const unitAmount = product.currency === "XOF"

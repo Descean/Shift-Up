@@ -55,6 +55,11 @@ const FORMATION_RICH_CONTENT: Record<string, {
   },
 };
 
+/** Heure de la requête (page rendue à chaque visite). */
+function instant() {
+  return Date.now();
+}
+
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ succes?: string; ref?: string; echec?: string }>;
@@ -121,7 +126,7 @@ export default async function FormationPage({ params, searchParams }: Props) {
   if (!formation) notFound();
 
   const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Porto-Novo" });
-  const now = Date.now();
+  const now = instant();
   const richContent = FORMATION_RICH_CONTENT[mainSlug] ?? {};
 
   // Construction des sessions si des variantes existent

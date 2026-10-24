@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId, isValidElement, cloneElement } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -695,13 +695,23 @@ function Card({ num, title, children }: { num: string; title: string; children: 
 function Field({ label, children, error, required, hint }: {
   label: string; children: React.ReactNode; error?: string; required?: boolean; hint?: string;
 }) {
+  // Libellé relié au champ (accessibilité) : id ajouté au champ unique, sinon groupe nommé
+  const id = useId();
+  const champUnique = isValidElement(children) && typeof children.type === "string" && ["input", "select", "textarea"].includes(children.type);
+  const champ = champUnique ? cloneElement(children as React.ReactElement<{ id?: string }>, { id }) : children;
   return (
     <div>
-      <label className="block text-sm font-semibold text-primary mb-1">
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      {hint && <p className="text-xs text-gray-400 mb-1.5">{hint}</p>}
-      {children}
+      {champUnique ? (
+        <label htmlFor={id} className="block text-sm font-semibold text-primary mb-1">
+          {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+      ) : (
+        <p id={`${id}-l`} className="block text-sm font-semibold text-primary mb-1">
+          {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+        </p>
+      )}
+      {hint && <p className="text-xs text-gray-500 mb-1.5">{hint}</p>}
+      {champUnique ? champ : <div role="group" aria-labelledby={`${id}-l`}>{champ}</div>}
       <AnimatePresence>
         {error && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-red-500 mt-1">

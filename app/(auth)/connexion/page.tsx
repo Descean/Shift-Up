@@ -202,10 +202,11 @@ export default function ConnexionPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Adresse email</label>
+          <label htmlFor="f-email" className="block text-sm font-medium text-gray-700 mb-2">Adresse email</label>
           <div className="relative">
             <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
+              id="f-email"
               {...register("email")}
               type="email"
               className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-accent transition-colors"
@@ -217,7 +218,7 @@ export default function ConnexionPage() {
 
         <div>
           <div className="flex justify-between mb-2">
-            <label className="text-sm font-medium text-gray-700">Mot de passe</label>
+            <label htmlFor="f-password" className="text-sm font-medium text-gray-700">Mot de passe</label>
             <Link href="/mot-de-passe-oublie" className="text-xs text-accent hover:underline">
               Mot de passe oublié ?
             </Link>
@@ -225,6 +226,7 @@ export default function ConnexionPage() {
           <div className="relative">
             <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
+              id="f-password"
               {...register("password")}
               type={showPwd ? "text" : "password"}
               className="w-full border border-gray-200 rounded-xl pl-11 pr-12 py-3.5 text-sm focus:outline-none focus:border-accent transition-colors"

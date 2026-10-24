@@ -209,7 +209,7 @@ export default async function BlogPostPage({ params }: Props) {
                   href="/contact"
                   className="block w-full bg-gradient-to-r from-accent to-secondary text-white text-sm font-semibold py-3 rounded-xl hover:opacity-90 transition-opacity"
                 >
-                  Prendre RDV
+                  Demander un rendez-vous
                 </Link>
               </div>
 

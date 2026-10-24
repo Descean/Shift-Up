@@ -9,7 +9,7 @@
  *  - Badge étoiles (notation) et compteur de prestations
  *  - Consomme GET /api/admin/users et PATCH /api/admin/users
  *
- * Données : actuellement mockées — remplacer par appels réels (TODO commentés).
+ * Données : réelles, lues via GET /api/admin/users (pagination, recherche, filtre par rôle).
  */
 
 "use client";

@@ -7,9 +7,7 @@
  *  - Tableau des commissions dues aux apporteurs
  *  - Filtrage par méthode de paiement et par statut
  *
- * Données : actuellement mockées.
- * TODO: brancher sur GET /api/admin/payments (à créer) qui lit prisma.payment.
- *       Les commissions doivent être lues depuis prisma.apporteurProfile.pendingEarnings.
+ * Données : réelles, lues via GET /api/admin/payments (table Payment et soldes des apporteurs).
  */
 
 "use client";

@@ -68,12 +68,12 @@ export default function Footer() {
           {/* Services */}
           <div>
             <h4 className="font-syne font-bold text-lg mb-5">Nos Services</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-0 md:space-y-3">
               {services.map((s) => (
                 <li key={s}>
                   <Link
                     href="/services"
-                    className="text-white/60 hover:text-white text-sm transition-colors flex items-center gap-2 group"
+                    className="text-white/70 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[44px] md:min-h-[28px]"
                   >
                     <i className="fas fa-chevron-right text-xs text-accent/0 group-hover:text-white transition-all duration-200" />
                     {s}
@@ -86,12 +86,12 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="font-syne font-bold text-lg mb-5">Liens Utiles</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-0 md:space-y-3">
               {quickLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-white/60 hover:text-white text-sm transition-colors flex items-center gap-2 group"
+                    className="text-white/70 hover:text-white text-sm transition-colors flex items-center gap-2 group min-h-[44px] md:min-h-[28px]"
                   >
                     <i className="fas fa-chevron-right text-xs text-accent/0 group-hover:text-white transition-all duration-200" />
                     {l.label}
@@ -104,7 +104,7 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h4 className="font-syne font-bold text-lg mb-5">Contact</h4>
-            <ul className="space-y-4">
+            <ul className="space-y-1 md:space-y-4">
               <li className="flex items-start gap-3">
                 <i className="fas fa-map-marker-alt text-accent-300 mt-0.5 w-4" />
                 <span className="text-white/60 text-sm">
@@ -113,7 +113,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <i className="fas fa-phone text-accent-300 w-4" />
-                <a href="tel:+2290195035099" className="text-white/60 hover:text-white text-sm transition-colors">
+                <a href="tel:+2290195035099" className="text-white/70 hover:text-white text-sm transition-colors inline-flex items-center min-h-[44px] md:min-h-0">
                   (+229) 01 95 03 50 99
                 </a>
               </li>
@@ -121,7 +121,7 @@ export default function Footer() {
                 <i className="fas fa-envelope text-accent-300 w-4" />
                 <a
                   href="mailto:contact@shiftup.bj"
-                  className="text-white/60 hover:text-white text-sm transition-colors"
+                  className="text-white/70 hover:text-white text-sm transition-colors inline-flex items-center min-h-[44px] md:min-h-0"
                 >
                   contact@shiftup.bj
                 </a>
@@ -132,7 +132,7 @@ export default function Footer() {
                   href="https://wa.me/2290195035099"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/60 hover:text-white text-sm transition-colors"
+                  className="text-white/70 hover:text-white text-sm transition-colors inline-flex items-center min-h-[44px] md:min-h-0"
                 >
                   WhatsApp Business
                 </a>
@@ -153,7 +153,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="w-9 h-9 bg-white/10 hover:bg-accent rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  className="w-11 h-11 bg-white/10 hover:bg-accent rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
                 >
                   <i className={`${s.icon} text-sm`} />
                 </a>
@@ -191,7 +191,7 @@ export default function Footer() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="text-white/30 hover:text-white/60 text-xs transition-colors"
+                  className="text-white/70 hover:text-white text-xs transition-colors inline-flex items-center min-h-[44px] px-1"
                 >
                   {l.label}
                 </Link>

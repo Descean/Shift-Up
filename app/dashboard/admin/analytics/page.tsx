@@ -129,7 +129,7 @@ export default function AdminAnalyticsPage() {
         </div>
       </div>
 
-      <GraphiqueMensuel initial={s?.mensuel ?? null} titre="Encaissements mensuels" />
+      <GraphiqueMensuel key={s ? "pret" : "attente"} initial={s?.mensuel ?? null} titre="Encaissements mensuels" />
 
       {/* Top services */}
       <div className="bg-white rounded-2xl shadow-card p-6">

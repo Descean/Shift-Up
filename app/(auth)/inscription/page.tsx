@@ -139,8 +139,9 @@ export default function InscriptionPage() {
         {/* Name & Email */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
+            <label htmlFor="f-name" className="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
             <input
+              id="f-name"
               {...register("name")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
               placeholder="Jean Dupont"
@@ -148,8 +149,9 @@ export default function InscriptionPage() {
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+            <label htmlFor="f-phone" className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
             <input
+              id="f-phone"
               {...register("phone")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
               placeholder="+229 01 XX XX XX XX"
@@ -158,8 +160,9 @@ export default function InscriptionPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Adresse email *</label>
+          <label htmlFor="f-email" className="block text-sm font-medium text-gray-700 mb-2">Adresse email *</label>
           <input
+            id="f-email"
             {...register("email")}
             type="email"
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
@@ -171,9 +174,10 @@ export default function InscriptionPage() {
         {/* Password */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
+            <label htmlFor="f-password" className="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
             <div className="relative">
               <input
+                id="f-password"
                 {...register("password")}
                 type={showPwd ? "text" : "password"}
                 className="w-full border border-gray-200 rounded-xl px-4 pr-11 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
@@ -188,8 +192,9 @@ export default function InscriptionPage() {
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirmer *</label>
+            <label htmlFor="f-confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">Confirmer *</label>
             <input
+              id="f-confirmPassword"
               {...register("confirmPassword")}
               type="password"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
@@ -247,11 +252,12 @@ export default function InscriptionPage() {
           {selectedRole === "APPORTEUR" && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
               <div className="bg-secondary/5 border border-secondary/20 rounded-xl p-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="f-ifu" className="block text-sm font-medium text-gray-700 mb-2">
                   <i className="fas fa-id-card text-secondary mr-2" />
                   IFU (requis pour les apporteurs)
                 </label>
                 <input
+                  id="f-ifu"
                   {...register("ifu")}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-secondary transition-colors"
                   placeholder="Votre numéro IFU"
@@ -262,10 +268,11 @@ export default function InscriptionPage() {
         </AnimatePresence>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="f-affiliationCode" className="block text-sm font-medium text-gray-700 mb-2">
             Code d'affiliation (optionnel)
           </label>
           <input
+            id="f-affiliationCode"
             {...register("affiliationCode")}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
             placeholder="Code de parrainage"

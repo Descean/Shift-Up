@@ -215,6 +215,7 @@ export default function ChatWidget() {
               {/* Bouton fermer */}
               <button
                 onClick={() => setOpen(false)}
+                aria-label="Fermer l'assistant"
                 className="text-white/60 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10"
               >
                 <i className="fas fa-xmark" />
@@ -300,6 +301,7 @@ export default function ChatWidget() {
               />
               <button
                 onClick={() => sendMessage(input)}
+                aria-label="Envoyer le message"
                 disabled={!input.trim() || loading}
                 className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white hover:opacity-90 transition-opacity disabled:opacity-40 flex-shrink-0"
               >
@@ -314,6 +316,8 @@ export default function ChatWidget() {
       {/* Affiche l'icône chat ou close selon l'état, et le badge de non-lus */}
       <motion.button
         onClick={handleOpen}
+        aria-label={open ? "Fermer l'assistant" : "Ouvrir l'assistant SHIFT UP"}
+        aria-expanded={open}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="w-14 h-14 bg-gradient-to-br from-accent to-secondary rounded-2xl shadow-glow flex items-center justify-center text-white relative"

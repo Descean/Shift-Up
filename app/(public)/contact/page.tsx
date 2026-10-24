@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,8 +55,15 @@ export default function ContactPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  // Objet prérempli depuis un lien (?sujet=…), ex. « Prochaine session : … »
+  useEffect(() => {
+    const sujet = new URLSearchParams(window.location.search).get("sujet");
+    if (sujet) setValue("subject", sujet.slice(0, 150));
+  }, [setValue]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -184,8 +191,8 @@ export default function ContactPage() {
                   <i className="fas fa-calendar-alt text-xl" />
                 </div>
                 <div>
-                  <p className="font-bold">Réserver un RDV</p>
-                  <p className="text-white/80 text-sm">Diagnostic gratuit en ligne</p>
+                  <p className="font-bold">Demander un rendez-vous</p>
+                  <p className="text-white/80 text-sm">Diagnostic offert : nous vous proposons un créneau</p>
                 </div>
                 <i className="fas fa-arrow-right ml-auto" />
               </a>
@@ -204,8 +211,9 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
+                    <label htmlFor="f-name" className="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
                     <input
+                      id="f-name"
                       {...register("name")}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
                       placeholder="Jean Dupont"
@@ -213,8 +221,9 @@ export default function ContactPage() {
                     {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <label htmlFor="f-email" className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                     <input
+                      id="f-email"
                       {...register("email")}
                       type="email"
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
@@ -226,16 +235,18 @@ export default function ContactPage() {
 
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                    <label htmlFor="f-phone" className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
                     <input
+                      id="f-phone"
                       {...register("phone")}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
                       placeholder="+229 01 XX XX XX XX"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Service concerné</label>
+                    <label htmlFor="f-service" className="block text-sm font-medium text-gray-700 mb-2">Service concerné</label>
                     <select
+                      id="f-service"
                       {...register("service")}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors bg-white"
                     >
@@ -248,8 +259,9 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Objet *</label>
+                  <label htmlFor="f-subject" className="block text-sm font-medium text-gray-700 mb-2">Objet *</label>
                   <input
+                    id="f-subject"
                     {...register("subject")}
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
                     placeholder="Sujet de votre message"
@@ -258,8 +270,9 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Message *</label>
+                  <label htmlFor="f-message" className="block text-sm font-medium text-gray-700 mb-2">Message *</label>
                   <textarea
+                    id="f-message"
                     {...register("message")}
                     rows={5}
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors resize-none"

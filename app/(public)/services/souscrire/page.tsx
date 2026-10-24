@@ -123,10 +123,10 @@ function SubscriptionForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Service */}
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-2">
+        <label htmlFor="f-service" className="text-sm font-medium text-gray-700 block mb-2">
           Service souhaité <span className="text-red-500">*</span>
         </label>
-        <select
+        <select id="f-service"
           required
           value={form.service}
           onChange={(e) => setForm({ ...form, service: e.target.value })}
@@ -142,10 +142,10 @@ function SubscriptionForm() {
       <div className="grid sm:grid-cols-2 gap-4">
         {/* Name */}
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
+          <label htmlFor="f-name" className="text-sm font-medium text-gray-700 block mb-2">
             Nom complet <span className="text-red-500">*</span>
           </label>
-          <input
+          <input id="f-name"
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -155,10 +155,10 @@ function SubscriptionForm() {
         </div>
         {/* Email */}
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
+          <label htmlFor="f-email" className="text-sm font-medium text-gray-700 block mb-2">
             Email <span className="text-red-500">*</span>
           </label>
-          <input
+          <input id="f-email"
             required
             type="email"
             value={form.email}
@@ -172,8 +172,8 @@ function SubscriptionForm() {
       <div className="grid sm:grid-cols-2 gap-4">
         {/* Phone */}
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">Téléphone</label>
-          <input
+          <label htmlFor="f-phone" className="text-sm font-medium text-gray-700 block mb-2">Téléphone</label>
+          <input id="f-phone"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="+229 01 97 00 00 00"
@@ -182,8 +182,8 @@ function SubscriptionForm() {
         </div>
         {/* Company */}
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">Entreprise / Organisation</label>
-          <input
+          <label htmlFor="f-company" className="text-sm font-medium text-gray-700 block mb-2">Entreprise / Organisation</label>
+          <input id="f-company"
             value={form.company}
             onChange={(e) => setForm({ ...form, company: e.target.value })}
             placeholder="Nom de votre structure"
@@ -195,8 +195,8 @@ function SubscriptionForm() {
       <div className="grid sm:grid-cols-2 gap-4">
         {/* Budget */}
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">Budget estimé</label>
-          <select
+          <label htmlFor="f-budget" className="text-sm font-medium text-gray-700 block mb-2">Budget estimé</label>
+          <select id="f-budget"
             value={form.budget}
             onChange={(e) => setForm({ ...form, budget: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none"
@@ -212,8 +212,8 @@ function SubscriptionForm() {
         </div>
         {/* Timeline */}
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">Délai souhaité</label>
-          <select
+          <label htmlFor="f-timeline" className="text-sm font-medium text-gray-700 block mb-2">Délai souhaité</label>
+          <select id="f-timeline"
             value={form.timeline}
             onChange={(e) => setForm({ ...form, timeline: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none"
@@ -230,10 +230,10 @@ function SubscriptionForm() {
 
       {/* Description */}
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-2">
+        <label htmlFor="f-description" className="text-sm font-medium text-gray-700 block mb-2">
           Décrivez votre besoin <span className="text-red-500">*</span>
         </label>
-        <textarea
+        <textarea id="f-description"
           required
           rows={5}
           value={form.description}

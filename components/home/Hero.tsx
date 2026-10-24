@@ -54,7 +54,7 @@ export default function Hero() {
               className="inline-flex items-center gap-2 border border-primary/20 text-primary px-8 py-4 rounded-full text-sm font-semibold hover:bg-primary hover:text-white transition-colors duration-200"
             >
               <i className="fas fa-calendar-alt text-xs" />
-              Prendre RDV
+              Demander un rendez-vous
             </Link>
           </div>
 
