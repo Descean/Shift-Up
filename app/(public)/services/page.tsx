@@ -548,8 +548,8 @@ export default function ServicesPage() {
           <div className="flex flex-wrap gap-6 mt-8">
             {[
               { icon: "fas fa-briefcase", value: `${SECTORS.length}`, label: "Secteurs" },
-              { icon: "fas fa-check-circle", value: `${SECTORS.reduce((a, s) => a + s.services.length, 0)}+`, label: "Services" },
-              { icon: "fas fa-users", value: "200+", label: "Clients accompagnés" },
+              { icon: "fas fa-check-circle", value: `${SECTORS.reduce((a, s) => a + s.services.length, 0)}`, label: "Services" },
+              { icon: "fas fa-file-invoice", value: "48 h", label: "Délai de devis" },
             ].map((stat) => (
               <div key={stat.label} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl">
                 <i className={`${stat.icon} text-accent`} />
@@ -565,7 +565,7 @@ export default function ServicesPage() {
 
       {/* ── Layout : Sidebar + Contenu ────────────────────────────────────── */}
       <div className="container-custom py-10">
-        <div className="flex gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 items-stretch lg:items-start">
 
           {/* ── Sidebar secteurs (desktop) ──────────────────────────────── */}
           <aside className="hidden lg:flex flex-col w-72 flex-shrink-0 sticky top-24 max-h-[calc(100vh-7rem)] overflow-hidden rounded-2xl bg-white shadow-card">

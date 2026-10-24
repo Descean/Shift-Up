@@ -53,7 +53,7 @@ function Counter({ value, suffix, fixe }: { value: number; suffix: string; fixe?
 
 export default function CounterDisplay({ stats }: { stats: StatItem[] }) {
   return (
-    <div className={`grid grid-cols-2 ${stats.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} divide-x divide-primary/10`}>
+    <div className={`grid grid-cols-2 ${stats.length >= 4 ? "lg:grid-cols-4" : stats.length === 3 ? "lg:grid-cols-3 max-w-4xl" : "max-w-2xl"} mx-auto divide-x divide-primary/10`}>
       {stats.map((c) => (
         <div key={c.label} className="text-center px-6 py-6 lg:py-0">
           <p className="text-4xl sm:text-5xl font-bold text-primary mb-2 tabular-nums" style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}>

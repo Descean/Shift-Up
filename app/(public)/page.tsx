@@ -8,7 +8,7 @@ import CTASection from "@/components/home/CTASection";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "SHIFT UP | Excellence • Innovation • Performance",
+  title: { absolute: "SHIFT UP | Excellence • Innovation • Performance" },
   description:
     "Cabinet de conseil stratégique et solutions numériques basé à Abomey-Calavi, Bénin. Transforming Business, Shaping Future.",
 };

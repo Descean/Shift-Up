@@ -47,7 +47,7 @@ export default function AdminAnalyticsPage() {
   const evoUsers = s ? evolution(s.users.newThisMonth, s.users.newLastMonth) : null;
   const kpis = [
     { label: "CA total",            value: s ? `${(s.revenue.total).toLocaleString("fr-FR")} F`     : "—", change: "", positive: true, icon: "fa-sack-dollar", color: "from-primary to-accent" },
-    { label: "CA ce mois",          value: s ? `${(s.revenue.thisMonth).toLocaleString("fr-FR")} F` : "—", change: evoCA ? `${evoCA.texte} vs mois dernier` : s ? "Pas de comparaison (mois dernier à 0)" : "", positive: evoCA?.positif ?? true, icon: "fa-chart-line", color: "from-primary to-accent" },
+    { label: "CA ce mois",          value: s ? `${(s.revenue.thisMonth).toLocaleString("fr-FR")} F` : "—", change: evoCA ? `${evoCA.texte} vs mois dernier` : s ? "Pas de comparaison (mois dernier à 0)" : "", positive: evoCA?.positif ?? true, neutre: !evoCA, icon: "fa-chart-line", color: "from-primary to-accent" },
     { label: "Utilisateurs",        value: s ? String(s.users.total) : "—", change: s ? `${s.users.newThisMonth} inscrit(s) ce mois${evoUsers ? ` (${evoUsers.texte})` : ""}` : "", positive: evoUsers?.positif ?? true, icon: "fa-users", color: "from-primary to-accent" },
     { label: "Prestations actives", value: s ? String(s.prestations.active) : "—", change: "", positive: true, icon: "fa-briefcase", color: "from-primary to-accent" },
   ];
@@ -86,7 +86,7 @@ export default function AdminAnalyticsPage() {
               <p className="font-syne font-black text-2xl text-primary mb-1">{kpi.value}</p>
             )}
             {kpi.change && (
-              <span className={`text-xs font-semibold ${kpi.positive ? "text-green-700" : "text-red-600"}`}>
+              <span className={`text-xs font-semibold ${"neutre" in kpi && kpi.neutre ? "text-gray-500" : kpi.positive ? "text-green-700" : "text-red-600"}`}>
                 {kpi.change}
               </span>
             )}

@@ -45,11 +45,11 @@ export default function CTASection() {
           {[
             { icon: "fas fa-lock", label: "Données sécurisées" },
             { icon: "fas fa-credit-card", label: "Paiement sécurisé" },
-            { icon: "fas fa-headset", label: "Support 7j/7" },
-            { icon: "fas fa-undo-alt", label: "Satisfaction garantie" },
+            { icon: "fas fa-file-invoice", label: "Devis gratuit" },
+            { icon: "fas fa-clock", label: "Réponse sous 48 h ouvrées" },
           ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2 text-white/30 text-sm">
-              <i className={`${item.icon} text-secondary/70`} />
+            <div key={item.label} className="flex items-center gap-2 text-white/70 text-sm">
+              <i className={`${item.icon} text-accent-200`} aria-hidden />
               {item.label}
             </div>
           ))}

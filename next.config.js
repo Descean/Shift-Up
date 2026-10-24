@@ -74,17 +74,17 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               // Scripts : notre domaine + Google (Analytics) + Stripe + hCaptcha
-              "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
+              "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://*.brevo.com",
               // Styles : notre domaine + Google Fonts + hCaptcha
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://hcaptcha.com https://*.hcaptcha.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://hcaptcha.com https://*.hcaptcha.com https://*.brevo.com",
               // Images : notre domaine + Google Analytics + Supabase + data: URIs (SVG inline)
-              "img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://*.google.com https://*.supabase.co https://lh3.googleusercontent.com",
+              "img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://*.google.com https://*.supabase.co https://lh3.googleusercontent.com https://*.brevo.com",
               // Fonts : notre domaine + Google Fonts + fonts gstatic pour PDF invoices
-              "font-src 'self' https://fonts.gstatic.com",
+              "font-src 'self' https://fonts.gstatic.com https://*.brevo.com",
               // Connexions fetch/WebSocket : notre domaine + APIs externes
-              "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.google.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com https://hcaptcha.com https://*.hcaptcha.com",
+              "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.google.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com https://hcaptcha.com https://*.hcaptcha.com https://*.brevo.com wss://*.brevo.com",
               // Iframes : Stripe + hCaptcha
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://*.brevo.com",
               // Toute ressource non couverte : uniquement notre domaine
               "default-src 'self'",
               // Bloque les formulaires qui soumettent vers des sites tiers non listés
