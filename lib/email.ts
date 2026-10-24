@@ -350,3 +350,69 @@ export async function sendCandidatureAdmin({ to, candidature, attachments, liens
     attachments,
   });
 }
+
+// ─── Recrutement : candidats non retenus ─────────────────────────────────────
+
+const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Porto-Novo" });
+
+function blocDonnees(lien: string, dateLimite: Date) {
+  return `
+    <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:20px;margin:24px 0;">
+      <p style="margin:0 0 8px;color:#0A2533;font-size:15px;font-weight:700;">Pouvons-nous garder votre dossier ?</p>
+      <p style="margin:0 0 4px;color:#555;font-size:14px;line-height:1.6;">Nous recrutons régulièrement pour des projets de travaux publics. Avec votre accord, nous conservons votre dossier pendant 24 mois pour vous proposer un poste qui correspond mieux à votre profil. Sans accord, il est supprimé.</p>
+      <p style="margin:12px 0 0;">
+        <a href="${lien}?choix=oui" style="display:inline-block;background:#0A2533;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;font-size:14px;margin:4px 8px 4px 0;">Oui, gardez mon dossier</a>
+        <a href="${lien}?choix=non" style="display:inline-block;background:#fff;color:#0A2533;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:700;font-size:14px;border:1px solid #0A2533;margin:4px 0;">Non, supprimez mes données</a>
+      </p>
+      <p style="margin:12px 0 0;color:#777;font-size:12px;line-height:1.5;">Sans réponse de votre part avant le <strong>${dateFr(dateLimite)}</strong>, vos pièces et vos coordonnées seront supprimées. Vous pourrez changer d'avis à tout moment avec ce même lien.</p>
+    </div>`;
+}
+
+/** Courriel de non-sélection avec les motifs et le choix de conservation des données. */
+export async function sendNonRetenuCandidat({ to, prenoms, poste, reference, motifs, commentaire, lien, dateLimite }: {
+  to: string; prenoms: string; poste: string; reference: string; motifs: string[]; commentaire?: string | null; lien: string; dateLimite: Date;
+}) {
+  const liste = motifs.length
+    ? `<p style="color:#555;line-height:1.6;margin:16px 0 6px;">Votre dossier n'a pas été retenu pour ${motifs.length > 1 ? "les raisons suivantes" : "la raison suivante"} :</p>
+       <ul style="margin:0 0 8px;padding-left:20px;color:#333;line-height:1.6;">${motifs.map((m) => `<li style="margin:4px 0;">${esc(m)}</li>`).join("")}</ul>`
+    : "";
+  const content = `
+    <h2 style="color:#0A2533;font-size:21px;margin:0 0 8px;">Suite donnée à votre candidature</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Merci de l'intérêt que vous avez porté au poste de <strong>${esc(poste)}</strong> (réf. ${esc(reference)}). Nous avons étudié votre dossier avec attention et nous ne pouvons pas y donner une suite favorable pour ce recrutement.</p>
+    ${liste}
+    ${commentaire ? `<p style="color:#555;line-height:1.6;margin:12px 0 0;">${esc(commentaire).replace(/\n/g, "<br/>")}</p>` : ""}
+    ${blocDonnees(lien, dateLimite)}
+    <p style="color:#555;line-height:1.6;font-size:14px;">Pour toute question, répondez à ce courriel ou écrivez à <a href="mailto:contact@shiftup.bj" style="color:#2D5B78;">contact@shiftup.bj</a> en rappelant votre référence.</p>
+    <p style="color:#333;font-weight:600;margin-top:20px;">Le service recrutement de SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: "contact@shiftup.bj", subject: `Votre candidature — ${poste} — Réf. ${reference}`, html: baseLayout(content, "Suite donnée à votre candidature") });
+}
+
+/** Relance : le candidat n'a pas encore indiqué s'il accepte la conservation de son dossier. */
+export async function sendRelanceDonneesCandidat({ to, prenoms, poste, reference, lien, dateLimite }: {
+  to: string; prenoms: string; poste: string; reference: string; lien: string; dateLimite: Date;
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:21px;margin:0 0 8px;">Votre dossier de candidature</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Nous vous avons écrit au sujet de votre candidature au poste de <strong>${esc(poste)}</strong> (réf. ${esc(reference)}). Vous ne nous avez pas encore dit si nous pouvons garder votre dossier pour un prochain recrutement.</p>
+    ${blocDonnees(lien, dateLimite)}
+    <p style="color:#333;font-weight:600;margin-top:20px;">Le service recrutement de SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: "contact@shiftup.bj", subject: `Rappel : conservation de votre dossier — Réf. ${reference}`, html: baseLayout(content, "Votre dossier de candidature") });
+}
+
+/** Accusé du choix du candidat. */
+export async function sendConfirmationDonneesCandidat({ to, prenoms, reference, choix, jusquau, lien }: {
+  to: string; prenoms: string; reference: string; choix: "ACCEPTEE" | "REFUSEE"; jusquau?: Date | null; lien: string;
+}) {
+  const corps = choix === "ACCEPTEE"
+    ? `<p style="color:#555;line-height:1.6;">Votre dossier (réf. ${esc(reference)}) est conservé jusqu'au <strong>${jusquau ? dateFr(jusquau) : "—"}</strong>. Nous vous contacterons si un poste correspond à votre profil.</p>
+       <p style="color:#555;line-height:1.6;font-size:14px;">Vous pouvez retirer votre accord à tout moment : <a href="${lien}" style="color:#2D5B78;">gérer mon dossier</a>.</p>`
+    : `<p style="color:#555;line-height:1.6;">Comme vous l'avez demandé, vos pièces et vos coordonnées liées à la candidature réf. ${esc(reference)} ont été supprimées de nos systèmes.</p>`;
+  const content = `
+    <h2 style="color:#0A2533;font-size:21px;margin:0 0 8px;">${choix === "ACCEPTEE" ? "Votre dossier est conservé" : "Vos données ont été supprimées"}</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
+    ${corps}
+    <p style="color:#333;font-weight:600;margin-top:20px;">Le service recrutement de SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: "contact@shiftup.bj", subject: choix === "ACCEPTEE" ? `Dossier conservé — Réf. ${reference}` : `Données supprimées — Réf. ${reference}`, html: baseLayout(content, "Votre dossier de candidature") });
+}

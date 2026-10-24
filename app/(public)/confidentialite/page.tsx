@@ -32,7 +32,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Politique de Confidentialité | SHIFT UP",
+  title: "Politique de confidentialité",
   description: "Politique de confidentialité et protection des données personnelles de SHIFT UP — conforme au Code du Numérique béninois (Loi n°2017-20).",
 };
 
@@ -85,11 +85,13 @@ Pour toute question relative à vos données ou pour exercer vos droits, contact
 
 **Données transactionnelles** : historique des prestations, montants réglés, modes de paiement utilisés.
 
-**Données de communication** : messages envoyés via notre formulaire de contact, échanges avec notre chatbot IA.`,
+**Données de communication** : messages envoyés via notre formulaire de contact, échanges avec notre chatbot IA.
+
+**Données de candidature** (page Recrutement) : identité, coordonnées, diplôme, expérience, disponibilité et pièces jointes (CV, diplômes, attestations de travail).`,
   },
   {
     id: "finalites",
-    title: "2. Finalités du traitement",
+    title: "3. Finalités du traitement",
     content: `Vos données sont collectées et traitées pour les finalités suivantes :
 
 - **Exécution des prestations** : gestion de votre espace client, suivi de vos projets, facturation.
@@ -101,7 +103,7 @@ Pour toute question relative à vos données ou pour exercer vos droits, contact
   },
   {
     id: "base-legale",
-    title: "3. Base légale du traitement",
+    title: "4. Base légale du traitement",
     content: `Le traitement de vos données repose sur les bases légales suivantes :
 
 - **Exécution du contrat** : pour les données nécessaires à la fourniture de nos services.
@@ -111,7 +113,7 @@ Pour toute question relative à vos données ou pour exercer vos droits, contact
   },
   {
     id: "conservation",
-    title: "4. Durée de conservation",
+    title: "5. Durée de conservation",
     content: `Nous conservons vos données pour les durées suivantes :
 
 - **Données de compte** : durée de votre relation contractuelle avec SHIFT UP, plus 3 ans après la résiliation.
@@ -124,7 +126,7 @@ Pour toute question relative à vos données ou pour exercer vos droits, contact
   },
   {
     id: "partage",
-    title: "5. Partage des données",
+    title: "6. Partage des données",
     content: `SHIFT UP ne vend jamais vos données personnelles à des tiers. Vos données peuvent être partagées avec :
 
 **Prestataires techniques** (sous-traitants) :
@@ -140,7 +142,7 @@ Ces prestataires n'utilisent vos données que pour les finalités pour lesquelle
   },
   {
     id: "droits",
-    title: "6. Vos droits",
+    title: "7. Vos droits",
     content: `Conformément aux lois applicables en matière de protection des données, vous disposez des droits suivants :
 
 - **Droit d'accès** : obtenir une copie des données vous concernant.
@@ -156,7 +158,7 @@ Nous nous engageons à répondre dans un délai maximum de **30 jours**.`,
   },
   {
     id: "durees",
-    title: "7. Durées de conservation",
+    title: "8. Durées de conservation par catégorie",
     content: `Conformément à l'**Article 76 du Code du Numérique béninois**, vos données sont conservées uniquement le temps nécessaire aux finalités pour lesquelles elles ont été collectées :
 
 **Compte utilisateur** : Pendant la durée de la relation contractuelle + 3 ans après la clôture du compte.
@@ -169,13 +171,15 @@ Nous nous engageons à répondre dans un délai maximum de **30 jours**.`,
 
 **Logs de sécurité (audit logs)** : 12 mois glissants.
 
+**Candidatures (recrutement)** : pendant la durée du recrutement. Un candidat non retenu en est informé par courriel et choisit, par un lien personnel, de laisser son dossier dans notre vivier pendant 24 mois ou de le faire supprimer. Sans réponse sous 30 jours, ses pièces et ses coordonnées sont supprimées. L'accord peut être retiré à tout moment avec le même lien.
+
 **Tokens de réinitialisation de mot de passe** : 1 heure (expiration automatique).
 
 À l'expiration de ces délais, vos données sont supprimées ou anonymisées de manière irréversible.`,
   },
   {
     id: "transferts",
-    title: "8. Transferts internationaux de données",
+    title: "9. Transferts internationaux de données",
     content: `Conformément à l'**Article 88 du Code du Numérique béninois**, nous vous informons que certaines de vos données sont transférées hors du Bénin auprès de nos prestataires techniques :
 
 **Vercel Inc.** (États-Unis) — Hébergement de l'application web.
@@ -191,7 +195,7 @@ Ces transferts sont nécessaires à la fourniture de nos services. Vous pouvez r
   },
   {
     id: "cookies",
-    title: "9. Politique de cookies",
+    title: "10. Politique de cookies",
     content: `Notre site utilise des cookies. Conformément à l'**Article 72 du Code du Numérique béninois**, les cookies non essentiels ne sont déposés qu'avec votre consentement explicite.
 
 **Cookies essentiels** (toujours actifs — aucun consentement requis) :
@@ -207,7 +211,7 @@ Vous pouvez modifier vos préférences à tout moment en cliquant sur "Gérer me
   },
   {
     id: "securite",
-    title: "10. Sécurité des données",
+    title: "11. Sécurité des données",
     content: `SHIFT UP met en œuvre les mesures techniques et organisationnelles suivantes pour protéger vos données :
 
 - Chiffrement des données en transit (HTTPS/TLS 1.3) et au repos (AES-256).

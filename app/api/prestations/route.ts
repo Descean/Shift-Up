@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
 
   const ip = getClientIp(req);
-  const { allowed, retryAfter } = rateLimit(`prestations:${session.user.id}:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 });
+  const { allowed, retryAfter } = await rateLimit(`prestations:${session.user.id}:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 });
   if (!allowed) {
     return NextResponse.json(
       { error: "Trop de demandes. Réessayez dans quelques minutes." },

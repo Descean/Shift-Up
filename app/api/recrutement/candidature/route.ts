@@ -54,7 +54,7 @@ async function nouvelleReference(code: string) {
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const { allowed, retryAfter } = rateLimit(`recrut-cand:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  const { allowed, retryAfter } = await rateLimit(`recrut-cand:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
   if (!allowed) {
     return NextResponse.json({ error: "Trop de tentatives. Réessayez dans quelques minutes." }, { status: 429, headers: { "Retry-After": String(retryAfter) } });
   }

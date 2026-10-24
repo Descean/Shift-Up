@@ -673,32 +673,50 @@ enum FormationInscriptionStatus {
 // ============================================================
 
 model Candidature {
-  id                  String            @id @default(cuid())
-  reference           String            @unique
-  offreCode           String // ex. "DT"
-  offreTitre          String // titre au moment du dépôt
-  nom                 String
-  prenoms             String
-  email               String
-  telephone           String
-  ville               String
-  nationalite         String
-  diplome             String
-  anneeDiplome        Int
-  anneesExperience    Int
-  nbProjetsSimilaires Int
-  disponibilite       String
-  source              String? // affiche, whatsapp, facebook… (paramètre ?src=)
-  fichiers            Json // [{ type, path, nom, taille }]
-  statut              CandidatureStatut @default(NOUVELLE)
-  noteInterne         String?
-  consentement        Boolean           @default(true)
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id                   String               @id @default(cuid())
+  reference            String               @unique
+  offreCode            String // ex. "DT"
+  offreTitre           String // titre au moment du dépôt
+  nom                  String
+  prenoms              String
+  email                String
+  telephone            String
+  ville                String
+  nationalite          String
+  diplome              String
+  anneeDiplome         Int
+  anneesExperience     Int
+  nbProjetsSimilaires  Int
+  disponibilite        String
+  source               String? // affiche, whatsapp, facebook… (paramètre ?src=)
+  fichiers             Json // [{ type, path, nom, taille }]
+  statut               CandidatureStatut    @default(NOUVELLE)
+  noteInterne          String?
+  consentement         Boolean              @default(true)
+  // ── Non-sélection : motifs communiqués au candidat et sort de ses données ──
+  motifsNonRetenu      String[]             @default([]) // codes de lib/recrutement/motifs.ts
+  commentaireNonRetenu String? // message libre ajouté au courriel
+  notifieLe            DateTime? // envoi du courriel de non-sélection
+  relanceLe            DateTime? // relance automatique sans réponse
+  conservation         ConservationDonnees? // réponse du candidat
+  conservationLe       DateTime? // date de la réponse
+  conservationJusquau  DateTime? // fin de conservation (accord) ou date limite de réponse
+  jetonDonnees         String?              @unique // lien personnel envoyé par courriel
+  donneesSupprimeesLe  DateTime? // pièces effacées et identité anonymisée
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 
   @@index([offreCode])
   @@index([email])
   @@index([statut])
+  @@index([conservation])
+}
+
+enum ConservationDonnees {
+  EN_ATTENTE // courriel envoyé, pas encore de réponse
+  ACCEPTEE // le candidat accepte que son dossier soit gardé (vivier)
+  REFUSEE // le candidat demande la suppression
+  EXPIREE // sans réponse dans le délai : données supprimées
 }
 
 enum CandidatureStatut {

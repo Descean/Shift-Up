@@ -21,7 +21,7 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const { allowed, retryAfter } = rateLimit(`recrut-upload:${ip}`, { limit: 40, windowMs: 15 * 60 * 1000 });
+  const { allowed, retryAfter } = await rateLimit(`recrut-upload:${ip}`, { limit: 40, windowMs: 15 * 60 * 1000 });
   if (!allowed) {
     return NextResponse.json({ error: "Trop de fichiers envoyés. Réessayez dans quelques minutes." }, { status: 429, headers: { "Retry-After": String(retryAfter) } });
   }

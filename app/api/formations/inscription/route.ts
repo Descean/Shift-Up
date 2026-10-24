@@ -37,7 +37,7 @@ function generateReference(): string {
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const { allowed, retryAfter } = rateLimit(`inscription:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  const { allowed, retryAfter } = await rateLimit(`inscription:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
   if (!allowed) {
     return NextResponse.json(
       { error: "Trop de tentatives. Réessayez dans quelques minutes." },

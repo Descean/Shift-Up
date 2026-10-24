@@ -106,3 +106,53 @@ function safeLocal(objectPath: string) {
 export function isPdf(buf: Buffer) {
   return buf.length > 5 && buf.subarray(0, 5).toString("latin1") === "%PDF-";
 }
+
+/** Supprime des fichiers du stockage (ignore ceux qui n'existent plus). */
+export async function removeObjects(paths: string[]): Promise<void> {
+  if (!paths.length) return;
+  if (localMode) {
+    await Promise.all(paths.map((p) => fs.rm(path.join(LOCAL_DIR, safeLocal(p)), { force: true })));
+    return;
+  }
+  for (let i = 0; i < paths.length; i += 100) {
+    const { error } = await admin().storage.from(BUCKET).remove(paths.slice(i, i + 100));
+    if (error) throw error;
+  }
+}
+
+/**
+ * Liste tous les fichiers du bucket avec leur date de création (parcours CODE/AAAA-MM/dossier/fichier).
+ * Sert au nettoyage des dépôts abandonnés (formulaire non validé).
+ */
+export async function listAllObjects(): Promise<{ path: string; createdAt: Date }[]> {
+  if (localMode) {
+    const out: { path: string; createdAt: Date }[] = [];
+    async function walk(rel: string) {
+      const entries = await fs.readdir(path.join(LOCAL_DIR, rel), { withFileTypes: true }).catch(() => []);
+      for (const e of entries) {
+        const r = rel ? `${rel}/${e.name}` : e.name;
+        if (e.isDirectory()) await walk(r);
+        else out.push({ path: r, createdAt: (await fs.stat(path.join(LOCAL_DIR, r))).birthtime });
+      }
+    }
+    await walk("");
+    return out;
+  }
+  await ensureBucket();
+  const sb = admin().storage.from(BUCKET);
+  const out: { path: string; createdAt: Date }[] = [];
+  async function walk(prefix: string) {
+    for (let offset = 0; ; offset += 1000) {
+      const { data, error } = await sb.list(prefix, { limit: 1000, offset });
+      if (error) throw error;
+      for (const it of data ?? []) {
+        const p = prefix ? `${prefix}/${it.name}` : it.name;
+        if (!it.id) await walk(p); // sous-dossier
+        else out.push({ path: p, createdAt: new Date(it.created_at) });
+      }
+      if (!data || data.length < 1000) break;
+    }
+  }
+  await walk("");
+  return out;
+}

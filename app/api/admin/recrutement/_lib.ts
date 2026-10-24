@@ -17,6 +17,11 @@ export function buildWhere(sp: URLSearchParams): Prisma.CandidatureWhereInput {
   const q = sp.get("q")?.trim();
   if (offre) where.offreCode = offre;
   if (statut && (STATUTS as readonly string[]).includes(statut)) where.statut = statut as (typeof STATUTS)[number];
+  const donnees = sp.get("donnees");
+  if (donnees === "vivier") { where.conservation = "ACCEPTEE"; where.donneesSupprimeesLe = null; }
+  else if (donnees === "attente") { where.conservation = "EN_ATTENTE"; where.donneesSupprimeesLe = null; }
+  else if (donnees === "a_notifier") { where.statut = "NON_RETENUE"; where.notifieLe = null; where.donneesSupprimeesLe = null; }
+  else if (donnees === "supprimees") where.donneesSupprimeesLe = { not: null };
   if (q) {
     where.OR = ["nom", "prenoms", "email", "reference", "diplome", "telephone"].map((k) => ({ [k]: { contains: q, mode: "insensitive" } }));
   }

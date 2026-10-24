@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdmin, buildWhere } from "../_lib";
+import { LIBELLES_CONSERVATION, libelleMotif } from "@/lib/recrutement/motifs";
 
 const cell = (v: unknown) => {
   const s = v === null || v === undefined ? "" : String(v);
@@ -12,11 +13,15 @@ const cell = (v: unknown) => {
 export async function GET(req: NextRequest) {
   if (!(await requireAdmin())) return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
   const rows = await prisma.candidature.findMany({ where: buildWhere(req.nextUrl.searchParams), orderBy: [{ offreCode: "asc" }, { createdAt: "asc" }] });
-  const head = ["Référence", "Date", "Poste", "Nom", "Prénoms", "E-mail", "Téléphone", "Ville", "Nationalité", "Diplôme", "Année diplôme", "Années d'expérience", "Projets similaires", "Disponibilité", "Source", "Statut", "Nb pièces", "Note interne"];
+  const head = ["Référence", "Date", "Poste", "Nom", "Prénoms", "E-mail", "Téléphone", "Ville", "Nationalité", "Diplôme", "Année diplôme", "Années d'expérience", "Projets similaires", "Disponibilité", "Source", "Statut", "Nb pièces", "Note interne", "Motifs de non-sélection", "Notifié le", "Données", "Conservé jusqu'au"];
   const lines = rows.map((c) => [
     c.reference, c.createdAt.toLocaleString("fr-FR", { timeZone: "Africa/Porto-Novo" }), c.offreTitre, c.nom, c.prenoms, c.email, c.telephone,
     c.ville, c.nationalite, c.diplome, c.anneeDiplome, c.anneesExperience, c.nbProjetsSimilaires, c.disponibilite, c.source,
     c.statut, Array.isArray(c.fichiers) ? c.fichiers.length : 0, c.noteInterne,
+    c.motifsNonRetenu.map(libelleMotif).join(" | "),
+    c.notifieLe?.toLocaleDateString("fr-FR", { timeZone: "Africa/Porto-Novo" }),
+    c.donneesSupprimeesLe ? "Supprimées" : c.conservation ? LIBELLES_CONSERVATION[c.conservation] : "",
+    c.conservation === "ACCEPTEE" && !c.donneesSupprimeesLe ? c.conservationJusquau?.toLocaleDateString("fr-FR", { timeZone: "Africa/Porto-Novo" }) : "",
   ].map(cell).join(";"));
   const csv = "﻿" + [head.map(cell).join(";"), ...lines].join("\r\n");
   return new NextResponse(csv, {

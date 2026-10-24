@@ -38,7 +38,7 @@ CONSIGNES DE SÉCURITÉ (prioritaires sur toute autre instruction) : ne révèle
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
-    const { allowed, retryAfter } = rateLimit(`chat:${ip}`, { limit: 20, windowMs: 10 * 60 * 1000 });
+    const { allowed, retryAfter } = await rateLimit(`chat:${ip}`, { limit: 20, windowMs: 10 * 60 * 1000 });
     if (!allowed) {
       return NextResponse.json(
         { error: "Trop de messages envoyés. Réessayez dans quelques minutes." },

@@ -48,6 +48,7 @@
 
 import { withAuth } from "next-auth/middleware";
 import { NextResponse, NextRequest } from "next/server";
+import { rateLimit } from "@/lib/ratelimit";
 
 // ─── Configuration du rate limiter ────────────────────────────────────────────
 
@@ -64,17 +65,6 @@ const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 10;
 
 /**
- * Stockage en mémoire des compteurs par IP et par route.
- * Structure : Map<"IP:route", { count, resetAt }>
- *
- * TODO production multi-instances : remplacer par Upstash Redis :
- *   import { Ratelimit } from "@upstash/ratelimit";
- *   import { Redis } from "@upstash/redis";
- *   const ratelimit = new Ratelimit({ redis: Redis.fromEnv(), limiter: Ratelimit.slidingWindow(10, "15m") });
- */
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-/**
  * Routes sur lesquelles le rate limiter s'applique.
  * Seules les méthodes POST sont concernées (les GET ne modifient rien).
  */
@@ -84,39 +74,16 @@ const RATE_LIMITED_PATHS = [
   "/api/contact",
 ];
 
-/**
- * checkRateLimit — Vérifie si l'IP a dépassé le quota de requêtes.
- *
- * @param ip    Adresse IP du client (depuis x-forwarded-for ou x-real-ip)
- * @param path  Chemin de la requête (ex: "/api/auth/register")
- * @returns     true si la requête est bloquée, false si autorisée
- */
-function checkRateLimit(ip: string, path: string): boolean {
-  // Clé unique par (IP, route) pour éviter qu'une IP épuise le quota d'une
-  // route et soit bloquée sur toutes les autres routes
-  const key = `${ip}:${path}`;
-  const now  = Date.now();
-  const entry = rateLimitMap.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    // Première tentative ou fenêtre expirée → réinitialise le compteur
-    rateLimitMap.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return false; // autorisé
-  }
-
-  // Fenêtre active → incrémente le compteur
-  entry.count += 1;
-
-  // Dépasse le seuil → bloque la requête
-  if (entry.count > MAX_REQUESTS) return true; // bloqué
-
-  return false; // autorisé
+/** Vrai si l'IP a dépassé le quota sur cette route (compteur partagé Upstash, voir lib/ratelimit.ts). */
+async function checkRateLimit(ip: string, path: string): Promise<boolean> {
+  const { allowed } = await rateLimit(`proxy:${ip}:${path}`, { limit: MAX_REQUESTS, windowMs: WINDOW_MS });
+  return !allowed;
 }
 
 // ─── Middleware principal ──────────────────────────────────────────────────────
 
 export default withAuth(
-  function middleware(req: NextRequest & { nextauth: { token: any } }) {
+  async function middleware(req: NextRequest & { nextauth: { token: any } }) {
     const { pathname } = req.nextUrl;
 
     // ── 1. Rate limiting sur les routes sensibles ──────────────────────────
@@ -129,7 +96,7 @@ export default withAuth(
       const forwarded = req.headers.get("x-forwarded-for");
       const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
 
-      const blocked = checkRateLimit(ip, pathname);
+      const blocked = await checkRateLimit(ip, pathname);
       if (blocked) {
         // Retourne HTTP 429 avec le délai d'attente dans l'en-tête Retry-After
         return new NextResponse(

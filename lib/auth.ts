@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
         // chemin /api/auth/*), donc la protection est posée ici directement.
         const forwarded = (req.headers as Record<string, string> | undefined)?.["x-forwarded-for"];
         const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
-        const { allowed } = rateLimit(`login:${ip}`, { limit: 8, windowMs: 15 * 60 * 1000 });
+        const { allowed } = await rateLimit(`login:${ip}`, { limit: 8, windowMs: 15 * 60 * 1000 });
         if (!allowed) {
           throw new Error("RATE_LIMITED");
         }

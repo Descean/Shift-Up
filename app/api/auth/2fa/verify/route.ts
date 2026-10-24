@@ -14,7 +14,7 @@ import { rateLimit, getClientIp } from "@/lib/ratelimit";
  */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const { allowed, retryAfter } = rateLimit(`2fa:${ip}`, { limit: 5, windowMs: 5 * 60 * 1000 });
+  const { allowed, retryAfter } = await rateLimit(`2fa:${ip}`, { limit: 5, windowMs: 5 * 60 * 1000 });
   if (!allowed) {
     return NextResponse.json(
       { error: "Trop de tentatives. Réessayez dans quelques minutes." },
