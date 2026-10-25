@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { generateAffiliationCode } from "@/lib/utils";
 import { freeTextSchema, isSafe } from "@/lib/validation";
@@ -17,6 +18,8 @@ import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { verifyCaptcha } from "@/lib/captcha";
 import { sendActivationCompte, sendDemandeConfirmation, sendNewDemandeAdmin } from "@/lib/email";
 import { envoyer } from "@/lib/prestations";
+import { preparerMontage } from "@/lib/montage-serveur";
+import { SECTEUR_MONTAGE } from "@/lib/montage";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120).refine(isSafe),
@@ -25,7 +28,9 @@ const schema = z.object({
   company: z.string().trim().max(150).refine(isSafe).optional().nullable(),
   sector: freeTextSchema(1, 100),
   customService: z.string().trim().max(150).refine(isSafe).optional().nullable(),
-  brief: freeTextSchema(1, 3000),
+  brief: freeTextSchema(0, 3000).optional().nullable(),
+  /** Fiche de l'appel d'offres (montage de dossier) ; le DAO se dépose ensuite dans l'espace client */
+  dossier: z.unknown().optional(),
   budget: z.string().max(50).optional().nullable(),
   deadline: z.string().max(50).optional().nullable(),
   captchaToken: z.string().optional(),
@@ -41,6 +46,18 @@ export async function POST(req: NextRequest) {
   const parsed = schema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: "Vérifiez les champs du formulaire." }, { status: 422 });
   const d = parsed.data;
+  let brief = d.brief ?? "";
+  let montage: { dossier: unknown; pieces: unknown[] } | null = null;
+  let urgence: string | null = null;
+  if (d.dossier !== undefined && d.dossier !== null) {
+    if (d.sector !== SECTEUR_MONTAGE) return NextResponse.json({ error: "Fiche d'appel d'offres réservée au montage de dossiers." }, { status: 422 });
+    const m = preparerMontage(d.dossier, "", null, brief);
+    if (!m.ok) return NextResponse.json({ error: m.erreur }, { status: 422 });
+    montage = { dossier: m.dossier, pieces: m.pieces };
+    brief = m.brief;
+    urgence = m.urgence;
+  }
+  if (!brief) return NextResponse.json({ error: "Décrivez votre besoin." }, { status: 422 });
   if (!(await verifyCaptcha(d.captchaToken))) {
     return NextResponse.json({ error: "Vérification anti-robot échouée. Réessayez." }, { status: 403 });
   }
@@ -61,14 +78,14 @@ export async function POST(req: NextRequest) {
         clientId: user.id,
         sector: d.sector,
         customService: d.customService || null,
-        brief: d.brief,
+        brief,
         budget: d.budget || null,
         deadline: d.deadline || null,
         company: d.company || null,
         phone: d.phone || null,
         status: "EN_ATTENTE",
         amount: 0,
-        customFields: { origine: "formulaire public", nomDeclare: d.name },
+        customFields: { origine: "formulaire public", nomDeclare: d.name, ...(montage ?? {}) } as Prisma.InputJsonValue,
       },
     });
 
@@ -78,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     const serviceName = d.customService || d.sector;
     const envois: Promise<unknown>[] = [
-      sendNewDemandeAdmin({ clientName: d.name, clientEmail: d.email, serviceName, brief: d.brief, prestationId: prestation.id }),
+      sendNewDemandeAdmin({ clientName: d.name, clientEmail: d.email, serviceName, brief, prestationId: prestation.id, urgence }),
     ];
 
     // Compte sans mot de passe (nouveau, ou ouvert par une demande précédente jamais activée) : lien d'activation
@@ -91,9 +108,9 @@ export async function POST(req: NextRequest) {
         create: { userId: user.id, token, expiresAt },
       });
       const base = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "https://www.shiftup.bj").replace(/\/$/, "");
-      envois.push(sendActivationCompte({ to: d.email, name: d.name, serviceName, prestationId: prestation.id, lien: `${base}/reinitialiser-mot-de-passe?token=${token}` }));
+      envois.push(sendActivationCompte({ to: d.email, name: d.name, serviceName, prestationId: prestation.id, lien: `${base}/reinitialiser-mot-de-passe?token=${token}`, piecesAFournir: montage?.pieces.length ?? 0 }));
     } else {
-      envois.push(sendDemandeConfirmation({ to: d.email, name: user.name ?? d.name, serviceName, prestationId: prestation.id }));
+      envois.push(sendDemandeConfirmation({ to: d.email, name: user.name ?? d.name, serviceName, prestationId: prestation.id, piecesAFournir: montage?.pieces.length ?? 0 }));
     }
     await envoyer("demande publique", envois);
 

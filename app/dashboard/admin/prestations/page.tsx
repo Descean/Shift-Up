@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { SECTEUR_MONTAGE, bilanPieces, lireMontage } from "@/lib/montage";
+import { BadgeEcheance, PiecesAdmin } from "@/components/prestations/Pieces";
 
 import { televerser } from "@/lib/televerser";
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -67,7 +69,7 @@ interface Prestation {
   quote: Quote | null;
   plan: { phases: { title: string; description: string; duration: string }[] } | null;
   adminNote: string | null;
-  customFields?: { historique?: { date: string; action: string; commentaire?: string | null }[]; origine?: string } | null;
+  customFields?: { historique?: { date: string; action: string; commentaire?: string | null }[]; origine?: string; [k: string]: unknown } | null;
   createdAt: string;
   estimatedEndDate: string | null;
   prestationPhases: PrestationPhase[];
@@ -1071,7 +1073,9 @@ function DetailPanel({
   onClose: () => void;
   onRefresh: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<"devis" | "phases" | "livrables">("devis");
+  const montage = lireMontage(prestation.customFields);
+  const estMontage = prestation.sector === SECTEUR_MONTAGE || Boolean(montage.dossier);
+  const [activeTab, setActiveTab] = useState<"dossier" | "devis" | "phases" | "livrables">(estMontage ? "dossier" : "devis");
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const status = prestation.status as PrestationStatus;
@@ -1099,6 +1103,7 @@ function DetailPanel({
   }
 
   const tabs = [
+    ...(estMontage ? [{ id: "dossier" as const, label: montage.pieces.length ? `Dossier & pièces (${bilanPieces(montage.pieces).recues}/${bilanPieces(montage.pieces).total})` : "Dossier & pièces" }] : []),
     { id: "devis" as const, label: "Devis & Plan" },
     { id: "phases" as const, label: "Phases" },
     { id: "livrables" as const, label: "Livrables" },
@@ -1195,7 +1200,7 @@ function DetailPanel({
         {prestation.brief && (
           <div className="mt-2">
             <p className="text-xs text-gray-400 mb-1">Brief{prestation.customFields?.origine ? ` — ${prestation.customFields.origine}` : ""}</p>
-            <p className="text-xs text-gray-700 bg-gray-50 rounded-lg p-2.5 leading-relaxed line-clamp-4">
+            <p className="text-xs text-gray-700 bg-gray-50 rounded-lg p-2.5 leading-relaxed line-clamp-6 whitespace-pre-line">
               {prestation.brief}
             </p>
           </div>
@@ -1289,6 +1294,11 @@ function DetailPanel({
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto p-4">
         <AnimatePresence mode="wait">
+          {activeTab === "dossier" && (
+            <motion.div key="dossier" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+              <PiecesAdmin key={prestation.id} prestationId={prestation.id} dossier={montage.dossier} pieces={montage.pieces} onMaj={onRefresh} />
+            </motion.div>
+          )}
           {activeTab === "devis" && (
             <motion.div
               key="devis"
@@ -1444,6 +1454,18 @@ export default function AdminPrestationsPage() {
                           <p className="text-xs text-gray-600 mt-0.5 font-medium truncate">
                             {serviceLabel(p)}
                           </p>
+                          {(() => {
+                            const m = lireMontage(p.customFields);
+                            if (!m.dossier || ["TERMINEE", "ANNULEE"].includes(p.status)) return null;
+                            const b = bilanPieces(m.pieces);
+                            return (
+                              <div className="flex items-center gap-2 mt-1">
+                                <BadgeEcheance dateLimite={m.dossier.dateLimite} compact />
+                                <span className="text-[11px] text-gray-500 truncate">{m.dossier.referenceAvis}</span>
+                                {m.pieces.length > 0 && <span className="text-[11px] text-gray-500 flex-shrink-0">· {b.recues}/{b.total} pièces</span>}
+                              </div>
+                            );
+                          })()}
                         </div>
                         <StatusBadge status={p.status} />
                       </div>

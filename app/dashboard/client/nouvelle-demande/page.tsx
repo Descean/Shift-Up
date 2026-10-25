@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
 import { televerser } from "@/lib/televerser";
+import { SECTEUR_MONTAGE, dossierVide, type DossierSaisie } from "@/lib/montage";
+import FicheMarche, { ficheComplete } from "@/components/prestations/FicheMarche";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Service { id: string; title: string; description: string; priceMin: number; priceMax: number | null; duration: string | null; }
 
@@ -55,6 +57,12 @@ export default function NouvelleDemandePage() {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loadingServices, setLoadingServices] = useState(false);
+  // Montage de dossier : fiche de l'appel d'offres + DAO
+  const [fiche, setFiche]         = useState<DossierSaisie>(dossierVide());
+  const [dao, setDao]             = useState<{ url: string; name: string } | null>(null);
+  const [envoiDao, setEnvoiDao]   = useState(false);
+  const daoRef = useRef<HTMLInputElement>(null);
+  const montage = sector === SECTEUR_MONTAGE;
 
   // Service choisi sur la page /services (?sector=…&service=…)
   const [servicePrevu, setServicePrevu] = useState("");
@@ -102,9 +110,22 @@ export default function NouvelleDemandePage() {
     finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
   }
 
+  async function deposerDao(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (daoRef.current) daoRef.current.value = "";
+    if (!file) return;
+    setEnvoiDao(true);
+    try {
+      const d = await televerser(file);
+      setDao({ url: d.url, name: d.name ?? file.name });
+      toast.success("DAO joint !");
+    } catch (err) { toast.error((err as Error).message || "Erreur lors de l'envoi."); }
+    finally { setEnvoiDao(false); }
+  }
+
   /* ─── Soumission finale ────────────────────────────────────────────────── */
   async function submit() {
-    if (!brief.trim()) { toast.error("Décrivez votre besoin."); return; }
+    if (montage ? !ficheComplete(fiche) : !brief.trim()) { toast.error(montage ? "Complétez la fiche de l'appel d'offres." : "Décrivez votre besoin."); return; }
     setSubmitting(true);
     try {
       const r = await fetch("/api/prestations", {
@@ -114,6 +135,7 @@ export default function NouvelleDemandePage() {
           sector, serviceId: serviceId || null, customService: customService || null,
           brief, budget, deadline, company, phone,
           attachments: files.map((f) => f.url),
+          ...(montage ? { dossier: fiche, dao: dao ? { url: dao.url, nom: dao.name } : null } : {}),
         }),
       });
       const d = await r.json();
@@ -128,7 +150,7 @@ export default function NouvelleDemandePage() {
   const selectedService = services.find((s) => s.id === serviceId);
   const canGoStep2 = !!sector;
   const canGoStep3 = sector === "Autre" ? !!customService.trim() : (serviceId === "autre" ? !!customService.trim() : !!serviceId);
-  const canSubmit  = !!brief.trim();
+  const canSubmit  = montage ? ficheComplete(fiche) : !!brief.trim();
 
   const stepLabel = ["", "Secteur", "Service", "Votre besoin", "Informations", "Confirmation"][step];
 
@@ -291,7 +313,7 @@ export default function NouvelleDemandePage() {
           <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
             <div className="flex items-center gap-3">
               <button onClick={() => setStep(2)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-arrow-left" /></button>
-              <h2 className="font-syne font-bold text-lg text-primary">Décrivez votre besoin</h2>
+              <h2 className="font-syne font-bold text-lg text-primary">{montage ? "L'appel d'offres" : "Décrivez votre besoin"}</h2>
             </div>
 
             {/* Récapitulatif service */}
@@ -302,16 +324,42 @@ export default function NouvelleDemandePage() {
               </div>
             )}
 
+            {montage && (
+              <>
+                <FicheMarche valeur={fiche} onChange={setFiche} />
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
+                  <p className="text-sm font-medium text-gray-700"><i className="fas fa-file-contract mr-1.5 text-accent" />Dossier d&apos;appel d&apos;offres (DAO) <span className="text-gray-400 font-normal">— recommandé</span></p>
+                  {dao ? (
+                    <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700">
+                      <i className="fas fa-file-pdf text-accent" /><span className="truncate flex-1">{dao.name}</span>
+                      <button onClick={() => setDao(null)} aria-label="Retirer le DAO" className="text-red-400 hover:text-red-600"><i className="fas fa-times" /></button>
+                    </div>
+                  ) : (
+                    <button onClick={() => daoRef.current?.click()} disabled={envoiDao}
+                      className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 bg-white rounded-xl px-4 py-3 text-sm text-gray-500 hover:border-accent hover:text-accent disabled:opacity-50">
+                      {envoiDao ? <><span className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />Envoi…</> : <><i className="fas fa-cloud-arrow-up" />Joindre le DAO (PDF, Word ou ZIP)</>}
+                    </button>
+                  )}
+                  <input ref={daoRef} type="file" className="hidden" accept=".pdf,.doc,.docx,.zip" onChange={deposerDao} />
+                  <p className="text-xs text-gray-400">Après l&apos;envoi, la liste des pièces à fournir (RCCM, attestations, bilans, références…) apparaîtra dans votre espace : vous pourrez y déposer chaque document.</p>
+                </div>
+              </>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Décrivez votre besoin en détail * <span className="text-gray-400 font-normal">(plus c&apos;est précis, mieux c&apos;est)</span>
+                {montage
+                  ? <>Précisions <span className="text-gray-400 font-normal">(facultatif : additifs, visite de site, difficultés particulières…)</span></>
+                  : <>Décrivez votre besoin en détail * <span className="text-gray-400 font-normal">(plus c&apos;est précis, mieux c&apos;est)</span></>}
               </label>
               <textarea
                 value={brief}
                 onChange={(e) => setBrief(e.target.value)}
-                rows={6}
+                rows={montage ? 3 : 6}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent resize-none"
-                placeholder="Ex: Nous sommes une PME de 15 personnes. Nous avons besoin d'un site vitrine pour présenter nos services, avec un formulaire de contact et une page tarifs. Nous souhaitons un design moderne..."
+                placeholder={montage
+                  ? "Ex : l'additif n°1 a repoussé la date ; nous avons besoin du dossier imprimé en 4 exemplaires."
+                  : "Ex: Nous sommes une PME de 15 personnes. Nous avons besoin d'un site vitrine pour présenter nos services, avec un formulaire de contact et une page tarifs. Nous souhaitons un design moderne..."}
               />
               <p className="text-xs text-gray-400 mt-1">{brief.length} caractères</p>
             </div>
@@ -400,6 +448,8 @@ export default function NouvelleDemandePage() {
               <p className="font-syne font-bold text-primary text-sm mb-3">Récapitulatif de votre demande</p>
               <div className="flex justify-between"><span className="text-gray-500">Secteur</span><span className="font-medium text-primary">{sector}</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Service</span><span className="font-medium text-primary">{selectedService?.title ?? customService ?? "Personnalisé"}</span></div>
+              {montage && <div className="flex justify-between gap-4"><span className="text-gray-500">Avis</span><span className="font-medium text-primary text-right">{fiche.referenceAvis}</span></div>}
+              {montage && <div className="flex justify-between gap-4"><span className="text-gray-500">DAO</span><span className="font-medium text-primary text-right">{dao ? "Joint" : "À déposer plus tard"}</span></div>}
               <div className="flex justify-between"><span className="text-gray-500">Pièces jointes</span><span className="font-medium text-primary">{files.length} fichier(s)</span></div>
             </div>
 
@@ -425,6 +475,7 @@ export default function NouvelleDemandePage() {
             <div>
               <h2 className="font-syne font-black text-2xl text-primary mb-2">Demande envoyée !</h2>
               <p className="text-gray-500 text-sm max-w-sm mx-auto">Notre équipe va analyser votre besoin et vous enverra un devis personnalisé <strong>sous 48h ouvrées</strong>. Un email de confirmation vous a été envoyé.</p>
+              {montage && <p className="text-gray-600 text-sm max-w-sm mx-auto mt-3">La liste des pièces à fournir vous attend dans « Mes prestations » : déposez dès maintenant les documents dont vous disposez.</p>}
             </div>
             <div className="bg-accent/5 border border-accent/20 rounded-2xl p-4 text-sm text-accent mx-auto max-w-xs">
               <i className="fas fa-info-circle mr-1.5" />Suivez l&apos;état de votre demande dans &ldquo;Mes prestations&rdquo;
@@ -433,7 +484,7 @@ export default function NouvelleDemandePage() {
               <button onClick={() => router.push("/dashboard/client/prestations")} className="bg-gradient-to-r from-accent to-secondary text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
                 <i className="fas fa-briefcase mr-2" />Voir mes prestations
               </button>
-              <button onClick={() => { setStep(1); setSector(""); setServiceId(""); setBrief(""); setFiles([]); }} className="border border-gray-200 px-6 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
+              <button onClick={() => { setStep(1); setSector(""); setServiceId(""); setBrief(""); setFiles([]); setFiche(dossierVide()); setDao(null); }} className="border border-gray-200 px-6 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
                 Nouvelle demande
               </button>
             </div>

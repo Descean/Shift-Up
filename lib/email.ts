@@ -52,8 +52,8 @@ function btn(label: string, url: string) {
 // ─── Emails client ────────────────────────────────────────────────────────────
 
 /** Confirmation de réception de la demande */
-export async function sendDemandeConfirmation({ to, name, serviceName, prestationId }: {
-  to: string; name: string; serviceName: string; prestationId: string;
+export async function sendDemandeConfirmation({ to, name, serviceName, prestationId, piecesAFournir = 0 }: {
+  to: string; name: string; serviceName: string; prestationId: string; piecesAFournir?: number;
 }) {
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
@@ -62,6 +62,7 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
     <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;">
       <p style="margin:0;color:#2D5B78;font-size:14px;"><strong>Référence demande :</strong> ${prestationId.slice(-8).toUpperCase()}</p>
     </div>
+    ${blocPieces(piecesAFournir)}
     <p style="color:#555;">Vous pouvez suivre l'état de votre demande depuis votre dashboard :</p>
     ${btn("Suivre ma demande →", `${APP_URL}/dashboard/client/prestations`)}
     <p style="color:#555;line-height:1.6;margin-top:20px;">Si vous avez des questions, répondez simplement à cet email.<br/>Merci de votre confiance.</p>
@@ -70,11 +71,12 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
 }
 
 /** Notification admin : nouvelle demande */
-export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName, brief, prestationId }: {
-  clientName: string; clientEmail: string; serviceName: string; brief: string; prestationId: string;
+export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName, brief, prestationId, urgence = null }: {
+  clientName: string; clientEmail: string; serviceName: string; brief: string; prestationId: string; urgence?: string | null;
 }) {
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 16px;">🔔 Nouvelle demande de prestation</h2>
+    ${urgence ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin:0 0 16px;color:#991b1b;font-weight:700;">⚠ Dépôt de l'offre : ${esc(urgence)}</div>` : ""}
     <table style="width:100%;border-collapse:collapse;">
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Client</td><td style="padding:8px 0;font-weight:600;color:#333;">${esc(clientName)} (${esc(clientEmail)})</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Service</td><td style="padding:8px 0;font-weight:600;color:#333;">${esc(serviceName)}</td></tr>
@@ -82,7 +84,7 @@ export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName
       <tr><td style="padding:8px 0;color:#777;font-size:14px;vertical-align:top;">Besoin exprimé</td><td style="padding:8px 0;color:#333;line-height:1.5;white-space:pre-wrap;">${esc(brief || "Non renseigné")}</td></tr>
     </table>
     ${btn("Traiter la demande →", `${APP_URL}/dashboard/admin/prestations`)}`;
-  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] Nouvelle demande — ${clientName} — ${serviceName}`, html: baseLayout(content, "Nouvelle demande") });
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] ${urgence ? `URGENT (${urgence}) — ` : ""}Nouvelle demande — ${clientName} — ${serviceName}`, html: baseLayout(content, "Nouvelle demande") });
 }
 
 /** Notification client : devis envoyé */
@@ -146,8 +148,8 @@ export function destinatairesAdmin() {
 }
 
 /** Demande déposée sans compte : lien pour créer le mot de passe de l'espace client. */
-export async function sendActivationCompte({ to, name, serviceName, prestationId, lien }: {
-  to: string; name: string; serviceName: string; prestationId: string; lien: string;
+export async function sendActivationCompte({ to, name, serviceName, prestationId, lien, piecesAFournir = 0 }: {
+  to: string; name: string; serviceName: string; prestationId: string; lien: string; piecesAFournir?: number;
 }) {
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
@@ -156,9 +158,54 @@ export async function sendActivationCompte({ to, name, serviceName, prestationId
     <p style="color:#555;line-height:1.6;">Un espace client a été ouvert à votre nom : vous y suivrez le devis, les paiements et les livrables. Choisissez votre mot de passe pour l'activer :</p>
     ${btn("Activer mon espace client →", lien)}
     <p style="color:#888;font-size:13px;margin-top:8px;">Ce lien est valable 7 jours. Passé ce délai, utilisez « Mot de passe oublié » sur la page de connexion.</p>
+    ${blocPieces(piecesAFournir)}
     <p style="color:#555;line-height:1.6;margin-top:16px;">Pour toute question, répondez simplement à ce courriel.</p>
     <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
   return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Votre demande "${serviceName}" a été reçue — SHIFT UP`, html: baseLayout(content, "Demande reçue") });
+}
+
+function blocPieces(n: number) {
+  if (!n) return "";
+  return `<div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;color:#0A2533;line-height:1.6;">
+      <strong>Pièces à fournir :</strong> ${n} document(s) sont listés dans votre espace client (DAO, pièces administratives, financières et techniques).
+      Déposez dès maintenant ceux dont vous disposez : le montage pourra commencer plus vite.</div>`;
+}
+
+function liste(items: string[]) {
+  return `<ul style="margin:0 0 16px;padding-left:20px;color:#333;line-height:1.7;">${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
+}
+
+/** Alerte admin : le client a déposé des pièces (envoyée quand il clique « Prévenir SHIFT UP »). */
+export async function sendPiecesDeposeesAdmin({ clientName, clientEmail, serviceName, prestationId, recues, indisponibles, message }: {
+  clientName: string; clientEmail: string; serviceName: string; prestationId: string;
+  recues: string[]; indisponibles: { libelle: string; commentaire?: string | null }[]; message?: string | null;
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">📎 Pièces déposées par le client</h2>
+    <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${esc(prestationId.slice(-8).toUpperCase())}</p>
+    ${recues.length ? `<p style="margin:0 0 6px;color:#0A2533;font-weight:700;">À vérifier (${recues.length})</p>${liste(recues.map((r) => esc(r)))}` : ""}
+    ${indisponibles.length ? `<p style="margin:0 0 6px;color:#9a3412;font-weight:700;">Signalées non disponibles (${indisponibles.length})</p>${liste(indisponibles.map((i) => `${esc(i.libelle)}${i.commentaire ? ` — <em>${esc(i.commentaire)}</em>` : ""}`))}` : ""}
+    ${message ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;"><p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Message du client</p><p style="margin:0;color:#333;white-space:pre-wrap;line-height:1.6;">${esc(message)}</p></div>` : ""}
+    ${btn("Vérifier les pièces →", `${APP_URL}/dashboard/admin/prestations`)}`;
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] Pièces déposées — ${clientName} — ${serviceName}`, html: baseLayout(content, "Pièces déposées") });
+}
+
+/** Client : point sur les pièces (à fournir, à reprendre), envoyé par l'admin. */
+export async function sendPiecesClient({ to, name, serviceName, aFournir, aReprendre, message, dateLimite }: {
+  to: string; name: string; serviceName: string; aFournir: string[]; aReprendre: { libelle: string; commentaire?: string | null }[];
+  message?: string | null; dateLimite?: string | null;
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Pièces à fournir pour votre dossier</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Pour avancer sur <strong>${esc(serviceName)}</strong>, nous avons besoin des documents ci-dessous.${dateLimite ? ` Date limite de dépôt de l'offre : <strong>${esc(dateLimite)}</strong>.` : ""}</p>
+    ${message ? `<p style="color:#333;line-height:1.6;white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:14px 18px;">${esc(message)}</p>` : ""}
+    ${aReprendre.length ? `<p style="margin:0 0 6px;color:#9a3412;font-weight:700;">À reprendre (${aReprendre.length})</p>${liste(aReprendre.map((i) => `${esc(i.libelle)}${i.commentaire ? ` — <em>${esc(i.commentaire)}</em>` : ""}`))}` : ""}
+    ${aFournir.length ? `<p style="margin:0 0 6px;color:#0A2533;font-weight:700;">Encore à fournir (${aFournir.length})</p>${liste(aFournir.map((a) => esc(a)))}` : ""}
+    <p style="color:#555;line-height:1.6;">Déposez-les directement dans votre espace client. Si vous n'avez pas une pièce, indiquez-le : nous vous dirons comment l'obtenir ou la remplacer.</p>
+    ${btn("Déposer mes pièces →", `${APP_URL}/dashboard/client/prestations`)}
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Pièces à fournir — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Pièces à fournir") });
 }
 
 const LIBELLES_DECISION: Record<string, string> = {

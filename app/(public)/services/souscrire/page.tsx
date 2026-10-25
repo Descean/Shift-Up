@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { HCaptchaField } from "@/components/ui/HCaptchaField";
+import { dossierVide, type DossierSaisie } from "@/lib/montage";
+import FicheMarche, { ficheComplete } from "@/components/prestations/FicheMarche";
 
 const servicesList = [
   { id: "montage-dossier", label: "Montage de dossier de soumission", sector: "Marchés Publics & Dossiers" },
@@ -50,6 +52,8 @@ function SubscriptionForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<null | { reference?: string; compteExistant?: boolean }>(null);
   const [captchaToken, setCaptchaToken] = useState("");
+  const [fiche, setFiche] = useState<DossierSaisie>(dossierVide());
+  const montage = form.service === "montage-dossier";
 
   if (status === "loading") {
     return (
@@ -61,8 +65,8 @@ function SubscriptionForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.service || !form.description) {
-      toast.error("Veuillez remplir tous les champs obligatoires.");
+    if (!form.service || (montage ? !ficheComplete(fiche) : !form.description)) {
+      toast.error(montage ? "Complétez la fiche de l'appel d'offres (champs marqués *)." : "Veuillez remplir tous les champs obligatoires.");
       return;
     }
     if (!session && (!form.name.trim() || !form.email.trim())) {
@@ -82,6 +86,7 @@ function SubscriptionForm() {
       deadline: form.timeline || null,
       company: form.company || null,
       phone: form.phone || null,
+      ...(montage ? { dossier: fiche } : {}),
     };
     setSubmitting(true);
     try {
@@ -122,6 +127,7 @@ function SubscriptionForm() {
         <p className="text-gray-500 text-lg mb-4">
           Notre équipe vous contactera sous <strong>48 heures</strong> ouvrables avec votre devis personnalisé.
         </p>
+        {montage && <p className="text-sm text-gray-600 max-w-md mx-auto mb-3">Dans votre espace client, vous pourrez déposer le DAO et les pièces à fournir, ligne par ligne.</p>}
         {submitted.reference && <p className="text-sm text-gray-500 mb-2">Référence de votre demande : <strong className="text-primary">{submitted.reference}</strong></p>}
         {!session && (
           <p className="text-sm text-gray-500 max-w-md mx-auto">
@@ -239,8 +245,8 @@ function SubscriptionForm() {
             <option>À définir avec vous</option>
           </select>
         </div>
-        {/* Timeline */}
-        <div>
+        {/* Timeline (le montage a sa propre date limite) */}
+        {!montage && <div>
           <label htmlFor="f-timeline" className="text-sm font-medium text-gray-700 block mb-2">Délai souhaité</label>
           <select id="f-timeline"
             value={form.timeline}
@@ -254,17 +260,25 @@ function SubscriptionForm() {
             <option>Plus de 3 mois</option>
             <option>Pas encore défini</option>
           </select>
-        </div>
+        </div>}
       </div>
+
+      {montage && (
+        <div className="border border-gray-100 rounded-2xl p-5 space-y-3">
+          <p className="font-syne font-bold text-primary">L&apos;appel d&apos;offres</p>
+          <FicheMarche valeur={fiche} onChange={setFiche} prefixe="pub" />
+          <p className="text-xs text-gray-500"><i className="fas fa-circle-info mr-1 text-accent" />Le DAO et vos pièces (RCCM, attestations, bilans, références…) se déposent ensuite dans votre espace client.</p>
+        </div>
+      )}
 
       {/* Description */}
       <div>
         <label htmlFor="f-description" className="text-sm font-medium text-gray-700 block mb-2">
-          Décrivez votre besoin <span className="text-red-500">*</span>
+          {montage ? <>Précisions <span className="text-gray-400 font-normal">(facultatif)</span></> : <>Décrivez votre besoin <span className="text-red-500">*</span></>}
         </label>
         <textarea id="f-description"
-          required
-          rows={5}
+          required={!montage}
+          rows={montage ? 3 : 5}
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           placeholder="Expliquez votre projet, vos objectifs, vos contraintes spécifiques…"

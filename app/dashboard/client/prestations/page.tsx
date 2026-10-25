@@ -7,6 +7,8 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 
 import { televerser } from "@/lib/televerser";
+import { bilanPieces, lireMontage } from "@/lib/montage";
+import { BadgeEcheance, PiecesClient, ResumeDossier } from "@/components/prestations/Pieces";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
 interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; verrouille?: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
@@ -33,6 +35,7 @@ interface Prestation {
   prestationPhases: Phase[];
   livrables: Livrable[];
   payments: { status: string; amount: number }[];
+  customFields?: unknown;
 }
 
 /* ─── Config statuts ─────────────────────────────────────────────────────── */
@@ -176,8 +179,22 @@ export default function ClientPrestationsPage() {
                 </div>
               </div>
 
+              {/* Montage de dossier : appel d'offres + pièces à fournir */}
+              {(() => {
+                const m = lireMontage(detail.customFields);
+                if (!m.dossier && m.pieces.length === 0) return null;
+                return (
+                  <div className="space-y-5">
+                    {m.dossier && <ResumeDossier dossier={m.dossier} />}
+                    {m.pieces.length > 0 && (
+                      <PiecesClient key={detail.id} prestationId={detail.id} pieces={m.pieces} close={["TERMINEE", "ANNULEE"].includes(detail.status)} onMaj={charger} />
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* Brief */}
-              {detail.brief && (
+              {detail.brief && !lireMontage(detail.customFields).dossier && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Votre besoin</p>
                   <p className="text-sm text-gray-700 bg-gray-50 rounded-xl p-3 line-clamp-3">{detail.brief}</p>
@@ -295,19 +312,23 @@ export default function ClientPrestationsPage() {
                 </div>
               )}
 
-              {/* Pièces jointes */}
-              {detail.attachments.length > 0 && (
+              {/* Pièces jointes (hors pièces du dossier, déjà listées plus haut) */}
+              {(() => {
+                const dejaListes = new Set(lireMontage(detail.customFields).pieces.flatMap((x) => x.fichiers.map((f) => f.url)));
+                const autres = detail.attachments.filter((u) => !dejaListes.has(u));
+                return autres.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Fichiers joints</p>
                   <div className="flex flex-wrap gap-2">
-                    {detail.attachments.map((url, i) => (
+                    {autres.map((url, i) => (
                       <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs transition-colors">
                         <i className="fas fa-file" />Fichier {i + 1}
                       </a>
                     ))}
                   </div>
                 </div>
-              )}
+                );
+              })()}
 
               {/* Livrables disponibles */}
               {detail.livrables.filter((l) => l.isAvailable).length > 0 && (
@@ -649,6 +670,9 @@ function ChoixLivraison({ statut, solde, occupe, onDecider }: { statut: string; 
 function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation; index: number; name: string; onSelect: (id: string) => void; selected: boolean }) {
   const cfg = STATUS[p.status] ?? STATUS["EN_ATTENTE"];
   const hasDevis = p.status === "DEVIS_ENVOYE" || p.status === "LIVRAISON";
+  const m = lireMontage(p.customFields);
+  const enAttente = m.pieces.length ? bilanPieces(m.pieces).attendues : 0;
+  const ouverte = !["TERMINEE", "ANNULEE"].includes(p.status);
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }}
@@ -665,7 +689,11 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
           <div className="flex items-center gap-3 ml-4">
             <StatusBadge status={p.status} />
             {p.budget && <span className="text-xs text-gray-400">{p.budget}</span>}
+            {m.dossier && ouverte && <BadgeEcheance dateLimite={m.dossier.dateLimite} compact />}
           </div>
+          {ouverte && enAttente > 0 && (
+            <p className="text-xs text-primary mt-1.5 ml-4"><i className="fas fa-folder-open mr-1 text-accent" />{enAttente} pièce(s) à fournir</p>
+          )}
         </div>
         <div className="text-right flex-shrink-0">
           {p.globalProgress > 0 ? (
