@@ -15,7 +15,7 @@ import { z } from "zod";
 import { freeTextSchema, isSafe } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { envoyer, vueClient } from "@/lib/prestations";
-import { preparerMontage } from "@/lib/montage-serveur";
+import { conflitsAvis, libelleConflit, preparerMontage } from "@/lib/montage-serveur";
 import { SECTEUR_MONTAGE } from "@/lib/montage";
 
 const bodySchema = z.object({
@@ -145,10 +145,11 @@ export async function POST(req: NextRequest) {
 
     // Notifications email (attendues : sur Vercel, un envoi non attendu peut être interrompu)
     const serviceName = service?.title ?? customService ?? sector;
+    const conflits = montage ? (await conflitsAvis(prestation.id, (montage.dossier as { referenceAvis: string }).referenceAvis).catch(() => [])).map(libelleConflit) : [];
     const clientName = session.user.name ?? session.user.email ?? "Client";
     await envoyer("nouvelle demande", [
       sendDemandeConfirmation({ to: session.user.email!, name: clientName, serviceName, prestationId: prestation.id, piecesAFournir: montage ? montage.pieces.length : 0 }),
-      sendNewDemandeAdmin({ clientName, clientEmail: session.user.email!, serviceName, brief, prestationId: prestation.id, urgence }),
+      sendNewDemandeAdmin({ clientName, clientEmail: session.user.email!, serviceName, brief, prestationId: prestation.id, urgence, conflits }),
     ]);
 
     return NextResponse.json({ prestation }, { status: 201 });

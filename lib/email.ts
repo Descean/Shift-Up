@@ -71,12 +71,13 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
 }
 
 /** Notification admin : nouvelle demande */
-export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName, brief, prestationId, urgence = null }: {
-  clientName: string; clientEmail: string; serviceName: string; brief: string; prestationId: string; urgence?: string | null;
+export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName, brief, prestationId, urgence = null, conflits = [] }: {
+  clientName: string; clientEmail: string; serviceName: string; brief: string; prestationId: string; urgence?: string | null; conflits?: string[];
 }) {
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 16px;">🔔 Nouvelle demande de prestation</h2>
     ${urgence ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin:0 0 16px;color:#991b1b;font-weight:700;">⚠ Dépôt de l'offre : ${esc(urgence)}</div>` : ""}
+    ${conflits.length ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;margin:0 0 16px;color:#9a3412;"><strong>Même avis déjà suivi pour :</strong><ul style="margin:6px 0 0;padding-left:18px;">${conflits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul><p style="margin:6px 0 0;font-size:13px;">Vérifiez les lots : deux offres liées sur un même lot peuvent être écartées.</p></div>` : ""}
     <table style="width:100%;border-collapse:collapse;">
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Client</td><td style="padding:8px 0;font-weight:600;color:#333;">${esc(clientName)} (${esc(clientEmail)})</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Service</td><td style="padding:8px 0;font-weight:600;color:#333;">${esc(serviceName)}</td></tr>
@@ -84,7 +85,7 @@ export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName
       <tr><td style="padding:8px 0;color:#777;font-size:14px;vertical-align:top;">Besoin exprimé</td><td style="padding:8px 0;color:#333;line-height:1.5;white-space:pre-wrap;">${esc(brief || "Non renseigné")}</td></tr>
     </table>
     ${btn("Traiter la demande →", `${APP_URL}/dashboard/admin/prestations`)}`;
-  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] ${urgence ? `URGENT (${urgence}) — ` : ""}Nouvelle demande — ${clientName} — ${serviceName}`, html: baseLayout(content, "Nouvelle demande") });
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] ${urgence ? `URGENT (${urgence}) — ` : ""}${conflits.length ? "MÊME AVIS — " : ""}Nouvelle demande — ${clientName} — ${serviceName}`, html: baseLayout(content, "Nouvelle demande") });
 }
 
 /** Notification client : devis envoyé */
@@ -206,6 +207,90 @@ export async function sendPiecesClient({ to, name, serviceName, aFournir, aRepre
     ${btn("Déposer mes pièces →", `${APP_URL}/dashboard/client/prestations`)}
     <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
   return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Pièces à fournir — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Pièces à fournir") });
+}
+
+// ─── Montage de dossiers : dépôt, résultat, rappels ──────────────────────────
+
+const ref = (id: string) => esc(id.slice(-8).toUpperCase());
+
+/** Client : SHIFT UP a déposé l'offre (récépissé joint au lien). */
+export async function sendDepotClient({ to, name, serviceName, avis, deposeLe, numero, lienRecepisse }: {
+  to: string; name: string; serviceName: string; avis: string; deposeLe: string; numero?: string | null; lienRecepisse?: string | null;
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre offre a été déposée ✅</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">L'offre pour l'avis <strong>${esc(avis)}</strong> a été déposée le <strong>${esc(deposeLe)}</strong>${numero ? ` (récépissé n° <strong>${esc(numero)}</strong>)` : ""}.</p>
+    ${lienRecepisse ? `<p style="color:#555;line-height:1.6;">Le récépissé est disponible dans votre espace client.</p>` : ""}
+    <p style="color:#555;line-height:1.6;">Dès que vous recevez le résultat (lettre, publication ou PV d'ouverture), indiquez-le dans votre espace : nous vous aiderons pour la suite, y compris en cas de recours.</p>
+    ${btn("Voir le suivi →", `${APP_URL}/dashboard/client/prestations`)}
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Offre déposée — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Offre déposée") });
+}
+
+/** Admin : le client a déclaré avoir déposé l'offre lui-même, ou a saisi le résultat. */
+export async function sendSuiviAdmin({ clientName, clientEmail, serviceName, prestationId, titre, lignes }: {
+  clientName: string; clientEmail: string; serviceName: string; prestationId: string; titre: string; lignes: [string, string | null | undefined][];
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">${esc(titre)}</h2>
+    <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${ref(prestationId)}</p>
+    <table style="width:100%;border-collapse:collapse;margin:0 0 12px;">
+      ${lignes.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:6px 0;color:#777;font-size:14px;vertical-align:top;width:40%;">${esc(k)}</td><td style="padding:6px 0;color:#333;white-space:pre-wrap;">${esc(v)}</td></tr>`).join("")}
+    </table>
+    ${btn("Ouvrir la prestation →", `${APP_URL}/dashboard/admin/prestations`)}`;
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] ${titre} — ${clientName} — ${serviceName}`, html: baseLayout(content, titre) });
+}
+
+/** Client : résultat enregistré par SHIFT UP. */
+export async function sendResultatClient({ to, name, avis, libelle, details }: {
+  to: string; name: string; avis: string; libelle: string; details: [string, string | null | undefined][];
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Résultat : ${esc(libelle)}</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Voici le résultat enregistré pour l'avis <strong>${esc(avis)}</strong>.</p>
+    <table style="width:100%;border-collapse:collapse;margin:0 0 12px;">
+      ${details.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:6px 0;color:#777;font-size:14px;vertical-align:top;width:40%;">${esc(k)}</td><td style="padding:6px 0;color:#333;white-space:pre-wrap;">${esc(v)}</td></tr>`).join("")}
+    </table>
+    ${btn("Voir le suivi →", `${APP_URL}/dashboard/client/prestations`)}
+    <p style="color:#555;line-height:1.6;">Une question sur ce résultat ? Répondez simplement à ce courriel.</p>
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Résultat de l'appel d'offres ${avis} — SHIFT UP`, html: baseLayout(content, "Résultat") });
+}
+
+/** Client : rappel automatique (pièces manquantes, dépôt à faire, résultat à communiquer). */
+export async function sendRappelClient({ to, name, sujet, titre, paragraphes, items = [] }: {
+  to: string; name: string; sujet: string; titre: string; paragraphes: string[]; items?: string[];
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">${esc(titre)}</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    ${paragraphes.map((x) => `<p style="color:#555;line-height:1.6;">${esc(x)}</p>`).join("")}
+    ${items.length ? liste(items.map((i) => esc(i))) : ""}
+    ${btn("Ouvrir mon espace →", `${APP_URL}/dashboard/client/prestations`)}
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `${sujet} — SHIFT UP`, html: baseLayout(content, titre) });
+}
+
+export type LigneRappel = { client: string; avis: string; objet: string; limite: string; echeance: string; pieces: string };
+
+/** Admin : point quotidien des dossiers à déposer. */
+export async function sendPointDepotsAdmin({ aDeposer, nonConfirmes, resultats }: { aDeposer: LigneRappel[]; nonConfirmes: LigneRappel[]; resultats: LigneRappel[] }) {
+  const tableau = (titre: string, couleur: string, lignes: LigneRappel[]) => !lignes.length ? "" : `
+    <p style="margin:20px 0 8px;color:${couleur};font-weight:700;">${esc(titre)} (${lignes.length})</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <tr style="background:#f4f6f9;"><th style="text-align:left;padding:6px;">Délai</th><th style="text-align:left;padding:6px;">Client / avis</th><th style="text-align:left;padding:6px;">Pièces</th></tr>
+      ${lignes.map((l) => `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px;font-weight:700;white-space:nowrap;vertical-align:top;">${esc(l.echeance)}</td><td style="padding:6px;vertical-align:top;"><strong>${esc(l.client)}</strong><br/>${esc(l.avis)} — ${esc(l.objet)}<br/><span style="color:#777;">${esc(l.limite)}</span></td><td style="padding:6px;vertical-align:top;white-space:nowrap;">${esc(l.pieces)}</td></tr>`).join("")}
+    </table>`;
+  const content = `
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 8px;">📅 Point des dépôts d'offres</h2>
+    ${tableau("Offres à déposer sous 3 jours", "#991b1b", aDeposer)}
+    ${tableau("Date limite passée sans dépôt enregistré", "#9a3412", nonConfirmes)}
+    ${tableau("Résultats à obtenir (dépôt depuis plus de 3 semaines)", "#0A2533", resultats)}
+    ${btn("Ouvrir les prestations →", `${APP_URL}/dashboard/admin/prestations`)}`;
+  const n = aDeposer.length;
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, subject: `[SHIFT UP] ${n ? `${n} offre(s) à déposer sous 3 jours` : "Suivi des dépôts d'offres"}`, html: baseLayout(content, "Point des dépôts") });
 }
 
 const LIBELLES_DECISION: Record<string, string> = {

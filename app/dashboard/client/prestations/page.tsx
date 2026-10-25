@@ -8,7 +8,8 @@ import toast from "react-hot-toast";
 
 import { televerser } from "@/lib/televerser";
 import { bilanPieces, lireMontage } from "@/lib/montage";
-import { BadgeEcheance, PiecesClient, ResumeDossier } from "@/components/prestations/Pieces";
+import { PiecesClient, ResumeDossier } from "@/components/prestations/Pieces";
+import SuiviDossier, { BadgeSuivi } from "@/components/prestations/Suivi";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
 interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; verrouille?: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
@@ -185,7 +186,10 @@ export default function ClientPrestationsPage() {
                 if (!m.dossier && m.pieces.length === 0) return null;
                 return (
                   <div className="space-y-5">
-                    {m.dossier && <ResumeDossier dossier={m.dossier} />}
+                    {m.dossier && <ResumeDossier dossier={m.dossier} depot={m.depot} resultat={m.resultat} />}
+                    {m.dossier && (
+                      <SuiviDossier key={`suivi-${detail.id}`} prestationId={detail.id} dossier={m.dossier} depot={m.depot} resultat={m.resultat} close={detail.status === "ANNULEE"} onMaj={charger} />
+                    )}
                     {m.pieces.length > 0 && (
                       <PiecesClient key={detail.id} prestationId={detail.id} pieces={m.pieces} close={["TERMINEE", "ANNULEE"].includes(detail.status)} onMaj={charger} />
                     )}
@@ -314,7 +318,11 @@ export default function ClientPrestationsPage() {
 
               {/* Pièces jointes (hors pièces du dossier, déjà listées plus haut) */}
               {(() => {
-                const dejaListes = new Set(lireMontage(detail.customFields).pieces.flatMap((x) => x.fichiers.map((f) => f.url)));
+                const mm = lireMontage(detail.customFields);
+                const dejaListes = new Set([
+                  ...mm.pieces.flatMap((x) => x.fichiers.map((f) => f.url)),
+                  ...[mm.depot?.recepisse?.url, mm.resultat?.document?.url].filter((u): u is string => Boolean(u)),
+                ]);
                 const autres = detail.attachments.filter((u) => !dejaListes.has(u));
                 return autres.length > 0 && (
                 <div>
@@ -689,9 +697,9 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
           <div className="flex items-center gap-3 ml-4">
             <StatusBadge status={p.status} />
             {p.budget && <span className="text-xs text-gray-400">{p.budget}</span>}
-            {m.dossier && ouverte && <BadgeEcheance dateLimite={m.dossier.dateLimite} compact />}
+            {m.dossier && p.status !== "ANNULEE" && <BadgeSuivi dossier={m.dossier} depot={m.depot} resultat={m.resultat} />}
           </div>
-          {ouverte && enAttente > 0 && (
+          {ouverte && enAttente > 0 && !m.depot && (
             <p className="text-xs text-primary mt-1.5 ml-4"><i className="fas fa-folder-open mr-1 text-accent" />{enAttente} pièce(s) à fournir</p>
           )}
         </div>

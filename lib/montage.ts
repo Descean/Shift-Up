@@ -175,8 +175,45 @@ export function bilanPieces(pieces: Piece[]) {
   };
 }
 
+// ─── Dépôt de l'offre et résultat ─────────────────────────────────────────────
+
+export interface Depot {
+  deposeLe: string;              // date et heure du dépôt (ISO)
+  par: "SHIFT_UP" | "CLIENT";
+  numero?: string | null;        // n° de récépissé ou d'accusé de réception
+  recepisse?: FichierPiece | null;
+  commentaire?: string | null;
+  enregistreLe: string;
+}
+
+export const RESULTATS = {
+  EN_ATTENTE: "En attente du résultat",
+  ATTRIBUE: "Marché attribué",
+  NON_RETENU: "Offre non retenue",
+  INFRUCTUEUX: "Appel d'offres infructueux",
+  ANNULE: "Procédure annulée",
+} as const;
+export type StatutResultat = keyof typeof RESULTATS;
+
+export interface Resultat {
+  statut: StatutResultat;
+  date?: string | null;          // date de la notification ou de la publication (AAAA-MM-JJ)
+  montantOffre?: number | null;  // montant lu à l'ouverture des plis (F CFA)
+  montantAttribue?: number | null;
+  rang?: number | null;
+  attributaire?: string | null;
+  motif?: string | null;         // motif de rejet communiqué
+  document?: FichierPiece | null; // PV, lettre de notification ou publication
+  commentaire?: string | null;
+  enregistrePar: "SHIFT_UP" | "CLIENT";
+  enregistreLe: string;
+}
+
+/** SHIFT UP dépose-t-il l'offre lui-même ? */
+export const shiftUpDepose = (d: Dossier | null) => Boolean(d?.prestations.includes("Dépôt de l'offre"));
+
 /** Lecture tolérante de customFields */
-export function lireMontage(cf: unknown): { dossier: Dossier | null; pieces: Piece[] } {
-  const o = (cf && typeof cf === "object" ? cf : {}) as { dossier?: Dossier; pieces?: Piece[] };
-  return { dossier: o.dossier ?? null, pieces: Array.isArray(o.pieces) ? o.pieces : [] };
+export function lireMontage(cf: unknown): { dossier: Dossier | null; pieces: Piece[]; depot: Depot | null; resultat: Resultat | null } {
+  const o = (cf && typeof cf === "object" ? cf : {}) as { dossier?: Dossier; pieces?: Piece[]; depot?: Depot; resultat?: Resultat };
+  return { dossier: o.dossier ?? null, pieces: Array.isArray(o.pieces) ? o.pieces : [], depot: o.depot ?? null, resultat: o.resultat ?? null };
 }

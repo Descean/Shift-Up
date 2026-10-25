@@ -9,8 +9,8 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { televerser } from "@/lib/televerser";
 import {
-  CATEGORIES_PIECE, MODES_DEPOT, STATUTS_PIECE, bilanPieces, dateLimiteFr, dossierVide, echeance,
-  type CategoriePiece, type Dossier, type DossierSaisie, type Piece, type StatutPiece,
+  CATEGORIES_PIECE, MODES_DEPOT, RESULTATS, STATUTS_PIECE, bilanPieces, dateLimiteFr, dossierVide, echeance,
+  type CategoriePiece, type Depot, type Dossier, type DossierSaisie, type Piece, type Resultat, type StatutPiece, type StatutResultat,
 } from "@/lib/montage";
 import FicheMarche, { ficheComplete } from "@/components/prestations/FicheMarche";
 
@@ -56,6 +56,21 @@ export function BadgeEcheance({ dateLimite, compact = false }: { dateLimite: str
   );
 }
 
+export const STYLE_RESULTAT: Record<StatutResultat, string> = {
+  EN_ATTENTE: "bg-gray-100 text-gray-600", ATTRIBUE: "bg-green-100 text-green-700", NON_RETENU: "bg-red-100 text-red-700",
+  INFRUCTUEUX: "bg-amber-100 text-amber-700", ANNULE: "bg-gray-200 text-gray-600",
+};
+
+/** Pastille d'état : résultat connu, sinon « Déposée », sinon compte à rebours. */
+export function BadgeSuivi({ dossier, depot, resultat, compact = true }: { dossier: Dossier; depot?: Depot | null; resultat?: Resultat | null; compact?: boolean }) {
+  const taille = compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs";
+  if (resultat && resultat.statut !== "EN_ATTENTE") {
+    return <span className={`inline-flex items-center rounded-full font-bold whitespace-nowrap ${taille} ${STYLE_RESULTAT[resultat.statut]}`}>{RESULTATS[resultat.statut]}</span>;
+  }
+  if (depot) return <span className={`inline-flex items-center gap-1 rounded-full font-bold whitespace-nowrap bg-green-100 text-green-700 ${taille}`}><i className="fas fa-stamp text-[9px]" />Offre déposée</span>;
+  return <BadgeEcheance dateLimite={dossier.dateLimite} compact={compact} />;
+}
+
 function grouper(pieces: Piece[]) {
   return CATEGORIES_PIECE.map((c) => ({ categorie: c, items: pieces.filter((p) => p.categorie === c) })).filter((g) => g.items.length > 0);
 }
@@ -99,7 +114,7 @@ function Fichiers({ piece, onRetirer }: { piece: Piece; onRetirer?: (url: string
 }
 
 // ─── Résumé de l'appel d'offres ──────────────────────────────────────────────
-export function ResumeDossier({ dossier }: { dossier: Dossier }) {
+export function ResumeDossier({ dossier, depot, resultat }: { dossier: Dossier; depot?: Depot | null; resultat?: Resultat | null }) {
   const lignes: [string, string | null | undefined][] = [
     ["Avis", dossier.referenceAvis],
     ["Autorité contractante", dossier.autorite],
@@ -116,7 +131,7 @@ export function ResumeDossier({ dossier }: { dossier: Dossier }) {
           <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Appel d&apos;offres</p>
           <p className="text-sm font-semibold text-primary">{dossier.intitule}</p>
         </div>
-        <BadgeEcheance dateLimite={dossier.dateLimite} />
+        <BadgeSuivi dossier={dossier} depot={depot} resultat={resultat} compact={false} />
       </div>
       <div className="px-4 py-3 space-y-1.5 text-xs">
         <p className="text-primary"><i className="fas fa-calendar-day mr-1.5 text-accent" />Date limite : <strong>{dateLimiteFr(dossier.dateLimite)}</strong></p>
@@ -267,7 +282,9 @@ export function PiecesClient({ prestationId, pieces: depart, close = false, onMa
 }
 
 // ─── Administration ───────────────────────────────────────────────────────────
-export function PiecesAdmin({ prestationId, dossier: dossierDepart, pieces: depart, onMaj }: { prestationId: string; dossier: Dossier | null; pieces: Piece[]; onMaj?: () => void }) {
+export function PiecesAdmin({ prestationId, dossier: dossierDepart, pieces: depart, onMaj, suivi, depot, resultat }: {
+  prestationId: string; dossier: Dossier | null; pieces: Piece[]; onMaj?: () => void; suivi?: (d: Dossier) => React.ReactNode; depot?: Depot | null; resultat?: Resultat | null;
+}) {
   const [dossier, setDossier] = useState<Dossier | null>(dossierDepart);
   const [pieces, setPieces] = useState<Piece[]>(depart);
   const [edition, setEdition] = useState(false);
@@ -304,8 +321,9 @@ export function PiecesAdmin({ prestationId, dossier: dossierDepart, pieces: depa
   const b = bilanPieces(pieces);
   return (
     <div className="space-y-4">
-      <ResumeDossier dossier={dossier} />
+      <ResumeDossier dossier={dossier} depot={depot} resultat={resultat} />
       <button onClick={() => { setFiche(dossier); setEdition(true); }} className="text-xs text-accent hover:underline"><i className="fas fa-pen mr-1" />Corriger la fiche</button>
+      {suivi?.(dossier)}
 
       <Avancement pieces={pieces} />
 

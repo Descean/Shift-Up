@@ -18,7 +18,7 @@ import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { verifyCaptcha } from "@/lib/captcha";
 import { sendActivationCompte, sendDemandeConfirmation, sendNewDemandeAdmin } from "@/lib/email";
 import { envoyer } from "@/lib/prestations";
-import { preparerMontage } from "@/lib/montage-serveur";
+import { conflitsAvis, libelleConflit, preparerMontage } from "@/lib/montage-serveur";
 import { SECTEUR_MONTAGE } from "@/lib/montage";
 
 const schema = z.object({
@@ -94,8 +94,9 @@ export async function POST(req: NextRequest) {
     });
 
     const serviceName = d.customService || d.sector;
+    const conflits = montage ? (await conflitsAvis(prestation.id, (montage.dossier as { referenceAvis: string }).referenceAvis).catch(() => [])).map(libelleConflit) : [];
     const envois: Promise<unknown>[] = [
-      sendNewDemandeAdmin({ clientName: d.name, clientEmail: d.email, serviceName, brief, prestationId: prestation.id, urgence }),
+      sendNewDemandeAdmin({ clientName: d.name, clientEmail: d.email, serviceName, brief, prestationId: prestation.id, urgence, conflits }),
     ];
 
     // Compte sans mot de passe (nouveau, ou ouvert par une demande précédente jamais activée) : lien d'activation

@@ -11,6 +11,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { conflitsDans, montagesActifs, statsMontage } from "@/lib/montage-serveur";
+import { lireMontage } from "@/lib/montage";
 import { z } from "zod";
 
 const patchSchema = z.object({
@@ -72,8 +74,16 @@ export async function GET(req: NextRequest) {
       prisma.prestation.count({ where }),
     ]);
 
+    // Montages : même avis suivi pour d'autres soumissionnaires + statistiques
+    const montages = await montagesActifs();
+    const avecConflits = prestations.map((p) => {
+      const d = lireMontage(p.customFields).dossier;
+      return d ? { ...p, conflits: conflitsDans(montages, p.id, d.referenceAvis) } : p;
+    });
+
     return NextResponse.json({
-      prestations,
+      prestations: avecConflits,
+      statsMontage: statsMontage(montages),
       total,
       page,
       pages: Math.ceil(total / limit),

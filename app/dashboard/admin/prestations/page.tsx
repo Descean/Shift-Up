@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { SECTEUR_MONTAGE, bilanPieces, lireMontage } from "@/lib/montage";
-import { BadgeEcheance, PiecesAdmin } from "@/components/prestations/Pieces";
+import { PiecesAdmin } from "@/components/prestations/Pieces";
+import SuiviDossier, { BadgeSuivi } from "@/components/prestations/Suivi";
 
 import { televerser } from "@/lib/televerser";
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -69,6 +70,7 @@ interface Prestation {
   quote: Quote | null;
   plan: { phases: { title: string; description: string; duration: string }[] } | null;
   adminNote: string | null;
+  conflits?: { id: string; client: string; soumissionnaire: string; lots: string | null; statut: string }[];
   customFields?: { historique?: { date: string; action: string; commentaire?: string | null }[]; origine?: string; [k: string]: unknown } | null;
   createdAt: string;
   estimatedEndDate: string | null;
@@ -1296,7 +1298,19 @@ function DetailPanel({
         <AnimatePresence mode="wait">
           {activeTab === "dossier" && (
             <motion.div key="dossier" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-              <PiecesAdmin key={prestation.id} prestationId={prestation.id} dossier={montage.dossier} pieces={montage.pieces} onMaj={onRefresh} />
+              {(prestation.conflits?.length ?? 0) > 0 && (
+                <div className="mb-4 bg-orange-50 border border-orange-200 rounded-xl p-3 text-xs text-orange-900">
+                  <p className="font-semibold mb-1"><i className="fas fa-triangle-exclamation mr-1.5" />Même avis suivi pour d&apos;autres soumissionnaires</p>
+                  <ul className="list-disc pl-4 space-y-0.5">
+                    {prestation.conflits!.map((c) => (
+                      <li key={c.id}>{c.soumissionnaire} — client : {c.client}{c.lots ? ` — ${c.lots}` : ""} <span className="text-orange-700">({statusLabel[c.statut as PrestationStatus] ?? c.statut})</span></li>
+                    ))}
+                  </ul>
+                  <p className="mt-1.5 text-orange-800">Vérifiez les lots : deux offres liées (même propriétaire, même personnel ou même matériel) sur un même lot risquent d&apos;être écartées.</p>
+                </div>
+              )}
+              <PiecesAdmin key={prestation.id} prestationId={prestation.id} dossier={montage.dossier} pieces={montage.pieces} onMaj={onRefresh} depot={montage.depot} resultat={montage.resultat}
+                suivi={(d) => <SuiviDossier key={`suivi-${prestation.id}`} prestationId={prestation.id} dossier={d} depot={montage.depot} resultat={montage.resultat} admin onMaj={onRefresh} />} />
             </motion.div>
           )}
           {activeTab === "devis" && (
@@ -1337,9 +1351,12 @@ function DetailPanel({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+type StatsMontage = { dossiers: number; deposes: number; attribues: number; nonRetenus: number; autres: number; enAttente: number; montantAttribue: number; tauxReussite: number | null };
+
 export default function AdminPrestationsPage() {
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [total, setTotal] = useState(0);
+  const [stats, setStats] = useState<StatsMontage | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<PrestationStatus | "TOUS">("TOUS");
@@ -1356,6 +1373,7 @@ export default function AdminPrestationsPage() {
         const list: Prestation[] = data.prestations ?? [];
         setPrestations(list);
         setTotal(data.total ?? list.length);
+        setStats(data.statsMontage ?? null);
         // Refresh selected prestation if it exists in the new list
         if (selected) {
           const refreshed = list.find((p) => p.id === selected.id);
@@ -1384,6 +1402,24 @@ export default function AdminPrestationsPage() {
         </h1>
         <p className="text-gray-500 text-sm">{total} prestation(s) au total</p>
       </motion.div>
+
+      {stats && stats.dossiers > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 flex-shrink-0">
+          {[
+            ["Dossiers de soumission", String(stats.dossiers), "fa-folder-open"],
+            ["Offres déposées", String(stats.deposes), "fa-stamp"],
+            ["Marchés attribués", `${stats.attribues}${stats.nonRetenus ? ` / ${stats.attribues + stats.nonRetenus}` : ""}`, "fa-trophy"],
+            ["Taux de réussite", stats.tauxReussite === null ? "—" : `${stats.tauxReussite} %`, "fa-chart-line"],
+            ["Montant attribué", stats.montantAttribue ? `${Math.round(stats.montantAttribue).toLocaleString("fr-FR")} F` : "—", "fa-coins"],
+          ].map(([l, v, ic]) => (
+            <div key={l} className="bg-white rounded-2xl shadow-card px-4 py-3">
+              <p className="text-[11px] text-gray-500"><i className={`fas ${ic} mr-1.5 text-accent`} />{l}</p>
+              <p className="font-syne font-black text-primary text-lg mt-0.5 truncate">{v}</p>
+            </div>
+          ))}
+          {stats.enAttente > 0 && <p className="col-span-2 sm:col-span-5 text-xs text-gray-500 -mt-1">{stats.enAttente} offre(s) déposée(s) en attente de résultat. Le taux de réussite compte les marchés attribués parmi les résultats connus (hors appels infructueux ou annulés).</p>}
+        </div>
+      )}
 
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
@@ -1456,13 +1492,14 @@ export default function AdminPrestationsPage() {
                           </p>
                           {(() => {
                             const m = lireMontage(p.customFields);
-                            if (!m.dossier || ["TERMINEE", "ANNULEE"].includes(p.status)) return null;
+                            if (!m.dossier || p.status === "ANNULEE") return null;
                             const b = bilanPieces(m.pieces);
                             return (
                               <div className="flex items-center gap-2 mt-1">
-                                <BadgeEcheance dateLimite={m.dossier.dateLimite} compact />
+                                <BadgeSuivi dossier={m.dossier} depot={m.depot} resultat={m.resultat} />
                                 <span className="text-[11px] text-gray-500 truncate">{m.dossier.referenceAvis}</span>
                                 {m.pieces.length > 0 && <span className="text-[11px] text-gray-500 flex-shrink-0">· {b.recues}/{b.total} pièces</span>}
+                                {(p.conflits?.length ?? 0) > 0 && <span className="text-[10px] font-bold text-orange-700 bg-orange-100 rounded-full px-2 py-0.5 flex-shrink-0">Même avis</span>}
                               </div>
                             );
                           })()}
