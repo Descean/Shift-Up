@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { vueClient } from "@/lib/prestations";
 
 const patchSchema = z.object({
   status: z.enum(["EN_ATTENTE","EN_COURS","LIVRAISON","REVISION","TERMINEE","ANNULEE"]).optional(),
@@ -48,6 +49,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         payments: { orderBy: { createdAt: "desc" } },
         client: { select: { id: true, name: true, email: true, phone: true } },
         assignedTo: { select: { id: true, name: true, email: true } },
+        livrables: { orderBy: { createdAt: "asc" } },
       },
     });
 
@@ -55,7 +57,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Prestation introuvable." }, { status: 404 });
     }
 
-    return NextResponse.json({ prestation });
+    return NextResponse.json({ prestation: isAdmin ? prestation : vueClient(prestation) });
   } catch (error) {
     console.error("GET /api/prestations/[id] error:", error);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });

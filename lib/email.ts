@@ -9,6 +9,10 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM ?? "SHIFT UP <noreply@shiftup.bj>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.shiftup.bj";
+/** Adresse(s) qui reçoivent les alertes « prestations » (séparées par des virgules). */
+const ADMIN_DEST = (process.env.ADMIN_EMAIL || "jgnancadja@gmail.com").split(",").map((e) => e.trim()).filter(Boolean);
+/** Adresse de réponse des courriels envoyés aux clients. */
+const REPONSE = "contact@shiftup.bj";
 
 // ─── Templates HTML partagés ─────────────────────────────────────────────────
 
@@ -53,8 +57,8 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
 }) {
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
-    <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${name}</strong>,</p>
-    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${serviceName}</strong>. Notre équipe va l'analyser et vous envoyer un devis personnalisé sous <strong>48h ouvrées</strong>.</p>
+    <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong>. Notre équipe va l'analyser et vous envoyer un devis personnalisé sous <strong>48h ouvrées</strong>.</p>
     <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;">
       <p style="margin:0;color:#2D5B78;font-size:14px;"><strong>Référence demande :</strong> ${prestationId.slice(-8).toUpperCase()}</p>
     </div>
@@ -62,23 +66,23 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
     ${btn("Suivre ma demande →", `${APP_URL}/dashboard/client/prestations`)}
     <p style="color:#555;line-height:1.6;margin-top:20px;">Si vous avez des questions, répondez simplement à cet email.<br/>Merci de votre confiance.</p>
     <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
-  return resend.emails.send({ from: FROM, to, subject: `Votre demande "${serviceName}" a été reçue — SHIFT UP`, html: baseLayout(content, "Demande reçue") });
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Votre demande "${serviceName}" a été reçue — SHIFT UP`, html: baseLayout(content, "Demande reçue") });
 }
 
 /** Notification admin : nouvelle demande */
 export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName, brief, prestationId }: {
   clientName: string; clientEmail: string; serviceName: string; brief: string; prestationId: string;
 }) {
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@shiftup.bj";
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 16px;">🔔 Nouvelle demande de prestation</h2>
     <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Client</td><td style="padding:8px 0;font-weight:600;color:#333;">${clientName} (${clientEmail})</td></tr>
-      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Service</td><td style="padding:8px 0;font-weight:600;color:#333;">${serviceName}</td></tr>
-      <tr><td style="padding:8px 0;color:#777;font-size:14px;vertical-align:top;">Besoin exprimé</td><td style="padding:8px 0;color:#333;line-height:1.5;">${brief || "Non renseigné"}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Client</td><td style="padding:8px 0;font-weight:600;color:#333;">${esc(clientName)} (${esc(clientEmail)})</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Service</td><td style="padding:8px 0;font-weight:600;color:#333;">${esc(serviceName)}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Référence</td><td style="padding:8px 0;color:#333;">${esc(prestationId.slice(-8).toUpperCase())}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;vertical-align:top;">Besoin exprimé</td><td style="padding:8px 0;color:#333;line-height:1.5;white-space:pre-wrap;">${esc(brief || "Non renseigné")}</td></tr>
     </table>
     ${btn("Traiter la demande →", `${APP_URL}/dashboard/admin/prestations`)}`;
-  return resend.emails.send({ from: FROM, to: adminEmail, subject: `[SHIFT UP] Nouvelle demande — ${clientName} — ${serviceName}`, html: baseLayout(content, "Nouvelle demande") });
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] Nouvelle demande — ${clientName} — ${serviceName}`, html: baseLayout(content, "Nouvelle demande") });
 }
 
 /** Notification client : devis envoyé */
@@ -87,29 +91,30 @@ export async function sendDevisClient({ to, name, serviceName, depositAmount, pr
 }) {
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre devis est prêt 📋</h2>
-    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
-    <p style="color:#555;line-height:1.6;">Notre équipe a analysé votre demande pour <strong>${serviceName}</strong> et vous a préparé un devis détaillé accompagné d'un plan de réalisation.</p>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Notre équipe a analysé votre demande pour <strong>${esc(serviceName)}</strong> et vous a préparé un devis détaillé accompagné d'un plan de réalisation.</p>
     <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:10px;padding:16px 20px;margin:20px 0;">
       <p style="margin:0 0 6px;color:#2D5B78;font-weight:700;">Acompte requis pour démarrer</p>
       <p style="margin:0;color:#2D5B78;font-size:24px;font-weight:900;">${depositAmount.toLocaleString("fr-FR")} XOF</p>
     </div>
-    <p style="color:#555;">Consultez votre devis et lancez l'exécution en payant l'acompte :</p>
+    <p style="color:#555;">Consultez votre devis : vous pouvez l'accepter et payer l'acompte, demander une modification ou le refuser.</p>
     ${btn("Voir mon devis →", `${APP_URL}/dashboard/client/prestations`)}
     <p style="color:#888;font-size:13px;margin-top:16px;">Le devis est valable 7 jours. Passé ce délai, merci de nous recontacter.</p>`;
-  return resend.emails.send({ from: FROM, to, subject: `Votre devis "${serviceName}" est disponible — SHIFT UP`, html: baseLayout(content, "Devis disponible") });
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Votre devis "${serviceName}" est disponible — SHIFT UP`, html: baseLayout(content, "Devis disponible") });
 }
 
 /** Notification client : livrable disponible */
-export async function sendLivrableClient({ to, name, livrableTitle, serviceName }: {
-  to: string; name: string; livrableTitle: string; serviceName: string;
+export async function sendLivrableClient({ to, name, livrableTitle, serviceName, apresSolde = false }: {
+  to: string; name: string; livrableTitle: string; serviceName: string; apresSolde?: boolean;
 }) {
   const content = `
     <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Un livrable est disponible 📦</h2>
-    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
-    <p style="color:#555;line-height:1.6;">Un nouveau livrable <strong>"${livrableTitle}"</strong> est disponible pour votre projet <strong>${serviceName}</strong>.</p>
-    ${btn("Accéder au livrable →", `${APP_URL}/dashboard/client/suivi`)}
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Un nouveau livrable <strong>"${esc(livrableTitle)}"</strong> est disponible pour votre projet <strong>${esc(serviceName)}</strong>.</p>
+    ${apresSolde ? `<p style="color:#555;line-height:1.6;">Il sera téléchargeable dès le règlement du solde, depuis votre espace client.</p>` : ""}
+    ${btn(apresSolde ? "Voir et régler le solde →" : "Accéder au livrable →", `${APP_URL}/dashboard/client/prestations`)}
     <p style="color:#555;line-height:1.6;margin-top:16px;">N'hésitez pas à nous faire part de vos retours depuis votre dashboard.</p>`;
-  return resend.emails.send({ from: FROM, to, subject: `Livrable disponible — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Livrable disponible") });
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Livrable disponible — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Livrable disponible") });
 }
 
 /** Notification admin : observation client sur un livrable */
@@ -121,18 +126,73 @@ export async function sendObservationAdmin({ to, clientName, serviceName, livrab
     : "";
   const content = `
     <h2 style="color:#0A2533;font-size:20px;margin:0 0 8px;">📋 Nouvelle observation client</h2>
-    <p style="color:#555;margin:0 0 16px;">Le client <strong>${clientName}</strong> a soumis une observation sur son projet <strong>${serviceName}</strong>.</p>
+    <p style="color:#555;margin:0 0 16px;">Le client <strong>${esc(clientName)}</strong> a soumis une observation sur son projet <strong>${esc(serviceName)}</strong>.</p>
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
       <p style="margin:0 0 6px;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Livrable concerné</p>
-      <p style="margin:0;color:#0A2533;font-weight:700;">${livrableTitle}</p>
+      <p style="margin:0;color:#0A2533;font-weight:700;">${esc(livrableTitle)}</p>
     </div>
     <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
       <p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Observation</p>
-      <p style="margin:0;color:#333;white-space:pre-wrap;line-height:1.6;">${observation}</p>
+      <p style="margin:0;color:#333;white-space:pre-wrap;line-height:1.6;">${esc(observation)}</p>
     </div>
     ${voiceSection}
     ${btn("Voir dans les messages →", `${APP_URL}/dashboard/admin/messages`)}`;
   return resend.emails.send({ from: FROM, to, subject: `Observation client — ${serviceName} — SHIFT UP`, html: baseLayout(content, "Observation client") });
+}
+
+/** Destinataires des alertes prestations (utilisé aussi par les routes). */
+export function destinatairesAdmin() {
+  return ADMIN_DEST;
+}
+
+/** Demande déposée sans compte : lien pour créer le mot de passe de l'espace client. */
+export async function sendActivationCompte({ to, name, serviceName, prestationId, lien }: {
+  to: string; name: string; serviceName: string; prestationId: string; lien: string;
+}) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong> (référence <strong>${esc(prestationId.slice(-8).toUpperCase())}</strong>). Vous recevrez notre devis sous <strong>48 h ouvrées</strong>.</p>
+    <p style="color:#555;line-height:1.6;">Un espace client a été ouvert à votre nom : vous y suivrez le devis, les paiements et les livrables. Choisissez votre mot de passe pour l'activer :</p>
+    ${btn("Activer mon espace client →", lien)}
+    <p style="color:#888;font-size:13px;margin-top:8px;">Ce lien est valable 7 jours. Passé ce délai, utilisez « Mot de passe oublié » sur la page de connexion.</p>
+    <p style="color:#555;line-height:1.6;margin-top:16px;">Pour toute question, répondez simplement à ce courriel.</p>
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Votre demande "${serviceName}" a été reçue — SHIFT UP`, html: baseLayout(content, "Demande reçue") });
+}
+
+const LIBELLES_DECISION: Record<string, string> = {
+  accepter_devis: "Devis accepté",
+  modifier_devis: "Modification du devis demandée",
+  refuser_devis: "Devis refusé",
+  demander_revision: "Révision demandée",
+  valider_livraison: "Livraison validée",
+};
+
+/** Alerte admin : décision du client (devis, livraison). */
+export async function sendDecisionClientAdmin({ clientName, clientEmail, serviceName, action, commentaire, prestationId }: {
+  clientName: string; clientEmail: string; serviceName: string; action: string; commentaire?: string | null; prestationId: string;
+}) {
+  const libelle = LIBELLES_DECISION[action] ?? action;
+  const content = `
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">${esc(libelle)}</h2>
+    <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${esc(prestationId.slice(-8).toUpperCase())}</p>
+    ${commentaire ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;"><p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Commentaire du client</p><p style="margin:0;color:#333;white-space:pre-wrap;line-height:1.6;">${esc(commentaire)}</p></div>` : ""}
+    ${btn("Ouvrir la prestation →", `${APP_URL}/dashboard/admin/prestations`)}`;
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] ${libelle} — ${clientName} — ${serviceName}`, html: baseLayout(content, libelle) });
+}
+
+/** Alerte admin : paiement reçu. */
+export async function sendPaiementAdmin({ clientName, clientEmail, serviceName, montant, total, paye, prestationId }: {
+  clientName: string; clientEmail: string; serviceName: string; montant: number; total: number; paye: number; prestationId: string;
+}) {
+  const f = (n: number) => Math.round(n).toLocaleString("fr-FR");
+  const content = `
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">💰 Paiement reçu : ${f(montant)} XOF</h2>
+    <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${esc(prestationId.slice(-8).toUpperCase())}</p>
+    <p style="color:#555;margin:0 0 12px;">Déjà payé : <strong>${f(paye)} XOF</strong> sur ${f(total)} XOF${paye >= total ? " — <strong>soldé</strong>" : ` — reste ${f(total - paye)} XOF`}.</p>
+    ${btn("Ouvrir la prestation →", `${APP_URL}/dashboard/admin/prestations`)}`;
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] Paiement reçu — ${clientName} — ${f(montant)} XOF`, html: baseLayout(content, "Paiement reçu") });
 }
 
 // ─── Emails formations ────────────────────────────────────────────────────────

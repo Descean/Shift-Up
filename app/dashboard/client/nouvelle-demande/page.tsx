@@ -25,6 +25,14 @@ const SECTORS = [
   { value: "Autre",                        icon: "fas fa-box-open",           color: "from-primary to-accent",      desc: "Besoin spécifique non listé ci-dessus" },
 ];
 
+/** Identifiants des secteurs de la page /services (lien « Démarrer ») */
+const SECTEURS_PAGE: Record<string, string> = {
+  conseil: "Conseil Stratégique", "marches-publics": "Marchés Publics & Dossiers", juridique: "Juridique & Finance",
+  marketing: "Marketing Digital", btp: "BTP & Génie Civil", numerique: "Solutions Numériques",
+  transformation: "Transformation Digitale", data: "Data & Business Intelligence", formation: "Formation & Coaching",
+  rse: "RSE & Développement Durable", finance: "Finance & Investissement",
+};
+
 const BUDGETS  = ["< 100 000 XOF", "100 000 – 300 000 XOF", "300 000 – 500 000 XOF", "500 000 – 1 000 000 XOF", "> 1 000 000 XOF", "À discuter"];
 const DEADLINES = ["Urgent (< 1 semaine)", "2 semaines", "1 mois", "2-3 mois", "Plus de 3 mois", "Flexible"];
 
@@ -48,22 +56,38 @@ export default function NouvelleDemandePage() {
   const [submitting, setSubmitting] = useState(false);
   const [loadingServices, setLoadingServices] = useState(false);
 
-  // Chargement des services du secteur sélectionné
+  // Service choisi sur la page /services (?sector=…&service=…)
+  const [servicePrevu, setServicePrevu] = useState("");
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const sec = SECTEURS_PAGE[q.get("sector") ?? ""] ?? SECTORS.find((x) => x.value === q.get("sector"))?.value;
+    if (sec) {
+      setSector(sec);
+      setServicePrevu(q.get("service") ?? "");
+      setStep(2);
+    }
+  }, []);
+
+  // Chargement des services du secteur sélectionné (catalogue public)
   useEffect(() => {
     if (!sector || sector === "Autre") { setServices([]); setServiceId(""); return; }
     setLoadingServices(true);
-    fetch("/api/admin/services")
+    fetch("/api/services")
       .then((r) => r.json())
       .then((d) => {
         const filtered = (d.services ?? []).filter((s: Service & { domain: string; isActive: boolean }) =>
           s.domain === sector && s.isActive
         );
         setServices(filtered);
-        setServiceId("");
+        const prevu = servicePrevu.trim().toLowerCase();
+        const trouve = prevu ? filtered.find((s: Service) => s.title.trim().toLowerCase() === prevu) : null;
+        if (trouve) { setServiceId(trouve.id); setCustomService(""); }
+        else if (prevu) { setServiceId("autre"); setCustomService(servicePrevu); }
+        else setServiceId("");
       })
       .catch(() => setServices([]))
       .finally(() => setLoadingServices(false));
-  }, [sector]);
+  }, [sector, servicePrevu]);
 
   /* ─── Upload pièce jointe ──────────────────────────────────────────────── */
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -103,7 +127,7 @@ export default function NouvelleDemandePage() {
   const sectorInfo = SECTORS.find((s) => s.value === sector);
   const selectedService = services.find((s) => s.id === serviceId);
   const canGoStep2 = !!sector;
-  const canGoStep3 = sector === "Autre" ? true : (!!serviceId || sector === "Autre");
+  const canGoStep3 = sector === "Autre" ? !!customService.trim() : (serviceId === "autre" ? !!customService.trim() : !!serviceId);
   const canSubmit  = !!brief.trim();
 
   const stepLabel = ["", "Secteur", "Service", "Votre besoin", "Informations", "Confirmation"][step];
@@ -198,16 +222,14 @@ export default function NouvelleDemandePage() {
                 Chargement des services…
               </div>
             ) : services.length === 0 ? (
-              <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3">
-                <i className="fas fa-box-open text-3xl text-gray-300 block" />
-                <p className="text-gray-500 text-sm font-medium">Aucun service disponible pour ce secteur</p>
-                <p className="text-gray-400 text-xs">Utilisez l&apos;option ci-dessous pour décrire votre besoin personnalisé.</p>
-                <button
-                  onClick={() => { setServiceId("autre"); setCustomService(""); }}
-                  className="inline-flex items-center gap-2 bg-accent/10 text-accent text-sm font-semibold px-4 py-2 rounded-xl hover:bg-accent/20 transition-colors"
-                >
-                  <i className="fas fa-plus-circle" />Décrire mon besoin
-                </button>
+              <div className="bg-gray-50 rounded-2xl p-5 space-y-3">
+                <p className="text-gray-600 text-sm font-medium">Quel service souhaitez-vous ?</p>
+                <input
+                  value={customService}
+                  onChange={(e) => { setCustomService(e.target.value); setServiceId("autre"); }}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent bg-white"
+                  placeholder="Ex : montage d'un dossier de soumission, dossier de financement…"
+                />
               </div>
             ) : (
               <div className="space-y-3">
@@ -255,7 +277,7 @@ export default function NouvelleDemandePage() {
               <button onClick={() => setStep(1)} className="flex-1 border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-600">Retour</button>
               <button
                 onClick={() => canGoStep3 && setStep(3)}
-                disabled={!canGoStep3 && sector !== "Autre"}
+                disabled={!canGoStep3}
                 className="flex-1 bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-40"
               >
                 Continuer <i className="fas fa-arrow-right ml-1" />

@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendDevisClient } from "@/lib/email";
+import { envoyer } from "@/lib/prestations";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -58,8 +59,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const depositAmount = quote.deposit ?? Math.round(quote.total * 0.6);
 
     if (clientEmail) {
-      sendDevisClient({ to: clientEmail, name: clientName, serviceName, depositAmount, prestationId: id })
-        .catch((e) => console.error("Email error:", e));
+      await envoyer("devis", [sendDevisClient({ to: clientEmail, name: clientName, serviceName, depositAmount, prestationId: id })]);
     }
 
     // Message interne

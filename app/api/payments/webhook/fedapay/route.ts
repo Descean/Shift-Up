@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac } from "crypto";
 import prisma from "@/lib/prisma";
-import { getPhaseTemplates } from "@/lib/service-templates";
+import { confirmerPaiement } from "@/lib/prestations";
 import type { Payment, Prestation } from "@prisma/client";
 
 /**
@@ -30,49 +30,7 @@ async function verifyFedapayTransaction(transactionId: string): Promise<string |
 
 /** Confirme un paiement déjà vérifié comme "approved" auprès de FedaPay. Idempotent. */
 async function confirmPayment(payment: Payment & { prestation: Prestation }) {
-  if (payment.status === "COMPLETED") return; // déjà traité
-
-  await prisma.payment.update({
-    where: { id: payment.id },
-    data: { status: "COMPLETED" },
-  });
-
-  await prisma.prestation.update({
-    where: { id: payment.prestationId },
-    data: {
-      amountPaid: { increment: payment.amount },
-      status: "EN_COURS",
-      startDate: payment.prestation.startDate ?? new Date(),
-    },
-  });
-
-  const existingPhases = await prisma.prestationPhase.count({ where: { prestationId: payment.prestationId } });
-  if (existingPhases === 0) {
-    const prestation = await prisma.prestation.findUnique({ where: { id: payment.prestationId } });
-    const templates = getPhaseTemplates(prestation?.sector ?? null);
-    if (templates.length > 0) {
-      await prisma.prestationPhase.createMany({
-        data: templates.map((t) => ({
-          prestationId: payment.prestationId,
-          title: t.title,
-          description: t.description,
-          order: t.order,
-          status: t.order === 0 ? "IN_PROGRESS" : "PENDING",
-          progress: 0,
-        })),
-      });
-    }
-  }
-
-  await prisma.auditLog.create({
-    data: {
-      userId: payment.userId,
-      action: "PAYMENT_COMPLETED",
-      entity: "Payment",
-      entityId: payment.id,
-      details: { amount: payment.amount, provider: "FEDAPAY", reference: payment.reference },
-    },
-  });
+  await confirmerPaiement(payment.id);
 }
 
 /**

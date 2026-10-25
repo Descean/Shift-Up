@@ -13,6 +13,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import prisma from "@/lib/prisma";
+import { livrableAccessible } from "@/lib/prestations";
 
 export const BUCKET_DOCS = "documents";
 export const BUCKET_ANCIEN = "prestations";
@@ -99,14 +100,16 @@ export async function peutLire(user: { id: string; email?: string | null; role?:
   if (path.startsWith(`${user.id}/`)) return true; // déposé par lui
   const lien = lienInterne(bucket, path);
   const [livrable, prestation, commande] = await Promise.all([
-    prisma.livrable.findFirst({ where: { url: lien, isAvailable: true, prestation: { clientId: user.id } }, select: { id: true } }),
+    prisma.livrable.findFirst({ where: { url: lien, isAvailable: true, prestation: { clientId: user.id } }, select: { type: true, isAvailable: true, prestation: { select: { amount: true, amountPaid: true } } } }),
     prisma.prestation.findFirst({ where: { attachments: { has: lien }, OR: [{ clientId: user.id }, { assignedToId: user.id }] }, select: { id: true } }),
     prisma.apporteurServiceOrder.findFirst({
       where: { documentUrl: { startsWith: lien }, OR: [{ service: { apporteurId: user.id } }, ...(user.email ? [{ clientEmail: user.email }] : [])] },
       select: { id: true },
     }),
   ]);
-  return Boolean(livrable || prestation || commande);
+  // Livrable : ouvert une fois le solde payé (ou s'il s'agit d'un aperçu provisoire)
+  const livrableOk = livrable ? livrableAccessible(livrable, livrable.prestation) : false;
+  return Boolean(livrableOk || prestation || commande);
 }
 
 /**

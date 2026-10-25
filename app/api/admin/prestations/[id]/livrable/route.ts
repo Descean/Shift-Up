@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendLivrableClient } from "@/lib/email";
+import { envoyer, livrableAccessible } from "@/lib/prestations";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -46,8 +47,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
       if (prestation?.client?.email) {
         const serviceName = prestation.service?.title ?? prestation.customService ?? "Prestation";
-        sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: title, serviceName })
-          .catch((e) => console.error("Email error:", e));
+        await envoyer("livrable", [sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: title, serviceName, apresSolde: !livrableAccessible({ type: livrable.type, isAvailable: true }, prestation) })]);
       }
     }
 
@@ -84,8 +84,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       });
       if (prestation?.client?.email) {
         const serviceName = prestation.service?.title ?? prestation.customService ?? "Prestation";
-        sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: livrable.title, serviceName })
-          .catch((e) => console.error("Email error:", e));
+        await envoyer("livrable", [sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: livrable.title, serviceName, apresSolde: !livrableAccessible({ type: livrable.type, isAvailable: true }, prestation) })]);
       }
     }
 

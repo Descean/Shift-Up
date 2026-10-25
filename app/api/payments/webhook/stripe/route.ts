@@ -28,6 +28,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import prisma from "@/lib/prisma";
+import { confirmerPaiement } from "@/lib/prestations";
 
 // ── Client Stripe créé à l'appel (le build ne dépend pas de la clé) ──────────
 function stripeClient() {
@@ -65,6 +66,20 @@ export async function POST(req: NextRequest) {
       // ────────────────────────────────────────────────────────────────────
       // Événement : paiement réussi
       // ────────────────────────────────────────────────────────────────────
+      // ────────────────────────────────────────────────────────────────────
+      // Événement : session Checkout payée (paiement d'une prestation par carte)
+      // La référence SU-PAY-… est passée dans metadata lors de /api/payments/create.
+      // ────────────────────────────────────────────────────────────────────
+      case "checkout.session.completed": {
+        const cs = event.data.object as Stripe.Checkout.Session;
+        const reference = cs.metadata?.reference;
+        if (reference && cs.payment_status === "paid") {
+          const payment = await prisma.payment.findUnique({ where: { reference } });
+          if (payment) await confirmerPaiement(payment.id);
+        }
+        break;
+      }
+
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         const { prestationId, clientId } = paymentIntent.metadata;
@@ -77,33 +92,7 @@ export async function POST(req: NextRequest) {
           data:  { status: "COMPLETED" },
         });
 
-        // 2. Si on a un prestationId → vérifier si on peut avancer le statut de la prestation
-        if (prestationId) {
-          const prestation = await prisma.prestation.findUnique({
-            where:   { id: prestationId },
-            include: { payments: true }, // Inclure tous les paiements liés
-          });
-
-          if (prestation) {
-            // Calculer le total effectivement encaissé (paiements COMPLETED uniquement)
-            const totalPaid = prestation.payments
-              .filter((p) => p.status === "COMPLETED")
-              .reduce((sum, p) => sum + p.amount, 0);
-
-            /**
-             * Règle d'avancement automatique :
-             * Si la prestation était EN_ATTENTE et que le client a payé au moins
-             * 60% du montant total → passer en EN_COURS (début des travaux).
-             * Cela correspond à l'acompte de 60% défini dans les CGV.
-             */
-            if (prestation.status === "EN_ATTENTE" && totalPaid >= prestation.amount * 0.6) {
-              await prisma.prestation.update({
-                where: { id: prestationId },
-                data:  { status: "EN_COURS" },
-              });
-            }
-          }
-        }
+        // 2. L'avancement de la prestation est fait par « checkout.session.completed » (voir plus haut).
 
         // 3. Créer une entrée dans l'AuditLog pour traçabilité
         if (clientId) {

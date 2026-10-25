@@ -14,6 +14,7 @@ import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { freeTextSchema, isSafe } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { envoyer, vueClient } from "@/lib/prestations";
 
 const bodySchema = z.object({
   serviceId:     z.string().max(100).optional().nullable(),
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
       },
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ prestations });
+    return NextResponse.json({ prestations: prestations.map(vueClient) });
   } catch (error) {
     console.error("GET /api/prestations error:", error);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
@@ -122,13 +123,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Notifications email (sans bloquer la réponse)
+    // Notifications email (attendues : sur Vercel, un envoi non attendu peut être interrompu)
     const serviceName = service?.title ?? customService ?? sector;
     const clientName = session.user.name ?? session.user.email ?? "Client";
-    Promise.all([
+    await envoyer("nouvelle demande", [
       sendDemandeConfirmation({ to: session.user.email!, name: clientName, serviceName, prestationId: prestation.id }),
       sendNewDemandeAdmin({ clientName, clientEmail: session.user.email!, serviceName, brief, prestationId: prestation.id }),
-    ]).catch((e) => console.error("Email error:", e));
+    ]);
 
     return NextResponse.json({ prestation }, { status: 201 });
   } catch (error) {

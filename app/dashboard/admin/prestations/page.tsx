@@ -67,6 +67,7 @@ interface Prestation {
   quote: Quote | null;
   plan: { phases: { title: string; description: string; duration: string }[] } | null;
   adminNote: string | null;
+  customFields?: { historique?: { date: string; action: string; commentaire?: string | null }[]; origine?: string } | null;
   createdAt: string;
   estimatedEndDate: string | null;
   prestationPhases: PrestationPhase[];
@@ -121,7 +122,13 @@ const statusTransitions: Record<PrestationStatus, PrestationStatus[]> = {
   ANNULEE: [],
 };
 
-const livrableTypes = ["PDF", "LINK", "VIDEO", "CODE", "DESIGN", "ARCHIVE"];
+const livrableTypes = ["PDF", "LINK", "VIDEO", "CODE", "DESIGN", "ARCHIVE", "APERCU"];
+/** APERCU = version provisoire ouverte au client avant le solde ; les autres types attendent le solde. */
+const libelleType = (t: string) => (t === "APERCU" ? "APERÇU (avant solde)" : t);
+const LIBELLES_DECISION: Record<string, string> = {
+  accepter_devis: "Devis accepté", modifier_devis: "Modification du devis demandée", refuser_devis: "Devis refusé",
+  demander_revision: "Révision demandée", valider_livraison: "Livraison validée",
+};
 
 function progressBarColor(p: number): string {
   if (p === 100) return "bg-green-500";
@@ -535,7 +542,7 @@ function PhaseLivrableForm({ prestation, phase, onDone }: { prestation: Prestati
           className="flex-1 border border-green-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent bg-white" />
         <select value={type} onChange={(e) => setType(e.target.value)}
           className="border border-green-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-accent bg-white">
-          {["PDF","LINK","VIDEO","CODE","DESIGN","ARCHIVE"].map((t) => <option key={t} value={t}>{t}</option>)}
+          {livrableTypes.map((t) => <option key={t} value={t}>{libelleType(t)}</option>)}
         </select>
       </div>
       <input ref={fileInputRef} type="file" className="hidden"
@@ -892,6 +899,7 @@ function TabLivrables({
     CODE: "fa-code",
     DESIGN: "fa-paintbrush",
     ARCHIVE: "fa-file-zipper",
+    APERCU: "fa-eye",
   };
 
   return (
@@ -975,7 +983,7 @@ function TabLivrables({
           >
             {livrableTypes.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {libelleType(t)}
               </option>
             ))}
           </select>
@@ -1186,11 +1194,30 @@ function DetailPanel({
         </div>
         {prestation.brief && (
           <div className="mt-2">
-            <p className="text-xs text-gray-400 mb-1">Brief</p>
+            <p className="text-xs text-gray-400 mb-1">Brief{prestation.customFields?.origine ? ` — ${prestation.customFields.origine}` : ""}</p>
             <p className="text-xs text-gray-700 bg-gray-50 rounded-lg p-2.5 leading-relaxed line-clamp-4">
               {prestation.brief}
             </p>
           </div>
+        )}
+        {(prestation.customFields?.historique?.length ?? 0) > 0 && (
+          <div className="mt-2">
+            <p className="text-xs text-gray-400 mb-1">Décisions du client</p>
+            <ul className="space-y-1.5">
+              {[...(prestation.customFields!.historique!)].reverse().map((h, i) => (
+                <li key={i} className="text-xs bg-amber-50 border border-amber-100 rounded-lg p-2">
+                  <span className="font-semibold text-primary">{LIBELLES_DECISION[h.action] ?? h.action}</span>
+                  <span className="text-gray-400"> — {new Date(h.date).toLocaleString("fr-FR")}</span>
+                  {h.commentaire && <p className="text-gray-700 mt-1 whitespace-pre-wrap">{h.commentaire}</p>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {prestation.amount > 0 && prestation.amountPaid < prestation.amount - 1 && prestation.livrables.some((l) => l.isAvailable && l.type !== "APERCU") && (
+          <p className="mt-2 text-xs text-amber-700 bg-amber-50 rounded-lg p-2">
+            <i className="fas fa-lock mr-1" />Solde non réglé : le client voit les livrables mais ne peut les télécharger qu&apos;après paiement (sauf les aperçus).
+          </p>
         )}
 
         {/* Attachments */}

@@ -6,16 +6,22 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { HCaptchaField } from "@/components/ui/HCaptchaField";
 
 const servicesList = [
-  { id: "conseil", label: "Conseil Stratégique" },
-  { id: "numerique", label: "Solutions Numériques" },
-  { id: "formation", label: "Formation & Coaching" },
-  { id: "marketing", label: "Marketing Digital" },
-  { id: "juridique", label: "Juridique & Fiscal" },
-  { id: "finance", label: "Finance & Comptabilité" },
-  { id: "montage-dossier", label: "Montage de Dossier" },
+  { id: "montage-dossier", label: "Montage de dossier de soumission", sector: "Marchés Publics & Dossiers" },
+  { id: "conseil", label: "Conseil Stratégique", sector: "Conseil Stratégique" },
+  { id: "numerique", label: "Solutions Numériques", sector: "Solutions Numériques" },
+  { id: "formation", label: "Formation & Coaching", sector: "Formation & Coaching" },
+  { id: "marketing", label: "Marketing Digital", sector: "Marketing Digital" },
+  { id: "juridique", label: "Juridique & Fiscal", sector: "Juridique & Finance" },
+  { id: "finance", label: "Finance & Comptabilité", sector: "Finance & Investissement" },
 ];
+/** ?service= peut contenir l'identifiant ou le libellé */
+function trouverService(v: string) {
+  const x = v.trim().toLowerCase();
+  return servicesList.find((s) => s.id === x || s.label.toLowerCase() === x || s.sector.toLowerCase() === x)?.id ?? "";
+}
 
 const steps = [
   { icon: "fa-file-alt", label: "Votre demande", desc: "Décrivez votre besoin" },
@@ -29,7 +35,7 @@ function SubscriptionForm() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const preselectedService = searchParams.get("service") || "";
+  const preselectedService = trouverService(searchParams.get("service") || "");
 
   const [form, setForm] = useState({
     service: preselectedService,
@@ -42,7 +48,8 @@ function SubscriptionForm() {
     timeline: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<null | { reference?: string; compteExistant?: boolean }>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   if (status === "loading") {
     return (
@@ -58,27 +65,41 @@ function SubscriptionForm() {
       toast.error("Veuillez remplir tous les champs obligatoires.");
       return;
     }
+    if (!session && (!form.name.trim() || !form.email.trim())) {
+      toast.error("Indiquez votre nom et votre adresse e-mail.");
+      return;
+    }
+    if (!session && process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY && !captchaToken) {
+      toast.error("Cochez la case anti-robot.");
+      return;
+    }
+    const choix = servicesList.find((s) => s.id === form.service);
+    const payload = {
+      sector: choix?.sector ?? "Autre",
+      customService: choix?.label ?? form.service,
+      brief: form.description,
+      budget: form.budget || null,
+      deadline: form.timeline || null,
+      company: form.company || null,
+      phone: form.phone || null,
+    };
     setSubmitting(true);
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          subject: `Demande de prestation : ${form.service}`,
-          service: form.service,
-          message: `${form.description}\n\nBudget : ${form.budget || "Non précisé"}\nDélai souhaité : ${form.timeline || "Non précisé"}\nEntreprise : ${form.company || "Non précisée"}`,
-        }),
-      });
+      const res = session
+        ? await fetch("/api/prestations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        : await fetch("/api/prestations/publique", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, name: form.name, email: form.email, captchaToken }),
+          });
+      const d = await res.json().catch(() => ({}));
       if (res.ok) {
-        setSubmitted(true);
+        setSubmitted({ reference: d.reference ?? d.prestation?.id?.slice(-8).toUpperCase(), compteExistant: d.compteExistant });
         if (session) {
           setTimeout(() => router.push("/dashboard/client/prestations"), 3000);
         }
       } else {
-        toast.error("Une erreur est survenue. Réessayez ou contactez-nous directement.");
+        toast.error(d.error ?? "Une erreur est survenue. Réessayez ou contactez-nous directement.");
       }
     } catch {
       toast.error("Impossible d'envoyer votre demande. Vérifiez votre connexion.");
@@ -101,6 +122,14 @@ function SubscriptionForm() {
         <p className="text-gray-500 text-lg mb-4">
           Notre équipe vous contactera sous <strong>48 heures</strong> ouvrables avec votre devis personnalisé.
         </p>
+        {submitted.reference && <p className="text-sm text-gray-500 mb-2">Référence de votre demande : <strong className="text-primary">{submitted.reference}</strong></p>}
+        {!session && (
+          <p className="text-sm text-gray-500 max-w-md mx-auto">
+            {submitted.compteExistant
+              ? "Cette demande a été ajoutée à votre espace client : connectez-vous pour suivre le devis."
+              : "Un courriel vient de vous être envoyé : cliquez sur le lien pour choisir votre mot de passe et suivre votre demande dans votre espace client."}
+          </p>
+        )}
         {session && (
           <p className="text-sm text-gray-400">Redirection vers votre tableau de bord…</p>
         )}
@@ -134,7 +163,7 @@ function SubscriptionForm() {
         >
           <option value="">Sélectionnez un service…</option>
           {servicesList.map((s) => (
-            <option key={s.id} value={s.label}>{s.label}</option>
+            <option key={s.id} value={s.id}>{s.label}</option>
           ))}
         </select>
       </div>
@@ -244,10 +273,14 @@ function SubscriptionForm() {
       </div>
 
       {!session && (
-        <div className="bg-accent/5 rounded-xl p-4 text-sm text-gray-600">
-          <i className="fas fa-user-plus text-accent mr-2" />
-          Vous n'avez pas de compte ? <Link href="/inscription" className="text-accent font-semibold hover:underline">Créez-en un</Link> pour suivre votre demande dans votre espace client.
-        </div>
+        <>
+          <div className="bg-accent/5 rounded-xl p-4 text-sm text-gray-600">
+            <i className="fas fa-user-plus text-accent mr-2" />
+            Pas encore de compte ? Il sera ouvert avec votre adresse e-mail pour suivre le devis, les paiements et les livrables.
+            Déjà client ? <Link href="/connexion?callbackUrl=/services/souscrire" className="text-accent font-semibold hover:underline">Connectez-vous</Link>.
+          </div>
+          <HCaptchaField onVerify={setCaptchaToken} onExpire={() => setCaptchaToken("")} />
+        </>
       )}
 
       <button

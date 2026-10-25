@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { televerser } from "@/lib/televerser";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
-interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
+interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; verrouille?: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
 interface QuoteItem { label: string; amount: number; }
 interface Quote { items: QuoteItem[]; deposit: number; total: number; validity?: string; terms?: string; }
 interface Prestation {
@@ -57,12 +57,38 @@ export default function ClientPrestationsPage() {
   const [selected, setSelected]       = useState<string | null>(null);
   const [paying, setPaying]           = useState(false);
 
-  useEffect(() => {
-    fetch("/api/prestations")
+  const [agit, setAgit]               = useState<string | null>(null);
+
+  function charger() {
+    return fetch("/api/prestations")
       .then((r) => r.json())
       .then((d) => setPrestations(d.prestations ?? []))
       .finally(() => setLoading(false));
-  }, []);
+  }
+  useEffect(() => { charger(); }, []);
+
+  /** Décision du client (devis, livraison). Renvoie true si elle a été enregistrée. */
+  async function decider(id: string, action: string, commentaire?: string) {
+    setAgit(action);
+    try {
+      const r = await fetch(`/api/prestations/${id}/decision`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, commentaire: commentaire ?? null }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { toast.error(d.error ?? "Action impossible."); return false; }
+      if (action !== "accepter_devis") toast.success(d.message ?? "C'est noté.");
+      await charger();
+      return true;
+    } catch { toast.error("Erreur réseau."); return false; }
+    finally { setAgit(null); }
+  }
+
+  async function accepterEtPayer(p: Prestation) {
+    if (p.status === "DEVIS_ENVOYE" && !(await decider(p.id, "accepter_devis"))) return;
+    pay(p.id, p.quote!.deposit, serviceName(p), true);
+  }
 
   const active = prestations.filter((p) => !["TERMINEE", "ANNULEE"].includes(p.status));
   const past   = prestations.filter((p) =>  ["TERMINEE", "ANNULEE"].includes(p.status));
@@ -257,13 +283,14 @@ export default function ClientPrestationsPage() {
 
                     {/* Bouton payer */}
                     <button
-                      onClick={() => pay(detail.id, detail.quote!.deposit, serviceName(detail), true)}
-                      disabled={paying}
+                      onClick={() => accepterEtPayer(detail)}
+                      disabled={paying || agit !== null}
                       className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
                     >
                       <i className="fas fa-lock-open" />
-                      Payer l&apos;acompte &amp; démarrer — {detail.quote.deposit.toLocaleString()} XOF
+                      {detail.status === "DEVIS_ENVOYE" ? "Accepter le devis et payer l'acompte" : "Payer l'acompte et démarrer"} — {detail.quote.deposit.toLocaleString()} XOF
                     </button>
+                    <ChoixDevis onDecider={(action, c) => decider(detail.id, action, c)} occupe={agit !== null} />
                   </div>
                 </div>
               )}
@@ -305,16 +332,26 @@ export default function ClientPrestationsPage() {
                 </div>
               )}
 
-              {/* Solde à payer si EN_COURS */}
-              {detail.status === "LIVRAISON" && detail.amount > detail.amountPaid && (
+              {/* Solde (une fois l'acompte payé) : il ouvre le téléchargement des livrables */}
+              {["EN_COURS", "LIVRAISON", "REVISION"].includes(detail.status) && detail.amountPaid > 0 && detail.amount > detail.amountPaid && (
                 <button
                   onClick={() => pay(detail.id, detail.amount - detail.amountPaid, serviceName(detail), false)}
                   disabled={paying}
-                  className="w-full border-2 border-accent text-accent py-3 rounded-xl font-semibold text-sm hover:bg-accent/5 transition-colors flex items-center justify-center gap-2"
+                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 ${detail.status === "EN_COURS" ? "border-2 border-accent text-accent hover:bg-accent/5" : "bg-gradient-to-r from-accent to-secondary text-white hover:opacity-90"}`}
                 >
                   <i className="fas fa-credit-card" />
                   Payer le solde — {(detail.amount - detail.amountPaid).toLocaleString()} XOF
                 </button>
+              )}
+
+              {/* Validation de la livraison */}
+              {["LIVRAISON", "REVISION"].includes(detail.status) && (
+                <ChoixLivraison
+                  statut={detail.status}
+                  solde={detail.amount > 0 && detail.amountPaid >= detail.amount - 1}
+                  occupe={agit !== null}
+                  onDecider={(action, c) => decider(detail.id, action, c)}
+                />
               )}
             </div>
           </motion.div>
@@ -434,18 +471,30 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
             )}
             <div className="space-y-3">
         {group.items.map((l) => (
-          <div key={l.id} className="bg-green-50 border border-green-200 rounded-xl overflow-hidden">
+          <div key={l.id} className={`${l.verrouille ? "bg-gray-50 border-gray-200" : "bg-green-50 border-green-200"} border rounded-xl overflow-hidden`}>
+            {l.verrouille ? (
+              <div className="flex items-center gap-3 p-3">
+                <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-lock text-gray-500 text-sm" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-700">{l.title}</p>
+                  <p className="text-xs text-gray-500">Téléchargeable après le règlement du solde</p>
+                </div>
+              </div>
+            ) : (
             <a href={l.url ?? "#"} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 p-3 hover:bg-green-100 transition-colors">
               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i className={`fas fa-${typeIcon[l.type] ?? "file"} text-green-600 text-sm`} />
+                <i className={`fas fa-${l.type === "APERCU" ? "eye" : (typeIcon[l.type] ?? "file")} text-green-600 text-sm`} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-green-800">{l.title}</p>
-                <p className="text-xs text-green-600">{l.type}</p>
+                <p className="text-xs text-green-600">{l.type === "APERCU" ? "Aperçu provisoire, pour relecture" : l.type}</p>
               </div>
               <i className="fas fa-arrow-up-right-from-square text-green-600 text-xs" />
             </a>
+            )}
             {/* Observation */}
             <div className="px-3 pb-3 border-t border-green-200 pt-2 space-y-2">
               {l.observation && (
@@ -515,9 +564,91 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
   );
 }
 
+/* ─── Choix sur le devis : modifier / refuser ───────────────────────────── */
+function ChoixDevis({ onDecider, occupe }: { onDecider: (action: string, commentaire?: string) => Promise<boolean>; occupe: boolean }) {
+  const [mode, setMode] = useState<null | "modifier" | "refuser">(null);
+  const [texte, setTexte] = useState("");
+  return (
+    <div className="space-y-2">
+      {mode === null && (
+        <div className="flex gap-2">
+          <button onClick={() => setMode("modifier")} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50">
+            <i className="fas fa-pen mr-1.5" />Demander une modification
+          </button>
+          <button onClick={() => setMode("refuser")} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-500 hover:bg-gray-50">
+            <i className="fas fa-xmark mr-1.5" />Refuser le devis
+          </button>
+        </div>
+      )}
+      {mode === "modifier" && (
+        <div className="space-y-2">
+          <textarea rows={3} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Que faut-il changer ? (prix, contenu, délai…)"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent resize-none" />
+          <div className="flex gap-2">
+            <button onClick={() => setMode(null)} className="flex-1 border border-gray-200 rounded-xl py-2 text-xs text-gray-600">Annuler</button>
+            <button disabled={occupe || !texte.trim()} onClick={async () => { if (await onDecider("modifier_devis", texte)) { setMode(null); setTexte(""); } }}
+              className="flex-1 bg-primary text-white rounded-xl py-2 text-xs font-semibold disabled:opacity-50">Envoyer la demande</button>
+          </div>
+        </div>
+      )}
+      {mode === "refuser" && (
+        <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+          <p className="text-xs text-gray-600">Confirmez-vous le refus du devis ? La demande sera close.</p>
+          <textarea rows={2} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Motif (facultatif)"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent resize-none bg-white" />
+          <div className="flex gap-2">
+            <button onClick={() => setMode(null)} className="flex-1 border border-gray-200 rounded-xl py-2 text-xs text-gray-600 bg-white">Annuler</button>
+            <button disabled={occupe} onClick={async () => { if (await onDecider("refuser_devis", texte)) setMode(null); }}
+              className="flex-1 bg-gray-700 text-white rounded-xl py-2 text-xs font-semibold disabled:opacity-50">Oui, refuser</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Validation de la livraison / demande de révision ─────────────────── */
+function ChoixLivraison({ statut, solde, occupe, onDecider }: { statut: string; solde: boolean; occupe: boolean; onDecider: (action: string, commentaire?: string) => Promise<boolean> }) {
+  const [revision, setRevision] = useState(false);
+  const [texte, setTexte] = useState("");
+  return (
+    <div className="border border-gray-100 rounded-2xl p-4 space-y-3">
+      <p className="text-sm font-semibold text-primary">
+        {statut === "REVISION" ? "Révision en cours" : "Votre avis sur la livraison"}
+      </p>
+      {statut === "REVISION" && <p className="text-xs text-gray-500">Nous reprenons les points signalés. Vous serez prévenu dès que la nouvelle version sera prête.</p>}
+      {!revision && (
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button disabled={occupe || !solde} onClick={() => onDecider("valider_livraison")}
+            className="flex-1 bg-green-600 text-white rounded-xl py-2.5 text-xs font-semibold hover:bg-green-700 disabled:opacity-50">
+            <i className="fas fa-circle-check mr-1.5" />Valider la livraison
+          </button>
+          {statut === "LIVRAISON" && (
+            <button disabled={occupe} onClick={() => setRevision(true)} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50">
+              <i className="fas fa-rotate mr-1.5" />Demander une révision
+            </button>
+          )}
+        </div>
+      )}
+      {!solde && !revision && <p className="text-xs text-gray-400">La validation est possible une fois le solde réglé.</p>}
+      {revision && (
+        <div className="space-y-2">
+          <textarea rows={3} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Points à corriger ou à compléter"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent resize-none" />
+          <div className="flex gap-2">
+            <button onClick={() => setRevision(false)} className="flex-1 border border-gray-200 rounded-xl py-2 text-xs text-gray-600">Annuler</button>
+            <button disabled={occupe || !texte.trim()} onClick={async () => { if (await onDecider("demander_revision", texte)) { setRevision(false); setTexte(""); } }}
+              className="flex-1 bg-primary text-white rounded-xl py-2 text-xs font-semibold disabled:opacity-50">Envoyer</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation; index: number; name: string; onSelect: (id: string) => void; selected: boolean }) {
   const cfg = STATUS[p.status] ?? STATUS["EN_ATTENTE"];
-  const hasDevis = p.status === "DEVIS_ENVOYE";
+  const hasDevis = p.status === "DEVIS_ENVOYE" || p.status === "LIVRAISON";
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }}
@@ -553,7 +684,7 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
         </div>
       )}
       <p className="text-xs text-accent font-medium mt-2 ml-4">
-        {hasDevis ? "Cliquez pour voir et accepter le devis →" : "Cliquer pour les détails →"}
+        {p.status === "DEVIS_ENVOYE" ? "Cliquez pour voir et accepter le devis →" : p.status === "LIVRAISON" ? "Livraison prête : cliquez pour la valider →" : "Cliquer pour les détails →"}
       </p>
     </motion.div>
   );

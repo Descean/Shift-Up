@@ -21,6 +21,14 @@ const templates: Record<string, PhaseTemplate[]> = {
     { title: "Accompagnement initial", description: "Suivi de la mise en œuvre des premières recommandations.", duration: "2 semaines", order: 4 },
   ],
 
+  "Marchés Publics & Dossiers": [
+    { title: "Analyse du DAO", description: "Lecture du dossier d'appel d'offres, des additifs et des réponses aux questions ; liste des critères éliminatoires.", duration: "1-2 jours", order: 0 },
+    { title: "Pièces à fournir", description: "Liste des pièces administratives, financières, références, personnel et matériel à réunir par le client ; contrôle de conformité.", duration: "2-3 jours", order: 1 },
+    { title: "Offre financière", description: "Bordereau des prix, devis quantitatif et estimatif, sous-détails des prix.", duration: "2-4 jours", order: 2 },
+    { title: "Offre technique et formulaires", description: "Formulaires du DAO, méthodologie, planning, personnel (CV), matériel, plan environnemental et social.", duration: "3-5 jours", order: 3 },
+    { title: "Contrôle final et signature", description: "Contrôle de conformité, paraphe et signature par le soumissionnaire, reprographie et reliure.", duration: "1 jour", order: 4 },
+    { title: "Dépôt de l'offre", description: "Remise de l'offre avant la date limite et transmission du récépissé de dépôt.", duration: "1 jour", order: 5 },
+  ],
   "Solutions Numériques": [
     { title: "Découverte & Cadrage", description: "Définition des besoins, rédaction des spécifications fonctionnelles.", duration: "1 semaine", order: 0 },
     { title: "Conception UI/UX", description: "Maquettes, wireframes et prototype interactif pour validation.", duration: "1-2 semaines", order: 1 },

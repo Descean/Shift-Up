@@ -191,8 +191,8 @@ async function handleStripe({ amount, reference, session, prestation }: {
     data: {
       prestationId: prestation.id,
       userId: session.user.id,
-      amount,
-      currency: "EUR",
+      amount, // montant en XOF (la conversion en euros ne concerne que Stripe Checkout)
+      currency: "XOF",
       method: "CARD",
       provider: "STRIPE",
       status: "PENDING",
