@@ -33,8 +33,9 @@ import CookieConsent from "@/components/legal/CookieConsent";
  * Identifiant GA4 : propriété « shiftup.bj » du compte Analytics SHIFT UP (flux « Site SHIFT UP »).
  * NEXT_PUBLIC_GA_MEASUREMENT_ID permet de le remplacer ; la valeur d'exemple « G-XXXXXXXXXX » est ignorée.
  */
-const GA_RAW = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() || "G-H2JRV9FPTC";
-const GA_ID = /^G-[A-Z0-9]{6,12}$/.test(GA_RAW) && !/^G-X+$/.test(GA_RAW) ? GA_RAW : "";
+const GA_DEFAUT = "G-H2JRV9FPTC";
+const GA_RAW = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? "";
+const GA_ID = /^G-[A-Z0-9]{6,12}$/.test(GA_RAW) && !/^G-X+$/.test(GA_RAW) ? GA_RAW : GA_DEFAUT;
 
 const poppins = Poppins({
   subsets: ["latin"],
