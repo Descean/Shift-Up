@@ -32,7 +32,9 @@ export async function collecter() {
   const noms = Object.keys(SOURCES_AUTOMATIQUES);
   const bilan = { parSource: {} as Record<string, number>, nouveaux: 0, erreurs: [] as string[] };
   // Lecture en parallèle (une seule requête par page et par jour), enregistrement dans un ordre fixe
-  const lus = await Promise.allSettled(noms.map((n) => SOURCES_AUTOMATIQUES[n]()));
+  // Chaque source a 35 s au plus : une source lente ou bloquée ne fait pas échouer la tâche (limite Vercel : 60 s)
+  const limite = <T,>(p: Promise<T>) => Promise.race([p, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("délai dépassé (35 s)")), 35_000))]);
+  const lus = await Promise.allSettled(noms.map((n) => limite(SOURCES_AUTOMATIQUES[n]())));
   for (const [i, r] of lus.entries()) {
     const nom = noms[i];
     if (r.status === "rejected") { bilan.erreurs.push(`${nom}: ${(r.reason as Error)?.message ?? r.reason}`); bilan.parSource[nom] = 0; continue; }

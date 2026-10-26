@@ -354,22 +354,37 @@ export const SOURCES_AUTOMATIQUES: Record<string, () => Promise<AvisCollecte[]>>
 
 // ─── Enregistrement ──────────────────────────────────────────────────────────
 
-/** Crée ou met à jour les avis ; renvoie le nombre de nouveaux avis. */
+/**
+ * Crée ou met à jour les avis ; renvoie le nombre de nouveaux avis.
+ * En lot : une lecture des clés existantes, une insertion groupée, des mises à jour seulement
+ * pour les avis modifiés (report de date, objet corrigé, lien) — la tâche tient dans le temps imparti.
+ */
 export async function enregistrerAvis(avis: AvisCollecte[]) {
-  let nouveaux = 0;
+  const parCle = new Map<string, Prisma.AvisMarcheCreateManyInput>();
   for (const a of avis) {
     if (!a.reference || !a.objet) continue;
     const cle = cleAvis(a.source, a.reference);
-    const donnees = {
-      source: a.source, reference: a.reference.slice(0, 200), objet: a.objet.slice(0, 2000),
+    parCle.set(cle, {
+      cle, source: a.source, reference: a.reference.slice(0, 200), objet: a.objet.slice(0, 2000),
       autorite: a.autorite?.slice(0, 300) ?? null, typeMarche: a.typeMarche ?? null, procedure: a.procedure?.slice(0, 200) ?? null,
       financement: a.financement?.slice(0, 300) ?? null, lieu: a.lieu?.slice(0, 300) ?? null,
       datePublication: a.datePublication ?? null, dateLimite: a.dateLimite ?? null, lien: a.lien ?? null,
       details: (a.details ?? undefined) as Prisma.InputJsonValue | undefined,
-    };
-    const existant = await prisma.avisMarche.findUnique({ where: { cle }, select: { id: true } });
-    if (existant) await prisma.avisMarche.update({ where: { cle }, data: donnees });
-    else { await prisma.avisMarche.create({ data: { cle, ...donnees } }); nouveaux++; }
+    });
   }
-  return nouveaux;
+  if (!parCle.size) return 0;
+  const existants = new Map(
+    (await prisma.avisMarche.findMany({ where: { cle: { in: [...parCle.keys()] } }, select: { cle: true, objet: true, dateLimite: true, lien: true, source: true } }))
+      .map((e) => [e.cle, e]),
+  );
+  const nouveaux = [...parCle.values()].filter((d) => !existants.has(d.cle));
+  if (nouveaux.length) await prisma.avisMarche.createMany({ data: nouveaux, skipDuplicates: true });
+  const modifies = [...parCle.values()].filter((d) => {
+    const e = existants.get(d.cle);
+    return e && (e.objet !== d.objet || (e.dateLimite?.getTime() ?? null) !== ((d.dateLimite as Date | null)?.getTime() ?? null) || e.lien !== d.lien);
+  });
+  for (let i = 0; i < modifies.length; i += 10) {
+    await Promise.all(modifies.slice(i, i + 10).map(({ cle, ...data }) => prisma.avisMarche.update({ where: { cle }, data })));
+  }
+  return nouveaux.length;
 }
