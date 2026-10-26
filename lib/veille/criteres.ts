@@ -79,8 +79,8 @@ export function scoreCorrespondance(a: AvisPourCorrespondance, c: CriteresVeille
 
 /** Type de marché déduit d'un libellé ou d'un titre (portails, Banque mondiale, agences). */
 export function typeDepuisTexte(t?: string | null): (typeof TYPES_VEILLE)[number] | null {
-  const x = normaliser(t ?? "");
-  if (/ (prestations? intellectuelles?|pi|cs|consultant|consulting|consultancy|cabinet|bureau d'?etudes?|assistance technique|maitrise d'?oeuvre|etudes?|audit|auditeur|evaluation|expert|specialiste|recrutement|expression of interest|eoi) /.test(x)) return "Prestations intellectuelles";
+  const x = normaliser(t ?? "").replace(/'/g, " ");
+  if (/ (prestations? intellectuelles?|pi|cs|consultant|consulting|consultancy|cabinet|bureau d ?etudes?|assistance technique|maitrise d ?oeuvre|etudes?|audit|auditeur|evaluation|expert|specialiste|recrutement|expression of interest|eoi) /.test(x)) return "Prestations intellectuelles";
   if (/ (travaux|works|t|cw|construction|rehabilitation|refection|amenagement) /.test(x)) return "Travaux";
   if (/ (fournitures?|goods|f|go|acquisition|achat|livraison|equipements?) /.test(x)) return "Fournitures";
   if (/ (services?|non-consulting|nc|s|entretien|gardiennage|nettoyage|maintenance|location|assurance) /.test(x)) return "Services courants";

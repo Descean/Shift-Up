@@ -22,7 +22,7 @@ type Donnees = {
 
 const SOURCES: Record<string, string> = {
   SIGMAP: "Portail national", BANQUE_MONDIALE: "Banque mondiale", UNGM: "Nations unies (UNGM)", PNUD: "PNUD", UNFPA: "UNFPA Bénin",
-  ENABEL: "Enabel", GIZ: "GIZ", SBEE: "SBEE", BOAD: "BOAD", MANUEL: "Saisie SHIFT UP",
+  ENABEL: "Enabel", GIZ: "GIZ", SBEE: "SBEE", BOAD: "BOAD", GOUV_BJ: "gouv.bj", ABE: "ABE", MANUEL: "Saisie SHIFT UP",
 };
 /** Sites sans lecture automatique possible (protection anti-robots ou données chiffrées) : à consulter à la main. */
 const A_CONSULTER: [string, string, string][] = [
@@ -71,7 +71,7 @@ export default function AdminVeillePage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <h1 className="font-syne font-black text-2xl text-primary">Veille des appels d&apos;offres</h1>
-          <p className="text-gray-500 text-sm">Collecte chaque matin vers 7 h : portail national des marchés publics, SBEE, Banque mondiale, Nations unies (UNGM, PNUD, UNFPA), Enabel, GIZ et BOAD. Les abonnés actifs reçoivent les avis qui correspondent à leurs critères.</p>
+          <p className="text-gray-500 text-sm">Collecte chaque matin vers 7 h : portail national des marchés publics, gouv.bj, SBEE, ABE, Banque mondiale, Nations unies (UNGM, PNUD, UNFPA), Enabel, GIZ et BOAD. Les abonnés actifs reçoivent les avis qui correspondent à leurs critères.</p>
         </div>
         {!d.indisponible && (
           <button disabled={occupe} onClick={() => agir({ action: "lancer" })} className="bg-primary text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex-shrink-0">

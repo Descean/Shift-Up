@@ -32,7 +32,7 @@ export type AvisCollecte = {
   details?: Record<string, unknown>;
 };
 
-export type SourceAvis = "SIGMAP" | "BANQUE_MONDIALE" | "UNGM" | "PNUD" | "UNFPA" | "ENABEL" | "GIZ" | "SBEE" | "BOAD" | "MANUEL";
+export type SourceAvis = "SIGMAP" | "BANQUE_MONDIALE" | "UNGM" | "PNUD" | "UNFPA" | "ENABEL" | "GIZ" | "SBEE" | "BOAD" | "GOUV_BJ" | "ABE" | "MANUEL";
 
 /** UNGM et le portail du PNUD publient les mêmes avis onusiens : même clé pour les fusionner. */
 const GROUPE_CLE: Partial<Record<SourceAvis, string>> = { UNGM: "ONU", PNUD: "ONU" };
@@ -345,11 +345,58 @@ export async function collecterBoad(): Promise<AvisCollecte[]> {
   });
 }
 
+// ─── gouv.bj — opportunités « Marchés publics » du Gouvernement ──────────────
+
+export async function collecterGouvBj(): Promise<AvisCollecte[]> {
+  const h = (await page("https://www.gouv.bj/opportunites/marches-publics/")).replace(/\r/g, "");
+  return h.split(/(?=<article class="flex row bg-gray news)/).slice(1).flatMap((a) => {
+    const lien = a.match(/<h3[^>]*><a href="([^"]+)"/)?.[1];
+    const titre = texteHtml(a.match(/<h3[^>]*><a[^>]*>([\s\S]*?)<\/a>/)?.[1] ?? "");
+    if (!lien || !titre) return [];
+    const resume = texteHtml(a.match(/<p class="p-alt-2[^"]*">([\s\S]*?)<\/p>/)?.[1] ?? "");
+    const genre = texteHtml(a.match(/<span class="upper success medium">([\s\S]*?)<\/span>/)?.[1] ?? "");
+    const lim = texteHtml(a.match(/Clôture : <\/span><span[^>]*>([\s\S]*?)<\/span>/)?.[1] ?? "").match(/(\d{1,2}) ([A-Za-zéû]+)\.? (\d{4}) à (\d{2}):(\d{2})/);
+    const mois = lim ? MOIS_EN[lim[2].toLowerCase().slice(0, 3)] : undefined;
+    const id = lien.match(/opportunite\/(\d+)/)?.[1] ?? lien;
+    // Titre générique (« Avis de demande de renseignements et de prix ») : le résumé précise l'objet
+    const objet = /^avis de demande de renseignements et de prix/i.test(titre) && resume ? `${titre} — ${resume.slice(0, 300)}` : titre;
+    return [{
+      source: "GOUV_BJ" as const, reference: `GOUV-${id}`, objet, autorite: "Gouvernement du Bénin (gouv.bj)",
+      typeMarche: typeDepuisTexte(`${titre} ${resume}`), procedure: genre || null,
+      dateLimite: lim && mois ? dateBenin(`${lim[3]}-${String(mois).padStart(2, "0")}-${lim[1].padStart(2, "0")}`, `${lim[4]}:${lim[5]}`) : null,
+      lien, details: { resume: resume.slice(0, 1000) || null },
+    }];
+  });
+}
+
+// ─── ABE (Agence Béninoise pour l'Environnement) ─────────────────────────────
+
+export async function collecterAbe(): Promise<AvisCollecte[]> {
+  const h = (await page("https://www.abe.bj/appels-doffres/")).replace(/\r/g, "");
+  return h.split(/(?=<li class="dt-doc ao-avis")/).slice(1).flatMap((li) => {
+    if (!/data-statut="en-cours"/.test(li)) return [];
+    const ref = texteHtml(li.match(/<h2 class="dt-titre">([\s\S]*?)<\/h2>/)?.[1] ?? "").replace(/^avis n°\s*:?\s*/i, "");
+    const objet = texteHtml(li.match(/<p class="ao-objet">([\s\S]*?)<\/p>/)?.[1] ?? "") || ref;
+    const ech = Number(li.match(/data-echeance="(\d+)"/)?.[1]);
+    const pub = Number(li.match(/data-publication="(\d+)"/)?.[1]);
+    const pdf = li.match(/data-pdf-url="([^"]+)"/)?.[1]?.replace(/&#038;/g, "&") ?? null;
+    if (!ref) return [];
+    return [{
+      source: "ABE" as const, reference: ref, objet, autorite: "Agence Béninoise pour l'Environnement (ABE)",
+      typeMarche: typeDepuisTexte(objet), procedure: ref.split(/[\s/]/)[0] || null,
+      // Les horodatages du site correspondent à l'heure du Bénin enregistrée comme UTC : on retire 1 h
+      datePublication: pub ? new Date(pub * 1000 - 3_600_000) : null, dateLimite: ech ? new Date(ech * 1000 - 3_600_000) : null,
+      lien: "https://www.abe.bj/appels-doffres/", details: { avisPdf: pdf },
+    }];
+  });
+}
+
 /** Toutes les sources automatiques, lues en parallèle. */
 // Ordre d'enregistrement : pour un même avis onusien, UNGM (heure saisie par l'agence) passe après le PNUD.
 export const SOURCES_AUTOMATIQUES: Record<string, () => Promise<AvisCollecte[]>> = {
   sigmap: collecterSigmap, banqueMondiale: collecterBanqueMondiale, pnud: collecterPnud, ungm: collecterUngm,
   unfpa: collecterUnfpa, enabel: collecterEnabel, giz: collecterGiz, sbee: collecterSbee, boad: collecterBoad,
+  gouvBj: collecterGouvBj, abe: collecterAbe,
 };
 
 // ─── Enregistrement ──────────────────────────────────────────────────────────

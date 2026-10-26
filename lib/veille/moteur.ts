@@ -17,7 +17,7 @@ const MAX_PAR_COURRIEL = 15;
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.shiftup.bj").replace(/\/$/, "");
 export const LIBELLES_SOURCE: Record<string, string> = {
   SIGMAP: "Portail des marchés publics", BANQUE_MONDIALE: "Banque mondiale", UNGM: "Nations unies (UNGM)", PNUD: "PNUD", UNFPA: "UNFPA Bénin",
-  ENABEL: "Enabel", GIZ: "GIZ", SBEE: "SBEE", BOAD: "BOAD", MANUEL: "SHIFT UP",
+  ENABEL: "Enabel", GIZ: "GIZ", SBEE: "SBEE", BOAD: "BOAD", GOUV_BJ: "gouv.bj", ABE: "ABE", MANUEL: "SHIFT UP",
 };
 /** Avis sans date limite connue (ex. UNFPA) : considérés ouverts 30 jours après leur publication. */
 const OUVERT_SANS_DATE_JOURS = 30;
