@@ -20,7 +20,16 @@ type Donnees = {
   whatsapp: { automatique: boolean; alertesEquipe: boolean; modeles: Record<string, { variables: readonly string[]; texte: string }> };
 };
 
-const SOURCES: Record<string, string> = { SIGMAP: "Portail national", BANQUE_MONDIALE: "Banque mondiale", MANUEL: "Saisie SHIFT UP" };
+const SOURCES: Record<string, string> = {
+  SIGMAP: "Portail national", BANQUE_MONDIALE: "Banque mondiale", UNGM: "Nations unies (UNGM)", PNUD: "PNUD", UNFPA: "UNFPA Bénin",
+  ENABEL: "Enabel", GIZ: "GIZ", SBEE: "SBEE", BOAD: "BOAD", MANUEL: "Saisie SHIFT UP",
+};
+/** Sites sans lecture automatique possible (protection anti-robots ou données chiffrées) : à consulter à la main. */
+const A_CONSULTER: [string, string, string][] = [
+  ["Banque africaine de développement", "https://www.afdb.org/fr/projects-and-operations/procurement", "Le site refuse la lecture automatique."],
+  ["TechnoServe", "https://buy.tns.org/public-opportunity-portal", "Filtrer sur « West Africa / Benin »."],
+  ["Expertise France (via marchesonline)", "https://www.marchesonline.com/appels-offres/acheteurs/expertise-france,C284299", "Avis de l'agence française."],
+];
 const STATUTS: Record<string, string> = { EN_ATTENTE: "bg-amber-100 text-amber-800", ACTIF: "bg-green-100 text-green-700", SUSPENDU: "bg-gray-200 text-gray-600", EXPIRE: "bg-red-100 text-red-700" };
 const LIB_STATUTS: Record<string, string> = { EN_ATTENTE: "En attente", ACTIF: "Active", SUSPENDU: "Suspendue", EXPIRE: "Échue" };
 const dateFr = (d: string | null, heure = false) => d ? new Date(d).toLocaleString("fr-FR", { timeZone: "Africa/Porto-Novo", day: "2-digit", month: "2-digit", year: "numeric", ...(heure ? { hour: "2-digit", minute: "2-digit" } : {}) }) : "—";
@@ -62,7 +71,7 @@ export default function AdminVeillePage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <h1 className="font-syne font-black text-2xl text-primary">Veille des appels d&apos;offres</h1>
-          <p className="text-gray-500 text-sm">Collecte chaque matin vers 7 h : portail national des marchés publics et Banque mondiale. Les abonnés actifs reçoivent les avis qui correspondent à leurs critères.</p>
+          <p className="text-gray-500 text-sm">Collecte chaque matin vers 7 h : portail national des marchés publics, SBEE, Banque mondiale, Nations unies (UNGM, PNUD, UNFPA), Enabel, GIZ et BOAD. Les abonnés actifs reçoivent les avis qui correspondent à leurs critères.</p>
         </div>
         {!d.indisponible && (
           <button disabled={occupe} onClick={() => agir({ action: "lancer" })} className="bg-primary text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex-shrink-0">
@@ -81,8 +90,8 @@ export default function AdminVeillePage() {
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
               ["Avis ouverts", String(d.stats?.ouverts ?? 0), "fa-folder-open"],
-              ["Portail national", String(d.stats?.parSource.SIGMAP ?? 0), "fa-landmark"],
-              ["Banque mondiale", String(d.stats?.parSource.BANQUE_MONDIALE ?? 0), "fa-globe-africa"],
+              ["Sources lues", String(Object.keys(d.stats?.parSource ?? {}).filter((k) => k !== "MANUEL").length), "fa-satellite-dish"],
+              ["Avis collectés", String(Object.values(d.stats?.parSource ?? {}).reduce((x, y) => x + y, 0)), "fa-layer-group"],
               ["Abonnés actifs", String(d.abonnements.filter((a) => a.statut === "ACTIF").length), "fa-user-check"],
               ["Dernière collecte", dateFr(d.stats?.derniereCollecte ?? null, true), "fa-clock"],
             ].map(([l, v, ic]) => (
@@ -90,6 +99,12 @@ export default function AdminVeillePage() {
                 <p className="text-[11px] text-gray-500"><i className={`fas ${ic} mr-1.5 text-accent`} />{l}</p>
                 <p className="font-syne font-black text-primary text-lg mt-0.5 truncate">{v}</p>
               </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-2 -mt-2">
+            {Object.entries(d.stats?.parSource ?? {}).sort((a, b) => b[1] - a[1]).map(([k, n]) => (
+              <span key={k} className="text-[11px] bg-white border border-gray-100 rounded-full px-2.5 py-1 text-gray-600">{SOURCES[k] ?? k} <strong className="text-primary">{n}</strong></span>
             ))}
           </div>
 
@@ -176,7 +191,7 @@ export default function AdminVeillePage() {
                     <p className="text-[11px] text-gray-500 mt-0.5">{a.reference}{a.autorite ? ` — ${a.autorite}` : ""}{a.typeMarche ? ` · ${a.typeMarche}` : ""} · {SOURCES[a.source] ?? a.source}</p>
                   </div>
                   <div className="text-right flex-shrink-0 space-y-1">
-                    <p className="text-[11px] font-semibold text-primary whitespace-nowrap">{dateFr(a.dateLimite, true)}</p>
+                    <p className="text-[11px] font-semibold text-primary whitespace-nowrap">{a.dateLimite ? dateFr(a.dateLimite, true) : "Date à vérifier"}</p>
                     <div className="flex gap-2 justify-end">
                       {a.lien && <a href={a.lien} target="_blank" rel="noopener noreferrer" className="text-[11px] text-accent hover:underline">Avis</a>}
                       {a.source === "MANUEL" && <button disabled={occupe} onClick={() => agir({ action: "supprimer_avis", id: a.id })} className="text-[11px] text-gray-400 hover:text-red-600">Supprimer</button>}
@@ -188,6 +203,20 @@ export default function AdminVeillePage() {
           </section>
         </>
       )}
+
+      {/* Sources à consulter à la main */}
+      <section className="bg-white rounded-2xl shadow-card p-5 space-y-3">
+        <h2 className="font-syne font-bold text-primary text-sm"><i className="fas fa-hand-pointer text-accent mr-1.5" />Sites à consulter à la main</h2>
+        <p className="text-xs text-gray-500">Ces sites ne peuvent pas être lus automatiquement. Ajoutez leurs avis avec « Ajouter un avis » : ils seront envoyés aux abonnés concernés.</p>
+        <ul className="grid sm:grid-cols-2 gap-2">
+          {A_CONSULTER.map(([nom, url, note]) => (
+            <li key={url} className="border border-gray-100 rounded-xl px-3 py-2">
+              <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-accent hover:underline">{nom} <i className="fas fa-arrow-up-right-from-square text-[10px] ml-1" /></a>
+              <p className="text-[11px] text-gray-500">{note}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* WhatsApp */}
       <section className="bg-white rounded-2xl shadow-card p-5 space-y-4" id="whatsapp">

@@ -50,10 +50,13 @@ export async function GET(req: NextRequest) {
         orderBy: [{ statut: "asc" }, { updatedAt: "desc" }],
       }),
       prisma.avisMarche.groupBy({ by: ["source"], _count: { _all: true } }),
-      prisma.avisMarche.count({ where: { dateLimite: { gt: now } } }),
+      prisma.avisMarche.count({ where: { OR: [{ dateLimite: { gt: now } }, { dateLimite: null, datePublication: { gte: new Date(now.getTime() - 30 * 86_400_000) } }] } }),
       prisma.avisMarche.findFirst({ orderBy: { updatedAt: "desc" }, select: { updatedAt: true } }),
       prisma.avisMarche.findMany({
-        where: { dateLimite: { gt: now }, ...(q ? { OR: [{ objet: { contains: q, mode: "insensitive" } }, { reference: { contains: q, mode: "insensitive" } }, { autorite: { contains: q, mode: "insensitive" } }] } : {}) },
+        where: { AND: [
+          { OR: [{ dateLimite: { gt: now } }, { dateLimite: null, datePublication: { gte: new Date(now.getTime() - 30 * 86_400_000) } }] },
+          ...(q ? [{ OR: [{ objet: { contains: q, mode: "insensitive" as const } }, { reference: { contains: q, mode: "insensitive" as const } }, { autorite: { contains: q, mode: "insensitive" as const } }] }] : []),
+        ] },
         orderBy: { createdAt: "desc" }, take: 100,
       }),
     ]);
@@ -119,9 +122,10 @@ export async function POST(req: NextRequest) {
         const r = await executerVeille();
         const c = "collecte" in r ? r.collecte : null;
         const d = "distribution" in r ? r.distribution : null;
+        const lus = c ? Object.values(c.parSource).reduce((x, y) => x + y, 0) : 0;
         return NextResponse.json({
           ok: !r.erreurs.length || Boolean(c),
-          message: c && d ? `${c.sigmap} avis lus sur le portail, ${c.banqueMondiale} à la Banque mondiale, ${c.nouveaux} nouveau(x) ; ${d.alertes} avis signalé(s) à ${d.courriels} abonné(s).` : "Veille non exécutée.",
+          message: c && d ? `${lus} avis lus sur ${Object.keys(c.parSource).length} sources, ${c.nouveaux} nouveau(x) ; ${d.alertes} avis signalé(s) à ${d.courriels} abonné(s).` : "Veille non exécutée.",
           erreurs: r.erreurs,
         });
       }

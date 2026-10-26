@@ -18,7 +18,7 @@ const SIGMAP_UI = "https://www.marches-publics.bj/appels-doffres";
 const BM_API = "https://search.worldbank.org/api/v2/procnotices";
 
 export type AvisCollecte = {
-  source: "SIGMAP" | "BANQUE_MONDIALE" | "MANUEL";
+  source: SourceAvis;
   reference: string;
   objet: string;
   autorite?: string | null;
@@ -32,7 +32,11 @@ export type AvisCollecte = {
   details?: Record<string, unknown>;
 };
 
-export const cleAvis = (source: string, reference: string) => `${source}:${normaliser(reference).trim().replace(/\s+/g, "")}`;
+export type SourceAvis = "SIGMAP" | "BANQUE_MONDIALE" | "UNGM" | "PNUD" | "UNFPA" | "ENABEL" | "GIZ" | "SBEE" | "BOAD" | "MANUEL";
+
+/** UNGM et le portail du PNUD publient les mêmes avis onusiens : même clé pour les fusionner. */
+const GROUPE_CLE: Partial<Record<SourceAvis, string>> = { UNGM: "ONU", PNUD: "ONU" };
+export const cleAvis = (source: string, reference: string) => `${GROUPE_CLE[source as SourceAvis] ?? source}:${normaliser(reference).trim().replace(/\s+/g, "")}`;
 
 const dateBenin = (jour?: string | null, heure?: string | null) => {
   if (!jour || !/^\d{4}-\d{2}-\d{2}/.test(jour)) return null;
@@ -40,6 +44,26 @@ const dateBenin = (jour?: string | null, heure?: string | null) => {
   const d = new Date(`${jour.slice(0, 10)}T${h}:00+01:00`);
   return Number.isNaN(d.getTime()) ? null : d;
 };
+
+/** Date et heure locales d'un fuseau (ex. America/New_York) → Date */
+export function dateFuseau(an: number, mois: number, jour: number, h: number, mi: number, fuseau: string) {
+  const naif = Date.UTC(an, mois - 1, jour, h, mi);
+  const decalage = (t: number) => {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: fuseau, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+    return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - t;
+  };
+  let t = naif - decalage(naif);
+  t = naif - decalage(t);
+  return new Date(t);
+}
+const MOIS_EN: Record<string, number> = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12, january: 1, february: 2, march: 3, april: 4, june: 6, july: 7, august: 8, september: 9, october: 10, november: 11, december: 12 };
+const texteHtml = (h: string) => h.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n)).replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16))).replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#039;|&apos;|&rsquo;|&lsquo;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&[a-z]+;/gi, " ").replace(/\s+/g, " ").trim();
+
+async function page(url: string, init?: RequestInit): Promise<string> {
+  const r = await fetch(url, { ...init, headers: { "User-Agent": AGENT, Accept: "text/html,*/*", ...(init?.headers ?? {}) }, signal: AbortSignal.timeout(25000), cache: "no-store" });
+  if (!r.ok) throw new Error(`HTTP ${r.status} — ${url.split("?")[0]}`);
+  return r.text();
+}
 
 async function json<T>(url: string): Promise<T> {
   const r = await fetch(url, { headers: { "User-Agent": AGENT, Accept: "application/json" }, signal: AbortSignal.timeout(25000), cache: "no-store" });
@@ -124,6 +148,209 @@ export async function collecterBanqueMondiale(): Promise<AvisCollecte[]> {
       details: { idBM: n.id, projet: n.project_id ?? null },
     }));
 }
+
+// ─── UNGM (agences des Nations unies : PNUD, UNFPA, UNICEF, PAM, UNOPS…) ─────
+
+const UNGM = "https://www.ungm.org";
+const PAYS_UNGM_BENIN = "2314";
+
+export async function collecterUngm(): Promise<AvisCollecte[]> {
+  const accueil = await fetch(`${UNGM}/Public/Notice`, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(25000), cache: "no-store" });
+  const html = await accueil.text();
+  const jeton = html.match(/name="__RequestVerificationToken" type="hidden" value="([^"]+)"/)?.[1];
+  const cookies = (accueil.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
+  if (!jeton) throw new Error("UNGM : jeton introuvable");
+  const auj = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).replace(/ /g, "-");
+  const avis: AvisCollecte[] = [];
+  for (let i = 0; i < 10; i++) {
+    const corps = {
+      PageIndex: i, PageSize: 15, Title: "", Description: "", Reference: "", PublishedFrom: "", PublishedTo: auj, DeadlineFrom: auj, DeadlineTo: "",
+      Countries: [PAYS_UNGM_BENIN], Agencies: [], UNSPSCs: [], NoticeTypes: [], SortField: "Deadline", SortAscending: true, isPicker: false,
+      IsSustainable: false, IsActive: true, NoticeDisplayType: null, NoticeSearchTotalLabelId: "noticeSearchTotal", TypeOfCompetitions: [],
+    };
+    const h = await page(`${UNGM}/Public/Notice/Search`, {
+      method: "POST", body: JSON.stringify(corps),
+      headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest", RequestVerificationToken: jeton, Cookie: cookies },
+    });
+    const lignes = h.replace(/\r/g, "").split(/(?=<div role="row"[^>]*data-noticeid=)/).slice(1);
+    if (!lignes.length) break;
+    for (const l of lignes) {
+      const id = l.match(/data-noticeid="(\d+)"/)?.[1];
+      const titre = texteHtml(l.match(/ungm-title--small">([\s\S]*?)<\/span>/)?.[1] ?? "");
+      const cellules = [...l.replace(/<script[\s\S]*?<\/script>/g, "").matchAll(/<div role="cell"[^>]*>([\s\S]*?)<\/div>\s*(?=<div role="cell"|$)/g)].map((m) => texteHtml(m[1]));
+      const pays = cellules[cellules.length - 1] ?? "";
+      if (!id || !titre || !/benin/i.test(pays)) continue;
+      const lim = l.match(/deadline"[^>]*>\s*<span>\s*(\d{2})-([A-Za-z]{3})-(\d{4}) (\d{2}):(\d{2})\s*\(GMT ([-\d.]+)\)/);
+      const pub = cellules.find((c) => /^\d{2}-[A-Za-z]{3}-\d{4}$/.test(c));
+      const refCell = l.match(/data-description="Reference">\s*<span>([\s\S]*?)<\/span>/)?.[1];
+      const agence = texteHtml(l.match(/resultAgency">\s*<span>([\s\S]*?)<\/span>/)?.[1] ?? "");
+      const type = texteHtml(l.match(/<label[^>]*>([\s\S]*?)<\/label>/)?.[1] ?? "");
+      avis.push({
+        source: "UNGM", reference: texteHtml(refCell ?? id) || id, objet: titre, autorite: agence || null,
+        typeMarche: typeDepuisTexte(`${type} ${titre}`), procedure: type || null, financement: agence ? `Nations unies — ${agence}` : "Nations unies",
+        datePublication: pub ? dateBM(pub) : null,
+        dateLimite: lim ? new Date(Date.UTC(+lim[3], (MOIS_EN[lim[2].toLowerCase()] ?? 1) - 1, +lim[1], +lim[4], +lim[5]) - Number(lim[6]) * 3_600_000) : null,
+        lien: `${UNGM}/Public/Notice/${id}`, details: { idUngm: id },
+      });
+    }
+    if (lignes.length < 15) break;
+  }
+  return avis;
+}
+
+// ─── Portail du PNUD (procurement-notices.undp.org) ──────────────────────────
+
+export async function collecterPnud(): Promise<AvisCollecte[]> {
+  const h = (await page("https://procurement-notices.undp.org/")).replace(/\r/g, "");
+  return h.split(/(?=<a href="view_negotiation\.cfm\?nego_id=)/).slice(1).flatMap((bloc) => {
+    const champ = (nom: string) => texteHtml(bloc.match(new RegExp(`${nom}\\s*</div>\\s*<span>([\\s\\S]*?)</span>`))?.[1] ?? "");
+    const bureau = champ("UNDP Office/Country");
+    if (!/\/BENIN/i.test(bureau)) return [];
+    const id = bloc.match(/nego_id=(\d+)/)?.[1];
+    const lim = bloc.match(/Deadline[\s\S]*?<nobr>(\d{2})-([A-Za-z]{3})-(\d{2})<br>(\d{2}):(\d{2}) (AM|PM)/);
+    const pub = bloc.match(/Posted[\s\S]*?<nobr>(\d{2})-([A-Za-z]{3})-(\d{2})<\/nobr>/);
+    const h24 = lim ? (+lim[4] % 12) + (lim[6] === "PM" ? 12 : 0) : 0;
+    return [{
+      source: "PNUD" as const, reference: champ("Ref No") || `PNUD-${id}`, objet: champ("Title"), autorite: "PNUD Bénin",
+      typeMarche: typeDepuisTexte(`${champ("Process")} ${champ("Title")}`), procedure: champ("Process") || null, financement: "Nations unies — PNUD",
+      datePublication: pub ? dateFuseau(2000 + +pub[3], MOIS_EN[pub[2].toLowerCase()] ?? 1, +pub[1], 12, 0, "America/New_York") : null,
+      dateLimite: lim ? dateFuseau(2000 + +lim[3], MOIS_EN[lim[2].toLowerCase()] ?? 1, +lim[1], h24, +lim[5], "America/New_York") : null,
+      lien: `https://procurement-notices.undp.org/view_negotiation.cfm?nego_id=${id}`, details: { idPnud: id },
+    }];
+  }).filter((a) => a.objet);
+}
+
+// ─── UNFPA Bénin (appels à soumission du bureau pays) ────────────────────────
+
+export async function collecterUnfpa(): Promise<AvisCollecte[]> {
+  const h = (await page("https://benin.unfpa.org/fr/call-for-submissions")).replace(/\r/g, "");
+  const vus = new Set<string>();
+  return [...h.matchAll(/<a[^>]+href="(\/fr\/submission\/[^"]+)"[^>]*>([\s\S]{10,400}?)<\/a>/g)].flatMap((m) => {
+    const lien = `https://benin.unfpa.org${m[1]}`;
+    const titre = texteHtml(m[2]);
+    // Ignorés : liens « Lire l'histoire », stages et recrutements individuels de personnel (niveaux NOA à NOD)
+    if (vus.has(lien) || titre.length < 15 || /^lire l/i.test(titre) || /stagiaire|stage |niveau no[a-d]\b/i.test(titre)) return [];
+    vus.add(lien);
+    const apres = h.slice((m.index ?? 0) + m[0].length, (m.index ?? 0) + m[0].length + 600);
+    const d = texteHtml(apres).match(/(\d{1,2}) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (\d{4})/i);
+    const MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+    return [{
+      source: "UNFPA" as const, reference: decodeURIComponent(m[1].split("/").pop() ?? m[1]).slice(0, 120), objet: titre, autorite: "UNFPA Bénin",
+      typeMarche: typeDepuisTexte(titre), financement: "Nations unies — UNFPA",
+      datePublication: d ? dateBenin(`${d[3]}-${String(MOIS_FR.indexOf(d[2].toLowerCase()) + 1).padStart(2, "0")}-${d[1].padStart(2, "0")}`, "12:00") : null,
+      dateLimite: null, lien,
+    }];
+  });
+}
+
+// ─── Enabel (coopération belge) — marchés ouverts au Bénin ───────────────────
+
+export async function collecterEnabel(): Promise<AvisCollecte[]> {
+  const url = "https://www.enabel.be/fr/liste-marches-publics/?in_category%5B%5D=all&in_country=1710&is_status=0";
+  const h = (await page(url)).replace(/\r/g, "");
+  return h.split(/(?=<div class="card--news card--tenders)/).slice(1).flatMap((c) => {
+    const titre = texteHtml(c.match(/<p class="h5">([\s\S]*?)<\/p>/)?.[1] ?? "");
+    if (!titre) return [];
+    const [ref, ...reste] = titre.split(/\s+[–-]\s+/);
+    const lim = texteHtml(c.match(/Date de clôture : <\/strong>([\s\S]*?)<\/p>/)?.[1] ?? "").match(/(\d{1,2}) ([A-Za-zéû]+) (\d{4}) (\d{2}):(\d{2})/);
+    const docs = [...c.matchAll(/<a href="([^"]+)" download>([^<]+)<\/a>/g)].map((x) => ({ url: x[1], nom: texteHtml(x[2]) }));
+    const cahier = docs.find((d) => /csc|cahier|dao/i.test(d.nom)) ?? docs[0];
+    return [{
+      source: "ENABEL" as const, reference: reste.length ? ref : titre.slice(0, 60), objet: reste.length ? reste.join(" – ") : titre, autorite: "Enabel (coopération belge)",
+      typeMarche: typeDepuisTexte(c.match(/type-tenders-([a-z-]+)/)?.[1]?.replace(/-/g, " ") ?? titre), financement: "Coopération belge (Enabel)",
+      dateLimite: lim && MOIS_EN[lim[2].toLowerCase()] ? dateFuseau(+lim[3], MOIS_EN[lim[2].toLowerCase()], +lim[1], +lim[4], +lim[5], "Africa/Porto-Novo") : null,
+      lien: url, details: { documents: docs.slice(0, 10), avisPdf: cahier?.url ?? null },
+    }];
+  });
+}
+
+// ─── GIZ (coopération allemande) — avis mentionnant le Bénin ─────────────────
+
+export async function collecterGiz(): Promise<AvisCollecte[]> {
+  const base = "https://ausschreibungen.giz.de/Satellite/company/welcome.do";
+  const premiere = await fetch(base, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(25000), cache: "no-store" });
+  const cookies = (premiere.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
+  const pages = [await premiere.text()];
+  const nbPages = Math.min(15, Math.max(1, ...[...pages[0].matchAll(/selectedTablePagePROJECT_RESULT=(\d+)/g)].map((m) => +m[1])));
+  for (let p = 2; p <= nbPages; p++) pages.push(await page(`${base}?method=showTable&fromSearch=1&selectedTablePagePROJECT_RESULT=${p}`, { headers: { Cookie: cookies } }));
+  const avis = new Map<string, AvisCollecte>();
+  for (const h of pages) {
+    for (const tr of h.replace(/\r/g, "").match(/<tr>[\s\S]*?<\/tr>/g) ?? []) {
+      const pid = tr.match(/projectForwarding\.do\?pid=(\d+)/)?.[1];
+      const tds = [...tr.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((m) => m[1]);
+      if (!pid || tds.length < 4) continue;
+      const titre = texteHtml(tds[2]);
+      if (!/b[eé]nin/i.test(titre)) continue;
+      const lim = tds[1].match(/title='(\d{2})\.(\d{2})\.(\d{4}) um (\d{2}):(\d{2}) Uhr'/);
+      const pub = tds[0].match(/title='(\d{2})\.(\d{2})\.(\d{4})/);
+      const [ref, ...reste] = titre.split(/-(?=\D)/);
+      avis.set(pid, {
+        source: "GIZ", reference: /^\d{6,}$/.test(ref) ? ref : `GIZ-${pid}`, objet: /^\d{6,}$/.test(ref) ? reste.join("-").trim() : titre, autorite: "GIZ (coopération allemande)",
+        typeMarche: typeDepuisTexte(titre), procedure: texteHtml(tds[3]) || null, financement: "Coopération allemande (GIZ)",
+        datePublication: pub ? dateFuseau(+pub[3], +pub[2], +pub[1], 12, 0, "Europe/Berlin") : null,
+        dateLimite: lim ? dateFuseau(+lim[3], +lim[2], +lim[1], +lim[4], +lim[5], "Europe/Berlin") : null,
+        lien: `https://ausschreibungen.giz.de/Satellite/public/company/projectForwarding.do?pid=${pid}`,
+      });
+    }
+  }
+  return [...avis.values()];
+}
+
+// ─── SBEE (portail de la PRMP) ───────────────────────────────────────────────
+
+export async function collecterSbee(): Promise<AvisCollecte[]> {
+  const h = (await page("https://marches-publics.sbee.bj/")).replace(/\r/g, "");
+  return h.split(/(?=<div class="col-md-12 blog-item">)/).slice(1).flatMap((b) => {
+    const titre = texteHtml(b.match(/<h3>([\s\S]*?)<\/h3>/)?.[1] ?? "");
+    const detail = texteHtml(b.match(/<p class="job-details[^"]*">([\s\S]*?)<\/p>/)?.[1] ?? "");
+    if (!titre) return [];
+    const ref = detail.match(/^((?:DRP|DAOI?|AAOI?|AMI|DC|DPS|AAON|AON|AOI)[^,]*?\d{4})(?= relati| pour| portant|\s*$)/i)?.[1] ?? detail.split(" relati")[0].slice(0, 120);
+    const champs = [...b.matchAll(/<strong>\s*([^<]+?)\s*<\/strong><\/span>\s*<br>\s*([\s\S]*?)<\/div>/g)].map((m) => [texteHtml(m[1]), texteHtml(m[2])] as const);
+    const val = (k: string) => champs.find(([c]) => c.toLowerCase().startsWith(k))?.[1] ?? "";
+    const lim = val("date limite").match(/(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/);
+    const pub = val("date de publication").match(/(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/);
+    const pdf = b.match(/href="(https:\/\/marches-publics\.sbee\.bj\/uploads\/[^"]+)"/)?.[1] ?? null;
+    return [{
+      source: "SBEE" as const, reference: ref, objet: titre, autorite: "Société Béninoise d'Énergie Électrique (SBEE)",
+      typeMarche: typeDepuisTexte(val("type de marché").replace(/marché de /i, "")), procedure: ref.split(/\s/)[0] ?? null,
+      datePublication: pub ? dateBenin(`${pub[3]}-${pub[2]}-${pub[1]}`, `${pub[4]}:${pub[5]}`) : null,
+      dateLimite: lim ? dateBenin(`${lim[3]}-${lim[2]}-${lim[1]}`, `${lim[4]}:${lim[5]}`) : null,
+      lien: "https://marches-publics.sbee.bj/", details: { avisPdf: pdf ? encodeURI(decodeURI(pdf)) : null, nombreLots: val("nombre de lots") || null },
+    }];
+  });
+}
+
+// ─── BOAD (Banque Ouest Africaine de Développement) ──────────────────────────
+
+type AvisBoad = { id: number; date: string; link: string; title: { rendered: string }; tender_category?: number[]; acf?: { end_at?: string; presentation?: { text?: string } } };
+
+export async function collecterBoad(): Promise<AvisCollecte[]> {
+  const liste = await json<AvisBoad[]>("https://admin.boad.org/wp-json/wp/v2/tender?per_page=60&_fields=id,date,link,title,tender_category,acf.end_at,acf.presentation");
+  return liste.flatMap((x) => {
+    const titre = texteHtml(x.title.rendered);
+    const texte = texteHtml(x.acf?.presentation?.text ?? "");
+    // Écartés : résultats, attributions, avis généraux, bourses ; gardés : avis citant le Bénin et appels régionaux de la BOAD
+    if (/^(r[ée]sultats?|avis d.attribution|avis g[ée]n[ée]ral|agpm|programme de bourses)/i.test(titre)) return [];
+    const lim = x.acf?.end_at?.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const [ref, ...reste] = titre.split(/\s+[–-]\s+/);
+    const appelRegionalBoad = /\/BOAD\b/.test(ref) && !/^A+O+N\b/i.test(ref) && !/TOGO|BURKINA|MALI|NIGER|S[ÉE]N[ÉE]GAL|C[ÔO]TE D.IVOIRE|GUIN[ÉE]E/i.test(ref);
+    if (!/b[ée]nin/i.test(`${titre} ${texte}`) && !appelRegionalBoad) return [];
+    return [{
+      source: "BOAD" as const, reference: reste.length ? ref : `BOAD-${x.id}`, objet: reste.length ? reste.join(" – ") : titre, autorite: "BOAD",
+      typeMarche: typeDepuisTexte(`${ref} ${titre}`), procedure: ref.split(/[\s/N°]/)[0] || null, financement: "BOAD",
+      datePublication: dateBenin(x.date.slice(0, 10), "12:00"),
+      dateLimite: lim ? dateBenin(`${lim[3]}-${lim[2]}-${lim[1]}`, "23:59") : null,
+      lien: x.link.replace("admin.boad.org", "www.boad.org"),
+    }];
+  });
+}
+
+/** Toutes les sources automatiques, lues en parallèle. */
+// Ordre d'enregistrement : pour un même avis onusien, UNGM (heure saisie par l'agence) passe après le PNUD.
+export const SOURCES_AUTOMATIQUES: Record<string, () => Promise<AvisCollecte[]>> = {
+  sigmap: collecterSigmap, banqueMondiale: collecterBanqueMondiale, pnud: collecterPnud, ungm: collecterUngm,
+  unfpa: collecterUnfpa, enabel: collecterEnabel, giz: collecterGiz, sbee: collecterSbee, boad: collecterBoad,
+};
 
 // ─── Enregistrement ──────────────────────────────────────────────────────────
 

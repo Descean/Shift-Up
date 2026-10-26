@@ -10,12 +10,17 @@ import prisma from "@/lib/prisma";
 import { sendVeilleClient, sendVeilleStatutClient, type AvisCourriel } from "@/lib/email";
 import { lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { scoreCorrespondance } from "@/lib/veille/criteres";
-import { collecterBanqueMondiale, collecterSigmap, enregistrerAvis } from "@/lib/veille/sources";
+import { SOURCES_AUTOMATIQUES, enregistrerAvis, type AvisCollecte } from "@/lib/veille/sources";
 
 const FENETRE_JOURS = 21;
 const MAX_PAR_COURRIEL = 15;
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.shiftup.bj").replace(/\/$/, "");
-export const LIBELLES_SOURCE: Record<string, string> = { SIGMAP: "Portail des marchés publics", BANQUE_MONDIALE: "Banque mondiale", MANUEL: "SHIFT UP" };
+export const LIBELLES_SOURCE: Record<string, string> = {
+  SIGMAP: "Portail des marchés publics", BANQUE_MONDIALE: "Banque mondiale", UNGM: "Nations unies (UNGM)", PNUD: "PNUD", UNFPA: "UNFPA Bénin",
+  ENABEL: "Enabel", GIZ: "GIZ", SBEE: "SBEE", BOAD: "BOAD", MANUEL: "SHIFT UP",
+};
+/** Avis sans date limite connue (ex. UNFPA) : considérés ouverts 30 jours après leur publication. */
+const OUVERT_SANS_DATE_JOURS = 30;
 
 export const dateFr = (d: Date | null | undefined) =>
   d ? d.toLocaleString("fr-FR", { timeZone: "Africa/Porto-Novo", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : null;
@@ -24,15 +29,16 @@ export const dateFr = (d: Date | null | undefined) =>
 export const tablesAbsentes = (e: unknown) => (e as { code?: string })?.code === "P2021" || /does not exist/i.test(String((e as Error)?.message));
 
 export async function collecter() {
-  const bilan = { sigmap: 0, banqueMondiale: 0, nouveaux: 0, erreurs: [] as string[] };
-  for (const [nom, f] of [["sigmap", collecterSigmap], ["banqueMondiale", collecterBanqueMondiale]] as const) {
-    try {
-      const avis = await f();
-      bilan[nom] = avis.length;
-      bilan.nouveaux += await enregistrerAvis(avis);
-    } catch (e) {
-      bilan.erreurs.push(`${nom}: ${(e as Error).message}`);
-    }
+  const noms = Object.keys(SOURCES_AUTOMATIQUES);
+  const bilan = { parSource: {} as Record<string, number>, nouveaux: 0, erreurs: [] as string[] };
+  // Lecture en parallèle (une seule requête par page et par jour), enregistrement dans un ordre fixe
+  const lus = await Promise.allSettled(noms.map((n) => SOURCES_AUTOMATIQUES[n]()));
+  for (const [i, r] of lus.entries()) {
+    const nom = noms[i];
+    if (r.status === "rejected") { bilan.erreurs.push(`${nom}: ${(r.reason as Error)?.message ?? r.reason}`); bilan.parSource[nom] = 0; continue; }
+    bilan.parSource[nom] = r.value.length;
+    try { bilan.nouveaux += await enregistrerAvis(r.value as AvisCollecte[]); }
+    catch (e) { if (tablesAbsentes(e)) throw e; bilan.erreurs.push(`${nom}: ${(e as Error).message}`); }
   }
   return bilan;
 }
@@ -58,7 +64,13 @@ export async function distribuer(now = new Date(), { envoyer = true } = {}) {
   });
   if (!abonnes.length) return bilan;
   const avis = await prisma.avisMarche.findMany({
-    where: { dateLimite: { gt: new Date(now.getTime() + 24 * 3600_000) }, createdAt: { gte: new Date(now.getTime() - FENETRE_JOURS * 86_400_000) } },
+    where: {
+      createdAt: { gte: new Date(now.getTime() - FENETRE_JOURS * 86_400_000) },
+      OR: [
+        { dateLimite: { gt: new Date(now.getTime() + 24 * 3600_000) } },
+        { dateLimite: null, datePublication: { gte: new Date(now.getTime() - OUVERT_SANS_DATE_JOURS * 86_400_000) } },
+      ],
+    },
     orderBy: { dateLimite: "asc" },
   });
 

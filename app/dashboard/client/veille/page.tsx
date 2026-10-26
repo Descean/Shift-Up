@@ -11,7 +11,10 @@ import NotificationsWhatsApp from "@/components/notifications/NotificationsWhats
 type Abonnement = { id: string; statut: string; actifJusquau: string | null; secteurs: string[]; motsCles: string[]; exclusions: string[]; typesMarche: string[]; zones: string[] };
 type Avis = { id: string; source: string; reference: string; objet: string; autorite: string | null; typeMarche: string | null; financement: string | null; dateLimite: string | null; lien: string | null; details: { avisPdf?: string | null } | null; signaleLe: string };
 
-const SOURCES: Record<string, string> = { SIGMAP: "Portail des marchés publics", BANQUE_MONDIALE: "Banque mondiale", MANUEL: "SHIFT UP" };
+const SOURCES: Record<string, string> = {
+  SIGMAP: "Portail des marchés publics", BANQUE_MONDIALE: "Banque mondiale", UNGM: "Nations unies", PNUD: "PNUD", UNFPA: "UNFPA Bénin",
+  ENABEL: "Enabel", GIZ: "GIZ", SBEE: "SBEE", BOAD: "BOAD", MANUEL: "SHIFT UP",
+};
 const STATUTS: Record<string, [string, string]> = {
   EN_ATTENTE: ["Demande en cours de traitement", "bg-amber-100 text-amber-800"],
   ACTIF: ["Veille active", "bg-green-100 text-green-700"],
@@ -79,7 +82,7 @@ export default function VeillePage() {
               {abonnement.statut === "ACTIF" && abonnement.actifJusquau && <>Active jusqu&apos;au <strong>{dateFr(abonnement.actifJusquau, false)}</strong>. </>}
               {abonnement.statut === "EN_ATTENTE" && <>SHIFT UP vous envoie le devis de l&apos;abonnement dans <Link href="/dashboard/client/prestations" className="text-accent hover:underline">Mes prestations</Link>. La veille démarre dès l&apos;activation. </>}
               {abonnement.statut === "EXPIRE" && <>Enregistrez vos critères pour demander le renouvellement. </>}
-              Sources : portail national des marchés publics, Banque mondiale et avis relevés par l&apos;équipe.
+              Sources : portail national des marchés publics, SBEE, Banque mondiale, Nations unies, Enabel, GIZ, BOAD et avis relevés par l&apos;équipe.
             </p>
           </div>
           {!edition && <button onClick={() => setEdition(true)} className="border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 flex-shrink-0"><i className="fas fa-sliders mr-1.5" />Modifier mes critères</button>}
@@ -157,7 +160,7 @@ export default function VeillePage() {
                   {j !== null && <span className={`flex-shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ${j <= 3 ? "bg-red-600 text-white" : j <= 7 ? "bg-amber-100 text-amber-800" : "bg-accent/10 text-accent"}`}>{j <= 0 ? "Aujourd'hui" : `J-${j}`}</span>}
                 </div>
                 <p className="text-xs text-gray-500">{a.reference}{a.autorite ? ` — ${a.autorite}` : ""}{a.typeMarche ? ` · ${a.typeMarche}` : ""}</p>
-                <p className="text-xs text-gray-500">Date limite : <strong className="text-primary">{dateFr(a.dateLimite)}</strong> · {a.source === "BANQUE_MONDIALE" && a.financement ? a.financement : `${SOURCES[a.source] ?? a.source}${a.financement ? ` · ${a.financement}` : ""}`}</p>
+                <p className="text-xs text-gray-500">Date limite : <strong className="text-primary">{a.dateLimite ? dateFr(a.dateLimite) : "voir l'avis"}</strong> · {["SIGMAP", "SBEE", "MANUEL"].includes(a.source) ? `${SOURCES[a.source] ?? a.source}${a.financement ? ` · ${a.financement}` : ""}` : (a.financement ?? SOURCES[a.source] ?? a.source)}</p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   <Link href={`/dashboard/client/nouvelle-demande?avis=${a.id}`} className="bg-primary text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:opacity-90"><i className="fas fa-folder-plus mr-1.5" />Monter ce dossier</Link>
                   {a.lien && <a href={a.lien} target="_blank" rel="noopener noreferrer" className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"><i className="fas fa-arrow-up-right-from-square mr-1.5" />Voir l&apos;avis</a>}
