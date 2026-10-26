@@ -802,3 +802,37 @@ model PreferenceNotification {
   consentLe DateTime?
   updatedAt DateTime  @updatedAt
 }
+
+// ─── Assistant WhatsApp (messages reçus et envoyés) ──────────────────────────
+
+/// Une conversation par numéro WhatsApp
+model ConversationWhatsApp {
+  id               String    @id @default(cuid())
+  numero           String    @unique // format international sans « + »
+  nom              String?
+  userId           String?
+  humainJusquau    DateTime? // l'équipe a pris la main : l'assistant ne répond plus jusqu'à cette date
+  dernierMessageLe DateTime  @default(now())
+  dernierRecuLe    DateTime? // ouvre la fenêtre de 24 h pour répondre librement
+  nonLus           Int       @default(0)
+  etat             Json? // étape en cours (recherche d'avis…)
+  createdAt        DateTime  @default(now())
+
+  messages MessageWhatsApp[]
+
+  @@index([dernierMessageLe])
+}
+
+model MessageWhatsApp {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   ConversationWhatsApp @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sens           String // RECU, ENVOYE
+  auteur         String // CLIENT, ASSISTANT, EQUIPE
+  texte          String
+  waId           String?              @unique
+  statut         String? // sent, delivered, read, failed
+  createdAt      DateTime             @default(now())
+
+  @@index([conversationId, createdAt])
+}

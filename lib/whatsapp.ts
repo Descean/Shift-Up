@@ -93,3 +93,66 @@ export async function alerterEquipeWhatsApp(titre: string, detail: string, chemi
 }
 
 export const lienEspaceClient = (chemin = "/dashboard/client/prestations") => `${APP_URL}${chemin}`;
+
+// ─── Messages libres (fenêtre de 24 h après un message du client) ────────────
+
+type Envoi = { ok: boolean; id?: string; erreur?: string };
+
+async function appelMessages(corps: Record<string, unknown>): Promise<Envoi> {
+  if (!whatsappAutomatique()) return { ok: false, erreur: "non configuré" };
+  try {
+    const r = await fetch(`${API}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ messaging_product: "whatsapp", ...corps }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const d = (await r.json().catch(() => ({}))) as { messages?: { id: string }[]; error?: { message?: string } };
+    if (!r.ok) { console.error("[whatsapp] envoi", r.status, JSON.stringify(d).slice(0, 400)); return { ok: false, erreur: d.error?.message ?? `HTTP ${r.status}` }; }
+    return { ok: true, id: d.messages?.[0]?.id };
+  } catch (e) {
+    return { ok: false, erreur: (e as Error).message };
+  }
+}
+
+const court = (t: string, n: number) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+/** Réponse dans une conversation : on écrit exactement au numéro WhatsApp qui a envoyé le message. */
+const exact = (numero: string) => numero.replace(/\D/g, "");
+
+export function envoyerTexte(numero: string, texte: string) {
+  return appelMessages({ to: exact(numero), type: "text", text: { body: court(texte, 4000), preview_url: true } });
+}
+
+/** Jusqu'à 3 boutons (titre de 20 caractères au plus). */
+export function envoyerBoutons(numero: string, texte: string, boutons: { id: string; titre: string }[]) {
+  return appelMessages({
+    to: exact(numero), type: "interactive",
+    interactive: { type: "button", body: { text: court(texte, 1000) }, action: { buttons: boutons.slice(0, 3).map((b) => ({ type: "reply", reply: { id: b.id, title: court(b.titre, 20) } })) } },
+  });
+}
+
+/** Liste déroulante : 10 lignes au plus. */
+export function envoyerListe(numero: string, texte: string, bouton: string, lignes: { id: string; titre: string; description?: string }[]) {
+  return appelMessages({
+    to: exact(numero), type: "interactive",
+    interactive: {
+      type: "list", body: { text: court(texte, 1000) },
+      action: { button: court(bouton, 20), sections: [{ title: "SHIFT UP", rows: lignes.slice(0, 10).map((l) => ({ id: l.id, title: court(l.titre, 24), ...(l.description ? { description: court(l.description, 72) } : {}) })) }] },
+    },
+  });
+}
+
+export function marquerLu(waId: string) {
+  return appelMessages({ status: "read", message_id: waId });
+}
+
+/** Signature Meta (en-tête X-Hub-Signature-256) ; vérifiée si WHATSAPP_APP_SECRET est défini. */
+export async function signatureMetaValide(brut: string, entete: string | null) {
+  const secret = process.env.WHATSAPP_APP_SECRET;
+  if (!secret) return true;
+  if (!entete?.startsWith("sha256=")) return false;
+  const { createHmac, timingSafeEqual } = await import("crypto");
+  const attendu = Buffer.from(`sha256=${createHmac("sha256", secret).update(brut).digest("hex")}`);
+  const recu = Buffer.from(entete);
+  return attendu.length === recu.length && timingSafeEqual(attendu, recu);
+}
