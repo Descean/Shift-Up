@@ -13,6 +13,7 @@ import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { alerterEquipeWhatsApp, lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { isSafe } from "@/lib/validation";
 import { envoyer, nomService } from "@/lib/prestations";
 import { fichierDe } from "@/lib/montage-serveur";
@@ -89,11 +90,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const quandFr = quand.toLocaleString("fr-FR", { timeZone: "Africa/Porto-Novo", dateStyle: "full", timeStyle: "short" });
     if (par === "SHIFT_UP" && p.client.email) {
       envois.push(sendDepotClient({ to: p.client.email, name: p.client.name ?? "", serviceName, avis: m.dossier.referenceAvis, deposeLe: quandFr, numero: a.numero, lienRecepisse: depot.recepisse?.url ?? null }));
+      envois.push(notifierClientWhatsApp(p.clientId, "shiftup_depot", [p.client.name ?? "", m.dossier.referenceAvis, quandFr, lienEspaceClient()]));
     } else if (par === "CLIENT") {
       envois.push(sendSuiviAdmin({
         clientName, clientEmail: p.client.email ?? "", serviceName, prestationId: id, titre: "Offre déposée par le client",
         lignes: [["Avis", m.dossier.referenceAvis], ["Déposée le", quandFr], ["Récépissé", a.numero ?? (a.recepisse ? "joint" : null)], ["Hors délai", horsDelai ? "OUI — après la date limite" : null], ["Commentaire", a.commentaire]],
       }));
+      envois.push(alerterEquipeWhatsApp("Offre déposée par le client", `${clientName} — ${m.dossier.referenceAvis}`));
     }
     message = horsDelai ? "Dépôt enregistré — attention : après la date limite." : "Dépôt enregistré.";
   } else if (a.action === "annuler_depot") {
@@ -116,6 +119,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     ];
     if (a.statut !== "EN_ATTENTE") {
       if (par === "SHIFT_UP" && p.client.email) envois.push(sendResultatClient({ to: p.client.email, name: p.client.name ?? "", avis: m.dossier.referenceAvis, libelle: RESULTATS[a.statut], details }));
+      if (par === "SHIFT_UP") envois.push(notifierClientWhatsApp(p.clientId, "shiftup_resultat", [p.client.name ?? "", m.dossier.referenceAvis, RESULTATS[a.statut], lienEspaceClient()]));
+      if (par === "CLIENT") envois.push(alerterEquipeWhatsApp(`Résultat : ${RESULTATS[a.statut]}`, `${clientName} — ${m.dossier.referenceAvis}`));
       if (par === "CLIENT") envois.push(sendSuiviAdmin({ clientName, clientEmail: p.client.email ?? "", serviceName, prestationId: id, titre: `Résultat communiqué : ${RESULTATS[a.statut]}`, lignes: [["Avis", m.dossier.referenceAvis], ...details] }));
     }
     message = "Résultat enregistré.";

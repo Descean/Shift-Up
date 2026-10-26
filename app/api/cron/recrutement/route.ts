@@ -1,6 +1,7 @@
 /**
  * GET /api/cron/recrutement — tâche quotidienne (Vercel Cron, voir vercel.json)
  * Recrutement : relances, suppression des dossiers sans réponse ou en fin de conservation, fichiers abandonnés.
+ * Veille des appels d'offres : collecte des avis et envoi aux abonnés (voir lib/veille/moteur.ts).
  * Montages de dossiers : rappels de pièces, de dépôt et de résultat (voir lib/montage-rappels.ts).
  * Documents : migration unique de l'ancien bucket public « prestations » vers un accès contrôlé.
  * Protégée par CRON_SECRET : Vercel envoie « Authorization: Bearer <CRON_SECRET> ».
@@ -9,6 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { entretienDonnees } from "@/lib/recrutement/donnees";
 import { migrerAncienBucket } from "@/lib/fichiers";
 import { rappelsMontage } from "@/lib/montage-rappels";
+import { executerVeille } from "@/lib/veille/moteur";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -24,5 +26,7 @@ export async function GET(req: NextRequest) {
   const fichiers = await migrerAncienBucket().catch((e) => ({ migre: false, raison: (e as Error).message }));
   const montage = await rappelsMontage().catch((e) => ({ erreurs: [(e as Error).message] }));
   if (montage.erreurs.length) console.error("[cron/montage]", montage.erreurs);
-  return NextResponse.json({ ...bilan, fichiers, montage });
+  const veille = await executerVeille();
+  if (veille.erreurs.length) console.error("[cron/veille]", veille.erreurs);
+  return NextResponse.json({ ...bilan, fichiers, montage, veille });
 }

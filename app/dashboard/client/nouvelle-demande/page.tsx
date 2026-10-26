@@ -66,8 +66,31 @@ export default function NouvelleDemandePage() {
 
   // Service choisi sur la page /services (?sector=…&service=…)
   const [servicePrevu, setServicePrevu] = useState("");
+  // « Monter ce dossier » depuis la veille : fiche pré-remplie avec l'avis
+  const [avisVeille, setAvisVeille] = useState<string | null>(null);
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("avis");
+    if (!id) return;
+    fetch(`/api/veille/avis/${encodeURIComponent(id)}`).then((r) => (r.ok ? r.json() : null)).then((d) => {
+      const a = d?.avis;
+      if (!a) return;
+      const types = ["Travaux", "Fournitures", "Services courants", "Prestations intellectuelles"];
+      const limite = a.dateLimite ? new Date(new Date(a.dateLimite).getTime() + 3_600_000).toISOString().slice(0, 16) : "";
+      setSector(SECTEUR_MONTAGE);
+      setServiceId("autre");
+      setCustomService("Montage de dossier de soumission");
+      setFiche((f) => ({
+        ...f, referenceAvis: a.reference ?? "", intitule: (a.objet ?? "").slice(0, 400), autorite: a.autorite ?? "",
+        typeMarche: types.includes(a.typeMarche) ? a.typeMarche : f.typeMarche, financement: a.financement ?? "", dateLimite: limite,
+      }));
+      setAvisVeille(a.reference ?? "");
+      setStep(3);
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
+    if (q.get("avis")) return;
     const sec = SECTEURS_PAGE[q.get("sector") ?? ""] ?? SECTORS.find((x) => x.value === q.get("sector"))?.value;
     if (sec) {
       setSector(sec);
@@ -326,6 +349,7 @@ export default function NouvelleDemandePage() {
 
             {montage && (
               <>
+                {avisVeille && <p className="text-xs text-accent bg-accent/5 rounded-xl px-3 py-2"><i className="fas fa-binoculars mr-1.5" />Fiche pré-remplie depuis votre veille (avis {avisVeille}). Vérifiez-la et indiquez l&apos;entreprise qui soumissionne.</p>}
                 <FicheMarche valeur={fiche} onChange={setFiche} />
                 <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
                   <p className="text-sm font-medium text-gray-700"><i className="fas fa-file-contract mr-1.5 text-accent" />Dossier d&apos;appel d&apos;offres (DAO) <span className="text-gray-400 font-normal">— recommandé</span></p>

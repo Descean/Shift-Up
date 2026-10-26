@@ -89,17 +89,19 @@ model User {
   clientProfile       ClientProfile?
   apporteurProfile    ApporteurProfile?
   etudiantProfile     EtudiantProfile?
-  prestations         Prestation[]        @relation("ClientPrestations")
-  assignedPrestations Prestation[]        @relation("AssignedPrestations")
+  prestations         Prestation[]            @relation("ClientPrestations")
+  assignedPrestations Prestation[]            @relation("AssignedPrestations")
   payments            Payment[]
   payoutRequests      PayoutRequest[]
-  sentMessages        Message[]           @relation("SentMessages")
-  receivedMessages    Message[]           @relation("ReceivedMessages")
+  sentMessages        Message[]               @relation("SentMessages")
+  receivedMessages    Message[]               @relation("ReceivedMessages")
   campaigns           Campaign[]
   chatSessions        ChatSession[]
   auditLogs           AuditLog[]
   passwordResetToken  PasswordResetToken?
   apporteurServices   ApporteurService[]
+  abonnementVeille    AbonnementVeille?
+  preferenceNotif     PreferenceNotification?
 }
 
 model ClientProfile {
@@ -725,4 +727,78 @@ enum CandidatureStatut {
   PRESELECTIONNEE
   RETENUE
   NON_RETENUE
+}
+
+// ─── Veille des appels d'offres (service vendu aux clients) ──────────────────
+
+/// Avis d'appel d'offres collecté (portail des marchés publics, Banque mondiale, saisie manuelle)
+model AvisMarche {
+  id              String    @id @default(cuid())
+  cle             String    @unique // source + référence normalisée
+  source          String // SIGMAP, BANQUE_MONDIALE, MANUEL
+  reference       String
+  objet           String
+  autorite        String?
+  typeMarche      String?
+  procedure       String?
+  financement     String?
+  lieu            String?
+  datePublication DateTime?
+  dateLimite      DateTime?
+  lien            String?
+  details         Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  alertes AlerteVeille[]
+
+  @@index([dateLimite])
+  @@index([createdAt])
+}
+
+/// Abonnement d'un client à la veille : critères, statut, période payée
+model AbonnementVeille {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  secteurs     String[]  @default([])
+  motsCles     String[]  @default([])
+  exclusions   String[]  @default([])
+  typesMarche  String[]  @default([])
+  zones        String[]  @default([])
+  statut       String    @default("EN_ATTENTE") // EN_ATTENTE, ACTIF, SUSPENDU
+  actifJusquau DateTime?
+  dernierEnvoi DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  alertes AlerteVeille[]
+
+  @@index([statut])
+}
+
+/// Avis déjà signalé à un abonné (évite les doublons)
+model AlerteVeille {
+  id           String           @id @default(cuid())
+  abonnementId String
+  abonnement   AbonnementVeille @relation(fields: [abonnementId], references: [id], onDelete: Cascade)
+  avisId       String
+  avis         AvisMarche       @relation(fields: [avisId], references: [id], onDelete: Cascade)
+  score        Int              @default(0)
+  envoyeLe     DateTime?
+  createdAt    DateTime         @default(now())
+
+  @@unique([abonnementId, avisId])
+  @@index([abonnementId, createdAt])
+}
+
+/// Préférences de notification (WhatsApp) — table séparée pour ne pas toucher à User
+model PreferenceNotification {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  whatsapp  Boolean   @default(false)
+  numero    String?
+  consentLe DateTime?
+  updatedAt DateTime  @updatedAt
 }

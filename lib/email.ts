@@ -293,6 +293,60 @@ export async function sendPointDepotsAdmin({ aDeposer, nonConfirmes, resultats }
   return resend.emails.send({ from: FROM, to: ADMIN_DEST, subject: `[SHIFT UP] ${n ? `${n} offre(s) à déposer sous 3 jours` : "Suivi des dépôts d'offres"}`, html: baseLayout(content, "Point des dépôts") });
 }
 
+// ─── Veille des appels d'offres ──────────────────────────────────────────────
+
+export type AvisCourriel = { reference: string; objet: string; autorite?: string | null; dateLimite?: string | null; source: string; lien?: string | null; monter: string };
+
+/** Client : nouveaux avis correspondant à ses critères. */
+export async function sendVeilleClient({ to, name, avis, total }: { to: string; name: string; avis: AvisCourriel[]; total: number }) {
+  const lignes = avis.map((a) => `
+    <tr><td style="padding:14px 0;border-bottom:1px solid #eee;">
+      <p style="margin:0 0 4px;color:#0A2533;font-weight:700;line-height:1.4;">${esc(a.objet)}</p>
+      <p style="margin:0 0 6px;color:#555;font-size:13px;">${esc(a.reference)}${a.autorite ? ` — ${esc(a.autorite)}` : ""} · <span style="color:#777;">${esc(a.source)}</span></p>
+      ${a.dateLimite ? `<p style="margin:0 0 8px;color:#991b1b;font-size:13px;font-weight:600;">Date limite : ${esc(a.dateLimite)}</p>` : ""}
+      <a href="${a.monter}" style="display:inline-block;background:#0A2533;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;margin-right:8px;">Monter ce dossier</a>
+      ${a.lien ? `<a href="${a.lien}" style="color:#2D5B78;font-size:13px;">Voir l'avis</a>` : ""}
+    </td></tr>`).join("");
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">${total} nouvel(s) avis pour vous 🔎</h2>
+    <p style="color:#555;margin:0 0 8px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;margin:0 0 8px;">Voici les avis d'appel d'offres publiés récemment qui correspondent à vos critères de veille.</p>
+    <table style="width:100%;border-collapse:collapse;">${lignes}</table>
+    ${total > avis.length ? `<p style="color:#555;margin:16px 0 0;">Et ${total - avis.length} autre(s) dans votre espace.</p>` : ""}
+    ${btn("Voir toute ma veille →", `${APP_URL}/dashboard/client/veille`)}
+    <p style="color:#888;font-size:12px;">Vous recevez ce courriel parce que vous êtes abonné à la veille SHIFT UP. Modifiez vos critères depuis votre espace.</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Veille SHIFT UP : ${total} nouvel(s) avis d'appel d'offres`, html: baseLayout(content, "Veille des appels d'offres") });
+}
+
+/** Client : abonnement activé, suspendu ou arrivé à échéance. */
+export async function sendVeilleStatutClient({ to, name, statut, jusquau }: { to: string; name: string; statut: "ACTIF" | "SUSPENDU" | "EXPIRE"; jusquau?: string | null }) {
+  const textes = {
+    ACTIF: ["Votre veille est active ✅", `Vous recevrez désormais les avis d'appel d'offres qui correspondent à vos critères${jusquau ? `, jusqu'au ${esc(jusquau)}` : ""}. Vous pouvez affiner vos critères à tout moment.`],
+    SUSPENDU: ["Votre veille est suspendue", "L'envoi des avis est suspendu. Pour toute question, répondez à ce courriel."],
+    EXPIRE: ["Votre abonnement à la veille est arrivé à échéance", "Pour continuer à recevoir les avis qui vous intéressent, demandez le renouvellement depuis votre espace ou répondez à ce courriel."],
+  }[statut];
+  const content = `
+    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">${textes[0]}</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">${textes[1]}</p>
+    ${btn("Ma veille →", `${APP_URL}/dashboard/client/veille`)}
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `${textes[0].replace(/ ✅$/, "")} — SHIFT UP`, html: baseLayout(content, "Veille SHIFT UP") });
+}
+
+/** Admin : demande d'abonnement ou critères modifiés. */
+export async function sendDemandeVeilleAdmin({ clientName, clientEmail, nouveau, criteres }: { clientName: string; clientEmail: string; nouveau: boolean; criteres: [string, string][] }) {
+  const content = `
+    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">${nouveau ? "🔎 Nouvelle demande d'abonnement à la veille" : "Critères de veille modifiés"}</h2>
+    <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})</p>
+    <table style="width:100%;border-collapse:collapse;margin:0 0 12px;">
+      ${criteres.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:6px 0;color:#777;font-size:14px;vertical-align:top;width:35%;">${esc(k)}</td><td style="padding:6px 0;color:#333;">${esc(v)}</td></tr>`).join("")}
+    </table>
+    ${nouveau ? `<p style="color:#555;line-height:1.6;">Envoyez le devis de l'abonnement depuis la prestation créée, puis activez la veille une fois le paiement reçu (ou pour un essai).</p>` : ""}
+    ${btn("Ouvrir la veille →", `${APP_URL}/dashboard/admin/veille`)}`;
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, replyTo: clientEmail, subject: `[SHIFT UP] ${nouveau ? "Abonnement veille demandé" : "Critères de veille modifiés"} — ${clientName}`, html: baseLayout(content, "Veille") });
+}
+
 const LIBELLES_DECISION: Record<string, string> = {
   accepter_devis: "Devis accepté",
   modifier_devis: "Modification du devis demandée",

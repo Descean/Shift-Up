@@ -26,6 +26,7 @@ import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { alerterEquipeWhatsApp, lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { isSafe } from "@/lib/validation";
 import { rateLimit } from "@/lib/ratelimit";
 import { envoyer, nomService } from "@/lib/prestations";
@@ -165,6 +166,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           indisponibles: indisponibles.map((x) => ({ libelle: x.libelle, commentaire: x.commentaireClient })),
           message: a.message ?? null,
         }),
+        alerterEquipeWhatsApp("Pièces déposées", `${p.client.name ?? p.client.email ?? "Client"} — ${recues.length} à vérifier`),
       ]);
       const admins = await prisma.user.findMany({ where: { role: { in: ["ADMIN", "DEVELOPER"] } }, select: { id: true } });
       await prisma.message.createMany({
@@ -187,6 +189,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           aFournir: aFournir.map((x) => x.libelle), aReprendre: aReprendre.map((x) => ({ libelle: x.libelle, commentaire: x.commentaireAdmin })),
           message: a.message ?? null, dateLimite: dossier ? dateLimiteFr(dossier.dateLimite) : null,
         }),
+        notifierClientWhatsApp(p.clientId, "shiftup_pieces", [p.client.name ?? "", String(aReprendre.length + aFournir.length), dossier?.referenceAvis ?? nomService(p), dossier ? dateLimiteFr(dossier.dateLimite) : "—", lienEspaceClient()]),
       ]);
       cf.clientRelanceLe = maintenant;
       break;

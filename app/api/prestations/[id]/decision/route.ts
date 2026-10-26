@@ -16,6 +16,7 @@ import { z } from "zod";
 import type { Prisma, PrestationStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { sendDecisionClientAdmin } from "@/lib/email";
 import { envoyer, nomService, soldeRegle } from "@/lib/prestations";
 
@@ -110,6 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       clientName: p.client.name ?? p.client.email ?? "Client", clientEmail: p.client.email ?? "",
       serviceName, action, commentaire, prestationId: id,
     }),
+    alerterEquipeWhatsApp(LIBELLES[action], `${p.client.name ?? p.client.email ?? "Client"} — ${serviceName}`),
   ]);
 
   return NextResponse.json({ ok: true, status: maj.status, message: MESSAGES[action] });

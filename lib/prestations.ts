@@ -7,6 +7,7 @@
  *  - vueClient : retire les liens des livrables encore verrouillés avant de les envoyer au navigateur
  */
 import prisma from "@/lib/prisma";
+import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { getPhaseTemplates } from "@/lib/service-templates";
 import { sendPaiementAdmin } from "@/lib/email";
 
@@ -94,6 +95,7 @@ export async function confirmerPaiement(paymentId: string) {
       clientName: maj.client.name ?? maj.client.email ?? "Client", clientEmail: maj.client.email ?? "",
       serviceName: nomService(maj), montant: payment.amount, total: maj.amount, paye: maj.amountPaid, prestationId: p.id,
     }),
+    alerterEquipeWhatsApp("Paiement reçu", `${maj.client.name ?? maj.client.email ?? "Client"} — ${Math.round(payment.amount).toLocaleString("fr-FR")} F — ${nomService(maj)}`),
   ]);
   return true;
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import NotificationsWhatsApp from "@/components/notifications/NotificationsWhatsApp";
 
 export default function ProfilPage() {
   const [name, setName]   = useState("");
@@ -215,6 +216,9 @@ export default function ProfilPage() {
           ))}
         </div>
       </motion.div>
+
+      {/* Notifications WhatsApp */}
+      <NotificationsWhatsApp />
 
       {/* Parrainage */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-2xl shadow-card p-6">

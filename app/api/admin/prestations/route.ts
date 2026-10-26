@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         take:    limit,
         orderBy: { createdAt: "desc" },
         include: {
-          client:          { select: { id: true, name: true, email: true } },
+          client:          { select: { id: true, name: true, email: true, phone: true } },
           service:         { select: { id: true, title: true, domain: true } },
           assignedTo:      { select: { id: true, name: true } },
           payments:        { select: { status: true, amount: true } },

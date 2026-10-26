@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { sendDevisClient } from "@/lib/email";
 import { envoyer } from "@/lib/prestations";
 
@@ -59,7 +60,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const depositAmount = quote.deposit ?? Math.round(quote.total * 0.6);
 
     if (clientEmail) {
-      await envoyer("devis", [sendDevisClient({ to: clientEmail, name: clientName, serviceName, depositAmount, prestationId: id })]);
+      await envoyer("devis", [
+        sendDevisClient({ to: clientEmail, name: clientName, serviceName, depositAmount, prestationId: id }),
+        notifierClientWhatsApp(prestation.clientId, "shiftup_devis", [clientName, serviceName, lienEspaceClient()]),
+      ]);
     }
 
     // Message interne

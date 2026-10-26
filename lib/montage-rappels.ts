@@ -14,6 +14,7 @@
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { sendPointDepotsAdmin, sendRappelClient, type LigneRappel } from "@/lib/email";
+import { lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import {
   SECTEUR_MONTAGE, bilanPieces, dateLimiteFr, dateLimiteVersDate, echeance, enAttenteClient, joursRestants, lireMontage, shiftUpDepose,
 } from "@/lib/montage";
@@ -24,7 +25,7 @@ export async function rappelsMontage(now = new Date()) {
   const bilan = { clients: 0, aDeposer: 0, nonConfirmes: 0, resultats: 0, pointAdmin: false, erreurs: [] as string[] };
   const prestations = await prisma.prestation.findMany({
     where: { sector: SECTEUR_MONTAGE, status: { notIn: ["ANNULEE"] } },
-    select: { id: true, status: true, createdAt: true, customFields: true, client: { select: { name: true, email: true } } },
+    select: { id: true, clientId: true, status: true, createdAt: true, customFields: true, client: { select: { name: true, email: true } } },
   });
 
   const aDeposer: { t: number; l: LigneRappel }[] = [];
@@ -65,6 +66,7 @@ export async function rappelsMontage(now = new Date()) {
             ],
             items: attendues.map((x) => x.libelle),
           });
+          await notifierClientWhatsApp(p.clientId, "shiftup_pieces", [nom, String(attendues.length), dossier.referenceAvis, dateLimiteFr(dossier.dateLimite), lienEspaceClient()]);
           rappels[cle] = now.toISOString();
           if (cle === "piecesJ2") rappels.piecesJ5 ??= now.toISOString();
           bilan.clients++;
@@ -81,6 +83,7 @@ export async function rappelsMontage(now = new Date()) {
             "Après le dépôt, indiquez-le dans votre espace et joignez la photo du récépissé : nous suivrons le résultat avec vous.",
           ],
         });
+        await notifierClientWhatsApp(p.clientId, "shiftup_rappel_depot", [nom, dossier.referenceAvis, dateLimiteFr(dossier.dateLimite), lienEspaceClient()]);
         rappels.depotClient = now.toISOString();
         bilan.clients++;
       }

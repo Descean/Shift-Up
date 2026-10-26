@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { SECTEUR_MONTAGE, bilanPieces, lireMontage } from "@/lib/montage";
 import { PiecesAdmin } from "@/components/prestations/Pieces";
 import SuiviDossier, { BadgeSuivi } from "@/components/prestations/Suivi";
+import WhatsAppRapide from "@/components/prestations/WhatsAppRapide";
 
 import { televerser } from "@/lib/televerser";
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -53,7 +54,7 @@ interface Quote {
 
 interface Prestation {
   id: string;
-  client: { id: string; name: string; email: string };
+  client: { id: string; name: string; email: string; phone?: string | null };
   service: { title: string; domain: string } | null;
   sector: string | null;
   customService: string | null;
@@ -1199,6 +1200,7 @@ function DetailPanel({
             </p>
           </div>
         </div>
+        <WhatsAppRapide telephone={prestation.phone || prestation.client.phone} nom={prestation.client.name ?? ""} service={serviceLabel(prestation)} statut={prestation.status} customFields={prestation.customFields} />
         {prestation.brief && (
           <div className="mt-2">
             <p className="text-xs text-gray-400 mb-1">Brief{prestation.customFields?.origine ? ` — ${prestation.customFields.origine}` : ""}</p>

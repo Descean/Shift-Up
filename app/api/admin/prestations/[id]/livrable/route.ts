@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { sendLivrableClient } from "@/lib/email";
 import { envoyer, livrableAccessible } from "@/lib/prestations";
 
@@ -47,7 +48,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
       if (prestation?.client?.email) {
         const serviceName = prestation.service?.title ?? prestation.customService ?? "Prestation";
-        await envoyer("livrable", [sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: title, serviceName, apresSolde: !livrableAccessible({ type: livrable.type, isAvailable: true }, prestation) })]);
+        await envoyer("livrable", [
+          sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: title, serviceName, apresSolde: !livrableAccessible({ type: livrable.type, isAvailable: true }, prestation) }),
+          notifierClientWhatsApp(prestation.clientId, "shiftup_livrable", [prestation.client.name ?? "", serviceName, lienEspaceClient()]),
+        ]);
       }
     }
 
@@ -84,7 +88,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       });
       if (prestation?.client?.email) {
         const serviceName = prestation.service?.title ?? prestation.customService ?? "Prestation";
-        await envoyer("livrable", [sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: livrable.title, serviceName, apresSolde: !livrableAccessible({ type: livrable.type, isAvailable: true }, prestation) })]);
+        await envoyer("livrable", [
+          sendLivrableClient({ to: prestation.client.email, name: prestation.client.name ?? "Client", livrableTitle: livrable.title, serviceName, apresSolde: !livrableAccessible({ type: livrable.type, isAvailable: true }, prestation) }),
+          notifierClientWhatsApp(prestation.clientId, "shiftup_livrable", [prestation.client.name ?? "", serviceName, lienEspaceClient()]),
+        ]);
       }
     }
 

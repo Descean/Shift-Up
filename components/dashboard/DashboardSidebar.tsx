@@ -37,6 +37,7 @@ const navByRole: Record<string, NavItem[]> = {
     { href: "/dashboard/client", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/client/nouvelle-demande", icon: "fas fa-plus-circle", label: "Nouvelle demande" },
     { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Mes prestations" },
+    { href: "/dashboard/client/veille", icon: "fas fa-binoculars", label: "Veille des marchés" },
     { href: "/dashboard/client/suivi", icon: "fas fa-chart-line", label: "Suivi en temps réel" },
     { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messagerie", badge: "messages" },
     { href: "/dashboard/client/affiliation", icon: "fas fa-users", label: "Affiliation & gains" },
@@ -66,6 +67,7 @@ const navByRole: Record<string, NavItem[]> = {
   ADMIN: [
     { href: "/dashboard/admin", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
+    { href: "/dashboard/admin/veille", icon: "fas fa-binoculars", label: "Veille & WhatsApp" },
     { href: "/dashboard/admin/utilisateurs", icon: "fas fa-users", label: "Utilisateurs" },
     { href: "/dashboard/admin/messages", icon: "fas fa-envelope", label: "Messages", badge: "messages" },
     { href: "/dashboard/admin/services", icon: "fas fa-cog", label: "Services & CMS", badge: "pending" },
@@ -84,6 +86,7 @@ const navByRole: Record<string, NavItem[]> = {
   DEVELOPER: [
     { href: "/dashboard/admin", icon: "fas fa-grid-2", label: "Vue d'ensemble" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
+    { href: "/dashboard/admin/veille", icon: "fas fa-binoculars", label: "Veille & WhatsApp" },
     { href: "/dashboard/admin/utilisateurs", icon: "fas fa-users", label: "Utilisateurs" },
     { href: "/dashboard/admin/messages", icon: "fas fa-envelope", label: "Messages", badge: "messages" },
     { href: "/dashboard/admin/services", icon: "fas fa-cog", label: "Services & CMS", badge: "pending" },

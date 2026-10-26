@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { sendDemandeConfirmation, sendNewDemandeAdmin } from "@/lib/email";
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -150,6 +151,7 @@ export async function POST(req: NextRequest) {
     await envoyer("nouvelle demande", [
       sendDemandeConfirmation({ to: session.user.email!, name: clientName, serviceName, prestationId: prestation.id, piecesAFournir: montage ? montage.pieces.length : 0 }),
       sendNewDemandeAdmin({ clientName, clientEmail: session.user.email!, serviceName, brief, prestationId: prestation.id, urgence, conflits }),
+      alerterEquipeWhatsApp(`Nouvelle demande${urgence ? ` (URGENT ${urgence})` : ""}`, `${clientName} — ${serviceName}`),
     ]);
 
     return NextResponse.json({ prestation }, { status: 201 });

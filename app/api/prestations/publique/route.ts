@@ -12,6 +12,7 @@ import crypto from "crypto";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
+import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { generateAffiliationCode } from "@/lib/utils";
 import { freeTextSchema, isSafe } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
@@ -97,6 +98,7 @@ export async function POST(req: NextRequest) {
     const conflits = montage ? (await conflitsAvis(prestation.id, (montage.dossier as { referenceAvis: string }).referenceAvis).catch(() => [])).map(libelleConflit) : [];
     const envois: Promise<unknown>[] = [
       sendNewDemandeAdmin({ clientName: d.name, clientEmail: d.email, serviceName, brief, prestationId: prestation.id, urgence, conflits }),
+      alerterEquipeWhatsApp(`Nouvelle demande${urgence ? ` (URGENT ${urgence})` : ""}`, `${d.name} — ${serviceName}`),
     ];
 
     // Compte sans mot de passe (nouveau, ou ouvert par une demande précédente jamais activée) : lien d'activation
