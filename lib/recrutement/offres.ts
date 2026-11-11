@@ -134,7 +134,7 @@ export const OFFRES: OffreEmploi[] = [
     experience: "5 ans d'expérience professionnelle minimum après le diplôme",
     experienceSpecifique: "Portfolio présentant au moins 2 identités visuelles réalisées (à joindre en PDF)",
     autres: AUTRES_COM, exempleDiplome: "Ex. Licence professionnelle en design graphique", ...COM,
-    piecesObligatoires: ["AUTRES"], aidePieces: { AUTRES: "Portfolio (au moins 2 identités visuelles) obligatoire ; pièce d'identité, certificats" },
+    piecesObligatoires: ["AUTRES"], aidePieces: { AUTRES: "Portfolio (au moins 2 identités visuelles) obligatoire ; certificats, références" },
   },
   {
     code: "DW", slug: "dw", titre: "Développeur web (CMS)", famille: "Numérique",
@@ -151,7 +151,7 @@ export const OFFRES: OffreEmploi[] = [
     experience: "3 ans d'expérience minimum en rédaction institutionnelle français-anglais",
     experienceSpecifique: "Avoir rédigé ou traduit des contenus institutionnels (sites web, rapports, brochures, communiqués)",
     autres: AUTRES_COM, exempleDiplome: "Ex. Licence en anglais (ou dernier diplôme obtenu)", ...COM,
-    piecesFacultatives: ["DIPLOME"], aidePieces: { AUTRES: "Exemples de textes rédigés ou traduits, pièce d'identité, certificats" },
+    piecesFacultatives: ["DIPLOME"], aidePieces: { AUTRES: "Exemples de textes rédigés ou traduits, certificats" },
   },
   {
     code: "GM", slug: "gm", titre: "Graphiste maquettiste (rendus produits)", famille: "Création",
@@ -160,7 +160,7 @@ export const OFFRES: OffreEmploi[] = [
     experience: "3 ans d'expérience professionnelle minimum après le diplôme",
     experienceSpecifique: "Portfolio de maquettes de vêtements ou d'objets marqués (tenues, EPI, goodies)",
     autres: AUTRES_COM, exempleDiplome: "Ex. BTS en arts graphiques", ...COM,
-    piecesObligatoires: ["AUTRES"], aidePieces: { AUTRES: "Portfolio de maquettes (vêtements, objets marqués) obligatoire ; pièce d'identité, certificats" },
+    piecesObligatoires: ["AUTRES"], aidePieces: { AUTRES: "Portfolio de maquettes (vêtements, objets marqués) obligatoire ; certificats, références" },
   },
   {
     code: "PH", slug: "ph", titre: "Photographe professionnel", famille: "Création",
@@ -170,7 +170,7 @@ export const OFFRES: OffreEmploi[] = [
     experienceSpecifique: "Portfolio de portraits professionnels et de photos de sites industriels ou de chantiers",
     autres: AUTRES_COM, exempleDiplome: "Ex. dernier diplôme obtenu", ...COM, libelleProjets: "Nombre de reportages similaires",
     piecesObligatoires: ["AUTRES"], piecesFacultatives: ["DIPLOME", "ATTESTATIONS"],
-    aidePieces: { AUTRES: "Portfolio (portraits professionnels, sites industriels ou chantiers) obligatoire ; pièce d'identité" },
+    aidePieces: { AUTRES: "Portfolio (portraits professionnels, sites industriels ou chantiers) obligatoire ; références" },
   },
 ];
 
@@ -194,9 +194,10 @@ export function formatDateLimite(iso: string): string {
 /** Pièces demandées. CV, diplôme et attestations obligatoires. */
 export const PIECES = [
   { type: "CV", label: "CV", aide: "Daté et signé", obligatoire: true, max: 1 },
+  { type: "IDENTITE", label: "Pièce d'identité", aide: "En cours de validité (CNI, passeport, CIP ou carte biométrique), recto et verso", obligatoire: true, max: 2 },
   { type: "DIPLOME", label: "Diplôme", aide: "Copie du diplôme le plus élevé", obligatoire: true, max: 2 },
   { type: "ATTESTATIONS", label: "Attestations de travail", aide: "Attestations ou certificats précisant les chantiers ou missions réalisés (plusieurs fichiers possibles)", obligatoire: true, max: 8 },
-  { type: "AUTRES", label: "Autres pièces", aide: "Portfolio, pièce d'identité, certificats, références", obligatoire: false, max: 5 },
+  { type: "AUTRES", label: "Autres pièces", aide: "Portfolio, certificats, références", obligatoire: false, max: 5 },
 ] as const;
 
 export type TypePiece = (typeof PIECES)[number]["type"];

@@ -70,9 +70,9 @@ export default function RecrutementPage() {
             <div>
               <h2 className="text-lg text-primary mb-2">Comment postuler</h2>
               <p className="text-gray-600 leading-relaxed">
-                Choisissez le poste, remplissez le formulaire et chargez séparément, en PDF lisible : CV, diplôme,
-                attestations de travail et, le cas échéant, portfolio et autres pièces. Un accusé de réception avec votre
-                référence vous est envoyé par e-mail. Aucun dossier papier ni envoi par e-mail n&apos;est accepté.
+                Choisissez le poste, remplissez le formulaire et chargez séparément, en PDF lisible : CV, pièce d&apos;identité
+                valide, diplôme, attestations de travail et, le cas échéant, portfolio et autres pièces. Un accusé de réception avec votre
+                référence vous est envoyé par e-mail. Aucun dossier papier ni envoi par e-mail ou par WhatsApp n&apos;est accepté.
               </p>
             </div>
             <Link href="/contact" className="text-accent font-semibold hover:underline whitespace-nowrap">

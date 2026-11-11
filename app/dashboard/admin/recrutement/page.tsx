@@ -29,7 +29,7 @@ const CONS_CLS: Record<Conservation, string> = {
   EXPIREE: "bg-gray-100 text-gray-600 border-gray-200",
 };
 
-const LIB_PIECE: Record<string, string> = { CV: "CV", DIPLOME: "Diplôme", ATTESTATIONS: "Attestation", AUTRES: "Autre pièce" };
+const LIB_PIECE: Record<string, string> = { CV: "CV", IDENTITE: "Pièce d'identité", DIPLOME: "Diplôme", ATTESTATIONS: "Attestation", AUTRES: "Autre pièce" };
 const jour = (s: string | null) => (s ? new Date(s).toLocaleDateString("fr-FR") : "—");
 
 function BadgeDonnees({ c }: { c: Candidature }) {
