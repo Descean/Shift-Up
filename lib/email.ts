@@ -605,7 +605,7 @@ function blocDonnees(lien: string, dateLimite: Date) {
   return `
     <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:20px;margin:24px 0;">
       <p style="margin:0 0 8px;color:#0A2533;font-size:15px;font-weight:700;">Pouvons-nous garder votre dossier ?</p>
-      <p style="margin:0 0 4px;color:#555;font-size:14px;line-height:1.6;">Nous recrutons régulièrement pour des projets de travaux publics. Avec votre accord, nous conservons votre dossier pendant 24 mois pour vous proposer un poste qui correspond mieux à votre profil. Sans accord, il est supprimé.</p>
+      <p style="margin:0 0 4px;color:#555;font-size:14px;line-height:1.6;">Nous recrutons régulièrement pour des projets de travaux publics et des missions d’experts. Avec votre accord, nous conservons votre dossier pendant 24 mois pour vous proposer un poste qui correspond mieux à votre profil. Sans accord, il est supprimé.</p>
       <p style="margin:12px 0 0;">
         <a href="${lien}?choix=oui" style="display:inline-block;background:#0A2533;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;font-size:14px;margin:4px 8px 4px 0;">Oui, gardez mon dossier</a>
         <a href="${lien}?choix=non" style="display:inline-block;background:#fff;color:#0A2533;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:700;font-size:14px;border:1px solid #0A2533;margin:4px 0;">Non, supprimez mes données</a>

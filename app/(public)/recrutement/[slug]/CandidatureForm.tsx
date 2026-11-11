@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { HCaptchaField } from "@/components/ui/HCaptchaField";
-import { PIECES, DISPONIBILITES, TAILLE_MAX_FICHIER, type TypePiece } from "@/lib/recrutement/offres";
+import { DISPONIBILITES, TAILLE_MAX_FICHIER, type PieceDemandee, type TypePiece } from "@/lib/recrutement/offres";
 
 type Fichier = { id: string; type: TypePiece; nom: string; taille: number; path?: string; etat: "envoi" | "ok" | "erreur"; erreur?: string };
 
@@ -28,7 +28,10 @@ const mo = (o: number) => (o / 1024 / 1024).toFixed(1).replace(".", ",") + " Mo"
 const inputCls =
   "w-full font-normal text-[15px] px-3.5 py-3 min-h-[44px] border border-gray-300 rounded-xl bg-white text-primary placeholder:text-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
-export default function CandidatureForm({ offre }: { offre: { code: string; slug: string; titre: string } }) {
+type OffreForm = { code: string; slug: string; titre: string; pieces: PieceDemandee[]; libelleProjets?: string; exempleDiplome?: string };
+
+export default function CandidatureForm({ offre }: { offre: OffreForm }) {
+  const PIECES = offre.pieces;
   const params = useSearchParams();
   const source = (params.get("src") ?? "").replace(/[^\w-]/g, "").slice(0, 40) || null;
   const dossierId = useMemo(() => aleatoire(), []);
@@ -165,10 +168,10 @@ export default function CandidatureForm({ offre }: { offre: { code: string; slug
 
       <fieldset className="grid sm:grid-cols-2 gap-4">
         <legend className="font-syne font-semibold text-primary mb-3">Qualification</legend>
-        <div className="sm:col-span-2">{champ("diplome", "Diplôme le plus élevé et spécialité", { placeholder: "Ex. Ingénieur de conception en génie civil", maxLength: 160 })}</div>
+        <div className="sm:col-span-2">{champ("diplome", "Diplôme le plus élevé et spécialité", { placeholder: offre.exempleDiplome ?? "Ex. Ingénieur de conception en génie civil", maxLength: 160 })}</div>
         {champ("anneeDiplome", "Année d'obtention", { type: "number", inputMode: "numeric", min: 1960, max: new Date().getFullYear() })}
         {champ("anneesExperience", "Années d'expérience dans le métier", { type: "number", inputMode: "numeric", min: 0, max: 60 })}
-        {champ("nbProjetsSimilaires", "Nombre de chantiers similaires", { type: "number", inputMode: "numeric", min: 0, max: 200 })}
+        {champ("nbProjetsSimilaires", offre.libelleProjets ?? "Nombre de chantiers similaires", { type: "number", inputMode: "numeric", min: 0, max: 200 })}
         <label className="flex flex-col gap-1.5 text-sm font-medium text-primary">
           Disponibilité
           <select className={inputCls} value={v.disponibilite} onChange={set("disponibilite")}>

@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Carte = { code: string; slug: string; titre: string; famille: string; diplome: string; experience: string };
 
-const FILTRES = [
-  { id: "tous", label: "Tous" },
-  { id: "Ingénieur", label: "Ingénieurs" },
-  { id: "Technicien", label: "Techniciens" },
-];
+const LIBELLES: Record<string, string> = { Ingénieur: "Ingénieurs", Technicien: "Techniciens" };
 
 export default function OffresFiltre({ offres }: { offres: Carte[] }) {
   const [filtre, setFiltre] = useState("tous");
+  // Conserve la provenance (?src=affiche…) jusqu'au formulaire de candidature
+  const src = (useSearchParams().get("src") ?? "").replace(/[^\w-]/g, "").slice(0, 40);
+  const familles = Array.from(new Set(offres.map((o) => o.famille)));
+  const FILTRES = [{ id: "tous", label: "Tous" }, ...familles.map((f) => ({ id: f, label: LIBELLES[f] ?? f }))];
   const liste = filtre === "tous" ? offres : offres.filter((o) => o.famille === filtre);
 
   return (
@@ -42,7 +43,7 @@ export default function OffresFiltre({ offres }: { offres: Carte[] }) {
         {liste.map((o) => (
           <Link
             key={o.code}
-            href={`/recrutement/${o.slug}`}
+            href={`/recrutement/${o.slug}${src ? `?src=${src}` : ""}`}
             className="group bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4 hover:border-primary hover:shadow-card-hover transition-all"
           >
             <div className="flex items-center justify-between gap-3">

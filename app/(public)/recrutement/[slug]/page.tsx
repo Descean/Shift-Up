@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { OFFRES, getOffre, offreOuverte, formatDateLimite, PIECES } from "@/lib/recrutement/offres";
+import { OFFRES, getOffre, offreOuverte, formatDateLimite, piecesOffre } from "@/lib/recrutement/offres";
 import CandidatureForm from "./CandidatureForm";
 
 export function generateStaticParams() {
@@ -28,6 +28,7 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
   const o = getOffre(slug);
   if (!o) notFound();
   const ouverte = offreOuverte(o);
+  const pieces = piecesOffre(o);
 
   return (
     <div className="min-h-screen">
@@ -39,10 +40,11 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
           </Link>
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <span className="font-syne font-semibold text-xs tracking-wider text-primary bg-accent-200 px-2.5 py-1 rounded-md">{o.code}</span>
-            <span className="text-white/70 text-sm">{o.famille} · Bénin · Prise de poste selon le calendrier des chantiers</span>
+            <span className="text-white/70 text-sm">{o.famille} · Bénin · {o.priseDePoste ?? "Prise de poste selon le calendrier des chantiers"}</span>
           </div>
           <h1 className="font-syne font-black text-4xl sm:text-5xl text-white mb-4 leading-tight">{o.titre} (H/F)</h1>
           <p className="text-white/70 text-lg leading-relaxed max-w-3xl">{o.mission}</p>
+          {o.contexte && <p className="text-white/50 text-sm leading-relaxed max-w-3xl mt-4">{o.contexte}</p>}
         </div>
       </section>
 
@@ -66,7 +68,7 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
               <h2 className="text-lg text-primary mb-3">Pièces à charger (PDF lisible)</h2>
               <ul className="space-y-2 text-gray-600">
-                {PIECES.map((p) => (
+                {pieces.map((p) => (
                   <li key={p.type} className="flex gap-2">
                     <i className="fas fa-file-pdf text-accent mt-1 text-sm" aria-hidden />
                     <span>{p.label}{p.obligatoire ? "" : " (facultatif)"} — <span className="text-gray-500">{p.aide}</span></span>
@@ -83,7 +85,7 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
           <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 min-w-0">
             {ouverte ? (
               <Suspense fallback={null}>
-                <CandidatureForm offre={{ code: o.code, slug: o.slug, titre: o.titre }} />
+                <CandidatureForm offre={{ code: o.code, slug: o.slug, titre: o.titre, pieces, libelleProjets: o.libelleProjets, exempleDiplome: o.exempleDiplome }} />
               </Suspense>
             ) : (
               <div className="py-10 text-center">

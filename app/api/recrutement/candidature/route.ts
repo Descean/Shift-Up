@@ -11,7 +11,7 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { verifyCaptcha } from "@/lib/captcha";
-import { getOffre, offreOuverte, PIECES, TAILLE_MAX_DOSSIER, DISPONIBILITES } from "@/lib/recrutement/offres";
+import { getOffre, offreOuverte, PIECES, piecesOffre, TAILLE_MAX_DOSSIER, DISPONIBILITES } from "@/lib/recrutement/offres";
 import { readObject, signedReadUrl, isPdf } from "@/lib/recrutement/storage";
 import { sendCandidatureAccuse, sendCandidatureAdmin } from "@/lib/email";
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
   // ── Contrôle des pièces ───────────────────────────────────────────────────
   const prefix = new RegExp(`^${offre.code}/\\d{4}-\\d{2}/${d.dossierId}/([a-z]+)-[a-f0-9]{8}\\.pdf$`);
-  for (const p of PIECES) {
+  for (const p of piecesOffre(offre)) {
     const n = d.fichiers.filter((f) => f.type === p.type).length;
     if (p.obligatoire && n === 0) return NextResponse.json({ error: `Pièce manquante : ${p.label}.` }, { status: 400 });
     if (n > p.max) return NextResponse.json({ error: `Trop de fichiers pour : ${p.label}.` }, { status: 400 });

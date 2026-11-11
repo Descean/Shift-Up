@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { OFFRES, CONTEXTE_RECRUTEMENT, offreOuverte, formatDateLimite } from "@/lib/recrutement/offres";
 import OffresFiltre from "./OffresFiltre";
 
 export const metadata: Metadata = {
-  title: "Recrutement — Offres d'emploi BTP",
+  title: "Recrutement — Offres d'emploi",
   description: CONTEXTE_RECRUTEMENT,
   openGraph: {
-    title: "Offres d'emploi BTP et travaux publics — SHIFT UP",
+    title: "Offres d'emploi — SHIFT UP, cabinet de recrutement",
     description: CONTEXTE_RECRUTEMENT,
   },
 };
@@ -17,6 +18,7 @@ export const revalidate = 3600;
 export default function RecrutementPage() {
   const ouvertes = OFFRES.filter((o) => offreOuverte(o));
   const dateLimite = ouvertes[0]?.dateLimite;
+  const contextes = Array.from(new Set(ouvertes.map((o) => o.contexte ?? CONTEXTE_RECRUTEMENT)));
 
   return (
     <div className="min-h-screen">
@@ -28,9 +30,11 @@ export default function RecrutementPage() {
             Cabinet de recrutement
           </span>
           <h1 className="font-syne font-black text-4xl sm:text-5xl text-white mb-5 leading-tight">
-            Offres d&apos;emploi <span className="gradient-text">BTP et travaux publics</span>
+            Offres d&apos;emploi <span className="gradient-text">et missions d&apos;experts</span>
           </h1>
-          <p className="text-white/70 text-lg leading-relaxed max-w-2xl">{CONTEXTE_RECRUTEMENT}</p>
+          {(contextes.length ? contextes : [CONTEXTE_RECRUTEMENT]).map((c) => (
+            <p key={c} className="text-white/70 text-lg leading-relaxed max-w-2xl mb-3 last:mb-0">{c}</p>
+          ))}
           {ouvertes.length > 0 && (
             <div className="flex flex-wrap gap-3 mt-8 text-sm text-white">
               <span className="border border-white/20 bg-white/5 rounded-full px-4 py-2">
@@ -55,9 +59,11 @@ export default function RecrutementPage() {
               <p className="text-gray-500">Revenez prochainement ou écrivez-nous à contact@shiftup.bj.</p>
             </div>
           ) : (
-            <OffresFiltre
-              offres={ouvertes.map((o) => ({ code: o.code, slug: o.slug, titre: o.titre, famille: o.famille, diplome: o.diplome, experience: o.experience }))}
-            />
+            <Suspense fallback={null}>
+              <OffresFiltre
+                offres={ouvertes.map((o) => ({ code: o.code, slug: o.slug, titre: o.titre, famille: o.famille, diplome: o.diplome, experience: o.experience }))}
+              />
+            </Suspense>
           )}
 
           <div className="mt-12 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 grid md:grid-cols-[1fr_auto] gap-6 items-center">
@@ -65,7 +71,7 @@ export default function RecrutementPage() {
               <h2 className="text-lg text-primary mb-2">Comment postuler</h2>
               <p className="text-gray-600 leading-relaxed">
                 Choisissez le poste, remplissez le formulaire et chargez séparément, en PDF lisible : CV, diplôme,
-                attestations de travail et, le cas échéant, autres pièces. Un accusé de réception avec votre
+                attestations de travail et, le cas échéant, portfolio et autres pièces. Un accusé de réception avec votre
                 référence vous est envoyé par e-mail. Aucun dossier papier ni envoi par e-mail n&apos;est accepté.
               </p>
             </div>
