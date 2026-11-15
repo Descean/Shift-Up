@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { BandeauTitre, TitrePoints, titreFont } from "@/components/site/Gabarit";
+import { Icone } from "@/components/home/icones";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
@@ -427,8 +429,14 @@ const SECTORS: Sector[] = [
   },
 ];
 
+/* ─── Icône de chaque domaine (jeu d'icônes du site) ─────────────────────── */
+const ICONES: Record<string, string> = {
+  conseil: "conseil", "marches-publics": "dossiers", juridique: "juridique", marketing: "marketing", btp: "entreprise",
+  numerique: "numerique", transformation: "numerique", data: "documents", formation: "formation", rse: "personne", finance: "finance",
+};
+
 /* ─── Composant carte service ────────────────────────────────────────────── */
-function ServiceCard({ service, sectorId, accentColor, index }: { service: ServiceItem; sectorId: string; accentColor: string; index: number }) {
+function ServiceCard({ service, sectorId, index }: { service: ServiceItem; sectorId: string; index: number }) {
   const { data: session } = useSession();
   const href = session
     ? `/dashboard/client/nouvelle-demande?sector=${encodeURIComponent(sectorId)}&service=${encodeURIComponent(service.title)}`
@@ -439,54 +447,53 @@ function ServiceCard({ service, sectorId, accentColor, index }: { service: Servi
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06 }}
-      className={`bg-white rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 relative flex flex-col ${
-        service.isPopular ? "ring-2 ring-accent" : "border border-gray-100"
+      className={`relative flex flex-col gap-3 rounded-2xl bg-white p-6 transition-shadow hover:shadow-[0_12px_30px_rgba(30,46,79,0.12)] ${
+        service.isPopular ? "border-2 border-su-bleu" : "border border-su-lavande"
       }`}
     >
       {service.isPopular && (
-        <div className="absolute -top-3 left-6 bg-gradient-to-r from-accent to-secondary text-white text-xs font-bold px-4 py-1 rounded-full shadow">
-          Plus demandé
-        </div>
+        <span className="absolute -top-3 left-6 rounded-full bg-su-bleu px-3.5 py-1 text-xs font-bold text-white">Le plus demandé</span>
       )}
-
-      <h3 className="font-syne font-bold text-lg text-primary mb-2 leading-tight">{service.title}</h3>
-      <p className="text-gray-500 text-sm leading-relaxed mb-4 flex-1">{service.description}</p>
-
-      <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
-        <div>
-          {service.priceLabel && <p className="text-xs text-gray-400">{service.priceLabel}</p>}
-          <p className="font-syne font-bold text-accent text-lg">
-            {service.price || "Devis personnalisé"}
-          </p>
-        </div>
-        {service.duration && (
-          <div className="text-right">
-            <p className="text-xs text-gray-400">Durée</p>
-            <p className="text-sm font-medium text-gray-600">{service.duration}</p>
-          </div>
-        )}
-      </div>
-
-      <ul className="space-y-2 mb-5">
+      <h3 className={`${titreFont} m-0 text-lg font-bold leading-snug text-su-nuit`}>{service.title}</h3>
+      <p className="m-0 flex-1 text-sm leading-relaxed text-[#4B5563]">{service.description}</p>
+      <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
         {service.features.map((f) => (
-          <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
-            <i className="fas fa-check text-secondary text-xs flex-shrink-0" />
-            {f}
+          <li key={f} className="flex items-center gap-2 text-sm text-[#374151]">
+            <span className="text-su-bleu"><Icone nom="coche" taille={15} epaisseur={2.2} /></span>{f}
           </li>
         ))}
       </ul>
-
-      <Link
-        href={href}
-        className={`mt-auto flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-          service.isPopular
-            ? "bg-gradient-to-r from-accent to-secondary text-white hover:opacity-90"
-            : "border border-accent text-accent hover:bg-accent/5"
-        }`}
-      >
-        Démarrer <i className="fas fa-arrow-right text-xs" />
+      <div className="mt-1 flex items-end justify-between gap-3 border-t border-su-lavande pt-4">
+        <div className="flex flex-col">
+          {service.priceLabel && <span className="text-xs text-[#6B7280]">{service.priceLabel}</span>}
+          <span className={`${titreFont} text-lg font-extrabold text-su-nuit`}>{service.price || "Sur devis"}</span>
+        </div>
+        {service.duration && (
+          <span className="flex items-center gap-1.5 text-[13px] text-[#4B5563]"><span className="text-su-bleu"><Icone nom="horloge" taille={16} /></span>{service.duration}</span>
+        )}
+      </div>
+      <Link href={href}
+        className={`inline-flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-colors ${
+          service.isPopular ? "bg-su-bleu text-white hover:bg-su-cadet" : "border border-su-clair text-su-bleu hover:border-su-bleu"
+        }`}>
+        Souscrire <Icone nom="fleche" taille={16} epaisseur={2} />
       </Link>
     </motion.div>
+  );
+}
+
+function BoutonDomaine({ s, actif, onClick }: { s: Sector; actif: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-current={actif ? "true" : undefined}
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${actif ? "bg-su-bleu text-white" : "text-su-nuit hover:bg-su-brume"}`}>
+      <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-lg ${actif ? "bg-white/15 text-white" : "bg-su-brume text-su-bleu"}`}>
+        <Icone nom={ICONES[s.id] ?? "conseil"} taille={19} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold">{s.label}</span>
+        <span className={`block text-[11px] ${actif ? "text-su-lavande" : "text-[#6B7280]"}`}>{s.services.length} offres</span>
+      </span>
+    </button>
   );
 }
 
@@ -495,7 +502,6 @@ export default function ServicesPage() {
   const [activeSector, setActiveSector] = useState<string>(SECTORS[0].id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [chatOpen, setChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -527,165 +533,65 @@ export default function ServicesPage() {
   function selectSector(id: string) {
     setActiveSector(id);
     setSidebarOpen(false);
-    // Scroll to content on mobile
     setTimeout(() => contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   }
 
-  // Trigger chatbot when "Parler à l'assistant" is clicked
+  // Ouvre l'assistant (widget de discussion) avec un message prérempli
   function openChatbot(prefill: string) {
-    setChatMessage(prefill);
-    setChatOpen(true);
-    // Try to open chatbot widget if it exposes a global method
-    if (typeof window !== "undefined") {
-      const event = new CustomEvent("shiftup:open-chat", { detail: { message: prefill } });
-      window.dispatchEvent(event);
-    }
+    window.dispatchEvent(new CustomEvent("shiftup:open-chat", { detail: { message: prefill } }));
   }
 
+  const nbOffres = SECTORS.reduce((a, s) => a + s.services.length, 0);
+
   return (
-    <div className="min-h-screen bg-paper">
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="bg-primary pt-28 pb-14 relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh-gradient opacity-40" />
-        <div className="container-custom relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-5">
-              <i className="fas fa-grid-2" />Catalogue de services
-            </span>
-            <h1 className="font-syne font-black text-4xl sm:text-5xl text-white mb-4 leading-tight">
-              Nos domaines <span className="gradient-text">d'intervention</span>
-            </h1>
-            <p className="text-white/60 text-lg leading-relaxed max-w-xl">
-              {SECTORS.length} secteurs couverts, des centaines de solutions. Trouvez ce dont vous avez besoin ou décrivez votre projet — nous vous proposerons le meilleur accompagnement.
-            </p>
-          </motion.div>
+    <div className="min-h-screen bg-white">
+      <BandeauTitre titre="Nos domaines" accent="d'intervention."
+        texte={`${SECTORS.length} domaines et ${nbOffres} offres, du dossier d'appel d'offres au tableau de bord. Choisissez un domaine pour voir les prix et les délais ; chaque devis est envoyé sous 48 heures ouvrées.`} />
 
-          {/* Stats rapides */}
-          <div className="flex flex-wrap gap-6 mt-8">
-            {[
-              { icon: "fas fa-briefcase", value: `${SECTORS.length}`, label: "Secteurs" },
-              { icon: "fas fa-check-circle", value: `${SECTORS.reduce((a, s) => a + s.services.length, 0)}`, label: "Services" },
-              { icon: "fas fa-file-invoice", value: "48 h", label: "Délai de devis" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl">
-                <i className={`${stat.icon} text-accent`} />
-                <div>
-                  <p className="font-syne font-black text-white text-lg leading-none">{stat.value}</p>
-                  <p className="text-white/50 text-xs">{stat.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="mx-auto max-w-[1200px] px-6 py-14">
+        <div className="flex flex-col items-start gap-8 lg:flex-row">
 
-      {/* ── Layout : Sidebar + Contenu ────────────────────────────────────── */}
-      <div className="container-custom py-10">
-        <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 items-stretch lg:items-start">
-
-          {/* ── Sidebar secteurs (desktop) ──────────────────────────────── */}
-          <aside className="hidden lg:flex flex-col w-72 flex-shrink-0 sticky top-24 max-h-[calc(100vh-7rem)] overflow-hidden rounded-2xl bg-white shadow-card">
-            {/* Header + search */}
-            <div className="p-4 border-b border-gray-100">
-              <h2 className="font-syne font-bold text-primary text-sm mb-3 flex items-center gap-2">
-                <i className="fas fa-list-ul text-accent" />Secteurs d'activité
-              </h2>
-              <div className="relative">
-                <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent"
-                  placeholder="Rechercher…"
-                />
-              </div>
+          {/* Domaines (ordinateur) */}
+          <aside className="sticky top-28 hidden max-h-[calc(100vh-8rem)] w-[290px] flex-none flex-col overflow-hidden rounded-[20px] border border-su-lavande bg-white lg:flex">
+            <div className="border-b border-su-lavande p-4">
+              <label className="relative block">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]"><Icone nom="loupe" taille={16} /></span>
+                <input value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Rechercher un domaine"
+                  className="w-full rounded-full border border-su-lavande py-2.5 pl-9 pr-3 text-sm focus:border-su-bleu focus:outline-none" placeholder="Rechercher un domaine" />
+              </label>
             </div>
-
-            {/* Liste */}
-            <nav className="flex-1 overflow-y-auto py-2">
-              {filtered.length === 0 ? (
-                <p className="text-center text-gray-400 text-sm py-6">Aucun résultat</p>
-              ) : filtered.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => selectSector(s.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all group ${
-                    activeSector === s.id
-                      ? "bg-primary/5 border-r-2 border-accent"
-                      : "hover:bg-gray-50 border-r-2 border-transparent"
-                  }`}
-                >
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                    <i className={`${s.icon} text-white text-sm`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold leading-tight truncate ${activeSector === s.id ? "text-primary" : "text-gray-700 group-hover:text-primary"}`}>
-                      {s.label}
-                    </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{s.services.length} services</p>
-                  </div>
-                  {activeSector === s.id && <i className="fas fa-chevron-right text-accent text-xs flex-shrink-0" />}
-                </button>
-              ))}
+            <nav aria-label="Domaines" className="flex flex-1 flex-col gap-1 overflow-y-auto p-2.5">
+              {filtered.length === 0
+                ? <p className="py-6 text-center text-sm text-[#6B7280]">Aucun résultat</p>
+                : filtered.map((s) => <BoutonDomaine key={s.id} s={s} actif={activeSector === s.id} onClick={() => selectSector(s.id)} />)}
             </nav>
-
-            {/* Footer sidebar */}
-            <div className="p-4 border-t border-gray-100 bg-gray-50/60">
-              <p className="text-xs text-gray-400 text-center leading-relaxed">
-                Secteurs issus du<br />registre de commerce SHIFT UP
-              </p>
-            </div>
           </aside>
 
-          {/* ── Mobile : sélecteur de secteur ────────────────────────────── */}
-          <div className="lg:hidden w-full mb-6">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="w-full flex items-center justify-between bg-white shadow-card rounded-2xl px-5 py-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 bg-gradient-to-br ${sector.color} rounded-xl flex items-center justify-center`}>
-                  <i className={`${sector.icon} text-white text-sm`} />
-                </div>
-                <div className="text-left">
-                  <p className="font-syne font-bold text-primary text-sm">{sector.label}</p>
-                  <p className="text-xs text-gray-400">{sector.services.length} services</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-accent text-sm">
-                <span className="font-medium">Changer</span>
-                <i className="fas fa-chevron-down" />
-              </div>
+          {/* Domaines (mobile) */}
+          <div className="w-full lg:hidden">
+            <button type="button" onClick={() => setSidebarOpen(true)}
+              className="flex w-full items-center justify-between rounded-2xl border border-su-lavande bg-white px-5 py-4">
+              <span className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-su-brume text-su-bleu"><Icone nom={ICONES[sector.id] ?? "conseil"} taille={20} /></span>
+                <span className="text-left">
+                  <span className={`${titreFont} block text-sm font-bold text-su-nuit`}>{sector.label}</span>
+                  <span className="block text-xs text-[#6B7280]">{sector.services.length} offres</span>
+                </span>
+              </span>
+              <span className="text-sm font-semibold text-su-bleu">Changer</span>
             </button>
-
-            {/* Mobile drawer */}
             <AnimatePresence>
               {sidebarOpen && (
                 <>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 z-40" />
-                  <motion.div
-                    initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
-                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    className="fixed top-0 left-0 bottom-0 w-80 bg-white z-50 flex flex-col shadow-2xl"
-                  >
-                    <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                      <h2 className="font-syne font-bold text-primary">Secteurs d'activité</h2>
-                      <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-gray-600 p-2">
-                        <i className="fas fa-times" />
-                      </button>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-40 bg-su-nuit/60" />
+                  <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                    className="fixed bottom-0 left-0 top-0 z-50 flex w-80 flex-col bg-white shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-su-lavande p-4">
+                      <span className={`${titreFont} font-bold text-su-nuit`}>Domaines</span>
+                      <button type="button" onClick={() => setSidebarOpen(false)} aria-label="Fermer" className="p-2 text-su-bleu"><Icone nom="plus" taille={20} /></button>
                     </div>
-                    <nav className="flex-1 overflow-y-auto py-2">
-                      {SECTORS.map((s) => (
-                        <button key={s.id} onClick={() => selectSector(s.id)} className={`w-full flex items-center gap-3 px-4 py-3 text-left ${activeSector === s.id ? "bg-primary/5 border-r-2 border-accent" : "hover:bg-gray-50 border-r-2 border-transparent"}`}>
-                          <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center flex-shrink-0`}>
-                            <i className={`${s.icon} text-white text-sm`} />
-                          </div>
-                          <div className="flex-1">
-                            <p className={`text-sm font-semibold ${activeSector === s.id ? "text-primary" : "text-gray-700"}`}>{s.label}</p>
-                            <p className="text-[10px] text-gray-400">{s.services.length} services</p>
-                          </div>
-                        </button>
-                      ))}
+                    <nav aria-label="Domaines" className="flex flex-1 flex-col gap-1 overflow-y-auto p-2.5">
+                      {SECTORS.map((s) => <BoutonDomaine key={s.id} s={s} actif={activeSector === s.id} onClick={() => selectSector(s.id)} />)}
                     </nav>
                   </motion.div>
                 </>
@@ -693,148 +599,53 @@ export default function ServicesPage() {
             </AnimatePresence>
           </div>
 
-          {/* ── Contenu principal ─────────────────────────────────────────── */}
-          <div ref={contentRef} className="flex-1 min-w-0 space-y-8">
+          {/* Contenu du domaine */}
+          <div ref={contentRef} className="min-w-0 flex-1 scroll-mt-28">
             <AnimatePresence mode="wait">
-              <motion.div key={sector.id} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.3 }}>
-
-                {/* En-tête du secteur */}
-                <div className="bg-white rounded-2xl shadow-card p-5 sm:p-6 mb-6 flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${sector.color} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                    <i className={`${sector.icon} text-white text-xl sm:text-2xl`} aria-hidden />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h2 className="font-syne font-black text-xl sm:text-2xl text-primary mb-1 break-words">{sector.label}</h2>
-                        <p className="text-gray-500 text-sm leading-relaxed">{sector.intro}</p>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center gap-2 flex-wrap">
-                      <i className="fas fa-certificate text-gray-400 text-xs" />
-                      <span className="text-xs text-gray-500 italic break-words">{sector.registreRef}</span>
-                    </div>
+              <motion.div key={sector.id} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.3 }}
+                className="flex flex-col gap-6">
+                <div className="relative flex flex-col gap-4 overflow-hidden rounded-[20px] bg-su-nuit p-7 sm:flex-row sm:items-center sm:gap-6 sm:p-9">
+                  <span aria-hidden="true" className="absolute right-[-100px] top-[-140px] h-[340px] w-[340px] rounded-full border-[36px] border-su-cadet" />
+                  <span className="relative flex h-16 w-16 flex-none items-center justify-center rounded-2xl bg-su-bleu text-white"><Icone nom={ICONES[sector.id] ?? "conseil"} taille={32} epaisseur={1.6} /></span>
+                  <div className="relative flex flex-col gap-2">
+                    <h2 className={`${titreFont} m-0 text-[26px] font-extrabold leading-tight text-white sm:text-[30px]`}>{sector.label}</h2>
+                    <p className="m-0 text-[15px] leading-relaxed text-su-lavande">{sector.intro}</p>
+                    <p className="m-0 text-xs text-su-ciel">{sector.registreRef}</p>
                   </div>
                 </div>
 
-                {/* Grille de services */}
-                <div className="grid md:grid-cols-2 gap-5">
+                <div className="grid gap-5 pt-2 md:grid-cols-2">
                   {sector.services.map((service, i) => (
-                    <ServiceCard key={service.title} service={service} sectorId={sector.id} accentColor={sector.accent} index={i} />
+                    <ServiceCard key={service.title} service={service} sectorId={sector.id} index={i} />
                   ))}
                 </div>
 
-                {/* ── "De quoi avez-vous besoin ?" ──────────────────────── */}
-                <div className="mt-8 bg-gradient-to-br from-primary to-primary/90 rounded-2xl overflow-hidden">
-                  <div className="p-8">
-                    <div className="grid lg:grid-cols-2 gap-8 items-center">
-                      {/* Texte */}
-                      <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center">
-                            <i className="fas fa-robot text-accent text-lg" />
-                          </div>
-                          <span className="text-accent-200 text-sm font-semibold uppercase tracking-wide">Assistant SHIFT UP</span>
-                        </div>
-                        <h3 className="font-syne font-black text-2xl text-white mb-2">
-                          De quoi avez-vous besoin ?
-                        </h3>
-                        <p className="text-white/60 text-sm leading-relaxed">
-                          Vous ne trouvez pas exactement ce qu'il vous faut ? Notre assistant analyse votre besoin et vous oriente vers la solution la plus adaptée.
-                        </p>
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          {["Besoin urgent", "Budget limité", "Projet complexe", "Débutant"].map((tag) => (
-                            <button
-                              key={tag}
-                              onClick={() => openChatbot(`Bonjour, j'ai un besoin ${tag.toLowerCase()} dans le secteur "${sector.label}"`)}
-                              className="text-xs bg-white/10 hover:bg-white/20 text-white/80 hover:text-white px-3 py-1.5 rounded-full transition-colors"
-                            >
-                              {tag}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Zone de saisie */}
-                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 space-y-3">
-                        <p className="text-white/80 text-sm font-medium">Décrivez votre besoin en quelques mots</p>
-                        <textarea
-                          value={chatMessage}
-                          onChange={(e) => setChatMessage(e.target.value)}
-                          rows={3}
-                          className="w-full bg-white/15 text-white placeholder-white/40 border border-white/20 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent/60 resize-none"
-                          placeholder={`Ex: J'ai besoin d'aide pour ${sector.services[0]?.title.toLowerCase()}…`}
-                        />
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => openChatbot(chatMessage || `Bonjour, je cherche un service dans le secteur "${sector.label}"`)}
-                            className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                          >
-                            <i className="fas fa-robot" />Parler à l'assistant
-                          </button>
-                          <Link
-                            href="/contact"
-                            className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                          >
-                            <i className="fas fa-envelope" />
-                          </Link>
-                        </div>
-                        <p className="text-white/30 text-xs text-center">
-                          Ou <Link href="/dashboard/client/nouvelle-demande" className="underline hover:text-white/60">soumettre directement une demande →</Link>
-                        </p>
-                      </div>
-                    </div>
+                <div className="flex flex-col gap-5 rounded-[20px] border border-su-lavande bg-su-brume p-7 sm:p-8">
+                  <div className="flex flex-col gap-2">
+                    <TitrePoints taille="text-2xl">Votre besoin n&apos;est pas dans la liste ?</TitrePoints>
+                    <p className="m-0 text-[15px] leading-relaxed text-[#4B5563]">
+                      Décrivez-le en quelques mots : nous vous orientons vers la bonne offre ou vous envoyons un devis sous 48 heures ouvrées. Un acompte de 60 % est demandé au démarrage.
+                    </p>
                   </div>
-
-                  {/* Bande bas — chiffres clés du secteur */}
-                  <div className="border-t border-white/10 px-8 py-4 flex flex-wrap gap-6">
-                    <div className="flex items-center gap-2 text-white/50 text-xs">
-                      <i className="fas fa-layer-group text-accent" />
-                      <span><strong className="text-white">{sector.services.length}</strong> services disponibles</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-white/50 text-xs">
-                      <i className="fas fa-clock text-accent" />
-                      <span>Devis sous <strong className="text-white">48h ouvrées</strong></span>
-                    </div>
-                    <div className="flex items-center gap-2 text-white/50 text-xs">
-                      <i className="fas fa-lock-open text-accent" />
-                      <span>Acompte <strong className="text-white">60%</strong> au démarrage</span>
-                    </div>
+                  <textarea value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} rows={3} aria-label="Décrivez votre besoin"
+                    className="w-full resize-none rounded-xl border border-su-lavande bg-white px-4 py-3 text-[15px] focus:border-su-bleu focus:outline-none"
+                    placeholder={`Ex. : j'ai besoin d'aide pour ${sector.services[0]?.title.toLowerCase()}…`} />
+                  <div className="flex flex-wrap gap-3">
+                    <Link href="/dashboard/client/nouvelle-demande"
+                      className="inline-flex items-center gap-2 rounded-full bg-su-bleu px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-su-cadet">
+                      Demander un devis <Icone nom="fleche" taille={16} epaisseur={2} />
+                    </Link>
+                    <button type="button" onClick={() => openChatbot(chatMessage || `Bonjour, je cherche un service dans le domaine « ${sector.label} »`)}
+                      className="rounded-full border border-su-clair bg-white px-6 py-3 text-sm font-semibold text-su-bleu transition-colors hover:border-su-bleu">
+                      Parler à l&apos;assistant
+                    </button>
                   </div>
                 </div>
-
               </motion.div>
             </AnimatePresence>
           </div>
         </div>
       </div>
-
-      {/* ── Vue d'ensemble tous secteurs (bas de page) ──────────────────────── */}
-      <section className="bg-white border-t border-gray-100 py-14">
-        <div className="container-custom">
-          <div className="text-center mb-10">
-            <h2 className="font-syne font-black text-2xl text-primary mb-2">Tous nos secteurs d'intervention</h2>
-            <p className="text-gray-500 text-sm">Cliquez sur un secteur pour explorer ses services</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            {SECTORS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => { selectSector(s.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all hover:shadow-md text-center ${
-                  activeSector === s.id ? "border-accent bg-accent/5 shadow-md" : "border-gray-100 bg-white hover:border-accent/30"
-                }`}
-              >
-                <div className={`w-12 h-12 bg-gradient-to-br ${s.color} rounded-xl flex items-center justify-center shadow-sm`}>
-                  <i className={`${s.icon} text-white`} />
-                </div>
-                <p className="text-xs font-semibold text-primary leading-tight">{s.label}</p>
-                <p className="text-[10px] text-gray-400">{s.services.length} services</p>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

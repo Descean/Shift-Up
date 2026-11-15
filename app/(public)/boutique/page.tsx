@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { BandeauTitre, Puce, TitrePoints, titreFont } from "@/components/site/Gabarit";
+import { Icone } from "@/components/home/icones";
 
 const categories = ["Tous", "Templates", "Guides", "Outils", "Formation"];
 
@@ -11,8 +12,7 @@ const products = [
   {
     id: "1",
     category: "Templates",
-    icon: "fas fa-file-powerpoint",
-    color: "from-primary to-accent",
+    icon: "documents",
     title: "Template Business Plan Pro",
     description: "Modèle complet de business plan en Word + Excel avec tableaux financiers automatisés, projections sur 5 ans et guide de rédaction.",
     price: 15000,
@@ -30,8 +30,7 @@ const products = [
   {
     id: "2",
     category: "Templates",
-    icon: "fas fa-file-invoice",
-    color: "from-primary to-accent",
+    icon: "finance",
     title: "Pack Dossier Financement Bancaire",
     description: "Tous les documents nécessaires pour constituer un dossier de demande de crédit bancaire au Bénin et dans la sous-région UEMOA.",
     price: 12000,
@@ -49,8 +48,7 @@ const products = [
   {
     id: "3",
     category: "Guides",
-    icon: "fas fa-book",
-    color: "from-primary to-accent",
+    icon: "entreprise",
     title: "Guide : Créer son entreprise au Bénin",
     description: "Le guide complet pour créer votre SARL ou SAS au Bénin en 2026 : RCCM, IFU, compte bancaire, et premières obligations fiscales.",
     price: 8000,
@@ -68,8 +66,7 @@ const products = [
   {
     id: "4",
     category: "Outils",
-    icon: "fas fa-table",
-    color: "from-primary to-accent",
+    icon: "numerique",
     title: "Tableau de Bord PME – Excel Pro",
     description: "Tableau de bord de gestion PME tout-en-un : suivi CA, charges, BFR, trésorerie, rentabilité — adapté à la réalité africaine.",
     price: 20000,
@@ -87,8 +84,7 @@ const products = [
   {
     id: "5",
     category: "Guides",
-    icon: "fas fa-bullhorn",
-    color: "from-primary to-accent",
+    icon: "marketing",
     title: "Guide Marketing Digital PMEA",
     description: "Stratégies marketing digital éprouvées pour les PME africaines : réseaux sociaux, WhatsApp Business, Google My Business, SEO local.",
     price: 10000,
@@ -106,8 +102,7 @@ const products = [
   {
     id: "6",
     category: "Formation",
-    icon: "fas fa-graduation-cap",
-    color: "from-primary to-accent",
+    icon: "formation",
     title: "Mini-Formation : Maîtrisez votre comptabilité",
     description: "4 modules vidéo + PDF pour comprendre les bases comptables de votre entreprise sans être expert-comptable.",
     price: 25000,
@@ -125,8 +120,7 @@ const products = [
   {
     id: "7",
     category: "Templates",
-    icon: "fas fa-handshake",
-    color: "from-primary to-accent",
+    icon: "juridique",
     title: "Pack Contrats Commerciaux OHADA",
     description: "10 modèles de contrats conformes au droit OHADA : contrat de prestation, partenariat, NDA, bail commercial, CGV.",
     price: 18000,
@@ -144,8 +138,7 @@ const products = [
   {
     id: "8",
     category: "Outils",
-    icon: "fas fa-chart-line",
-    color: "from-primary to-accent",
+    icon: "dossiers",
     title: "Simulateur d'Appel d'Offres",
     description: "Outil Excel pour analyser la rentabilité d'un appel d'offres avant de répondre : calcul coûts, marge, probabilité de gain.",
     price: 15000,
@@ -180,128 +173,59 @@ export default function BoutiquePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="bg-primary pt-28 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
-        <div className="container-custom relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <i className="fas fa-store" />
-              Boutique digitale
-            </span>
-            <h1 className="font-syne font-black text-4xl sm:text-5xl text-white mb-4">
-              Ressources & <span className="gradient-text">outils pro</span>
-            </h1>
-            <p className="text-white/60 text-xl leading-relaxed">
-              Templates, guides et outils téléchargeables pour accélérer votre croissance.
-              Conçus spécifiquement pour les entrepreneurs béninois et africains.
-            </p>
-          </motion.div>
+      <BandeauTitre titre="Modèles et outils" accent="prêts à l'emploi."
+        texte="Business plan, contrats OHADA, tableaux de bord, guides : des ressources conçues pour les entrepreneurs béninois, à télécharger juste après le paiement.">
+        <div className="flex flex-wrap gap-2.5">
+          {categories.map((c) => <Puce key={c} actif={filter === c} onClick={() => setFilter(c)}>{c === "Tous" ? "Tout voir" : c}</Puce>)}
         </div>
-      </section>
+      </BandeauTitre>
 
-      <section className="section-padding bg-paper">
-        <div className="container-custom">
-          {/* Filters */}
-          <div className="flex gap-2 flex-wrap mb-8">
-            {categories.map((c) => (
-              <button
-                key={c}
-                onClick={() => setFilter(c)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  filter === c
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-white text-gray-500 hover:text-primary shadow-card"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-
-          {/* Products grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filtered.map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 }}
-                className={`bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col relative ${
-                  product.isPopular ? "ring-2 ring-accent" : "border border-gray-100"
-                }`}
-              >
+      <section className="bg-white pb-24 pt-16">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-12 px-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((product) => (
+              <div key={product.id}
+                className={`relative flex flex-col rounded-2xl bg-white transition-shadow hover:shadow-[0_12px_30px_rgba(30,46,79,0.12)] ${product.isPopular ? "border-2 border-su-bleu" : "border border-su-lavande"}`}>
                 {product.isPopular && (
-                  <div className="absolute -top-3 left-6 bg-gradient-to-r from-accent to-secondary text-white text-xs font-bold px-4 py-1 rounded-full">
-                    Best-seller
-                  </div>
+                  <span className="absolute -top-3 left-5 rounded-full bg-su-bleu px-3.5 py-1 text-xs font-bold text-white">Le plus demandé</span>
                 )}
-                {product.originalPrice && (
-                  <div className="absolute -top-3 right-6 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    -{Math.round((1 - product.price / product.originalPrice) * 100)}%
-                  </div>
-                )}
-
-                {/* Icon */}
-                <div className={`m-5 mb-0 h-20 bg-gradient-to-br ${product.color} rounded-xl flex items-center justify-center`}>
-                  <i className={`${product.icon} text-white text-3xl`} />
+                <div className="relative m-4 mb-0 flex h-[110px] items-center justify-center overflow-hidden rounded-xl bg-su-brume text-su-bleu">
+                  <span aria-hidden="true" className="absolute right-[-40px] top-[-50px] h-[140px] w-[140px] rounded-full border-[18px] border-su-lavande" />
+                  <span className="relative"><Icone nom={product.icon} taille={44} epaisseur={1.6} /></span>
                 </div>
-
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs bg-gray-100 text-gray-600 font-medium px-2 py-0.5 rounded-full">{product.category}</span>
-                    <span className="text-xs text-gray-400">{product.format} · {product.pages}</span>
-                  </div>
-
-                  <h3 className="font-syne font-bold text-primary mb-2 text-base leading-snug">{product.title}</h3>
-                  <p className="text-xs text-gray-500 mb-4 flex-1 leading-relaxed">{product.description}</p>
-
-                  <ul className="space-y-1.5 mb-4">
-                    {product.features.map((f, fi) => (
-                      <li key={fi} className="flex items-start gap-2 text-xs text-gray-600">
-                        <i className="fas fa-check text-green-500 mt-0.5 w-3 flex-shrink-0" />
-                        {f}
+                <div className="flex flex-1 flex-col gap-2.5 p-5">
+                  <span className="text-xs font-semibold text-su-bleu">{product.category} · {product.format} · {product.pages}</span>
+                  <h3 className={`${titreFont} m-0 text-[17px] font-bold leading-snug text-su-nuit`}>{product.title}</h3>
+                  <p className="m-0 flex-1 text-[13px] leading-relaxed text-[#4B5563]">{product.description}</p>
+                  <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+                    {product.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-[13px] text-[#374151]">
+                        <span className="mt-0.5 text-su-bleu"><Icone nom="coche" taille={14} epaisseur={2.2} /></span>{f}
                       </li>
                     ))}
                   </ul>
-
-                  <div className="border-t border-gray-50 pt-4">
-                    <div className="flex items-baseline gap-2 mb-3">
-                      <span className="font-syne font-black text-xl text-primary">{product.price.toLocaleString()} F</span>
-                      {product.originalPrice && (
-                        <span className="text-sm text-gray-400 line-through">{product.originalPrice.toLocaleString()} F</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleBuy(product)}
-                      className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-                        product.isPopular
-                          ? "bg-gradient-to-r from-accent to-secondary text-white hover:opacity-90"
-                          : "bg-primary text-white hover:bg-primary/90"
-                      }`}
-                    >
-                      <i className="fas fa-shopping-cart" />
-                      Acheter & télécharger
-                    </button>
+                  <div className="mt-2 flex items-baseline gap-2 border-t border-su-lavande pt-4">
+                    <span className={`${titreFont} text-[22px] font-extrabold text-su-nuit`}>{product.price.toLocaleString("fr-FR")} F</span>
+                    {product.originalPrice && <span className="text-sm text-[#9CA3AF] line-through">{product.originalPrice.toLocaleString("fr-FR")} F</span>}
                   </div>
+                  <button type="button" onClick={() => handleBuy(product)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-su-bleu py-3 text-sm font-semibold text-white transition-colors hover:bg-su-cadet">
+                    Acheter <Icone nom="telecharger" taille={16} epaisseur={2} />
+                  </button>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
 
-          {/* Custom order CTA */}
-          <div className="mt-12 bg-primary rounded-2xl p-8 text-center">
-            <i className="fas fa-tools text-accent text-3xl mb-4 block" />
-            <h3 className="font-syne font-bold text-xl text-white mb-2">Besoin d'un outil sur mesure ?</h3>
-            <p className="text-white/50 mb-6">
-              Nous créons des templates et outils personnalisés adaptés à votre secteur d'activité.
-            </p>
-            <Link
-              href="/services/souscrire?service=numerique"
-              className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-semibold hover:bg-accent/90 transition-colors"
-            >
-              <i className="fas fa-envelope" />
-              Demander un outil personnalisé
+          <div className="relative grid items-center gap-6 overflow-hidden rounded-3xl bg-su-nuit p-8 sm:p-12 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <span aria-hidden="true" className="absolute right-[-120px] top-[-160px] h-[400px] w-[400px] rounded-full border border-su-ciel/25" />
+            <div className="relative flex flex-col gap-3">
+              <TitrePoints taille="text-[28px]" clair>Besoin d&apos;un outil sur mesure ?</TitrePoints>
+              <p className="m-0 max-w-[560px] text-[15px] leading-relaxed text-su-lavande">Nous créons des modèles et des outils adaptés à votre secteur et à vos procédures.</p>
+            </div>
+            <Link href="/services/souscrire?service=numerique"
+              className="relative inline-flex items-center gap-2 justify-self-start rounded-full bg-white px-6 py-3.5 text-[15px] font-semibold text-su-nuit transition-colors hover:bg-su-lavande">
+              Demander un outil <Icone nom="fleche" taille={18} epaisseur={2} />
             </Link>
           </div>
         </div>

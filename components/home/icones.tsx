@@ -26,6 +26,13 @@ const traces: Record<string, ReactNode> = {
   facebook: (<path d="M15 3h-2a4 4 0 0 0-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h2z" />),
   instagram: (<><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><path d="M17.5 6.5h0" /></>),
   linkedin: (<><path d="M4 9h4v11H4zM6 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" /><path d="M11 9h4v1.5a4 4 0 0 1 6 3.5V20h-4v-5a2 2 0 0 0-4 0v5h-2z" /></>),
+  fleche: (<path d="M5 12h14M13 6l6 6-6 6" />),
+  loupe: (<><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></>),
+  telecharger: (<path d="M12 4v11M7 10l5 5 5-5M5 20h14" />),
+  whatsapp: (<><path d="M4 20l1.3-4A8 8 0 1 1 8 19z" /><path d="M9 9.5c.5 2 2 3.5 4 4l1-1.5 2 1-.5 1.5c-3 .5-7-3.5-6.5-6.5L10.5 8l1 2z" /></>),
+  plus: (<path d="M12 5v14M5 12h14" />),
+  moins: (<path d="M5 12h14" />),
+  calendrier: (<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>),
   agrandir: (<path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7" />),
 };
 
