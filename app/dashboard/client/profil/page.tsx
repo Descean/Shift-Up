@@ -104,9 +104,9 @@ export default function ProfilPage() {
       </motion.div>
 
       {/* Informations personnelles */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl shadow-card p-6">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl border border-su-lavande p-6">
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-secondary flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-su-bleu flex items-center justify-center flex-shrink-0">
             <span className="text-white text-xl font-black">
               {name.split(" ").map((n) => n[0]).slice(0, 2).join("") || "?"}
             </span>
@@ -120,7 +120,7 @@ export default function ProfilPage() {
           </div>
         </div>
 
-        <h2 className="font-syne font-bold text-primary mb-4 text-sm uppercase tracking-widest">Informations personnelles</h2>
+        <h2 className="font-syne font-bold text-primary mb-4 text-sm">Informations personnelles</h2>
         <form onSubmit={saveInfo} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
@@ -144,7 +144,7 @@ export default function ProfilPage() {
             </div>
           </div>
           <button type="submit" disabled={savingInfo}
-            className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-60">
+            className="w-full bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-60">
             {savingInfo ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Enregistrement…</span>
               : <><i className="fas fa-check mr-2" />Enregistrer les modifications</>}
           </button>
@@ -152,8 +152,8 @@ export default function ProfilPage() {
       </motion.div>
 
       {/* Mot de passe */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-2xl shadow-card p-6">
-        <h2 className="font-syne font-bold text-primary mb-4 text-sm uppercase tracking-widest">Changer le mot de passe</h2>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-2xl border border-su-lavande p-6">
+        <h2 className="font-syne font-bold text-primary mb-4 text-sm">Changer le mot de passe</h2>
         <form onSubmit={savePassword} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
@@ -194,8 +194,8 @@ export default function ProfilPage() {
       </motion.div>
 
       {/* Notifications */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white rounded-2xl shadow-card p-6">
-        <h2 className="font-syne font-bold text-primary mb-4 text-sm uppercase tracking-widest">Préférences de notifications</h2>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white rounded-2xl border border-su-lavande p-6">
+        <h2 className="font-syne font-bold text-primary mb-4 text-sm">Préférences de notifications</h2>
         <div className="space-y-4">
           {[
             { key: "emailPrestations" as const, label: "Avancement des prestations",   desc: "Recevoir un email à chaque changement de statut de vos projets" },
@@ -221,8 +221,8 @@ export default function ProfilPage() {
       <NotificationsWhatsApp />
 
       {/* Parrainage */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-2xl shadow-card p-6">
-        <h2 className="font-syne font-bold text-primary mb-1 text-sm uppercase tracking-widest">Mon code de parrainage</h2>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-2xl border border-su-lavande p-6">
+        <h2 className="font-syne font-bold text-primary mb-1 text-sm">Mon code de parrainage</h2>
         <p className="text-xs text-gray-400 mb-4">Partagez ce lien avec vos contacts. Chaque inscription via votre lien vous fait bénéficier d'avantages exclusifs.</p>
         <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
           <span className="font-mono font-bold text-accent text-lg tracking-widest flex-1">{referralCode}</span>

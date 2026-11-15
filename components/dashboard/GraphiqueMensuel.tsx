@@ -29,7 +29,7 @@ export default function GraphiqueMensuel({ initial, titre = "Chiffre d'affaires 
   const annees = donnees?.annees?.length ? donnees.annees : [annee];
 
   return (
-    <div className="bg-white rounded-2xl shadow-card p-6">
+    <div className="bg-white rounded-2xl border border-su-lavande p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
           <h2 className="font-syne font-bold text-lg text-primary">{titre}</h2>

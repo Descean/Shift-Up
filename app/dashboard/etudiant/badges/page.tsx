@@ -44,13 +44,13 @@ export default function EtudiantBadgesPage() {
         <p className="text-gray-500 text-sm">Vos récompenses et accomplissements</p>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl shadow-card p-6">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl border border-su-lavande p-6">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-medium text-gray-700">Progression — {unlockedCount}/{totalCount} badges débloqués</p>
           <span className="font-syne font-bold text-accent">{progress}%</span>
         </div>
         <div className="w-full bg-gray-100 rounded-full h-3">
-          <motion.div className="h-3 rounded-full bg-gradient-to-r from-accent to-secondary"
+          <motion.div className="h-3 rounded-full bg-su-bleu"
             initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.8, ease: "easeOut" }} />
         </div>
       </motion.div>
@@ -58,7 +58,7 @@ export default function EtudiantBadgesPage() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {badges.map((badge, i) => (
           <motion.div key={badge.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-            className={`bg-white rounded-2xl shadow-card p-5 flex flex-col items-center text-center transition-all ${badge.unlocked ? "" : "opacity-50 grayscale"}`}>
+            className={`bg-white rounded-2xl border border-su-lavande p-5 flex flex-col items-center text-center transition-all ${badge.unlocked ? "" : "opacity-50 grayscale"}`}>
             <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center mb-4 ${badge.unlocked ? "shadow-lg" : ""}`}>
               {badge.unlocked
                 ? <i className={`fas ${badge.icon} text-white text-2xl`} />

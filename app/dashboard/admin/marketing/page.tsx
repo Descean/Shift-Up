@@ -30,7 +30,7 @@ interface Stats {
 }
 
 const KPI = ({ icon, label, value, sub, color }: { icon: string; label: string; value: string | number; sub?: string; color: string }) => (
-  <div className="bg-white rounded-2xl shadow-card p-5">
+  <div className="bg-white rounded-2xl border border-su-lavande p-5">
     <div className="flex items-start justify-between mb-3">
       <div className={`w-10 h-10 ${color} rounded-xl flex items-center justify-center`}>
         <i className={`${icon} text-white`} />
@@ -102,10 +102,10 @@ export default function AdminMarketingPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPI icon="fas fa-users" label="Abonnés newsletter" value={stats?.totalSubscribers ?? 0} sub={`${stats?.activeSubscribers ?? 0} actifs`} color="bg-gradient-to-br from-accent to-secondary" />
-        <KPI icon="fas fa-envelope-open-text" label="Messages non lus" value={stats?.unreadContacts ?? 0} sub="contacts entrants" color="bg-gradient-to-br from-secondary-400 to-secondary-400" />
-        <KPI icon="fas fa-user-check" label="Utilisateurs inscrits" value={stats?.totalUsers ?? 0} sub="comptes actifs" color="bg-gradient-to-br from-accent-500 to-secondary-500" />
-        <KPI icon="fas fa-chart-line" label="Taux d'activation" value={stats && stats.totalSubscribers > 0 ? `${Math.round((stats.activeSubscribers / stats.totalSubscribers) * 100)}%` : "—"} sub="abonnés actifs" color="bg-gradient-to-br from-primary-500 to-primary-400" />
+        <KPI icon="fas fa-users" label="Abonnés newsletter" value={stats?.totalSubscribers ?? 0} sub={`${stats?.activeSubscribers ?? 0} actifs`} color="bg-su-bleu" />
+        <KPI icon="fas fa-envelope-open-text" label="Messages non lus" value={stats?.unreadContacts ?? 0} sub="contacts entrants" color="bg-su-cadet" />
+        <KPI icon="fas fa-user-check" label="Utilisateurs inscrits" value={stats?.totalUsers ?? 0} sub="comptes actifs" color="bg-su-bleu" />
+        <KPI icon="fas fa-chart-line" label="Taux d'activation" value={stats && stats.totalSubscribers > 0 ? `${Math.round((stats.activeSubscribers / stats.totalSubscribers) * 100)}%` : "—"} sub="abonnés actifs" color="bg-su-nuit" />
       </div>
 
       {/* Tabs */}
@@ -135,7 +135,7 @@ export default function AdminMarketingPage() {
           {/* Liste messages */}
           <div className="space-y-2">
             {contacts.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+              <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">
                 <i className="fas fa-inbox text-3xl mb-2 block" />Aucun message de contact.
               </div>
             ) : contacts.map((c) => (
@@ -145,9 +145,9 @@ export default function AdminMarketingPage() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => openContact(c)}
-                className={`w-full text-left bg-white rounded-xl shadow-card p-4 flex items-start gap-3 transition-all hover:shadow-md ${selected?.id === c.id ? "ring-2 ring-accent" : ""}`}
+                className={`w-full text-left bg-white rounded-xl border border-su-lavande p-4 flex items-start gap-3 transition-all hover:shadow-md ${selected?.id === c.id ? "ring-2 ring-accent" : ""}`}
               >
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold text-white ${c.isRead ? "bg-gray-300" : "bg-gradient-to-br from-accent to-secondary"}`}>
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold text-white ${c.isRead ? "bg-gray-300" : "bg-su-bleu"}`}>
                   {c.name[0]?.toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -166,7 +166,7 @@ export default function AdminMarketingPage() {
           {/* Détail message */}
           <div>
             {selected ? (
-              <motion.div key={selected.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="bg-white rounded-2xl shadow-card p-6 space-y-4 sticky top-4">
+              <motion.div key={selected.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="bg-white rounded-2xl border border-su-lavande p-6 space-y-4 sticky top-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-syne font-bold text-primary">{selected.name}</h3>
@@ -181,14 +181,14 @@ export default function AdminMarketingPage() {
                 <div className="flex gap-3">
                   <a
                     href={`mailto:${selected.email}?subject=Re: ${selected.subject ?? "Votre message SHIFT UP"}`}
-                    className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90"
+                    className="flex-1 flex items-center justify-center gap-2 bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90"
                   >
                     <i className="fas fa-reply" />Répondre par email
                   </a>
                 </div>
               </motion.div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-300 text-sm flex flex-col items-center gap-3">
+              <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-300 text-sm flex flex-col items-center gap-3">
                 <i className="fas fa-envelope-open text-4xl" />
                 <p>Sélectionnez un message pour le lire</p>
               </div>
@@ -214,18 +214,18 @@ export default function AdminMarketingPage() {
           </div>
 
           {filteredSubs.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+            <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">
               <i className="fas fa-users-slash text-3xl mb-2 block" />Aucun abonné trouvé.
             </div>
           ) : (
-            <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+            <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 text-left">
-                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Email</th>
-                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide hidden sm:table-cell">Nom</th>
-                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Statut</th>
-                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide hidden md:table-cell">Inscrit le</th>
+                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs">Email</th>
+                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs hidden sm:table-cell">Nom</th>
+                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs">Statut</th>
+                    <th className="px-5 py-3 font-semibold text-gray-500 text-xs hidden md:table-cell">Inscrit le</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">

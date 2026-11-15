@@ -188,7 +188,7 @@ export default function AdminServicesPage() {
           <p className="text-gray-500 text-sm">{services.length} service(s) plateforme · {apServices.length > 0 ? `${apServices.filter(s=>!s.isApproved).length} en attente` : ""}</p>
         </div>
         {tab === "platform" && (
-          <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
+          <button onClick={openCreate} className="flex items-center gap-2 bg-su-bleu text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
             <i className="fas fa-plus" />Nouveau service
           </button>
         )}
@@ -238,13 +238,13 @@ export default function AdminServicesPage() {
           {apLoading ? (
             <div className="flex justify-center py-12"><span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>
           ) : apServices.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+            <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">
               {apFilter === "pending" ? "Aucun service en attente de validation." : "Aucun service trouvé."}
             </div>
           ) : (
             <div className="space-y-3">
               {apServices.map((s) => (
-                <motion.div key={s.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5">
+                <motion.div key={s.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-su-lavande p-5">
                   <div className="flex items-start gap-4">
                     <div className={`w-1 self-stretch rounded-full flex-shrink-0 ${s.isApproved ? "bg-green-400" : "bg-secondary-300"}`} />
                     <div className="flex-1 min-w-0">
@@ -349,9 +349,9 @@ export default function AdminServicesPage() {
         {loading ? (
           <div className="flex justify-center py-12"><span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>
         ) : services.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">Aucun service. Créez le premier !</div>
+          <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">Aucun service. Créez le premier !</div>
         ) : services.map((s) => (
-          <motion.div key={s.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5 flex items-start gap-4">
+          <motion.div key={s.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-su-lavande p-5 flex items-start gap-4">
             <div className={`w-1 self-stretch rounded-full flex-shrink-0 ${s.isActive ? "bg-green-400" : "bg-gray-200"}`} />
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -449,7 +449,7 @@ export default function AdminServicesPage() {
 
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => setShowForm(false)} disabled={saving} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600">Annuler</button>
-                  <button onClick={save} disabled={saving || !form.title.trim()} className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60">
+                  <button onClick={save} disabled={saving || !form.title.trim()} className="flex-1 bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60">
                     {saving ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Enregistrement…</span> : editing ? "Mettre à jour" : "Créer le service"}
                   </button>
                 </div>

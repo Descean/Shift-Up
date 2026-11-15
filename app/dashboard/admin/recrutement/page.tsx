@@ -55,7 +55,7 @@ function FormulaireNonRetenu({ nb, onEnvoyer, envoi, initial }: {
         <legend className="text-sm font-semibold text-primary mb-1">Motifs communiqués au candidat</legend>
         {MOTIFS_NON_RETENU.map((m) => (
           <label key={m.code} className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer rounded-lg px-2 py-1.5 hover:bg-gray-50">
-            <input type="checkbox" checked={motifs.includes(m.code)} onChange={() => bascule(m.code)} className="mt-1 w-4 h-4 accent-[#0A2533]" />
+            <input type="checkbox" checked={motifs.includes(m.code)} onChange={() => bascule(m.code)} className="mt-1 w-4 h-4 accent-[#192338]" />
             <span>{m.label}</span>
           </label>
         ))}
@@ -223,10 +223,10 @@ export default function RecrutementAdminPage() {
       <div className="bg-white rounded-2xl border border-gray-200 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wider text-gray-500 border-b border-gray-200">
+            <tr className="text-left text-xs text-gray-500 border-b border-gray-200">
               <th className="pl-4 py-3 w-8">
                 <input type="checkbox" aria-label="Tout sélectionner" checked={toutCoche} disabled={!selectionnables.length}
-                  onChange={() => setSelection(toutCoche ? new Set() : new Set(selectionnables.map((c) => c.id)))} className="w-4 h-4 accent-[#0A2533]" />
+                  onChange={() => setSelection(toutCoche ? new Set() : new Set(selectionnables.map((c) => c.id)))} className="w-4 h-4 accent-[#192338]" />
               </th>
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Poste</th>
@@ -249,7 +249,7 @@ export default function RecrutementAdminPage() {
               return (
                 <tr key={c.id} onClick={() => { setOuvert(c); setNote(c.noteInterne ?? ""); }} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
                   <td className="pl-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" aria-label={`Sélectionner ${c.reference}`} disabled={!peut} checked={selection.has(c.id)} onChange={() => cocher(c.id)} className="w-4 h-4 accent-[#0A2533] disabled:opacity-30" />
+                    <input type="checkbox" aria-label={`Sélectionner ${c.reference}`} disabled={!peut} checked={selection.has(c.id)} onChange={() => cocher(c.id)} className="w-4 h-4 accent-[#192338] disabled:opacity-30" />
                   </td>
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{new Date(c.createdAt).toLocaleDateString("fr-FR")}</td>
                   <td className="px-4 py-3"><span className="font-syne font-semibold text-xs text-accent bg-accent-50 px-2 py-0.5 rounded">{c.offreCode}</span></td>

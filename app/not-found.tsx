@@ -35,7 +35,7 @@ export default function NotFound() {
           style={{
             fontSize: "clamp(80px, 20vw, 160px)",
             lineHeight: 1,
-            background: "linear-gradient(135deg, #0A2533 0%, #2D5B78 100%)",
+            background: "linear-gradient(135deg, #192338 0%, #31487A 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",

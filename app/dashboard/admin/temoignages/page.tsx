@@ -61,7 +61,7 @@ export default function TemoignagesAdminPage() {
         {champ("company", "Entreprise (facultatif)", { maxLength: 120 })}
         <div className="sm:col-span-2">{champ("content", "Témoignage (tel que rédigé ou validé par le client)", { required: true, minLength: 20, maxLength: 600 })}</div>
         <label className="sm:col-span-2 flex items-start gap-3 text-sm text-gray-700">
-          <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.target.checked)} className="mt-1 w-4 h-4 accent-[#0A2533]" />
+          <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.target.checked)} className="mt-1 w-4 h-4 accent-[#192338]" />
           J&apos;ai l&apos;accord écrit du client pour publier ce témoignage avec son nom.
         </label>
         {erreur && <p className="sm:col-span-2 text-sm text-red-700" role="alert">{erreur}</p>}

@@ -100,7 +100,7 @@ export default function ReclamerCommissionsPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-3xl shadow-card p-8 text-center"
+          className="bg-white rounded-3xl border border-su-lavande p-8 text-center"
         >
           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <i className="fas fa-circle-check text-green-500 text-4xl" />
@@ -118,7 +118,7 @@ export default function ReclamerCommissionsPage() {
           <div className="space-y-3">
             <Link
               href="/dashboard/apporteur/commissions"
-              className="block w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              className="block w-full bg-su-bleu text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity"
             >
               Retour aux commissions
             </Link>
@@ -153,7 +153,7 @@ export default function ReclamerCommissionsPage() {
       </p>
 
       {/* Solde disponible */}
-      <div className="bg-gradient-to-r from-accent to-secondary rounded-2xl p-5 text-white mb-6">
+      <div className="bg-su-bleu rounded-2xl p-5 text-white mb-6">
         <p className="text-white/70 text-sm">Commissions disponibles</p>
         <p className="font-syne font-black text-3xl mt-1">
           {solde === null ? "…" : disponible.toLocaleString("fr-FR")} <span className="text-lg font-medium">F CFA</span>
@@ -167,7 +167,7 @@ export default function ReclamerCommissionsPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl shadow-card p-6 space-y-6"
+        className="bg-white rounded-2xl border border-su-lavande p-6 space-y-6"
       >
         {/* Montant */}
         <div>
@@ -297,7 +297,7 @@ export default function ReclamerCommissionsPage() {
         <button
           type="submit"
           disabled={!canSubmit || loading}
-          className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3.5 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-su-bleu text-white py-3.5 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

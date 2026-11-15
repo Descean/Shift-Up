@@ -88,7 +88,7 @@ export default function ClientSuiviPage() {
       )}
 
       {!project ? (
-        <div className="bg-white rounded-2xl shadow-card p-14 text-center text-gray-400">
+        <div className="bg-white rounded-2xl border border-su-lavande p-14 text-center text-gray-400">
           <i className="fas fa-binoculars text-4xl mb-3 block" />
           <p className="font-medium text-gray-500">Aucun projet actif pour le moment.</p>
           <p className="text-sm mt-1">Vos projets apparaîtront ici une fois le paiement de l&apos;acompte confirmé.</p>
@@ -99,17 +99,17 @@ export default function ClientSuiviPage() {
       ) : (
         <>
           {/* ── Carte projet ──────────────────────────────────────────────── */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-6">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-su-lavande p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
               <div>
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Projet en cours</p>
+                <p className="text-xs text-gray-400 font-medium mb-1">Projet en cours</p>
                 <h2 className="font-syne font-bold text-primary text-xl">{project.service?.title ?? project.customService ?? project.sector}</h2>
                 <div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-500">
                   <span><i className="fas fa-calendar-alt mr-1" />Démarrage : {new Date(project.createdAt).toLocaleDateString("fr-FR")}</span>
                   {project.estimatedEndDate && <span><i className="fas fa-flag-checkered mr-1" />Fin estimée : {new Date(project.estimatedEndDate).toLocaleDateString("fr-FR")}</span>}
                 </div>
               </div>
-              <div className="flex-shrink-0 text-center bg-gradient-to-br from-accent/10 to-secondary/10 rounded-2xl px-6 py-4">
+              <div className="flex-shrink-0 text-center bg-su-brume rounded-2xl px-6 py-4">
                 <p className="text-4xl font-syne font-black text-accent">{project.globalProgress}%</p>
                 <p className="text-xs text-gray-500 mt-0.5">Complété</p>
               </div>
@@ -123,7 +123,7 @@ export default function ClientSuiviPage() {
               </div>
               <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div initial={{ width: 0 }} animate={{ width: `${project.globalProgress}%` }} transition={{ duration: 1.2, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-accent to-secondary rounded-full relative flex items-center justify-end pr-2">
+                  className="h-full bg-su-bleu rounded-full relative flex items-center justify-end pr-2">
                   {project.globalProgress > 10 && <span className="text-[9px] text-white font-bold">{project.globalProgress}%</span>}
                 </motion.div>
               </div>
@@ -131,7 +131,7 @@ export default function ClientSuiviPage() {
           </motion.div>
 
           {/* ── Vue A : Timeline des jalons ───────────────────────────────── */}
-          <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+          <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-syne font-bold text-primary flex items-center gap-2">
                 <i className="fas fa-route text-accent" />Jalons du projet
@@ -192,7 +192,7 @@ export default function ClientSuiviPage() {
 
           {/* ── Livrables disponibles ─────────────────────────────────────── */}
           {project.livrables.some((l) => l.isAvailable) && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card overflow-hidden">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                   <i className="fas fa-box-open text-green-600 text-sm" />
@@ -225,7 +225,7 @@ export default function ClientSuiviPage() {
                 { label: "Montant payé",  value: project.amountPaid, color: "text-green-600", bg: "bg-green-50" },
                 { label: "Solde restant", value: project.amount - project.amountPaid, color: "text-amber-600", bg: "bg-amber-50" },
               ].map(({ label, value, color, bg }) => (
-                <div key={label} className={`${bg} rounded-2xl shadow-card p-4 text-center`}>
+                <div key={label} className={`${bg} rounded-2xl border border-su-lavande p-4 text-center`}>
                   <p className="text-xs text-gray-500 mb-1">{label}</p>
                   <p className={`font-syne font-black text-base ${color}`}>{value.toLocaleString()} F</p>
                 </div>
@@ -234,7 +234,7 @@ export default function ClientSuiviPage() {
           )}
 
           {/* ── CTA message ───────────────────────────────────────────────── */}
-          <div className="bg-gradient-to-r from-accent/5 to-secondary/5 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-su-brume rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <p className="font-syne font-bold text-primary">Une question sur votre projet ?</p>
               <p className="text-sm text-gray-500">Notre équipe vous répond sous 24h.</p>

@@ -118,7 +118,7 @@ export default function ClientPrestationsPage() {
           <h1 className="font-syne font-black text-2xl text-primary">Mes Prestations</h1>
           <p className="text-gray-500 text-sm mt-0.5">Suivez l&apos;avancement de vos projets SHIFT UP.</p>
         </div>
-        <Link href="/dashboard/client/nouvelle-demande" className="bg-gradient-to-r from-accent to-secondary text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2">
+        <Link href="/dashboard/client/nouvelle-demande" className="bg-su-bleu text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2">
           <i className="fas fa-plus" />Nouvelle demande
         </Link>
       </div>
@@ -130,7 +130,7 @@ export default function ClientPrestationsPage() {
         </h2>
         <div className="space-y-3">
           {active.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-card p-10 text-center text-gray-400">
+            <div className="bg-white rounded-2xl border border-su-lavande p-10 text-center text-gray-400">
               <i className="fas fa-briefcase text-3xl mb-3 block" />
               <p className="font-medium">Aucune prestation en cours.</p>
               <Link href="/dashboard/client/nouvelle-demande" className="text-accent text-sm mt-2 inline-block hover:underline">
@@ -158,9 +158,9 @@ export default function ClientPrestationsPage() {
       {/* Panneau détail */}
       <AnimatePresence>
         {detail && (
-          <motion.div key={detail.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="bg-white rounded-2xl shadow-card overflow-hidden">
+          <motion.div key={detail.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
             {/* Header panneau */}
-            <div className="bg-gradient-to-r from-primary to-primary/90 p-5 flex items-start justify-between">
+            <div className="bg-su-nuit p-5 flex items-start justify-between">
               <div>
                 <h3 className="font-syne font-bold text-white text-lg">{serviceName(detail)}</h3>
                 <p className="text-white/60 text-xs mt-0.5">Demande du {fmt(detail.createdAt)}</p>
@@ -176,7 +176,7 @@ export default function ClientPrestationsPage() {
                   <span className="text-sm font-bold text-primary">{detail.globalProgress}%</span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <motion.div animate={{ width: `${detail.globalProgress}%` }} transition={{ duration: 1 }} className="h-full bg-gradient-to-r from-accent to-secondary rounded-full" />
+                  <motion.div animate={{ width: `${detail.globalProgress}%` }} transition={{ duration: 1 }} className="h-full bg-su-bleu rounded-full" />
                 </div>
               </div>
 
@@ -200,7 +200,7 @@ export default function ClientPrestationsPage() {
               {/* Brief */}
               {detail.brief && !lireMontage(detail.customFields).dossier && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Votre besoin</p>
+                  <p className="text-xs font-semibold text-gray-500 mb-1">Votre besoin</p>
                   <p className="text-sm text-gray-700 bg-gray-50 rounded-xl p-3 line-clamp-3">{detail.brief}</p>
                 </div>
               )}
@@ -208,7 +208,7 @@ export default function ClientPrestationsPage() {
               {/* Phases de réalisation */}
               {detail.prestationPhases.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  <p className="text-xs font-semibold text-gray-500 mb-2">
                     <i className="fas fa-tasks mr-1.5" />Phases du projet
                   </p>
                   <div className="space-y-2">
@@ -231,7 +231,7 @@ export default function ClientPrestationsPage() {
                           {ph.status !== "PENDING" && (
                             <div className="h-1 bg-gray-100 rounded-full mt-1.5">
                               <div
-                                className={`h-full rounded-full transition-all ${ph.status === "DONE" ? "bg-green-400" : "bg-gradient-to-r from-accent to-secondary"}`}
+                                className={`h-full rounded-full transition-all ${ph.status === "DONE" ? "bg-green-400" : "bg-su-bleu"}`}
                                 style={{ width: `${ph.progress}%` }}
                               />
                             </div>
@@ -287,7 +287,7 @@ export default function ClientPrestationsPage() {
                     {/* Plan de réalisation */}
                     {detail.plan?.phases && detail.plan.phases.length > 0 && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Plan de réalisation</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-2">Plan de réalisation</p>
                         <div className="space-y-2">
                           {detail.plan.phases.map((ph, i) => (
                             <div key={i} className="flex gap-3 items-start">
@@ -306,7 +306,7 @@ export default function ClientPrestationsPage() {
                     <button
                       onClick={() => accepterEtPayer(detail)}
                       disabled={paying || agit !== null}
-                      className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+                      className="w-full bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
                     >
                       <i className="fas fa-lock-open" />
                       {detail.status === "DEVIS_ENVOYE" ? "Accepter le devis et payer l'acompte" : "Payer l'acompte et démarrer"} — {detail.quote.deposit.toLocaleString()} XOF
@@ -326,7 +326,7 @@ export default function ClientPrestationsPage() {
                 const autres = detail.attachments.filter((u) => !dejaListes.has(u));
                 return autres.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Fichiers joints</p>
+                  <p className="text-xs font-semibold text-gray-500 mb-2">Fichiers joints</p>
                   <div className="flex flex-wrap gap-2">
                     {autres.map((url, i) => (
                       <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs transition-colors">
@@ -366,7 +366,7 @@ export default function ClientPrestationsPage() {
                 <button
                   onClick={() => pay(detail.id, detail.amount - detail.amountPaid, serviceName(detail), false)}
                   disabled={paying}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 ${detail.status === "EN_COURS" ? "border-2 border-accent text-accent hover:bg-accent/5" : "bg-gradient-to-r from-accent to-secondary text-white hover:opacity-90"}`}
+                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 ${detail.status === "EN_COURS" ? "border-2 border-accent text-accent hover:bg-accent/5" : "bg-su-bleu text-white hover:opacity-90"}`}
                 >
                   <i className="fas fa-credit-card" />
                   Payer le solde — {(detail.amount - detail.amountPaid).toLocaleString()} XOF
@@ -487,7 +487,7 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
 
   return (
     <div>
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <p className="text-xs font-semibold text-gray-500 mb-2">
         <i className="fas fa-box-open mr-1.5" />Livrables disponibles
       </p>
       <div className="space-y-4">
@@ -685,7 +685,7 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
     <motion.div
       initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }}
       onClick={() => onSelect(p.id)}
-      className={`bg-white rounded-2xl shadow-card p-5 cursor-pointer transition-all hover:shadow-md ${selected ? "ring-2 ring-accent" : ""} ${hasDevis ? "border-l-4 border-accent-500" : ""}`}
+      className={`bg-white rounded-2xl border border-su-lavande p-5 cursor-pointer transition-all hover:shadow-md ${selected ? "ring-2 ring-accent" : ""} ${hasDevis ? "border-l-4 border-accent-500" : ""}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -716,7 +716,7 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
       </div>
       {p.globalProgress > 0 && (
         <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-accent to-secondary rounded-full" style={{ width: `${p.globalProgress}%` }} />
+          <div className="h-full bg-su-bleu rounded-full" style={{ width: `${p.globalProgress}%` }} />
         </div>
       )}
       <p className="text-xs text-accent font-medium mt-2 ml-4">

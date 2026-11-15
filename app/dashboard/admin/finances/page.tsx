@@ -134,11 +134,11 @@ export default function AdminFinancesPage() {
             bg: "bg-accent-50",
           },
         ].map((card) => (
-          <div key={card.label} className="bg-white rounded-2xl shadow-card p-5">
+          <div key={card.label} className="bg-white rounded-2xl border border-su-lavande p-5">
             <div className={`w-10 h-10 ${card.bg} rounded-xl flex items-center justify-center mb-4`}>
               <i className={`fas ${card.icon} ${card.color}`} />
             </div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">{card.label}</p>
+            <p className="text-xs text-gray-400 mb-1">{card.label}</p>
             <p className="font-syne font-black text-xl text-primary">
               {card.value.toLocaleString()}
               <span className="text-sm font-normal text-gray-400 ml-1">FCFA</span>
@@ -148,7 +148,7 @@ export default function AdminFinancesPage() {
       </div>
 
       {/* ── Tableau des paiements ─────────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
         <div className="p-6 border-b border-gray-100">
           <h2 className="font-syne font-bold text-primary mb-4">Historique des paiements</h2>
 
@@ -181,13 +181,13 @@ export default function AdminFinancesPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-50">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Référence</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Client</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Service</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Montant</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Méthode</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Date</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Statut</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Référence</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Client</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Service</th>
+                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400">Montant</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Méthode</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Date</th>
+                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Statut</th>
               </tr>
             </thead>
             <tbody>
@@ -223,7 +223,7 @@ export default function AdminFinancesPage() {
       </div>
 
       {/* ── Tableau des commissions apporteurs ───────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
         <div className="p-6 border-b border-gray-100">
           <h2 className="font-syne font-bold text-primary">Commissions apporteurs</h2>
           <p className="text-xs text-gray-400 mt-1">
@@ -234,12 +234,12 @@ export default function AdminFinancesPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-50">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Apporteur</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Code</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Filleuls</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">CA généré</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Commission (10%)</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Statut</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Apporteur</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Code</th>
+                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Filleuls</th>
+                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400">CA généré</th>
+                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400">Commission (10%)</th>
+                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Statut</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>

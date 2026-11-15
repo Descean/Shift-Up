@@ -87,7 +87,7 @@ export default function FicheMarche({ valeur, onChange, prefixe = "fm" }: { vale
       </div>
 
       <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-        <input type="checkbox" checked={Boolean(valeur.groupement)} onChange={(e) => maj("groupement", e.target.checked)} className="w-4 h-4 accent-[#0A2533]" />
+        <input type="checkbox" checked={Boolean(valeur.groupement)} onChange={(e) => maj("groupement", e.target.checked)} className="w-4 h-4 accent-[#192338]" />
         La soumission se fait en groupement d&apos;entreprises
       </label>
       {valeur.groupement && (
@@ -99,7 +99,7 @@ export default function FicheMarche({ valeur, onChange, prefixe = "fm" }: { vale
         <div className="grid sm:grid-cols-2 gap-2">
           {PRESTATIONS_MONTAGE.map((x) => (
             <label key={x} className={`flex items-center gap-2 text-sm rounded-xl border px-3 py-2 cursor-pointer transition-colors ${prestations.includes(x) ? "border-accent bg-accent/5 text-primary" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
-              <input type="checkbox" checked={prestations.includes(x)} onChange={() => basculer(x)} className="w-4 h-4 flex-shrink-0 accent-[#0A2533]" />
+              <input type="checkbox" checked={prestations.includes(x)} onChange={() => basculer(x)} className="w-4 h-4 flex-shrink-0 accent-[#192338]" />
               {x}
             </label>
           ))}

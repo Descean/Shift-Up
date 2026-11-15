@@ -75,8 +75,8 @@ export default function WhatsAppAdminPage() {
       {indispo && <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-900">Exécutez une fois le script <code className="bg-white px-1.5 rounded">prisma/sql/2026-10_whatsapp_conversations.sql</code> dans Supabase pour enregistrer les conversations.</div>}
 
       <div className="grid lg:grid-cols-[360px_1fr] gap-4 min-h-[600px]">
-        <div className="bg-white rounded-2xl shadow-card overflow-hidden flex flex-col">
-          <div className="px-4 py-3 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">Conversations ({liste.length})</div>
+        <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-gray-100 text-xs font-semibold text-gray-500">Conversations ({liste.length})</div>
           <div className="flex-1 overflow-y-auto divide-y divide-gray-50 max-h-[640px]">
             {liste.length === 0 ? <p className="p-6 text-sm text-gray-400 text-center">Aucun message reçu pour l&apos;instant.</p> : liste.map((c) => (
               <button key={c.id} onClick={() => setChoisie(c.id)} className={`w-full text-left px-4 py-3 hover:bg-gray-50 ${choisie === c.id ? "bg-accent/5 border-l-4 border-accent" : "border-l-4 border-transparent"}`}>
@@ -97,7 +97,7 @@ export default function WhatsAppAdminPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-card flex flex-col overflow-hidden">
+        <div className="bg-white rounded-2xl border border-su-lavande flex flex-col overflow-hidden">
           {!conv ? (
             <div className="flex-1 flex items-center justify-center text-sm text-gray-400 p-10">Choisissez une conversation.</div>
           ) : (

@@ -84,22 +84,22 @@ export default function FacturesPage() {
 
       {/* Récapitulatif */}
       <div className="grid sm:grid-cols-3 gap-5">
-        <div className="bg-white rounded-2xl shadow-card p-5">
-          <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Total payé</p>
+        <div className="bg-white rounded-2xl border border-su-lavande p-5">
+          <p className="text-xs text-gray-400 mb-1">Total payé</p>
           <p className="font-syne font-black text-2xl text-secondary">{totalPaid.toLocaleString()} <span className="text-base font-normal text-gray-500">FCFA</span></p>
         </div>
-        <div className="bg-white rounded-2xl shadow-card p-5">
-          <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Solde à régler</p>
+        <div className="bg-white rounded-2xl border border-su-lavande p-5">
+          <p className="text-xs text-gray-400 mb-1">Solde à régler</p>
           <p className="font-syne font-black text-2xl text-accent">{totalPending.toLocaleString()} <span className="text-base font-normal text-gray-500">FCFA</span></p>
         </div>
-        <div className="bg-white rounded-2xl shadow-card p-5">
-          <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Transactions</p>
+        <div className="bg-white rounded-2xl border border-su-lavande p-5">
+          <p className="text-xs text-gray-400 mb-1">Transactions</p>
           <p className="font-syne font-black text-2xl text-primary">{invoices.length}</p>
         </div>
       </div>
 
       {/* Tableau des factures */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-syne font-bold text-primary">Toutes les factures</h2>
           <button className="flex items-center gap-2 text-accent text-sm font-medium hover:underline">
@@ -117,13 +117,13 @@ export default function FacturesPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-50">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Référence</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Service</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Type</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Montant</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Méthode</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Date</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Statut</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Référence</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Service</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Type</th>
+                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400">Montant</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Méthode</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Date</th>
+                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Statut</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>
@@ -158,7 +158,7 @@ export default function FacturesPage() {
                     ) : inv.status === "PENDING" && inv.prestationId ? (
                       <Link
                         href={`/paiement?type=service&prestationId=${inv.prestationId}&amount=${inv.amount}`}
-                        className="text-white bg-gradient-to-r from-accent to-secondary px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity whitespace-nowrap"
+                        className="text-white bg-su-bleu px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity whitespace-nowrap"
                       >
                         Payer maintenant
                       </Link>

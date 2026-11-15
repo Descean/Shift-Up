@@ -92,7 +92,7 @@ export default function SuiviDossier({ prestationId, dossier, depot: depotDepart
 
   return (
     <div className="border border-gray-100 rounded-2xl p-4 space-y-4">
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide"><i className="fas fa-box-archive mr-1.5" />Dépôt et résultat</p>
+      <p className="text-xs font-semibold text-gray-500"><i className="fas fa-box-archive mr-1.5" />Dépôt et résultat</p>
 
       {/* ── Dépôt ── */}
       {depot ? (

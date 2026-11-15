@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { StatCard } from "@/components/ui/Card";
 import { PrestationStatusBadge } from "@/components/ui/Badge";
 import Link from "next/link";
+import { TitrePoints } from "@/components/site/Gabarit";
 import GraphiqueMensuel, { type Mensuel } from "./GraphiqueMensuel";
 
 type Stats = {
@@ -45,7 +46,7 @@ export default function AdminDashboard() {
           icon: <i className="fas fa-chart-line" />,
           color: "secondary" as const,
           trend: "up" as const,
-          trendValue: `${stats.revenue.total.toLocaleString()} F total`,
+          trendValue: `${stats.revenue.total.toLocaleString("fr-FR")} F au total`,
         },
         {
           label: "Prestations actives",
@@ -60,7 +61,7 @@ export default function AdminDashboard() {
           icon: <i className="fas fa-users" />,
           color: "accent" as const,
           trend: "up" as const,
-          trendValue: `+${stats.users.newThisMonth} ce mois`,
+          trendValue: `${stats.users.newThisMonth} ce mois`,
         },
         {
           label: "Messages non lus",
@@ -84,10 +85,10 @@ export default function AdminDashboard() {
     return (
       <div className="space-y-6 max-w-7xl">
         <div>
-          <h1 className="font-syne font-black text-2xl text-primary">Tableau de bord Admin</h1>
-          <p className="text-gray-500 text-sm">Vue globale — SHIFT UP</p>
+          <TitrePoints as="h1" taille="text-[28px]">Pilotage SHIFT UP</TitrePoints>
+          <p className="mt-1 text-gray-500 text-sm">Prestations, clients, encaissements et messages.</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-card p-12 text-center space-y-3">
+        <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center space-y-3">
           <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
             <i className="fas fa-exclamation-triangle text-amber-500 text-2xl" />
           </div>
@@ -108,8 +109,8 @@ export default function AdminDashboard() {
     <div className="space-y-6 max-w-7xl">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-syne font-black text-2xl text-primary">Tableau de bord Admin</h1>
-        <p className="text-gray-500 text-sm">Vue globale — SHIFT UP</p>
+        <TitrePoints as="h1" taille="text-[28px]">Pilotage SHIFT UP</TitrePoints>
+        <p className="mt-1 text-gray-500 text-sm">Prestations, clients, encaissements et messages.</p>
       </motion.div>
 
       {/* KPIs */}
@@ -124,7 +125,7 @@ export default function AdminDashboard() {
       {/* Main grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Recent prestations */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-su-lavande p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-syne font-bold text-lg text-primary">Prestations récentes</h2>
             <Link href="/dashboard/admin/prestations" className="text-accent text-sm hover:underline">
@@ -137,7 +138,7 @@ export default function AdminDashboard() {
             )}
             {stats?.recentPrestations.map((p) => (
               <div key={p.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                <div className="w-9 h-9 bg-su-bleu rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {(p.client.name ?? "?").charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -156,7 +157,7 @@ export default function AdminDashboard() {
 
         {/* Quick links */}
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl shadow-card p-5">
+          <div className="bg-white rounded-2xl border border-su-lavande p-5">
             <h3 className="font-syne font-bold text-primary mb-4">Accès rapides</h3>
             <div className="space-y-2">
               {[
@@ -174,12 +175,12 @@ export default function AdminDashboard() {
           </div>
 
           {/* Finance access (DG only) */}
-          <div className="bg-gradient-to-br from-primary to-primary/90 rounded-2xl p-5">
+          <div className="bg-su-nuit rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <i className="fas fa-lock text-accent" />
+              <i className="fas fa-lock text-su-ciel" />
               <h3 className="font-syne font-bold text-white text-sm">Accès financier (DG)</h3>
             </div>
-            <p className="text-white/50 text-xs mb-4">
+            <p className="text-su-lavande text-xs mb-4">
               Accès restreint au tableau de bord financier et fiscal. Clé unique requise.
             </p>
             <Link

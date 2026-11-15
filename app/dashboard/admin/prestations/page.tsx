@@ -475,7 +475,7 @@ function TabDevis({
       <button
         onClick={sendDevis}
         disabled={sending || total === 0}
-        className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
+        className="w-full bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
       >
         {sending ? (
           <>
@@ -558,7 +558,7 @@ function PhaseLivrableForm({ prestation, phase, onDone }: { prestation: Prestati
           {uploading ? <><Spinner sm />Upload…</> : url.startsWith("http") ? <><i className="fas fa-check" />Fichier prêt</> : <><i className="fas fa-cloud-upload-alt" />Télécharger</>}
         </button>
         <button onClick={submit} disabled={adding || uploading}
-          className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-lg py-1.5 text-xs font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-1.5">
+          className="flex-1 bg-su-bleu text-white rounded-lg py-1.5 text-xs font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-1.5">
           {adding ? <><Spinner sm />Ajout…</> : <><i className="fas fa-check" />Valider</>}
         </button>
       </div>
@@ -717,7 +717,7 @@ function TabPhases({
               <button
                 onClick={() => updatePhase(phase, phase.status, phase.progress)}
                 disabled={updating === phase.id}
-                className="text-xs bg-gradient-to-r from-accent to-secondary text-white px-3 py-1.5 rounded-lg font-semibold hover:opacity-90 disabled:opacity-60"
+                className="text-xs bg-su-bleu text-white px-3 py-1.5 rounded-lg font-semibold hover:opacity-90 disabled:opacity-60"
               >
                 OK
               </button>
@@ -748,7 +748,7 @@ function TabPhases({
 
       {/* Formulaire ajout phase */}
       <div className="border border-dashed border-gray-300 rounded-xl p-4 space-y-3">
-        <h5 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+        <h5 className="text-xs font-semibold text-gray-600">
           Ajouter une phase
         </h5>
         <input
@@ -767,7 +767,7 @@ function TabPhases({
         <button
           onClick={addPhase}
           disabled={addingPhase}
-          className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full bg-su-bleu text-white rounded-xl py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {addingPhase ? (
             <>
@@ -971,7 +971,7 @@ function TabLivrables({
 
       {/* Formulaire ajout livrable */}
       <div className="border border-dashed border-gray-300 rounded-xl p-4 space-y-3">
-        <h5 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+        <h5 className="text-xs font-semibold text-gray-600">
           Ajouter un livrable
         </h5>
         <div className="flex gap-2">
@@ -1048,7 +1048,7 @@ function TabLivrables({
         <button
           onClick={addLivrable}
           disabled={adding || uploading}
-          className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full bg-su-bleu text-white rounded-xl py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {adding ? (
             <>
@@ -1118,7 +1118,7 @@ function DetailPanel({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
-      className="bg-white rounded-2xl shadow-card flex flex-col h-full overflow-hidden"
+      className="bg-white rounded-2xl border border-su-lavande flex flex-col h-full overflow-hidden"
     >
       {/* Header */}
       <div className="p-5 border-b border-gray-100 flex-shrink-0">
@@ -1159,7 +1159,7 @@ function DetailPanel({
 
       {/* Client info */}
       <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0 space-y-2">
-        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <h4 className="text-xs font-semibold text-gray-500">
           Informations client
         </h4>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -1254,7 +1254,7 @@ function DetailPanel({
       {/* Status transitions */}
       {transitions.length > 0 && (
         <div className="px-5 py-3 border-b border-gray-100 flex-shrink-0">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <p className="text-xs font-semibold text-gray-500 mb-2">
             Changer le statut
           </p>
           <div className="flex flex-wrap gap-2">
@@ -1414,7 +1414,7 @@ export default function AdminPrestationsPage() {
             ["Taux de réussite", stats.tauxReussite === null ? "—" : `${stats.tauxReussite} %`, "fa-chart-line"],
             ["Montant attribué", stats.montantAttribue ? `${Math.round(stats.montantAttribue).toLocaleString("fr-FR")} F` : "—", "fa-coins"],
           ].map(([l, v, ic]) => (
-            <div key={l} className="bg-white rounded-2xl shadow-card px-4 py-3">
+            <div key={l} className="bg-white rounded-2xl border border-su-lavande px-4 py-3">
               <p className="text-[11px] text-gray-500"><i className={`fas ${ic} mr-1.5 text-accent`} />{l}</p>
               <p className="font-syne font-black text-primary text-lg mt-0.5 truncate">{v}</p>
             </div>
@@ -1453,7 +1453,7 @@ export default function AdminPrestationsPage() {
 
         {/* List */}
         <div
-          className={`bg-white rounded-2xl shadow-card overflow-hidden flex flex-col ${
+          className={`bg-white rounded-2xl border border-su-lavande overflow-hidden flex flex-col ${
             selected ? "lg:w-[40%]" : "w-full"
           } transition-all duration-300`}
         >

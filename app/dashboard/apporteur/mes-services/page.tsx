@@ -331,7 +331,7 @@ export default function ApporteurMesServicesPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 bg-su-bleu text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity"
         >
           <i className="fas fa-plus" />
           Ajouter un service
@@ -339,7 +339,7 @@ export default function ApporteurMesServicesPage() {
       </div>
 
       {/* Bandeau info commission */}
-      <div className="bg-gradient-to-r from-accent/5 to-secondary/5 border border-accent/20 rounded-2xl p-4 flex gap-4 items-start">
+      <div className="bg-su-brume border border-accent/20 rounded-2xl p-4 flex gap-4 items-start">
         <div className="w-9 h-9 bg-accent/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
           <i className="fas fa-circle-info text-accent" />
         </div>
@@ -356,7 +356,7 @@ export default function ApporteurMesServicesPage() {
 
       {/* Liste vide */}
       {services.length === 0 && (
-        <div className="bg-white rounded-2xl shadow-card p-12 text-center space-y-3">
+        <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center space-y-3">
           <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto">
             <i className="fas fa-briefcase text-accent text-2xl" />
           </div>
@@ -380,7 +380,7 @@ export default function ApporteurMesServicesPage() {
             key={s.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-card p-5 flex flex-col gap-4"
+            className="bg-white rounded-2xl border border-su-lavande p-5 flex flex-col gap-4"
           >
             {/* En-tête carte */}
             <div className="flex items-start justify-between gap-3">
@@ -473,7 +473,7 @@ export default function ApporteurMesServicesPage() {
             <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
           </div>
         ) : orders.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-card p-8 text-center text-gray-400 text-sm">
+          <div className="bg-white rounded-2xl border border-su-lavande p-8 text-center text-gray-400 text-sm">
             Aucune commande pour l'instant. Partagez le lien de vos services pour recevoir vos premières demandes.
           </div>
         ) : (
@@ -491,7 +491,7 @@ export default function ApporteurMesServicesPage() {
                   key={o.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl shadow-card p-5 flex flex-col gap-3"
+                  className="bg-white rounded-2xl border border-su-lavande p-5 flex flex-col gap-3"
                 >
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div>
@@ -553,7 +553,7 @@ export default function ApporteurMesServicesPage() {
                           <span className="text-xs text-accent font-medium">· {o.apporteurRevenue.toLocaleString("fr-FR")} FCFA pour vous</span>
                           <button
                             onClick={() => openDeliverModal(o)}
-                            className="px-3 py-2 rounded-lg bg-gradient-to-r from-accent to-secondary text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                            className="px-3 py-2 rounded-lg bg-su-bleu text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
                           >
                             <i className="fas fa-paper-plane" /> Livrer le service
                           </button>
@@ -637,7 +637,7 @@ export default function ApporteurMesServicesPage() {
                   <button
                     onClick={submitDeliver}
                     disabled={busyOrderId === deliverModal.id}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-accent to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    className="px-5 py-2.5 rounded-xl bg-su-bleu text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
                   >
                     Envoyer au client
                   </button>
@@ -844,7 +844,7 @@ export default function ApporteurMesServicesPage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-accent to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-2"
+                      className="px-5 py-2.5 rounded-xl bg-su-bleu text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-2"
                     >
                       {saving && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                       {editing ? "Enregistrer les modifications" : "Créer le service"}

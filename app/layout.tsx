@@ -21,7 +21,7 @@
  */
 
 import type { Metadata, Viewport } from "next";
-import { Poppins, Inter, Cormorant_Garamond } from "next/font/google";
+import { Manrope, Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Toaster } from "react-hot-toast";
@@ -37,7 +37,8 @@ const GA_DEFAUT = "G-H2JRV9FPTC";
 const GA_RAW = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? "";
 const GA_ID = /^G-[A-Z0-9]{6,12}$/.test(GA_RAW) && !/^G-X+$/.test(GA_RAW) ? GA_RAW : GA_DEFAUT;
 
-const poppins = Poppins({
+// Police des titres (variable historique --font-syne) : Manrope, comme la refonte
+const titres = Manrope({
   subsets: ["latin"],
   variable: "--font-syne",
   weight: ["400", "500", "600", "700", "800"],
@@ -131,7 +132,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${poppins.variable} ${inter.variable} ${cormorant.variable}`}>
+    <html lang="fr" className={`${titres.variable} ${inter.variable} ${cormorant.variable}`}>
       <head>
         {/* PWA — iOS Safari */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -206,14 +207,14 @@ export default function RootLayout({
             toastOptions={{
               duration: 4000,
               style: {
-                background: "#0A2533",
+                background: "#192338",
                 color: "#fff",
                 fontFamily: "var(--font-space-grotesk)",
                 borderRadius: "12px",
                 border: "1px solid rgba(45,91,120,0.2)",
               },
               success: {
-                iconTheme: { primary: "#0A2533", secondary: "#fff" },
+                iconTheme: { primary: "#192338", secondary: "#fff" },
               },
               error: {
                 iconTheme: { primary: "#ef4444", secondary: "#fff" },

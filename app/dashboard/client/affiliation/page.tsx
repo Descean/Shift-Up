@@ -55,7 +55,7 @@ export default function ClientAffiliationPage() {
           { label: "Commissions perçues", value: `${totalCommission.toLocaleString()} F`,  icon: "fas fa-check-circle",color: "from-primary to-accent" },
           { label: "Taux de conversion",  value: `${conversionRate}%`,                     icon: "fas fa-chart-pie",   color: "from-primary to-accent" },
         ].map((s) => (
-          <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
+          <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-su-lavande p-5 flex items-center gap-4">
             <div className={`w-12 h-12 bg-gradient-to-br ${s.color} rounded-xl flex items-center justify-center text-white flex-shrink-0`}>
               <i className={s.icon} />
             </div>
@@ -68,7 +68,7 @@ export default function ClientAffiliationPage() {
       </div>
 
       {/* Code + lien */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-su-lavande p-6">
         <h2 className="font-syne font-bold text-primary mb-4">
           <i className="fas fa-link mr-2 text-accent" />
           Mon code & lien de parrainage
@@ -101,7 +101,7 @@ export default function ClientAffiliationPage() {
       </div>
 
       {/* Tableau des filleuls */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-su-lavande p-6">
         <h2 className="font-syne font-bold text-primary mb-4">
           <i className="fas fa-user-plus mr-2 text-accent" />
           Mes filleuls ({referrals.length})
@@ -151,7 +151,7 @@ export default function ClientAffiliationPage() {
       </div>
 
       {/* Comment ça marche */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-su-lavande p-6">
         <h2 className="font-syne font-bold text-primary mb-4">
           <i className="fas fa-question-circle mr-2 text-accent" />
           Comment fonctionne le parrainage ?

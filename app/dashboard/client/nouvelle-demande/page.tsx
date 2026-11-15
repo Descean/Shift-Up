@@ -200,7 +200,7 @@ export default function NouvelleDemandePage() {
             <motion.div
               animate={{ width: `${((step - 1) / 4) * 100}%` }}
               transition={{ duration: 0.4 }}
-              className="h-full bg-gradient-to-r from-accent to-secondary rounded-full"
+              className="h-full bg-su-bleu rounded-full"
             />
           </div>
         </div>
@@ -232,7 +232,7 @@ export default function NouvelleDemandePage() {
             <button
               onClick={() => canGoStep2 && setStep(2)}
               disabled={!canGoStep2}
-              className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-40 transition-opacity"
+              className="w-full bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-40 transition-opacity"
             >
               Continuer <i className="fas fa-arrow-right ml-1" />
             </button>
@@ -323,7 +323,7 @@ export default function NouvelleDemandePage() {
               <button
                 onClick={() => canGoStep3 && setStep(3)}
                 disabled={!canGoStep3}
-                className="flex-1 bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-40"
+                className="flex-1 bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-40"
               >
                 Continuer <i className="fas fa-arrow-right ml-1" />
               </button>
@@ -422,7 +422,7 @@ export default function NouvelleDemandePage() {
               <button
                 onClick={() => canSubmit && setStep(4)}
                 disabled={!canSubmit}
-                className="flex-1 bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-40"
+                className="flex-1 bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-40"
               >
                 Continuer <i className="fas fa-arrow-right ml-1" />
               </button>
@@ -482,7 +482,7 @@ export default function NouvelleDemandePage() {
               <button
                 onClick={submit}
                 disabled={submitting}
-                className="flex-1 bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+                className="flex-1 bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {submitting ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Envoi…</> : <><i className="fas fa-paper-plane" />Envoyer ma demande</>}
               </button>
@@ -493,7 +493,7 @@ export default function NouvelleDemandePage() {
         {/* ── Étape 5 : Confirmation ───────────────────────────────────────── */}
         {step === 5 && (
           <motion.div key="step5" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-6 py-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-accent to-secondary rounded-full flex items-center justify-center mx-auto">
+            <div className="w-20 h-20 bg-su-bleu rounded-full flex items-center justify-center mx-auto">
               <i className="fas fa-check text-white text-3xl" />
             </div>
             <div>
@@ -505,7 +505,7 @@ export default function NouvelleDemandePage() {
               <i className="fas fa-info-circle mr-1.5" />Suivez l&apos;état de votre demande dans &ldquo;Mes prestations&rdquo;
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button onClick={() => router.push("/dashboard/client/prestations")} className="bg-gradient-to-r from-accent to-secondary text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
+              <button onClick={() => router.push("/dashboard/client/prestations")} className="bg-su-bleu text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
                 <i className="fas fa-briefcase mr-2" />Voir mes prestations
               </button>
               <button onClick={() => { setStep(1); setSector(""); setServiceId(""); setBrief(""); setFiles([]); setFiche(dossierVide()); setDao(null); }} className="border border-gray-200 px-6 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">

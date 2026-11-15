@@ -140,18 +140,18 @@ export default function MessagesPage() {
           <p className="text-gray-500 text-sm">{totalUnread > 0 ? `${totalUnread} message(s) non lu(s)` : "Toutes les conversations"}</p>
         </div>
         <button onClick={() => { setComposing(true); setSelected(null); }}
-          className="flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity">
+          className="flex items-center gap-2 bg-su-bleu text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity">
           <i className="fas fa-pen" />Nouveau message
         </button>
       </motion.div>
 
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden" style={{ height: "calc(100vh - 220px)", minHeight: "500px" }}>
+      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden" style={{ height: "calc(100vh - 220px)", minHeight: "500px" }}>
         <div className="flex h-full">
 
           {/* ── Colonne contacts ── */}
           <div className={`border-r border-gray-100 flex flex-col ${selected || composing ? "hidden sm:flex sm:w-72 lg:w-80" : "flex w-full sm:w-72 lg:w-80"}`}>
             <div className="p-3 border-b border-gray-100">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Conversations</p>
+              <p className="text-xs font-semibold text-gray-400">Conversations</p>
             </div>
             <div className="flex-1 overflow-y-auto">
               {contacts.length === 0 ? (
@@ -162,7 +162,7 @@ export default function MessagesPage() {
               ) : contacts.map((c) => (
                 <button key={c.id} onClick={() => selectContact(c)}
                   className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-center gap-3 ${selected?.id === c.id ? "bg-accent/5 border-l-4 border-l-accent" : ""}`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                  <div className="w-10 h-10 bg-su-bleu rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                     {initials(c.name)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -190,7 +190,7 @@ export default function MessagesPage() {
                 <button onClick={() => setSelected(null)} className="sm:hidden text-gray-400 hover:text-gray-600 mr-1">
                   <i className="fas fa-arrow-left" />
                 </button>
-                <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                <div className="w-9 h-9 bg-su-bleu rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {initials(selected.name)}
                 </div>
                 <div>
@@ -213,7 +213,7 @@ export default function MessagesPage() {
                   ) : (
                     thread.map((m) => (
                       <div key={m.id} className={`flex gap-2 ${m.isMine ? "flex-row-reverse" : ""}`}>
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 ${m.isMine ? "bg-accent" : "bg-gradient-to-br from-primary to-primary/70"}`}>
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 ${m.isMine ? "bg-accent" : "bg-su-nuit"}`}>
                           {m.isMine ? "M" : initials(m.senderName)}
                         </div>
                         <div className={`max-w-[75%] ${m.isMine ? "items-end" : "items-start"} flex flex-col gap-1`}>
@@ -241,7 +241,7 @@ export default function MessagesPage() {
                       className="flex-1 bg-gray-50 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
                     />
                     <button onClick={sendMessage} disabled={!newMsg.trim() || sending}
-                      className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 flex-shrink-0">
+                      className="w-10 h-10 bg-su-bleu rounded-xl flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 flex-shrink-0">
                       {sending ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <i className="fas fa-paper-plane text-sm" />}
                     </button>
                   </div>
@@ -269,7 +269,7 @@ export default function MessagesPage() {
                     onChange={(e) => setNewMsg(e.target.value)}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-none" />
                   <button onClick={sendMessage} disabled={!newMsg.trim() || sending}
-                    className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2">
+                    className="w-full bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2">
                     {sending
                       ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Envoi…</>
                       : <><i className="fas fa-paper-plane" />Envoyer</>}

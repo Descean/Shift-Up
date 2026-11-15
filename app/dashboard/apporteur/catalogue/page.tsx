@@ -113,7 +113,7 @@ export default function ApporteurCataloguePage() {
       </div>
 
       {/* Commission reminder */}
-      <div className="bg-gradient-to-r from-accent to-secondary rounded-2xl p-5 text-white flex items-center gap-4">
+      <div className="bg-su-bleu rounded-2xl p-5 text-white flex items-center gap-4">
         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
           <i className="fas fa-coins text-xl" />
         </div>
@@ -132,7 +132,7 @@ export default function ApporteurCataloguePage() {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               filter === d
                 ? "bg-accent text-white shadow-sm"
-                : "bg-white text-gray-500 hover:text-primary shadow-card"
+                : "bg-white text-gray-500 hover:text-primary border border-su-lavande"
             }`}
           >
             {d}
@@ -148,7 +148,7 @@ export default function ApporteurCataloguePage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-white rounded-2xl shadow-card p-5 flex flex-col"
+            className="bg-white rounded-2xl border border-su-lavande p-5 flex flex-col"
           >
             <div className="flex items-start justify-between mb-3">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${domainColors[s.domain] || "bg-gray-100 text-gray-600"}`}>

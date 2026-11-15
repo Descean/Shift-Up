@@ -143,7 +143,7 @@ export default function AdminRessourcesPage() {
           <p className="text-gray-500 text-sm">{resources.length} ressource(s) · visibles par les étudiants</p>
         </div>
         <button onClick={openCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
+          className="flex items-center gap-2 bg-su-bleu text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
           <i className="fas fa-plus" />Nouvelle ressource
         </button>
       </motion.div>
@@ -167,14 +167,14 @@ export default function AdminRessourcesPage() {
         {loading ? (
           <div className="flex justify-center py-12"><span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+          <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">
             {resources.length === 0 ? "Aucune ressource. Créez la première !" : "Aucune ressource trouvée."}
           </div>
         ) : filtered.map((res) => {
           const typeInfo = typeStyle[res.type] ?? typeStyle.LIEN;
           return (
             <motion.div key={res.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-card p-5 flex items-start gap-4">
+              className="bg-white rounded-2xl border border-su-lavande p-5 flex items-start gap-4">
               <div className={`w-1 self-stretch rounded-full flex-shrink-0 ${res.isActive ? "bg-green-400" : "bg-gray-200"}`} />
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -297,7 +297,7 @@ export default function AdminRessourcesPage() {
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => setShowForm(false)} disabled={saving} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600">Annuler</button>
                   <button onClick={saveForm} disabled={saving || !form.title.trim() || !form.url.trim()}
-                    className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60">
+                    className="flex-1 bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60">
                     {saving ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Enregistrement…</span>
                       : editing ? "Mettre à jour" : "Créer la ressource"}
                   </button>

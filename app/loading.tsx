@@ -28,8 +28,8 @@ export default function Loading() {
           />
           <defs>
             <linearGradient id="spin-gradient" x1="60" y1="6" x2="114" y2="60" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#2D5B78" />
-              <stop offset="100%" stopColor="#8FAEC2" />
+              <stop offset="0%" stopColor="#31487A" />
+              <stop offset="100%" stopColor="#8FB3E2" />
             </linearGradient>
           </defs>
         </svg>
