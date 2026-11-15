@@ -11,9 +11,7 @@ import { useSession } from "next-auth/react";
 /* ─── Composant carte service ────────────────────────────────────────────── */
 function ServiceCard({ service, sectorId, index }: { service: ServiceItem; sectorId: string; index: number }) {
   const { data: session } = useSession();
-  const href = session
-    ? `/dashboard/client/nouvelle-demande/formulaire?sector=${encodeURIComponent(sectorId)}&service=${encodeURIComponent(service.title)}`
-    : `/services/souscrire?secteur=${encodeURIComponent(sectorId)}&offre=${encodeURIComponent(service.title)}`;
+  const href = `${session ? "/dashboard/client/nouvelle-demande" : "/services/souscrire"}?secteur=${encodeURIComponent(sectorId)}&offre=${encodeURIComponent(service.title)}`;
 
   return (
     <motion.div
@@ -120,7 +118,7 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-white">
       <BandeauTitre titre="Nos domaines" accent="d'intervention."
-        texte={`${SECTORS.length} domaines et ${nbOffres} offres, du dossier d'appel d'offres au tableau de bord. Choisissez un domaine pour voir les prix et les délais ; chaque devis est envoyé sous 48 heures ouvrées.`} />
+        texte={`${SECTORS.length} domaines et ${nbOffres} offres, du dossier d'appel d'offres au tableau de bord. Choisissez un domaine pour voir les prix et les délais ; déposez votre dossier et recevez le devis.`} />
 
       <div className="mx-auto max-w-[1200px] px-6 py-14">
         <div className="flex flex-col items-start gap-8 lg:flex-row">
@@ -198,14 +196,14 @@ export default function ServicesPage() {
                   <div className="flex flex-col gap-2">
                     <TitrePoints taille="text-2xl">Votre besoin n&apos;est pas dans la liste ?</TitrePoints>
                     <p className="m-0 text-[15px] leading-relaxed text-[#4B5563]">
-                      Décrivez-le en quelques mots : nous vous orientons vers la bonne offre ou vous envoyons un devis sous 48 heures ouvrées. Un acompte de 60 % est demandé au démarrage.
+                      Décrivez-le en quelques mots : nous vous orientons vers la bonne offre et vous envoyons le devis. Un acompte de 60 % est demandé au démarrage.
                     </p>
                   </div>
                   <textarea value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} rows={3} aria-label="Décrivez votre besoin"
                     className="w-full resize-none rounded-xl border border-su-lavande bg-white px-4 py-3 text-[15px] focus:border-su-bleu focus:outline-none"
                     placeholder={`Ex. : j'ai besoin d'aide pour ${sector.services[0]?.title.toLowerCase()}…`} />
                   <div className="flex flex-wrap gap-3">
-                    <Link href={session ? `/dashboard/client/nouvelle-demande/formulaire?sector=${sector.id}` : `/services/souscrire?secteur=${sector.id}`}
+                    <Link href={`${session ? "/dashboard/client/nouvelle-demande" : "/services/souscrire"}?secteur=${sector.id}${chatMessage.trim() ? `&besoin=${encodeURIComponent(chatMessage.trim().slice(0, 1500))}` : ""}`}
                       className="inline-flex items-center gap-2 rounded-full bg-su-bleu px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-su-cadet">
                       Demander un devis <Icone nom="fleche" taille={16} epaisseur={2} />
                     </Link>

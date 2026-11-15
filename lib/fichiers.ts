@@ -59,10 +59,10 @@ export function lienInterne(bucket: string, path: string) {
   return `${APP_URL}/api/fichiers/${bucket}/${path.split("/").map(encodeURIComponent).join("/")}`;
 }
 
-export async function ticketDepot(userId: string, nom: string) {
+export async function ticketDepot(dossier: string, nom: string) {
   await bucketPrive();
   const ext = (nom.split(".").pop() ?? "bin").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) || "bin";
-  const path = `${userId}/${new Date().toISOString().slice(0, 7)}/${randomBytes(12).toString("hex")}.${ext}`;
+  const path = `${dossier}/${new Date().toISOString().slice(0, 7)}/${randomBytes(12).toString("hex")}.${ext}`;
   const { data, error } = await sb().storage.from(BUCKET_DOCS).createSignedUploadUrl(path);
   if (error || !data) throw error ?? new Error("Lien de dépôt indisponible.");
   return { path: data.path, token: data.token, supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!, anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "", url: lienInterne(BUCKET_DOCS, data.path) };
@@ -172,6 +172,61 @@ export async function supprimerFichiers(urls: string[]): Promise<number> {
     for (let i = 0; i < chemins.length; i += 100) {
       const { data } = await sb().storage.from(bucket).remove(chemins.slice(i, i + 100));
       n += data?.length ?? 0;
+    }
+  }
+  return n;
+}
+
+// ── Dépôts d'un visiteur sans compte (page publique /services/souscrire) ──────
+// Les fichiers vont dans « visiteurs/<jeton>/ » ; le jeton, tiré au hasard par le serveur, n'est connu
+// que du navigateur qui dépose. À l'envoi de la demande, ils sont rangés dans le dossier du client.
+
+export const JETON_VISITEUR = /^[a-f0-9]{24}$/;
+
+export function nouveauJeton() {
+  return randomBytes(12).toString("hex");
+}
+
+export async function ticketDepotVisiteur(jeton: string, nom: string) {
+  return ticketDepot(`visiteurs/${jeton}`, nom);
+}
+
+/** Le lien désigne-t-il un fichier déposé avec ce jeton ? */
+export function fichierDuJeton(url: string, jeton: string) {
+  return JETON_VISITEUR.test(jeton) && url.split("?")[0].startsWith(lienInterne(BUCKET_DOCS, `visiteurs/${jeton}/`));
+}
+
+/** Range les fichiers d'un visiteur dans le dossier de son compte. Renvoie les nouveaux liens, dans le même ordre. */
+export async function rattacherFichiers(urls: string[], userId: string): Promise<string[]> {
+  const mois = new Date().toISOString().slice(0, 7);
+  const sortie: string[] = [];
+  for (const u of urls) {
+    const l = decouperLien(u);
+    if (!l || l.bucket !== BUCKET_DOCS || !l.path.startsWith("visiteurs/")) { sortie.push(u); continue; }
+    const cible = `${userId}/${mois}/${l.path.split("/").pop()}`;
+    const { error } = await sb().storage.from(BUCKET_DOCS).move(l.path, cible);
+    sortie.push(error ? u : lienInterne(BUCKET_DOCS, cible));
+  }
+  return sortie;
+}
+
+/** Efface les dépôts de visiteurs jamais envoyés (plus de 48 heures). Renvoie le nombre de fichiers effacés. */
+export async function nettoyerDepotsVisiteurs(heures = 48): Promise<number> {
+  if (!supabaseConfigure) return 0;
+  const limite = Date.now() - heures * 3600 * 1000;
+  const { data: dossiers } = await sb().storage.from(BUCKET_DOCS).list("visiteurs", { limit: 1000 });
+  let n = 0;
+  for (const d of dossiers ?? []) {
+    // visiteurs/<jeton>/<AAAA-MM>/<fichier>
+    const { data: mois } = await sb().storage.from(BUCKET_DOCS).list(`visiteurs/${d.name}`, { limit: 100 });
+    for (const m of mois ?? []) {
+      const dossier = `visiteurs/${d.name}/${m.name}`;
+      const { data: fichiers } = await sb().storage.from(BUCKET_DOCS).list(dossier, { limit: 1000 });
+      const vieux = (fichiers ?? []).filter((f) => f.created_at && new Date(f.created_at).getTime() < limite).map((f) => `${dossier}/${f.name}`);
+      if (vieux.length) {
+        const { data } = await sb().storage.from(BUCKET_DOCS).remove(vieux);
+        n += data?.length ?? 0;
+      }
     }
   }
   return n;

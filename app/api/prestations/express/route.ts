@@ -5,20 +5,16 @@
  * créée tout de suite ; l'IA lit ensuite le dossier en arrière-plan et envoie le devis automatique
  * (lib/ia-devis). Sans IA, l'équipe chiffre à la main.
  */
-import { NextRequest, NextResponse, after } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { isSafe } from "@/lib/validation";
 import { rateLimit } from "@/lib/ratelimit";
 import { fichierDe } from "@/lib/montage-serveur";
-import { sendDemandeConfirmation, sendNewDemandeAdmin } from "@/lib/email";
-import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
-import { envoyer } from "@/lib/prestations";
-import { creerAvis, lienDemande } from "@/lib/notifications";
-import { analyserEtChiffrer, iaAnalyseDisponible } from "@/lib/ia-devis";
+import { sendDemandeConfirmation } from "@/lib/email";
+import { creerDemandeExpress } from "@/lib/demande-express";
 
 export const maxDuration = 300;
 
@@ -51,40 +47,11 @@ export async function POST(req: NextRequest) {
     ? await prisma.entreprise.findFirst({ where: { id: d.entrepriseId, userId: moi }, select: { id: true, nom: true } }).catch(() => null)
     : null;
 
-  const prestation = await prisma.prestation.create({
-    data: {
-      clientId: moi,
-      sector: "Autre",
-      customService: "Demande en cours d'analyse",
-      brief: d.consigne || null,
-      company: ent?.nom ?? null,
-      phone: d.telephone || null,
-      attachments: [...d.fichiers.map((f) => f.url), ...(d.vocal ? [d.vocal] : [])],
-      status: "EN_ATTENTE",
-      customFields: {
-        origine: "demande express",
-        fichiers: d.fichiers,
-        ...(d.vocal ? { consigneVocale: d.vocal } : {}),
-        ...(ent ? { entrepriseId: ent.id, entrepriseNom: ent.nom } : {}),
-        analyseIA: { statut: iaAnalyseDisponible() ? "en_attente" : "manuel", le: new Date().toISOString() },
-      } as Prisma.InputJsonValue,
-    },
-  });
-
   const nom = session.user.name ?? session.user.email ?? "Client";
-  await envoyer("demande express", [
-    sendDemandeConfirmation({ to: session.user.email!, name: nom, serviceName: "Votre demande", prestationId: prestation.id, piecesAFournir: 0 }),
-    sendNewDemandeAdmin({ clientName: nom, clientEmail: session.user.email!, serviceName: "Demande express (analyse automatique)", brief: d.consigne || "(dossier déposé, voir les fichiers)", prestationId: prestation.id }),
-    alerterEquipeWhatsApp("Nouvelle demande", `${nom} — ${d.fichiers.length} fichier(s)${d.vocal ? " + vocal" : ""}`),
-  ]);
-  await creerAvis({
-    userId: moi, prestationId: prestation.id, type: "DEMANDE", titre: "Demande reçue",
-    texte: iaAnalyseDisponible() ? "Nous lisons votre dossier : votre devis arrive dans quelques minutes." : "Notre équipe étudie votre dossier : le devis suit sous 48 heures ouvrées.",
-    lien: lienDemande(prestation.id),
+  const r = await creerDemandeExpress({
+    clientId: moi, nomClient: nom, emailClient: session.user.email!,
+    consigne: d.consigne, fichiers: d.fichiers, vocal: d.vocal, entreprise: ent, telephone: d.telephone, origine: "demande express",
+    autresEnvois: (id) => [sendDemandeConfirmation({ to: session.user.email!, name: nom, serviceName: "Votre demande", prestationId: id, piecesAFournir: 0 })],
   });
-
-  // Lecture du dossier et devis automatique, après la réponse au client
-  if (iaAnalyseDisponible()) after(() => analyserEtChiffrer(prestation.id).then(() => undefined));
-
-  return NextResponse.json({ id: prestation.id, analyse: iaAnalyseDisponible() }, { status: 201 });
+  return NextResponse.json(r, { status: 201 });
 }

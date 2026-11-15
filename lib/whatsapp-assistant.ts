@@ -200,7 +200,7 @@ export async function traiterMessage(m: MessageEntrant) {
   }
 
   if (choix === "devis" || choix === "4" || /montage|monter un dossier|soumission|soumissionner/.test(choix)) {
-    await boutons(conv, `Pour nous confier un appel d'offres, remplissez la fiche (référence de l'avis, date limite, entreprise) et joignez le DAO :\n${APP_URL}/services/souscrire?service=montage-dossier\n\nNous vous envoyons le devis sous 48 h, puis la liste des pièces à fournir.`, [{ id: "EQUIPE", titre: "Parler à l'équipe" }, { id: "MENU", titre: "Menu" }]);
+    await boutons(conv, `Pour nous confier un appel d'offres, déposez le DAO et dites-nous ce qu'il faut faire (par écrit ou en message vocal) :\n${APP_URL}/services/souscrire?service=montage-dossier\n\nNous lisons le dossier et vous envoyons le devis, avec la liste des pièces à fournir.`, [{ id: "EQUIPE", titre: "Parler à l'équipe" }, { id: "MENU", titre: "Menu" }]);
     return { action: "devis" };
   }
 
