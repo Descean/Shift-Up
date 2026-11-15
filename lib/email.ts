@@ -25,7 +25,7 @@ function baseLayout(content: string, title: string) {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <!-- Header -->
-        <tr><td style="background:#0A2533;border-radius:16px 16px 0 0;padding:32px;text-align:center;">
+        <tr><td style="background:#192338;border-radius:16px 16px 0 0;padding:32px;text-align:center;">
           <div style="font-family:'Segoe UI',sans-serif;font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.5px;">SHIFT UP</div>
           <div style="color:rgba(255,255,255,0.8);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Excellence • Innovation</div>
         </td></tr>
@@ -35,7 +35,7 @@ function baseLayout(content: string, title: string) {
           <hr style="border:none;border-top:1px solid #eee;margin:32px 0;" />
           <p style="font-size:12px;color:#999;text-align:center;margin:0;">
             SHIFT UP — Votre partenaire digital au Bénin<br/>
-            <a href="${APP_URL}" style="color:#2D5B78;text-decoration:none;">${APP_URL}</a>
+            <a href="${APP_URL}" style="color:#31487A;text-decoration:none;">${APP_URL}</a>
           </p>
         </td></tr>
       </table>
@@ -46,7 +46,7 @@ function baseLayout(content: string, title: string) {
 }
 
 function btn(label: string, url: string) {
-  return `<a href="${url}" style="display:inline-block;background:#0A2533;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:15px;margin:16px 0;">${label}</a>`;
+  return `<a href="${url}" style="display:inline-block;background:#192338;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:700;font-size:15px;margin:16px 0;">${label}</a>`;
 }
 
 // ─── Emails client ────────────────────────────────────────────────────────────
@@ -56,11 +56,11 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
   to: string; name: string; serviceName: string; prestationId: string; piecesAFournir?: number;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
     <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong>. Notre équipe va l'analyser et vous envoyer un devis personnalisé sous <strong>48h ouvrées</strong>.</p>
     <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;">
-      <p style="margin:0;color:#2D5B78;font-size:14px;"><strong>Référence demande :</strong> ${prestationId.slice(-8).toUpperCase()}</p>
+      <p style="margin:0;color:#31487A;font-size:14px;"><strong>Référence demande :</strong> ${prestationId.slice(-8).toUpperCase()}</p>
     </div>
     ${blocPieces(piecesAFournir)}
     <p style="color:#555;">Vous pouvez suivre l'état de votre demande depuis votre dashboard :</p>
@@ -75,7 +75,7 @@ export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName
   clientName: string; clientEmail: string; serviceName: string; brief: string; prestationId: string; urgence?: string | null; conflits?: string[];
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 16px;">🔔 Nouvelle demande de prestation</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 16px;">🔔 Nouvelle demande de prestation</h2>
     ${urgence ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin:0 0 16px;color:#991b1b;font-weight:700;">⚠ Dépôt de l'offre : ${esc(urgence)}</div>` : ""}
     ${conflits.length ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;margin:0 0 16px;color:#9a3412;"><strong>Même avis déjà suivi pour :</strong><ul style="margin:6px 0 0;padding-left:18px;">${conflits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul><p style="margin:6px 0 0;font-size:13px;">Vérifiez les lots : deux offres liées sur un même lot peuvent être écartées.</p></div>` : ""}
     <table style="width:100%;border-collapse:collapse;">
@@ -93,12 +93,12 @@ export async function sendDevisClient({ to, name, serviceName, depositAmount, pr
   to: string; name: string; serviceName: string; depositAmount: number; prestationId: string;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre devis est prêt 📋</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre devis est prêt 📋</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Notre équipe a analysé votre demande pour <strong>${esc(serviceName)}</strong> et vous a préparé un devis détaillé accompagné d'un plan de réalisation.</p>
     <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:10px;padding:16px 20px;margin:20px 0;">
-      <p style="margin:0 0 6px;color:#2D5B78;font-weight:700;">Acompte requis pour démarrer</p>
-      <p style="margin:0;color:#2D5B78;font-size:24px;font-weight:900;">${depositAmount.toLocaleString("fr-FR")} XOF</p>
+      <p style="margin:0 0 6px;color:#31487A;font-weight:700;">Acompte requis pour démarrer</p>
+      <p style="margin:0;color:#31487A;font-size:24px;font-weight:900;">${depositAmount.toLocaleString("fr-FR")} XOF</p>
     </div>
     <p style="color:#555;">Consultez votre devis : vous pouvez l'accepter et payer l'acompte, demander une modification ou le refuser.</p>
     ${btn("Voir mon devis →", `${APP_URL}/dashboard/client/prestations`)}
@@ -111,7 +111,7 @@ export async function sendLivrableClient({ to, name, livrableTitle, serviceName,
   to: string; name: string; livrableTitle: string; serviceName: string; apresSolde?: boolean;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Un livrable est disponible 📦</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Un livrable est disponible 📦</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Un nouveau livrable <strong>"${esc(livrableTitle)}"</strong> est disponible pour votre projet <strong>${esc(serviceName)}</strong>.</p>
     ${apresSolde ? `<p style="color:#555;line-height:1.6;">Il sera téléchargeable dès le règlement du solde, depuis votre espace client.</p>` : ""}
@@ -125,14 +125,14 @@ export async function sendObservationAdmin({ to, clientName, serviceName, livrab
   to: string; clientName: string; serviceName: string; livrableTitle: string; observation: string; voiceNoteUrl?: string | null; prestationId: string;
 }) {
   const voiceSection = voiceNoteUrl
-    ? `<div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:8px;padding:12px 16px;margin:16px 0;"><p style="margin:0 0 4px;color:#0A2533;font-weight:600;font-size:13px;">🎙️ Note vocale jointe</p><a href="${voiceNoteUrl}" style="color:#2D5B78;word-break:break-all;font-size:13px;">${voiceNoteUrl}</a></div>`
+    ? `<div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:8px;padding:12px 16px;margin:16px 0;"><p style="margin:0 0 4px;color:#192338;font-weight:600;font-size:13px;">🎙️ Note vocale jointe</p><a href="${voiceNoteUrl}" style="color:#31487A;word-break:break-all;font-size:13px;">${voiceNoteUrl}</a></div>`
     : "";
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 8px;">📋 Nouvelle observation client</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 8px;">📋 Nouvelle observation client</h2>
     <p style="color:#555;margin:0 0 16px;">Le client <strong>${esc(clientName)}</strong> a soumis une observation sur son projet <strong>${esc(serviceName)}</strong>.</p>
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
       <p style="margin:0 0 6px;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Livrable concerné</p>
-      <p style="margin:0;color:#0A2533;font-weight:700;">${esc(livrableTitle)}</p>
+      <p style="margin:0;color:#192338;font-weight:700;">${esc(livrableTitle)}</p>
     </div>
     <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
       <p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Observation</p>
@@ -153,7 +153,7 @@ export async function sendActivationCompte({ to, name, serviceName, prestationId
   to: string; name: string; serviceName: string; prestationId: string; lien: string; piecesAFournir?: number;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong> (référence <strong>${esc(prestationId.slice(-8).toUpperCase())}</strong>). Vous recevrez notre devis sous <strong>48 h ouvrées</strong>.</p>
     <p style="color:#555;line-height:1.6;">Un espace client a été ouvert à votre nom : vous y suivrez le devis, les paiements et les livrables. Choisissez votre mot de passe pour l'activer :</p>
@@ -167,7 +167,7 @@ export async function sendActivationCompte({ to, name, serviceName, prestationId
 
 function blocPieces(n: number) {
   if (!n) return "";
-  return `<div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;color:#0A2533;line-height:1.6;">
+  return `<div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;color:#192338;line-height:1.6;">
       <strong>Pièces à fournir :</strong> ${n} document(s) sont listés dans votre espace client (DAO, pièces administratives, financières et techniques).
       Déposez dès maintenant ceux dont vous disposez : le montage pourra commencer plus vite.</div>`;
 }
@@ -182,9 +182,9 @@ export async function sendPiecesDeposeesAdmin({ clientName, clientEmail, service
   recues: string[]; indisponibles: { libelle: string; commentaire?: string | null }[]; message?: string | null;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">📎 Pièces déposées par le client</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 12px;">📎 Pièces déposées par le client</h2>
     <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${esc(prestationId.slice(-8).toUpperCase())}</p>
-    ${recues.length ? `<p style="margin:0 0 6px;color:#0A2533;font-weight:700;">À vérifier (${recues.length})</p>${liste(recues.map((r) => esc(r)))}` : ""}
+    ${recues.length ? `<p style="margin:0 0 6px;color:#192338;font-weight:700;">À vérifier (${recues.length})</p>${liste(recues.map((r) => esc(r)))}` : ""}
     ${indisponibles.length ? `<p style="margin:0 0 6px;color:#9a3412;font-weight:700;">Signalées non disponibles (${indisponibles.length})</p>${liste(indisponibles.map((i) => `${esc(i.libelle)}${i.commentaire ? ` — <em>${esc(i.commentaire)}</em>` : ""}`))}` : ""}
     ${message ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;"><p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Message du client</p><p style="margin:0;color:#333;white-space:pre-wrap;line-height:1.6;">${esc(message)}</p></div>` : ""}
     ${btn("Vérifier les pièces →", `${APP_URL}/dashboard/admin/prestations`)}`;
@@ -197,12 +197,12 @@ export async function sendPiecesClient({ to, name, serviceName, aFournir, aRepre
   message?: string | null; dateLimite?: string | null;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Pièces à fournir pour votre dossier</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Pièces à fournir pour votre dossier</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Pour avancer sur <strong>${esc(serviceName)}</strong>, nous avons besoin des documents ci-dessous.${dateLimite ? ` Date limite de dépôt de l'offre : <strong>${esc(dateLimite)}</strong>.` : ""}</p>
     ${message ? `<p style="color:#333;line-height:1.6;white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:14px 18px;">${esc(message)}</p>` : ""}
     ${aReprendre.length ? `<p style="margin:0 0 6px;color:#9a3412;font-weight:700;">À reprendre (${aReprendre.length})</p>${liste(aReprendre.map((i) => `${esc(i.libelle)}${i.commentaire ? ` — <em>${esc(i.commentaire)}</em>` : ""}`))}` : ""}
-    ${aFournir.length ? `<p style="margin:0 0 6px;color:#0A2533;font-weight:700;">Encore à fournir (${aFournir.length})</p>${liste(aFournir.map((a) => esc(a)))}` : ""}
+    ${aFournir.length ? `<p style="margin:0 0 6px;color:#192338;font-weight:700;">Encore à fournir (${aFournir.length})</p>${liste(aFournir.map((a) => esc(a)))}` : ""}
     <p style="color:#555;line-height:1.6;">Déposez-les directement dans votre espace client. Si vous n'avez pas une pièce, indiquez-le : nous vous dirons comment l'obtenir ou la remplacer.</p>
     ${btn("Déposer mes pièces →", `${APP_URL}/dashboard/client/prestations`)}
     <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
@@ -218,7 +218,7 @@ export async function sendDepotClient({ to, name, serviceName, avis, deposeLe, n
   to: string; name: string; serviceName: string; avis: string; deposeLe: string; numero?: string | null; lienRecepisse?: string | null;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre offre a été déposée ✅</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre offre a été déposée ✅</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">L'offre pour l'avis <strong>${esc(avis)}</strong> a été déposée le <strong>${esc(deposeLe)}</strong>${numero ? ` (récépissé n° <strong>${esc(numero)}</strong>)` : ""}.</p>
     ${lienRecepisse ? `<p style="color:#555;line-height:1.6;">Le récépissé est disponible dans votre espace client.</p>` : ""}
@@ -233,7 +233,7 @@ export async function sendSuiviAdmin({ clientName, clientEmail, serviceName, pre
   clientName: string; clientEmail: string; serviceName: string; prestationId: string; titre: string; lignes: [string, string | null | undefined][];
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">${esc(titre)}</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 12px;">${esc(titre)}</h2>
     <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${ref(prestationId)}</p>
     <table style="width:100%;border-collapse:collapse;margin:0 0 12px;">
       ${lignes.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:6px 0;color:#777;font-size:14px;vertical-align:top;width:40%;">${esc(k)}</td><td style="padding:6px 0;color:#333;white-space:pre-wrap;">${esc(v)}</td></tr>`).join("")}
@@ -247,7 +247,7 @@ export async function sendResultatClient({ to, name, avis, libelle, details }: {
   to: string; name: string; avis: string; libelle: string; details: [string, string | null | undefined][];
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Résultat : ${esc(libelle)}</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Résultat : ${esc(libelle)}</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Voici le résultat enregistré pour l'avis <strong>${esc(avis)}</strong>.</p>
     <table style="width:100%;border-collapse:collapse;margin:0 0 12px;">
@@ -264,7 +264,7 @@ export async function sendRappelClient({ to, name, sujet, titre, paragraphes, it
   to: string; name: string; sujet: string; titre: string; paragraphes: string[]; items?: string[];
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">${esc(titre)}</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">${esc(titre)}</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     ${paragraphes.map((x) => `<p style="color:#555;line-height:1.6;">${esc(x)}</p>`).join("")}
     ${items.length ? liste(items.map((i) => esc(i))) : ""}
@@ -284,10 +284,10 @@ export async function sendPointDepotsAdmin({ aDeposer, nonConfirmes, resultats }
       ${lignes.map((l) => `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px;font-weight:700;white-space:nowrap;vertical-align:top;">${esc(l.echeance)}</td><td style="padding:6px;vertical-align:top;"><strong>${esc(l.client)}</strong><br/>${esc(l.avis)} — ${esc(l.objet)}<br/><span style="color:#777;">${esc(l.limite)}</span></td><td style="padding:6px;vertical-align:top;white-space:nowrap;">${esc(l.pieces)}</td></tr>`).join("")}
     </table>`;
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 8px;">📅 Point des dépôts d'offres</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 8px;">📅 Point des dépôts d'offres</h2>
     ${tableau("Offres à déposer sous 3 jours", "#991b1b", aDeposer)}
     ${tableau("Date limite passée sans dépôt enregistré", "#9a3412", nonConfirmes)}
-    ${tableau("Résultats à obtenir (dépôt depuis plus de 3 semaines)", "#0A2533", resultats)}
+    ${tableau("Résultats à obtenir (dépôt depuis plus de 3 semaines)", "#192338", resultats)}
     ${btn("Ouvrir les prestations →", `${APP_URL}/dashboard/admin/prestations`)}`;
   const n = aDeposer.length;
   return resend.emails.send({ from: FROM, to: ADMIN_DEST, subject: `[SHIFT UP] ${n ? `${n} offre(s) à déposer sous 3 jours` : "Suivi des dépôts d'offres"}`, html: baseLayout(content, "Point des dépôts") });
@@ -301,14 +301,14 @@ export type AvisCourriel = { reference: string; objet: string; autorite?: string
 export async function sendVeilleClient({ to, name, avis, total }: { to: string; name: string; avis: AvisCourriel[]; total: number }) {
   const lignes = avis.map((a) => `
     <tr><td style="padding:14px 0;border-bottom:1px solid #eee;">
-      <p style="margin:0 0 4px;color:#0A2533;font-weight:700;line-height:1.4;">${esc(a.objet)}</p>
+      <p style="margin:0 0 4px;color:#192338;font-weight:700;line-height:1.4;">${esc(a.objet)}</p>
       <p style="margin:0 0 6px;color:#555;font-size:13px;">${esc(a.reference)}${a.autorite ? ` — ${esc(a.autorite)}` : ""} · <span style="color:#777;">${esc(a.source)}</span></p>
       ${a.dateLimite ? `<p style="margin:0 0 8px;color:#991b1b;font-size:13px;font-weight:600;">Date limite : ${esc(a.dateLimite)}</p>` : ""}
-      <a href="${a.monter}" style="display:inline-block;background:#0A2533;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;margin-right:8px;">Monter ce dossier</a>
-      ${a.lien ? `<a href="${a.lien}" style="color:#2D5B78;font-size:13px;">Voir l'avis</a>` : ""}
+      <a href="${a.monter}" style="display:inline-block;background:#192338;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;margin-right:8px;">Monter ce dossier</a>
+      ${a.lien ? `<a href="${a.lien}" style="color:#31487A;font-size:13px;">Voir l'avis</a>` : ""}
     </td></tr>`).join("");
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">${total} nouvel(s) avis pour vous 🔎</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">${total} nouvel(s) avis pour vous 🔎</h2>
     <p style="color:#555;margin:0 0 8px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;margin:0 0 8px;">Voici les avis d'appel d'offres publiés récemment qui correspondent à vos critères de veille.</p>
     <table style="width:100%;border-collapse:collapse;">${lignes}</table>
@@ -326,7 +326,7 @@ export async function sendVeilleStatutClient({ to, name, statut, jusquau }: { to
     EXPIRE: ["Votre abonnement à la veille est arrivé à échéance", "Pour continuer à recevoir les avis qui vous intéressent, demandez le renouvellement depuis votre espace ou répondez à ce courriel."],
   }[statut];
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">${textes[0]}</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">${textes[0]}</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">${textes[1]}</p>
     ${btn("Ma veille →", `${APP_URL}/dashboard/client/veille`)}
@@ -337,7 +337,7 @@ export async function sendVeilleStatutClient({ to, name, statut, jusquau }: { to
 /** Admin : demande d'abonnement ou critères modifiés. */
 export async function sendDemandeVeilleAdmin({ clientName, clientEmail, nouveau, criteres }: { clientName: string; clientEmail: string; nouveau: boolean; criteres: [string, string][] }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">${nouveau ? "🔎 Nouvelle demande d'abonnement à la veille" : "Critères de veille modifiés"}</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 12px;">${nouveau ? "🔎 Nouvelle demande d'abonnement à la veille" : "Critères de veille modifiés"}</h2>
     <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})</p>
     <table style="width:100%;border-collapse:collapse;margin:0 0 12px;">
       ${criteres.filter(([, v]) => v).map(([k, v]) => `<tr><td style="padding:6px 0;color:#777;font-size:14px;vertical-align:top;width:35%;">${esc(k)}</td><td style="padding:6px 0;color:#333;">${esc(v)}</td></tr>`).join("")}
@@ -361,7 +361,7 @@ export async function sendDecisionClientAdmin({ clientName, clientEmail, service
 }) {
   const libelle = LIBELLES_DECISION[action] ?? action;
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">${esc(libelle)}</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 12px;">${esc(libelle)}</h2>
     <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${esc(prestationId.slice(-8).toUpperCase())}</p>
     ${commentaire ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 16px;"><p style="margin:0 0 6px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Commentaire du client</p><p style="margin:0;color:#333;white-space:pre-wrap;line-height:1.6;">${esc(commentaire)}</p></div>` : ""}
     ${btn("Ouvrir la prestation →", `${APP_URL}/dashboard/admin/prestations`)}`;
@@ -374,7 +374,7 @@ export async function sendPaiementAdmin({ clientName, clientEmail, serviceName, 
 }) {
   const f = (n: number) => Math.round(n).toLocaleString("fr-FR");
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 12px;">💰 Paiement reçu : ${f(montant)} XOF</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 12px;">💰 Paiement reçu : ${f(montant)} XOF</h2>
     <p style="color:#555;margin:0 0 12px;">Client : <strong>${esc(clientName)}</strong> (${esc(clientEmail)})<br/>Prestation : <strong>${esc(serviceName)}</strong> — réf. ${esc(prestationId.slice(-8).toUpperCase())}</p>
     <p style="color:#555;margin:0 0 12px;">Déjà payé : <strong>${f(paye)} XOF</strong> sur ${f(total)} XOF${paye >= total ? " — <strong>soldé</strong>" : ` — reste ${f(total - paye)} XOF`}.</p>
     ${btn("Ouvrir la prestation →", `${APP_URL}/dashboard/admin/prestations`)}`;
@@ -391,47 +391,47 @@ export async function sendFormationReceipt({ to, prenom, nom, formation, dateDeb
 }) {
   const content = `
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="display:inline-block;background:#0A2533;border-radius:16px;padding:20px 32px;">
+      <div style="display:inline-block;background:#192338;border-radius:16px;padding:20px 32px;">
         <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">BILLET D'ENTRÉE OFFICIEL</div>
         <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">${formation}</div>
       </div>
     </div>
     <div style="background:#EFF4F7;border:2px solid #BACFDC;border-radius:12px;padding:20px 24px;margin-bottom:20px;text-align:center;">
-      <div style="font-size:11px;color:#2D5B78;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Numéro de billet</div>
-      <div style="font-size:26px;font-weight:900;color:#0A2533;letter-spacing:2px;font-family:monospace;">${reference}</div>
+      <div style="font-size:11px;color:#31487A;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Numéro de billet</div>
+      <div style="font-size:26px;font-weight:900;color:#192338;letter-spacing:2px;font-family:monospace;">${reference}</div>
       <div style="font-size:12px;color:#6b7280;margin-top:4px;">Présentez ce billet à l'accueil le jour J</div>
     </div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
       <tr style="border-bottom:1px solid #f0f0f0;">
         <td style="padding:10px 0;color:#777;font-size:14px;width:40%;">Participant</td>
-        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${prenom} ${nom}</td>
+        <td style="padding:10px 0;font-weight:700;color:#192338;font-size:14px;">${prenom} ${nom}</td>
       </tr>
       <tr style="border-bottom:1px solid #f0f0f0;">
         <td style="padding:10px 0;color:#777;font-size:14px;">Formation</td>
-        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${formation}</td>
+        <td style="padding:10px 0;font-weight:700;color:#192338;font-size:14px;">${formation}</td>
       </tr>
       <tr style="border-bottom:1px solid #f0f0f0;">
         <td style="padding:10px 0;color:#777;font-size:14px;">Dates</td>
-        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${dateDebut} → ${dateFin}</td>
+        <td style="padding:10px 0;font-weight:700;color:#192338;font-size:14px;">${dateDebut} → ${dateFin}</td>
       </tr>
       <tr style="border-bottom:1px solid #f0f0f0;">
         <td style="padding:10px 0;color:#777;font-size:14px;">Lieu</td>
-        <td style="padding:10px 0;font-weight:700;color:#0A2533;font-size:14px;">${lieu}</td>
+        <td style="padding:10px 0;font-weight:700;color:#192338;font-size:14px;">${lieu}</td>
       </tr>
       <tr style="border-bottom:1px solid #f0f0f0;">
         <td style="padding:10px 0;color:#777;font-size:14px;">Montant payé</td>
-        <td style="padding:10px 0;font-weight:700;color:#2D5B78;font-size:14px;">${prixFCFA.toLocaleString("fr-FR")} FCFA ✅</td>
+        <td style="padding:10px 0;font-weight:700;color:#31487A;font-size:14px;">${prixFCFA.toLocaleString("fr-FR")} FCFA ✅</td>
       </tr>
       <tr>
         <td style="padding:10px 0;color:#777;font-size:14px;">Mode de paiement</td>
-        <td style="padding:10px 0;font-weight:600;color:#0A2533;font-size:14px;">${methodePaiement}</td>
+        <td style="padding:10px 0;font-weight:600;color:#192338;font-size:14px;">${methodePaiement}</td>
       </tr>
     </table>
     <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
       <p style="margin:0 0 6px;color:#92400e;font-weight:700;font-size:14px;">📋 Que faire maintenant ?</p>
       <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">1. Conservez cet email — il vous servira de billet d'entrée.</p>
       <p style="margin:0 0 4px;color:#78350f;font-size:13px;line-height:1.6;">2. Le lieu exact vous sera communiqué <strong>3 jours avant</strong> la formation.</p>
-      <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">3. Pour toute question : <a href="mailto:contact@shiftup.bj" style="color:#2D5B78;">contact@shiftup.bj</a></p>
+      <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">3. Pour toute question : <a href="mailto:contact@shiftup.bj" style="color:#31487A;">contact@shiftup.bj</a></p>
     </div>
     <p style="color:#333;font-weight:600;margin:0;">À très bientôt — L'équipe SHIFT UP</p>`;
   return resend.emails.send({
@@ -449,15 +449,15 @@ export async function sendFormationInscriptionAdmin({ prenom, nom, email, teleph
 }) {
   const supportEmail = "contact@shiftup.bj";
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 16px;">🎓 Nouvelle inscription confirmée — ${formation}</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 16px;">🎓 Nouvelle inscription confirmée — ${formation}</h2>
     <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:8px 0;color:#777;font-size:14px;width:35%;">Référence</td><td style="padding:8px 0;font-weight:700;color:#0A2533;font-family:monospace;">${reference}</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;width:35%;">Référence</td><td style="padding:8px 0;font-weight:700;color:#192338;font-family:monospace;">${reference}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Participant</td><td style="padding:8px 0;font-weight:600;color:#333;">${prenom} ${nom}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Email</td><td style="padding:8px 0;color:#333;">${email}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Téléphone</td><td style="padding:8px 0;color:#333;">${telephone}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Structure</td><td style="padding:8px 0;color:#333;">${structure}</td></tr>
       <tr><td style="padding:8px 0;color:#777;font-size:14px;">Secteur</td><td style="padding:8px 0;color:#333;">${secteur}</td></tr>
-      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Paiement</td><td style="padding:8px 0;font-weight:600;color:#2D5B78;">${methodePaiement} ✅</td></tr>
+      <tr><td style="padding:8px 0;color:#777;font-size:14px;">Paiement</td><td style="padding:8px 0;font-weight:600;color:#31487A;">${methodePaiement} ✅</td></tr>
     </table>
     ${btn("Voir les inscriptions →", `${APP_URL}/dashboard/admin/formations`)}`;
   return resend.emails.send({
@@ -473,7 +473,7 @@ export async function sendAutoAccountEmail({ to, name, password, serviceName, pr
   to: string; name: string; password: string; serviceName: string; prestationId: string;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Bienvenue sur SHIFT UP 🎉</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Bienvenue sur SHIFT UP 🎉</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Votre demande pour <strong>${serviceName}</strong> a bien été enregistrée. Nous avons créé un compte client pour vous afin que vous puissiez suivre l'avancement de votre projet.</p>
     <div style="background:#fef9ec;border:1px solid #f59e0b;border-radius:10px;padding:16px 20px;margin:20px 0;">
@@ -494,7 +494,7 @@ export async function sendApporteurServiceLeadClient({ to, name, serviceTitle }:
   to: string; name: string; serviceTitle: string;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
     <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Votre demande pour <strong>"${serviceTitle}"</strong> a bien été transmise au prestataire partenaire SHIFT UP. Il vous contactera très prochainement pour finaliser les modalités et le paiement.</p>
     <p style="color:#555;line-height:1.6;margin-top:16px;">Merci de votre confiance.</p>
@@ -507,7 +507,7 @@ export async function sendApporteurServiceLeadOwner({ to, apporteurName, service
   to: string; apporteurName: string; serviceTitle: string; clientName: string; clientEmail: string; clientPhone?: string | null; brief?: string | null;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Nouvelle demande sur votre service 🔔</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Nouvelle demande sur votre service 🔔</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${apporteurName}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Vous avez reçu une nouvelle demande pour <strong>"${serviceTitle}"</strong>.</p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
@@ -526,7 +526,7 @@ export async function sendApporteurServiceDelivered({ to, name, serviceTitle, do
   to: string; name: string; serviceTitle: string; documentUrl: string;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Votre commande est livrée 📦</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre commande est livrée 📦</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${name}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Le prestataire a livré votre commande <strong>"${serviceTitle}"</strong>. Vous pouvez y accéder dès maintenant :</p>
     ${btn("Accéder au document →", documentUrl)}
@@ -545,13 +545,13 @@ export async function sendCandidatureAccuse({ to, prenoms, poste, reference }: {
   to: string; prenoms: string; poste: string; reference: string;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:22px;margin:0 0 8px;">Candidature reçue</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Candidature reçue</h2>
     <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre candidature au poste de <strong>${esc(poste)}</strong>. Votre dossier sera examiné avec attention ; seuls les candidats présélectionnés seront contactés.</p>
     <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;">
-      <p style="margin:0;color:#0A2533;font-size:14px;"><strong>Votre référence :</strong> ${esc(reference)}</p>
+      <p style="margin:0;color:#192338;font-size:14px;"><strong>Votre référence :</strong> ${esc(reference)}</p>
     </div>
-    <p style="color:#555;line-height:1.6;font-size:14px;">Merci de rappeler cette référence dans tout échange avec SHIFT UP : <a href="mailto:contact@shiftup.bj" style="color:#2D5B78;">contact@shiftup.bj</a></p>`;
+    <p style="color:#555;line-height:1.6;font-size:14px;">Merci de rappeler cette référence dans tout échange avec SHIFT UP : <a href="mailto:contact@shiftup.bj" style="color:#31487A;">contact@shiftup.bj</a></p>`;
   return resend.emails.send({ from: FROM, to, subject: `Candidature reçue — ${poste} — Réf. ${reference}`, html: baseLayout(content, "Candidature reçue") });
 }
 
@@ -568,12 +568,12 @@ export async function sendCandidatureAdmin({ to, candidature, attachments, liens
 }) {
   const c = candidature;
   const row = (k: string, v: string | number) =>
-    `<tr><td style="padding:7px 0;color:#777;font-size:14px;width:45%;">${k}</td><td style="padding:7px 0;font-weight:600;color:#0A2533;font-size:14px;">${esc(v)}</td></tr>`;
+    `<tr><td style="padding:7px 0;color:#777;font-size:14px;width:45%;">${k}</td><td style="padding:7px 0;font-weight:600;color:#192338;font-size:14px;">${esc(v)}</td></tr>`;
   const liensHtml = liens.length
-    ? `<p style="color:#555;font-size:14px;margin:20px 0 6px;"><strong>Pièces (liens valables 7 jours) :</strong></p><ul style="margin:0;padding-left:18px;">${liens.map((l) => `<li style="margin:4px 0;"><a href="${l.url}" style="color:#2D5B78;">${esc(l.label)}</a></li>`).join("")}</ul>`
+    ? `<p style="color:#555;font-size:14px;margin:20px 0 6px;"><strong>Pièces (liens valables 7 jours) :</strong></p><ul style="margin:0;padding-left:18px;">${liens.map((l) => `<li style="margin:4px 0;"><a href="${l.url}" style="color:#31487A;">${esc(l.label)}</a></li>`).join("")}</ul>`
     : `<p style="color:#555;font-size:14px;margin:20px 0 0;">Les ${attachments.length} pièce(s) du dossier sont jointes à cet e-mail.</p>`;
   const content = `
-    <h2 style="color:#0A2533;font-size:20px;margin:0 0 4px;">Nouvelle candidature — ${esc(c.poste)}</h2>
+    <h2 style="color:#192338;font-size:20px;margin:0 0 4px;">Nouvelle candidature — ${esc(c.poste)}</h2>
     <p style="color:#777;margin:0 0 16px;font-size:13px;">Réf. ${esc(c.reference)}${c.source ? ` · source : ${esc(c.source)}` : ""}</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #eee;">
       ${row("Nom et prénoms", `${c.nom} ${c.prenoms}`)}
@@ -604,11 +604,11 @@ const dateFr = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", mont
 function blocDonnees(lien: string, dateLimite: Date) {
   return `
     <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:20px;margin:24px 0;">
-      <p style="margin:0 0 8px;color:#0A2533;font-size:15px;font-weight:700;">Pouvons-nous garder votre dossier ?</p>
+      <p style="margin:0 0 8px;color:#192338;font-size:15px;font-weight:700;">Pouvons-nous garder votre dossier ?</p>
       <p style="margin:0 0 4px;color:#555;font-size:14px;line-height:1.6;">Nous recrutons régulièrement pour des projets de travaux publics et des missions d’experts. Avec votre accord, nous conservons votre dossier pendant 24 mois pour vous proposer un poste qui correspond mieux à votre profil. Sans accord, il est supprimé.</p>
       <p style="margin:12px 0 0;">
-        <a href="${lien}?choix=oui" style="display:inline-block;background:#0A2533;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;font-size:14px;margin:4px 8px 4px 0;">Oui, gardez mon dossier</a>
-        <a href="${lien}?choix=non" style="display:inline-block;background:#fff;color:#0A2533;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:700;font-size:14px;border:1px solid #0A2533;margin:4px 0;">Non, supprimez mes données</a>
+        <a href="${lien}?choix=oui" style="display:inline-block;background:#192338;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;font-size:14px;margin:4px 8px 4px 0;">Oui, gardez mon dossier</a>
+        <a href="${lien}?choix=non" style="display:inline-block;background:#fff;color:#192338;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:700;font-size:14px;border:1px solid #192338;margin:4px 0;">Non, supprimez mes données</a>
       </p>
       <p style="margin:12px 0 0;color:#777;font-size:12px;line-height:1.5;">Sans réponse de votre part avant le <strong>${dateFr(dateLimite)}</strong>, vos pièces et vos coordonnées seront supprimées. Vous pourrez changer d'avis à tout moment avec ce même lien.</p>
     </div>`;
@@ -623,13 +623,13 @@ export async function sendNonRetenuCandidat({ to, prenoms, poste, reference, mot
        <ul style="margin:0 0 8px;padding-left:20px;color:#333;line-height:1.6;">${motifs.map((m) => `<li style="margin:4px 0;">${esc(m)}</li>`).join("")}</ul>`
     : "";
   const content = `
-    <h2 style="color:#0A2533;font-size:21px;margin:0 0 8px;">Suite donnée à votre candidature</h2>
+    <h2 style="color:#192338;font-size:21px;margin:0 0 8px;">Suite donnée à votre candidature</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Merci de l'intérêt que vous avez porté au poste de <strong>${esc(poste)}</strong> (réf. ${esc(reference)}). Nous avons étudié votre dossier avec attention et nous ne pouvons pas y donner une suite favorable pour ce recrutement.</p>
     ${liste}
     ${commentaire ? `<p style="color:#555;line-height:1.6;margin:12px 0 0;">${esc(commentaire).replace(/\n/g, "<br/>")}</p>` : ""}
     ${blocDonnees(lien, dateLimite)}
-    <p style="color:#555;line-height:1.6;font-size:14px;">Pour toute question, répondez à ce courriel ou écrivez à <a href="mailto:contact@shiftup.bj" style="color:#2D5B78;">contact@shiftup.bj</a> en rappelant votre référence.</p>
+    <p style="color:#555;line-height:1.6;font-size:14px;">Pour toute question, répondez à ce courriel ou écrivez à <a href="mailto:contact@shiftup.bj" style="color:#31487A;">contact@shiftup.bj</a> en rappelant votre référence.</p>
     <p style="color:#333;font-weight:600;margin-top:20px;">Le service recrutement de SHIFT UP</p>`;
   return resend.emails.send({ from: FROM, to, replyTo: "contact@shiftup.bj", subject: `Votre candidature — ${poste} — Réf. ${reference}`, html: baseLayout(content, "Suite donnée à votre candidature") });
 }
@@ -639,7 +639,7 @@ export async function sendRelanceDonneesCandidat({ to, prenoms, poste, reference
   to: string; prenoms: string; poste: string; reference: string; lien: string; dateLimite: Date;
 }) {
   const content = `
-    <h2 style="color:#0A2533;font-size:21px;margin:0 0 8px;">Votre dossier de candidature</h2>
+    <h2 style="color:#192338;font-size:21px;margin:0 0 8px;">Votre dossier de candidature</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Nous vous avons écrit au sujet de votre candidature au poste de <strong>${esc(poste)}</strong> (réf. ${esc(reference)}). Vous ne nous avez pas encore dit si nous pouvons garder votre dossier pour un prochain recrutement.</p>
     ${blocDonnees(lien, dateLimite)}
@@ -653,12 +653,26 @@ export async function sendConfirmationDonneesCandidat({ to, prenoms, reference, 
 }) {
   const corps = choix === "ACCEPTEE"
     ? `<p style="color:#555;line-height:1.6;">Votre dossier (réf. ${esc(reference)}) est conservé jusqu'au <strong>${jusquau ? dateFr(jusquau) : "—"}</strong>. Nous vous contacterons si un poste correspond à votre profil.</p>
-       <p style="color:#555;line-height:1.6;font-size:14px;">Vous pouvez retirer votre accord à tout moment : <a href="${lien}" style="color:#2D5B78;">gérer mon dossier</a>.</p>`
+       <p style="color:#555;line-height:1.6;font-size:14px;">Vous pouvez retirer votre accord à tout moment : <a href="${lien}" style="color:#31487A;">gérer mon dossier</a>.</p>`
     : `<p style="color:#555;line-height:1.6;">Comme vous l'avez demandé, vos pièces et vos coordonnées liées à la candidature réf. ${esc(reference)} ont été supprimées de nos systèmes.</p>`;
   const content = `
-    <h2 style="color:#0A2533;font-size:21px;margin:0 0 8px;">${choix === "ACCEPTEE" ? "Votre dossier est conservé" : "Vos données ont été supprimées"}</h2>
+    <h2 style="color:#192338;font-size:21px;margin:0 0 8px;">${choix === "ACCEPTEE" ? "Votre dossier est conservé" : "Vos données ont été supprimées"}</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(prenoms)}</strong>,</p>
     ${corps}
     <p style="color:#333;font-weight:600;margin-top:20px;">Le service recrutement de SHIFT UP</p>`;
   return resend.emails.send({ from: FROM, to, replyTo: "contact@shiftup.bj", subject: choix === "ACCEPTEE" ? `Dossier conservé — Réf. ${reference}` : `Données supprimées — Réf. ${reference}`, html: baseLayout(content, "Votre dossier de candidature") });
+}
+
+/** Notification client générique : une étape de sa demande a avancé (démarrage, paiement reçu, étape terminée…). */
+export async function sendEtapeClient({ to, name, titre, texte, serviceName, lien }: {
+  to: string; name: string; titre: string; texte: string; serviceName: string; lien: string;
+}) {
+  const content = `
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">${esc(titre)}</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">${esc(texte)}</p>
+    <p style="color:#555;line-height:1.6;">Demande : <strong>${esc(serviceName)}</strong></p>
+    ${btn("Voir ma demande →", lien.startsWith("http") ? lien : `${APP_URL}${lien}`)}
+    <p style="color:#888;font-size:13px;margin-top:16px;">Vous pouvez répondre à ce courriel ou écrire à l'équipe depuis la fiche de votre demande.</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `${titre} — ${serviceName} — SHIFT UP`, html: baseLayout(content, titre) });
 }

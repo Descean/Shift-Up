@@ -10,6 +10,7 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import { Icone } from "@/components/home/icones";
 import { TitrePoints } from "@/components/site/Gabarit";
+import { retourDepuisAdresse } from "@/lib/retour";
 import { HCaptchaField } from "@/components/ui/HCaptchaField";
 
 const schema = z.object({
@@ -74,7 +75,8 @@ export default function ConnexionPage() {
     }
 
     toast.success("Connexion réussie !");
-    router.push("/dashboard/client");
+    // Retour à la page demandée (ex. une offre choisie), sinon l'espace du rôle
+    router.push(retourDepuisAdresse());
   }
 
   const onSubmit = async (data: FormData) => {
@@ -146,7 +148,7 @@ export default function ConnexionPage() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    await signIn("google", { callbackUrl: "/dashboard/client" });
+    await signIn("google", { callbackUrl: retourDepuisAdresse() });
   };
 
   return (
@@ -154,7 +156,8 @@ export default function ConnexionPage() {
       <TitrePoints as="h1" taille="text-[32px]">Connexion</TitrePoints>
       <p className="mb-8 mt-3 text-[15px] text-[#4B5563]">
         Pas encore de compte ?{" "}
-        <Link href="/inscription" className="font-semibold text-su-bleu underline">Créer un compte</Link>
+        <Link href="/inscription" className="font-semibold text-su-bleu underline"
+          onClick={(e) => { e.preventDefault(); router.push(`/inscription${window.location.search}`); }}>Créer un compte</Link>
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">

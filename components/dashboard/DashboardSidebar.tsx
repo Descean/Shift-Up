@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Cloche from "@/components/dashboard/Cloche";
 
 type NavItem = { href: string; icon: string; label: string; badge?: string };
 
@@ -36,9 +37,9 @@ const navByRole: Record<string, NavItem[]> = {
   CLIENT: [
     { href: "/dashboard/client", icon: "fas fa-table-cells-large", label: "Vue d'ensemble" },
     { href: "/dashboard/client/nouvelle-demande", icon: "fas fa-plus-circle", label: "Nouvelle demande" },
-    { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Mes prestations" },
+    { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Mes demandes" },
+    { href: "/dashboard/client/entreprises", icon: "fas fa-building", label: "Mes entreprises" },
     { href: "/dashboard/client/veille", icon: "fas fa-binoculars", label: "Veille des marchés" },
-    { href: "/dashboard/client/suivi", icon: "fas fa-chart-line", label: "Suivi en temps réel" },
     { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messagerie", badge: "messages" },
     { href: "/dashboard/client/affiliation", icon: "fas fa-users", label: "Affiliation & gains" },
     { href: "/dashboard/client/factures", icon: "fas fa-file-invoice", label: "Factures" },
@@ -109,8 +110,8 @@ const navByRole: Record<string, NavItem[]> = {
 const mobileTabsByRole: Record<string, NavItem[]> = {
   CLIENT: [
     { href: "/dashboard/client", icon: "fas fa-table-cells-large", label: "Accueil" },
-    { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Projets" },
-    { href: "/dashboard/client/suivi", icon: "fas fa-chart-line", label: "Suivi" },
+    { href: "/dashboard/client/prestations", icon: "fas fa-briefcase", label: "Demandes" },
+    { href: "/dashboard/client/entreprises", icon: "fas fa-building", label: "Entreprises" },
     { href: "/dashboard/client/messages", icon: "fas fa-comments", label: "Messages", badge: "messages" },
     { href: "/dashboard/client/profil", icon: "fas fa-user-circle", label: "Profil" },
   ],
@@ -282,12 +283,16 @@ export default function DashboardSidebar({ role }: { role: string }) {
             <Image src="/assets/logo-icon.png" alt="" width={32} height={32} className="w-8 h-8 object-contain brightness-0 invert" />
             <span className="text-white font-syne font-bold text-base">SHIFT UP</span>
           </div>
+          <div className="flex items-center gap-2">
+          <Cloche sombre />
           <button
             onClick={() => setMobileOpen(true)}
+            aria-label="Ouvrir le menu"
             className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 text-white"
           >
             <i className="fas fa-bars" />
           </button>
+          </div>
         </div>
       </div>
 

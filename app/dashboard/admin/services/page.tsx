@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SECTORS as CATALOGUE } from "@/lib/catalogue";
 import toast from "react-hot-toast";
 
 interface Service {
@@ -37,19 +38,8 @@ interface ApporteurService {
   apporteur: { id: string; name: string | null; email: string };
 }
 
-const DOMAINS = [
-  "Conseil Stratégique",
-  "Marchés Publics & Dossiers",
-  "Juridique & Finance",
-  "Marketing Digital",
-  "BTP & Génie Civil",
-  "Solutions Numériques",
-  "Transformation Digitale",
-  "Data & Business Intelligence",
-  "Formation & Coaching",
-  "RSE & Développement Durable",
-  "Finance & Investissement",
-];
+// Domaines du catalogue commun (lib/catalogue) : un service ajouté ici apparaît dans le formulaire de demande du domaine
+const DOMAINS = CATALOGUE.map((d) => d.label);
 
 const emptyForm = {
   domain: DOMAINS[0], title: "", description: "",

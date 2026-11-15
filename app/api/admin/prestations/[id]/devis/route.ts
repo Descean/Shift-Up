@@ -11,6 +11,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { sendDevisClient } from "@/lib/email";
+import { avertirClient } from "@/lib/notifications";
 import { envoyer } from "@/lib/prestations";
 
 async function requireAdmin() {
@@ -65,6 +66,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         notifierClientWhatsApp(prestation.clientId, "shiftup_devis", [clientName, serviceName, lienEspaceClient()]),
       ]);
     }
+
+    await avertirClient(id, "DEVIS", "Devis disponible", `Votre devis est prêt : ${quote.total.toLocaleString("fr-FR")} F au total, acompte de ${depositAmount.toLocaleString("fr-FR")} F pour démarrer.`, { courriel: false });
 
     // Message interne
     const admins = await prisma.user.findMany({ where: { role: { in: ["ADMIN", "DEVELOPER"] }, id: { not: session.user.id } }, select: { id: true } });

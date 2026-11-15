@@ -95,6 +95,8 @@ model User {
   payoutRequests      PayoutRequest[]
   sentMessages        Message[]               @relation("SentMessages")
   receivedMessages    Message[]               @relation("ReceivedMessages")
+  notifications       Notification[]
+  entreprises         Entreprise[]
   campaigns           Campaign[]
   chatSessions        ChatSession[]
   auditLogs           AuditLog[]
@@ -271,6 +273,68 @@ model Prestation {
   payments         Payment[]
   prestationPhases PrestationPhase[]
   livrables        Livrable[]
+  notifications    Notification[]
+}
+
+// ============================================================
+// NOTIFICATIONS ET JOURNAL DES DEMANDES
+// ============================================================
+
+/// Avis affiché dans la cloche de l'espace et dans le journal de la demande concernée.
+model Notification {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prestationId String?
+  prestation   Prestation? @relation(fields: [prestationId], references: [id], onDelete: Cascade)
+  type         String // DEMANDE | DEVIS | PAIEMENT | ETAPE | LIVRABLE | MESSAGE | PIECES | DEPOT | RESULTAT | STATUT
+  titre        String
+  texte        String?
+  lien         String?
+  lu           Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+
+  @@index([userId, lu])
+  @@index([prestationId])
+}
+
+// ============================================================
+// MES ENTREPRISES (coffre de pièces réutilisables)
+// ============================================================
+
+model Entreprise {
+  id             String            @id @default(cuid())
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nom            String
+  formeJuridique String?
+  rccm           String?
+  ifu            String?
+  representant   String?
+  telephone      String?
+  email          String?
+  adresse        String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  pieces         PieceEntreprise[]
+
+  @@index([userId])
+}
+
+/// Pièce administrative, financière ou technique conservée pour être reprise dans chaque dossier.
+model PieceEntreprise {
+  id             String     @id @default(cuid())
+  entrepriseId   String
+  entreprise     Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  type           String // identifiant du modèle de pièce (rccm, ifu, fiscale, cnss…) ou AUTRE
+  libelle        String
+  url            String
+  nomFichier     String
+  dateDelivrance DateTime?
+  dateExpiration DateTime?
+  createdAt      DateTime   @default(now())
+
+  @@index([entrepriseId, type])
 }
 
 model PrestationPhase {
@@ -375,6 +439,7 @@ model Message {
   subject        String?
   content        String
   isRead         Boolean  @default(false)
+  /// « prestation:<id> » = message du fil de discussion de cette demande ; null = messagerie générale
   conversationId String?
   attachments    String[] @default([])
   createdAt      DateTime @default(now())

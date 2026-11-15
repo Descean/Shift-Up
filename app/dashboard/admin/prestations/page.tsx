@@ -8,6 +8,8 @@ import { PiecesAdmin } from "@/components/prestations/Pieces";
 import SuiviDossier, { BadgeSuivi } from "@/components/prestations/Suivi";
 import WhatsAppRapide from "@/components/prestations/WhatsAppRapide";
 
+import Discussion from "@/components/prestations/Discussion";
+import Journal from "@/components/prestations/Journal";
 import { televerser } from "@/lib/televerser";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -184,6 +186,75 @@ function phaseStatusLabel(s: string): string {
   return "En attente";
 }
 
+
+// ─── Paiement reçu hors ligne (Mobile Money sur le numéro SHIFT UP, espèces, virement) ───
+const MOYENS_PAIEMENT = [
+  { id: "MOBILE_MONEY", label: "Mobile Money (numéro SHIFT UP)" },
+  { id: "ESPECES", label: "Espèces" },
+  { id: "BANK_TRANSFER", label: "Virement bancaire" },
+  { id: "CHEQUE", label: "Chèque" },
+];
+
+function EnregistrerPaiement({ prestation, onDone }: { prestation: Prestation; onDone: () => void }) {
+  const reste = Math.max(0, prestation.amount - prestation.amountPaid);
+  const [ouvert, setOuvert] = useState(false);
+  const [montant, setMontant] = useState("");
+  const [moyen, setMoyen] = useState("MOBILE_MONEY");
+  const [reference, setReference] = useState("");
+  const [envoi, setEnvoi] = useState(false);
+  if (prestation.amount <= 0 || reste <= 1 || prestation.status === "ANNULEE") return null;
+
+  async function valider() {
+    const m = Number(montant.replace(/\s/g, ""));
+    if (!m || m <= 0) { toast.error("Indiquez le montant reçu."); return; }
+    setEnvoi(true);
+    try {
+      const r = await fetch(`/api/admin/prestations/${prestation.id}/paiement`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ montant: m, moyen, reference: reference || null }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { toast.error(d.error ?? "Erreur"); return; }
+      toast.success("Paiement enregistré : le client est prévenu.");
+      setOuvert(false); setMontant(""); setReference("");
+      onDone();
+    } finally { setEnvoi(false); }
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-su-lavande bg-su-brume p-3">
+      {!ouvert ? (
+        <button onClick={() => setOuvert(true)} className="w-full text-left text-xs font-semibold text-su-bleu">
+          <i className="fas fa-hand-holding-dollar mr-1.5" />Enregistrer un paiement reçu hors ligne (reste {Math.round(reste).toLocaleString("fr-FR")} F)
+        </button>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-su-nuit">Paiement reçu hors ligne</p>
+          <div className="grid grid-cols-2 gap-2">
+            <input value={montant} onChange={(e) => setMontant(e.target.value)} inputMode="numeric" placeholder={`Montant (max ${Math.round(reste).toLocaleString("fr-FR")})`}
+              className="rounded-lg border border-su-lavande bg-white px-2.5 py-2 text-xs" />
+            <select value={moyen} onChange={(e) => setMoyen(e.target.value)} className="rounded-lg border border-su-lavande bg-white px-2 py-2 text-xs">
+              {MOYENS_PAIEMENT.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+            </select>
+          </div>
+          <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Référence de la transaction (facultatif)"
+            className="w-full rounded-lg border border-su-lavande bg-white px-2.5 py-2 text-xs" />
+          <div className="flex gap-2">
+            <button onClick={() => setMontant(String(Math.round(reste)))} className="rounded-lg border border-su-clair bg-white px-2.5 py-1.5 text-xs text-su-bleu">Tout le reste</button>
+            {prestation.quote?.deposit && prestation.amountPaid === 0 && (
+              <button onClick={() => setMontant(String(prestation.quote!.deposit))} className="rounded-lg border border-su-clair bg-white px-2.5 py-1.5 text-xs text-su-bleu">Acompte ({prestation.quote.deposit.toLocaleString("fr-FR")})</button>
+            )}
+            <span className="flex-1" />
+            <button onClick={() => setOuvert(false)} className="px-2 text-xs text-gray-500">Annuler</button>
+            <button onClick={valider} disabled={envoi} className="rounded-lg bg-su-bleu px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">{envoi ? "…" : "Enregistrer"}</button>
+          </div>
+          <p className="text-[11px] text-gray-500">Un acompte fait démarrer les travaux ; le solde complet déverrouille les livrables.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Tab "Devis & Plan" ───────────────────────────────────────────────────────
 
 function TabDevis({
@@ -197,8 +268,11 @@ function TabDevis({
     prestation.status !== "EN_ATTENTE" && prestation.status !== "DEVIS_ENVOYE";
   const hasSentQuote = prestation.status === "DEVIS_ENVOYE" && prestation.quote;
 
+  // Sans devis : première ligne pré-remplie avec l'offre choisie par le client (prix indicatif du catalogue)
+  const offre = prestation.customFields?.offre as { titre?: string; prix?: string } | undefined;
+  const prixOffre = Number((offre?.prix ?? "").replace(/[^\d]/g, "")) || 0;
   const defaultItems: QuoteItem[] = prestation.quote?.items ?? [
-    { label: "", amount: 0 },
+    { label: offre?.titre ?? "", amount: prixOffre },
   ];
   const defaultPhases =
     prestation.plan?.phases ??
@@ -1078,7 +1152,7 @@ function DetailPanel({
 }) {
   const montage = lireMontage(prestation.customFields);
   const estMontage = prestation.sector === SECTEUR_MONTAGE || Boolean(montage.dossier);
-  const [activeTab, setActiveTab] = useState<"dossier" | "devis" | "phases" | "livrables">(estMontage ? "dossier" : "devis");
+  const [activeTab, setActiveTab] = useState<"dossier" | "devis" | "phases" | "livrables" | "discussion">(estMontage ? "dossier" : "devis");
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const status = prestation.status as PrestationStatus;
@@ -1110,6 +1184,7 @@ function DetailPanel({
     { id: "devis" as const, label: "Devis & Plan" },
     { id: "phases" as const, label: "Phases" },
     { id: "livrables" as const, label: "Livrables" },
+    { id: "discussion" as const, label: "Discussion & journal" },
   ];
 
   return (
@@ -1200,6 +1275,12 @@ function DetailPanel({
             </p>
           </div>
         </div>
+        {(prestation.customFields?.offre as { titre?: string; prix?: string; delai?: string | null } | undefined)?.titre && (
+          <p className="mt-2 rounded-lg bg-su-brume px-2.5 py-2 text-xs text-su-nuit">
+            <i className="fas fa-tag mr-1.5 text-su-bleu" />Offre choisie : <strong>{(prestation.customFields!.offre as { titre: string }).titre}</strong>
+            {" "}— {(prestation.customFields!.offre as { prix: string }).prix}{(prestation.customFields!.offre as { delai?: string | null }).delai ? ` · ${(prestation.customFields!.offre as { delai: string }).delai}` : ""}
+          </p>
+        )}
         <WhatsAppRapide telephone={prestation.phone || prestation.client.phone} nom={prestation.client.name ?? ""} service={serviceLabel(prestation)} statut={prestation.status} customFields={prestation.customFields} />
         {prestation.brief && (
           <div className="mt-2">
@@ -1228,6 +1309,8 @@ function DetailPanel({
             <i className="fas fa-lock mr-1" />Solde non réglé : le client voit les livrables mais ne peut les télécharger qu&apos;après paiement (sauf les aperçus).
           </p>
         )}
+
+        <EnregistrerPaiement prestation={prestation} onDone={onRefresh} />
 
         {/* Attachments */}
         {prestation.attachments.length > 0 && (
@@ -1343,6 +1426,18 @@ function DetailPanel({
               exit={{ opacity: 0, y: -8 }}
             >
               <TabLivrables prestation={prestation} onRefresh={onRefresh} />
+            </motion.div>
+          )}
+          {activeTab === "discussion" && (
+            <motion.div key="discussion" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="space-y-5">
+              <div>
+                <p className="mb-2 text-xs font-semibold text-gray-500">Discussion avec le client sur cette demande</p>
+                <Discussion prestationId={prestation.id} />
+              </div>
+              <div>
+                <p className="mb-3 text-xs font-semibold text-gray-500">Ce que le client a reçu (notifications)</p>
+                <Journal prestationId={prestation.id} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

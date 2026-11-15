@@ -18,6 +18,7 @@ import { isSafe } from "@/lib/validation";
 import { envoyer, nomService } from "@/lib/prestations";
 import { fichierDe } from "@/lib/montage-serveur";
 import { RESULTATS, dateLimiteFr, dateLimiteVersDate, lireMontage, type Depot, type Resultat, type StatutResultat } from "@/lib/montage";
+import { creerAvis, lienDemande } from "@/lib/notifications";
 import { sendDepotClient, sendResultatClient, sendSuiviAdmin } from "@/lib/email";
 
 const txt = (max: number) => z.string().trim().max(max).refine(isSafe, "Contenu non autorisé détecté.").optional().nullable().transform((v) => v || null);
@@ -91,6 +92,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (par === "SHIFT_UP" && p.client.email) {
       envois.push(sendDepotClient({ to: p.client.email, name: p.client.name ?? "", serviceName, avis: m.dossier.referenceAvis, deposeLe: quandFr, numero: a.numero, lienRecepisse: depot.recepisse?.url ?? null }));
       envois.push(notifierClientWhatsApp(p.clientId, "shiftup_depot", [p.client.name ?? "", m.dossier.referenceAvis, quandFr, lienEspaceClient()]));
+      envois.push(creerAvis({ userId: p.clientId, prestationId: id, type: "DEPOT", titre: "Offre déposée", texte: `Votre offre pour l'avis ${m.dossier.referenceAvis} a été déposée le ${quandFr}.`, lien: lienDemande(id) }));
     } else if (par === "CLIENT") {
       envois.push(sendSuiviAdmin({
         clientName, clientEmail: p.client.email ?? "", serviceName, prestationId: id, titre: "Offre déposée par le client",
@@ -120,6 +122,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (a.statut !== "EN_ATTENTE") {
       if (par === "SHIFT_UP" && p.client.email) envois.push(sendResultatClient({ to: p.client.email, name: p.client.name ?? "", avis: m.dossier.referenceAvis, libelle: RESULTATS[a.statut], details }));
       if (par === "SHIFT_UP") envois.push(notifierClientWhatsApp(p.clientId, "shiftup_resultat", [p.client.name ?? "", m.dossier.referenceAvis, RESULTATS[a.statut], lienEspaceClient()]));
+      if (par === "SHIFT_UP") envois.push(creerAvis({ userId: p.clientId, prestationId: id, type: "RESULTAT", titre: `Résultat : ${RESULTATS[a.statut]}`, texte: `Avis ${m.dossier.referenceAvis}.`, lien: lienDemande(id) }));
       if (par === "CLIENT") envois.push(alerterEquipeWhatsApp(`Résultat : ${RESULTATS[a.statut]}`, `${clientName} — ${m.dossier.referenceAvis}`));
       if (par === "CLIENT") envois.push(sendSuiviAdmin({ clientName, clientEmail: p.client.email ?? "", serviceName, prestationId: id, titre: `Résultat communiqué : ${RESULTATS[a.statut]}`, lignes: [["Avis", m.dossier.referenceAvis], ...details] }));
     }

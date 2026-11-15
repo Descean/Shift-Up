@@ -17,7 +17,10 @@ import { freeTextSchema, isSafe } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { envoyer, vueClient } from "@/lib/prestations";
 import { conflitsAvis, libelleConflit, preparerMontage } from "@/lib/montage-serveur";
-import { SECTEUR_MONTAGE } from "@/lib/montage";
+import { SECTEUR_MONTAGE, dateLimiteVersDate, type Piece } from "@/lib/montage";
+import { reprendreDuCoffre } from "@/lib/entreprises";
+import { creerAvis, lienDemande } from "@/lib/notifications";
+import { offreDepuisDemande } from "@/lib/catalogue";
 
 const bodySchema = z.object({
   serviceId:     z.string().max(100).optional().nullable(),
@@ -33,6 +36,8 @@ const bodySchema = z.object({
   /** Fiche de l'appel d'offres (montage de dossier) */
   dossier:       z.unknown().optional(),
   dao:           z.object({ url: z.string().url().max(500), nom: z.string().max(200) }).optional().nullable(),
+  /** Entreprise soumissionnaire choisie dans « Mes entreprises » (montage de dossier) */
+  entrepriseId:  z.string().max(40).optional().nullable(),
 });
 
 export async function GET(req: NextRequest) {
@@ -86,13 +91,19 @@ export async function POST(req: NextRequest) {
       );
     }
     const {
-      serviceId, sector, customService, budget, deadline,
-      company, phone, attachments, customFields, dossier, dao,
+      serviceId, customService, budget, deadline,
+      company, phone, attachments, dossier, dao,
     } = parsed.data;
+    // Libellé de domaine du catalogue et offre choisie (prix, délai) reconnue côté serveur
+    const norme = offreDepuisDemande(parsed.data.sector, customService);
+    const sector = norme.sector;
+    const customFields = { ...(parsed.data.customFields ?? {}), ...(norme.offre ? { offre: norme.offre } : {}) };
     let brief = parsed.data.brief ?? "";
 
     // Montage de dossier : fiche de l'appel d'offres + liste des pièces à fournir
     let montage: { dossier: unknown; pieces: unknown[] } | null = null;
+    let coffre: { entrepriseId: string; entrepriseNom: string; reprises: number; expirees: number } | null = null;
+    let repriseUrls: string[] = [];
     let urgence: string | null = null;
     if (dossier !== undefined && dossier !== null) {
       if (sector !== SECTEUR_MONTAGE) return NextResponse.json({ error: "Fiche d'appel d'offres réservée au montage de dossiers." }, { status: 422 });
@@ -101,9 +112,23 @@ export async function POST(req: NextRequest) {
       montage = { dossier: m.dossier, pieces: m.pieces };
       brief = m.brief;
       urgence = m.urgence;
+      // Entreprise de « Mes entreprises » : pièces encore valides à la date limite reprises du coffre
+      if (parsed.data.entrepriseId) {
+        const ent = await prisma.entreprise.findFirst({
+          where: { id: parsed.data.entrepriseId, userId: session.user.id },
+          include: { pieces: true },
+        }).catch(() => null);
+        if (ent) {
+          const limite = dateLimiteVersDate((m.dossier as { dateLimite: string }).dateLimite);
+          const r = reprendreDuCoffre(m.pieces as Piece[], ent.pieces, limite);
+          montage = { dossier: m.dossier, pieces: r.pieces };
+          coffre = { entrepriseId: ent.id, entrepriseNom: ent.nom, reprises: r.reprises, expirees: r.expirees };
+          repriseUrls = r.pieces.filter((x) => x.statut === "FOURNI").flatMap((x) => x.fichiers.map((f) => f.url));
+        }
+      }
     }
     if (!brief) return NextResponse.json({ error: "Décrivez votre besoin.", details: { brief: ["Obligatoire."] } }, { status: 422 });
-    const pieceJointes = [...(attachments ?? []), ...(montage && dao ? [dao.url] : [])];
+    const pieceJointes = [...new Set([...(attachments ?? []), ...(montage && dao ? [dao.url] : []), ...repriseUrls])];
 
     // "autre" est une valeur interne UI, pas un vrai ID de service
     const realServiceId = (serviceId && serviceId !== "autre") ? serviceId : null;
@@ -123,10 +148,10 @@ export async function POST(req: NextRequest) {
         brief,
         budget: budget || null,
         deadline: deadline || null,
-        company: company || null,
+        company: company || coffre?.entrepriseNom || null,
         phone: phone || null,
         attachments: pieceJointes,
-        customFields: (montage ? { ...(customFields ?? {}), ...montage } : (customFields ?? undefined)) as Prisma.InputJsonValue | undefined,
+        customFields: (montage ? { ...customFields, ...montage, ...(coffre ? { entrepriseId: coffre.entrepriseId, entrepriseNom: coffre.entrepriseNom } : {}) } : customFields) as Prisma.InputJsonValue,
         status: "EN_ATTENTE",
         amount: 0, // Défini par le devis admin
       },
@@ -153,6 +178,9 @@ export async function POST(req: NextRequest) {
       sendNewDemandeAdmin({ clientName, clientEmail: session.user.email!, serviceName, brief, prestationId: prestation.id, urgence, conflits }),
       alerterEquipeWhatsApp(`Nouvelle demande${urgence ? ` (URGENT ${urgence})` : ""}`, `${clientName} — ${serviceName}`),
     ]);
+
+    await creerAvis({ userId: session.user.id, prestationId: prestation.id, type: "DEMANDE", titre: "Demande reçue",
+      texte: montage ? (coffre?.reprises ? `${coffre.reprises} pièce(s) reprise(s) du coffre de ${coffre.entrepriseNom}${coffre.expirees ? `, ${coffre.expirees} à renouveler` : ""}. Déposez les autres ; le devis suit sous 48 heures ouvrées.` : "Déposez dès maintenant les pièces dont vous disposez ; le devis suit sous 48 heures ouvrées.") : "Notre équipe étudie votre besoin ; le devis suit sous 48 heures ouvrées.", lien: lienDemande(prestation.id) });
 
     return NextResponse.json({ prestation }, { status: 201 });
   } catch (error) {

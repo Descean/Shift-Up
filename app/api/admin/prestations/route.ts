@@ -13,6 +13,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { conflitsDans, montagesActifs, statsMontage } from "@/lib/montage-serveur";
 import { lireMontage } from "@/lib/montage";
+import { avertirClient } from "@/lib/notifications";
 import { z } from "zod";
 
 const patchSchema = z.object({
@@ -135,6 +136,19 @@ export async function PATCH(req: NextRequest) {
         details:  { changes: data, previousStatus: existing.status },
       },
     });
+
+    // Avis au client quand l'équipe change l'étape de sa demande
+    const TEXTES_STATUT: Record<string, [string, string]> = {
+      EN_COURS: ["Travaux démarrés", "Votre demande est en cours de réalisation. Suivez chaque étape depuis votre espace."],
+      LIVRAISON: ["Livraison prête", "Les livrables de votre demande sont prêts. Consultez-les et validez la livraison, ou demandez une révision."],
+      REVISION: ["Révision en cours", "Nous reprenons les points signalés. Vous serez prévenu dès que la nouvelle version sera prête."],
+      TERMINEE: ["Demande clôturée", "Votre demande est terminée. Merci de votre confiance ; vos livrables restent disponibles dans votre espace."],
+      ANNULEE: ["Demande annulée", "Votre demande a été annulée. Écrivez-nous depuis votre espace si vous souhaitez la reprendre."],
+    };
+    if (data.status && data.status !== existing.status && TEXTES_STATUT[data.status]) {
+      const [titre, texte] = TEXTES_STATUT[data.status];
+      await avertirClient(prestationId, "STATUT", titre, texte);
+    }
 
     return NextResponse.json({ prestation: updated });
   } catch (error) {

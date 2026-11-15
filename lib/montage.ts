@@ -149,6 +149,11 @@ const MODELES: Modele[] = [
   { id: "autorisation", libelle: "Autorisation du fabricant (si le DAO l'exige)", categorie: "Technique", si: (d) => d.typeMarche === "Fournitures" },
 ];
 
+/** Types de pièces qu'on peut conserver dans le coffre d'une entreprise (« Mes entreprises »). */
+export const TYPES_PIECE_COFFRE = MODELES
+  .filter((m) => !["dao", "groupement", "garantie"].includes(m.id))
+  .map((m) => ({ id: m.id, libelle: m.libelle, categorie: m.categorie }));
+
 /** Liste de départ, adaptée au type de marché ; le DAO joint au formulaire est déjà marqué reçu. */
 export function piecesInitiales(d: Dossier, dao?: FichierPiece | null): Piece[] {
   const maintenant = new Date().toISOString();

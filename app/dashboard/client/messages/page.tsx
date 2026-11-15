@@ -138,6 +138,7 @@ export default function MessagesPage() {
         <div>
           <h1 className="font-syne font-black text-2xl text-primary">Messages</h1>
           <p className="text-gray-500 text-sm">{totalUnread > 0 ? `${totalUnread} message(s) non lu(s)` : "Toutes les conversations"}</p>
+          <p className="text-xs text-gray-500 mt-1">Pour une question sur une demande précise, écrivez depuis sa fiche dans <a href="/dashboard/client/prestations" className="font-semibold text-su-bleu underline">Mes demandes</a> : l&apos;échange y reste rattaché.</p>
         </div>
         <button onClick={() => { setComposing(true); setSelected(null); }}
           className="flex items-center gap-2 bg-su-bleu text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity">

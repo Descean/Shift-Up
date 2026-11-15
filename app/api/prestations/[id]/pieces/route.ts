@@ -34,7 +34,9 @@ import { fichierDe } from "@/lib/montage-serveur";
 import {
   CATEGORIES_PIECE, STATUTS_PIECE, dossierSchema, dateLimiteFr, enAttenteClient, lireMontage, piecesInitiales,
   type Piece, type StatutPiece,
+  TYPES_PIECE_COFFRE,
 } from "@/lib/montage";
+import { creerAvis, lienDemande } from "@/lib/notifications";
 import { sendPiecesClient, sendPiecesDeposeesAdmin } from "@/lib/email";
 
 const txt = (max: number) => z.string().trim().max(max).refine(isSafe, "Contenu non autorisé détecté.");
@@ -101,6 +103,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (a.commentaire) piece.commentaireClient = a.commentaire;
       piece.majLe = maintenant;
       nouvellesPJ.push(a.fichier.url);
+      // Dossier monté pour une entreprise de « Mes entreprises » : la pièce rejoint aussi son coffre
+      if (estClient && typeof cf.entrepriseId === "string" && TYPES_PIECE_COFFRE.some((t) => t.id === piece.id)) {
+        await prisma.pieceEntreprise.create({
+          data: { entrepriseId: cf.entrepriseId, type: piece.id, libelle: piece.libelle, url: a.fichier.url, nomFichier: a.fichier.nom },
+        }).catch(() => {});
+      }
       break;
     }
     case "retirer": {
@@ -192,6 +200,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         notifierClientWhatsApp(p.clientId, "shiftup_pieces", [p.client.name ?? "", String(aReprendre.length + aFournir.length), dossier?.referenceAvis ?? nomService(p), dossier ? dateLimiteFr(dossier.dateLimite) : "—", lienEspaceClient()]),
       ]);
       cf.clientRelanceLe = maintenant;
+      await creerAvis({ userId: p.clientId, prestationId: id, type: "PIECES", titre: "Pièces à fournir",
+        texte: `${aFournir.length + aReprendre.length} pièce(s) attendue(s)${aReprendre.length ? `, dont ${aReprendre.length} à reprendre` : ""}.`, lien: lienDemande(id) });
       break;
     }
   }

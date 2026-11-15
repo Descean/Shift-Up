@@ -21,6 +21,8 @@ import { sendActivationCompte, sendDemandeConfirmation, sendNewDemandeAdmin } fr
 import { envoyer } from "@/lib/prestations";
 import { conflitsAvis, libelleConflit, preparerMontage } from "@/lib/montage-serveur";
 import { SECTEUR_MONTAGE } from "@/lib/montage";
+import { offreDepuisDemande } from "@/lib/catalogue";
+import { creerAvis, lienDemande } from "@/lib/notifications";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120).refine(isSafe),
@@ -74,10 +76,11 @@ export async function POST(req: NextRequest) {
       nouveau = true;
     }
 
+    const norme = offreDepuisDemande(d.sector, d.customService);
     const prestation = await prisma.prestation.create({
       data: {
         clientId: user.id,
-        sector: d.sector,
+        sector: norme.sector,
         customService: d.customService || null,
         brief,
         budget: d.budget || null,
@@ -86,9 +89,11 @@ export async function POST(req: NextRequest) {
         phone: d.phone || null,
         status: "EN_ATTENTE",
         amount: 0,
-        customFields: { origine: "formulaire public", nomDeclare: d.name, ...(montage ?? {}) } as Prisma.InputJsonValue,
+        customFields: { origine: "formulaire public", nomDeclare: d.name, ...(norme.offre ? { offre: norme.offre } : {}), ...(montage ?? {}) } as Prisma.InputJsonValue,
       },
     });
+
+    await creerAvis({ userId: user.id, prestationId: prestation.id, type: "DEMANDE", titre: "Demande reçue", texte: "Notre équipe étudie votre besoin ; le devis suit sous 48 heures ouvrées.", lien: lienDemande(prestation.id) });
 
     await prisma.auditLog.create({
       data: { userId: user.id, action: "PRESTATION_CREATED", entity: "Prestation", entityId: prestation.id, details: { sector: d.sector, origine: "public", nouveauCompte: nouveau } },
