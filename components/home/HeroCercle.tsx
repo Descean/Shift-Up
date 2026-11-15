@@ -5,7 +5,8 @@ import { Icone, SERVICES, manrope } from "./icones";
 
 /**
  * Haut de l'accueil : titre, appels à l'action, chiffres clés et anneau animé des 7 services
- * (seules les icônes tournent ; survol = pause + nom du service). Styles de l'anneau : app/globals.css.
+ * (seules les icônes tournent ; survol = pause + nom du service ; chaque icône mène à la présentation
+ * du service). Styles de l'anneau : app/globals.css.
  */
 export default async function HeroCercle() {
   const chiffres = await getChiffresAccueil();
@@ -17,16 +18,16 @@ export default async function HeroCercle() {
 
   return (
     <section className="su-hero relative overflow-hidden bg-su-brume pt-36 pb-28">
-      <div className="su-ringwrap" aria-hidden="true">
-        <div className="su-ring">
+      <div className="su-ringwrap">
+        <nav className="su-ring" aria-label="Nos services">
           {SERVICES.map((s, i) => (
             <div key={s.titre} className="su-orb" style={{ "--a": `${(360 / SERVICES.length) * i}deg` } as CSSProperties}>
-              <span className="su-ic" title={s.titre}>
+              <Link href={s.href} className="su-ic" title={s.titre} aria-label={s.titre}>
                 <Icone nom={s.icone} taille={36} epaisseur={1.6} />
-              </span>
+              </Link>
             </div>
           ))}
-        </div>
+        </nav>
       </div>
 
       <div className="relative z-[1] mx-auto grid max-w-[1200px] items-center gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_240px]">

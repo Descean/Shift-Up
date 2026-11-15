@@ -260,11 +260,13 @@
 .su-ring { position: absolute; width: 700px; height: 700px; top: 50%; right: -206px; margin-top: -314px; border-radius: 50%;
   background: radial-gradient(circle at center, transparent 0 262px, #D9E1F1 264px, #B4C9E8 284px, #8FB3E2 306px, #B4C9E8 328px, #D9E1F1 346px, transparent 350px); }
 .su-orb { position: absolute; inset: 0; transform: rotate(var(--a)); animation: su-orbit 60s linear infinite; }
-.su-orb > .su-ic { position: absolute; left: 50%; top: 44px; width: 80px; height: 80px; border-radius: 50%; background: #31487A; color: #fff;
+.su-orb > .su-ic { position: absolute; left: 50%; top: 44px; width: 80px; height: 80px; border-radius: 50%; background: #31487A; color: #fff; text-decoration: none;
   display: flex; align-items: center; justify-content: center; border: 4px solid #fff; box-sizing: border-box;
-  box-shadow: 0 12px 26px rgba(30, 46, 79, 0.3); pointer-events: auto; cursor: default;
+  box-shadow: 0 12px 26px rgba(30, 46, 79, 0.3); pointer-events: auto; cursor: pointer;
   transform: translate(-50%, -50%) rotate(calc(-1 * var(--a))); animation: su-counter 60s linear infinite; transition: background 0.2s; }
-.su-orb > .su-ic:hover { background: #1E2E4F; }
+.su-orb > .su-ic:hover, .su-orb > .su-ic:focus-visible { background: #1E2E4F; }
+.su-orb > .su-ic:focus-visible { outline: 3px solid #8FB3E2; outline-offset: 3px; }
+.su-ring:focus-within .su-orb, .su-ring:focus-within .su-ic { animation-play-state: paused; }
 .su-ring:hover .su-orb, .su-ring:hover .su-ic { animation-play-state: paused; }
 @keyframes su-orbit { from { transform: rotate(var(--a)); } to { transform: rotate(calc(var(--a) + 360deg)); } }
 @keyframes su-counter { from { transform: translate(-50%, -50%) rotate(calc(-1 * var(--a))); } to { transform: translate(-50%, -50%) rotate(calc(-1 * var(--a) - 360deg)); } }

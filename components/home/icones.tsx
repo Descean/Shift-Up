@@ -42,7 +42,7 @@ export const SERVICES = [
   { icone: "conseil", titre: "Conseil stratégique", texte: "Analyse de marché, business plan, stratégie de croissance, restructuration.", href: "/services#conseil" },
   { icone: "numerique", titre: "Solutions numériques", texte: "Sites web et applications, transformation digitale, automatisation des processus.", href: "/services#numerique" },
   { icone: "formation", titre: "Formation & coaching", texte: "Programmes certifiants, coaching de dirigeants, ateliers pratiques, e-learning.", href: "/services#formation" },
-  { icone: "dossiers", titre: "Montage de dossiers", texte: "Appels d'offres, financement bancaire, création d'entreprise, subventions.", href: "/services#dossiers" },
+  { icone: "dossiers", titre: "Montage de dossiers", texte: "Appels d'offres, financement bancaire, création d'entreprise, subventions.", href: "/services#marches-publics" },
   { icone: "marketing", titre: "Marketing digital", texte: "Stratégie de contenu, référencement, réseaux sociaux, e-réputation.", href: "/services#marketing" },
   { icone: "juridique", titre: "Juridique & fiscal", texte: "Création d'entreprise, conformité OHADA, optimisation fiscale, contrats.", href: "/services#juridique" },
   { icone: "finance", titre: "Finance & comptabilité", texte: "Gestion financière, analyse de rentabilité, levée de fonds, audit.", href: "/services#finance" },
