@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { avertirClient } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 
 async function requireAdmin() {
@@ -53,6 +54,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const { phaseId, status, progress, startDate, endDate } = await req.json();
     if (!phaseId) return NextResponse.json({ error: "phaseId requis." }, { status: 400 });
+    const avant = await prisma.prestationPhase.findFirst({ where: { id: phaseId, prestationId: id }, select: { status: true, title: true } });
+    if (!avant) return NextResponse.json({ error: "Étape introuvable pour cette prestation." }, { status: 404 });
+    const etaitLivree = (await prisma.prestation.findUnique({ where: { id }, select: { status: true } }))?.status === "LIVRAISON";
 
     const phase = await prisma.prestationPhase.update({
       where: { id: phaseId },
@@ -77,6 +81,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         ...(allPhases.every((p) => p.status === "DONE") && { status: "LIVRAISON" }),
       },
     });
+
+    // Avis au client quand une étape démarre ou se termine
+    if (status !== undefined && status !== avant.status) {
+      if (status === "DONE") await avertirClient(id, "ETAPE", `Étape terminée : ${avant.title}`, `L'étape « ${avant.title} » de votre demande est terminée. Avancement global : ${globalProgress} %.`);
+      else if (status === "IN_PROGRESS") await avertirClient(id, "ETAPE", `Étape en cours : ${avant.title}`, `Nous avons commencé l'étape « ${avant.title} ». Avancement global : ${globalProgress} %.`);
+    }
+    if (!etaitLivree && allPhases.length > 0 && allPhases.every((p) => p.status === "DONE")) {
+      await avertirClient(id, "STATUT", "Livraison prête", "Toutes les étapes sont terminées. Consultez les livrables et validez la livraison, ou demandez une révision.");
+    }
 
     return NextResponse.json({ phase, globalProgress });
   } catch (error) {

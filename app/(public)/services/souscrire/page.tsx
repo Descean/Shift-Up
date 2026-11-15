@@ -9,20 +9,20 @@ import toast from "react-hot-toast";
 import { HCaptchaField } from "@/components/ui/HCaptchaField";
 import { dossierVide, type DossierSaisie } from "@/lib/montage";
 import FicheMarche, { ficheComplete } from "@/components/prestations/FicheMarche";
+import { SECTORS, trouverDomaine, trouverOffre, prixOffre } from "@/lib/catalogue";
 
-const servicesList = [
-  { id: "montage-dossier", label: "Montage de dossier de soumission", sector: "Marchés Publics & Dossiers" },
-  { id: "conseil", label: "Conseil Stratégique", sector: "Conseil Stratégique" },
-  { id: "numerique", label: "Solutions Numériques", sector: "Solutions Numériques" },
-  { id: "formation", label: "Formation & Coaching", sector: "Formation & Coaching" },
-  { id: "marketing", label: "Marketing Digital", sector: "Marketing Digital" },
-  { id: "juridique", label: "Juridique & Fiscal", sector: "Juridique & Finance" },
-  { id: "finance", label: "Finance & Comptabilité", sector: "Finance & Investissement" },
-];
-/** ?service= peut contenir l'identifiant ou le libellé */
-function trouverService(v: string) {
-  const x = v.trim().toLowerCase();
-  return servicesList.find((s) => s.id === x || s.label.toLowerCase() === x || s.sector.toLowerCase() === x)?.id ?? "";
+/** Valeur du champ « service » : « idDomaine|intitulé de l'offre » (intitulé vide = autre besoin du domaine). */
+function choixInitial(q: URLSearchParams): string {
+  const dom = trouverDomaine(q.get("secteur") ?? q.get("service"));
+  if (!dom) return "";
+  const offre = trouverOffre(dom, q.get("offre") ?? q.get("service"));
+  return `${dom.id}|${offre?.title ?? ""}`;
+}
+
+function lireChoix(v: string) {
+  const [id, titre = ""] = v.split("|");
+  const domaine = SECTORS.find((d) => d.id === id);
+  return { domaine, offre: trouverOffre(domaine, titre) };
 }
 
 const steps = [
@@ -37,7 +37,7 @@ function SubscriptionForm() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const preselectedService = trouverService(searchParams.get("service") || "");
+  const preselectedService = choixInitial(searchParams);
 
   const [form, setForm] = useState({
     service: preselectedService,
@@ -53,7 +53,8 @@ function SubscriptionForm() {
   const [submitted, setSubmitted] = useState<null | { reference?: string; compteExistant?: boolean }>(null);
   const [captchaToken, setCaptchaToken] = useState("");
   const [fiche, setFiche] = useState<DossierSaisie>(dossierVide());
-  const montage = form.service === "montage-dossier";
+  const choisi = lireChoix(form.service);
+  const montage = choisi.domaine?.id === "marches-publics";
 
   if (status === "loading") {
     return (
@@ -77,10 +78,9 @@ function SubscriptionForm() {
       toast.error("Cochez la case anti-robot.");
       return;
     }
-    const choix = servicesList.find((s) => s.id === form.service);
     const payload = {
-      sector: choix?.sector ?? "Autre",
-      customService: choix?.label ?? form.service,
+      sector: choisi.domaine?.label ?? "Autre",
+      customService: choisi.offre?.title ?? (choisi.domaine ? `Autre besoin — ${choisi.domaine.label}` : null),
       brief: form.description,
       budget: form.budget || null,
       deadline: form.timeline || null,
@@ -168,10 +168,16 @@ function SubscriptionForm() {
           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none"
         >
           <option value="">Sélectionnez un service…</option>
-          {servicesList.map((s) => (
-            <option key={s.id} value={s.id}>{s.label}</option>
+          {SECTORS.map((d) => (
+            <optgroup key={d.id} label={d.label}>
+              {d.services.map((o) => <option key={o.title} value={`${d.id}|${o.title}`}>{o.title} ({prixOffre(o)})</option>)}
+              <option value={`${d.id}|`}>Autre besoin — {d.label}</option>
+            </optgroup>
           ))}
         </select>
+        {choisi.offre && (
+          <p className="mt-2 text-xs text-gray-500">{choisi.offre.description} · {prixOffre(choisi.offre)}{choisi.offre.duration ? ` · délai indicatif : ${choisi.offre.duration}` : ""}</p>
+        )}
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">

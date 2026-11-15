@@ -214,6 +214,9 @@ export function PiecesClient({ prestationId, pieces: depart, close = false, onMa
                   </div>
                   {p.commentaireAdmin && <p className="text-xs text-red-700 mt-1"><i className="fas fa-comment-dots mr-1" />SHIFT UP : {p.commentaireAdmin}</p>}
                   {p.statut === "INDISPONIBLE" && p.commentaireClient && <p className="text-xs text-amber-700 mt-1">Votre réponse : {p.commentaireClient}</p>}
+                  {/* Note de « Mes entreprises » : pièce reprise du coffre, ou pièce du coffre expirée avant la date limite */}
+                  {p.statut !== "INDISPONIBLE" && p.commentaireClient?.includes("coffre") && <p className="text-xs text-amber-700 mt-1"><i className="fas fa-building mr-1" />{p.commentaireClient}</p>}
+                  {p.statut !== "INDISPONIBLE" && p.commentaireClient?.startsWith("Reprise de") && <p className="text-xs text-su-bleu mt-1"><i className="fas fa-building mr-1" />{p.commentaireClient}</p>}
                   <Fichiers piece={p} onRetirer={modifiable && p.statut !== "VALIDE" ? (url) => appliquer({ action: "retirer", pieceId: p.id, url }) : undefined} />
                   {modifiable && p.statut !== "VALIDE" && indispo !== p.id && (
                     <div className="flex flex-wrap gap-2 mt-2">

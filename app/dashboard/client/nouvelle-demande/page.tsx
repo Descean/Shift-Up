@@ -8,32 +8,18 @@ import toast from "react-hot-toast";
 import { televerser } from "@/lib/televerser";
 import { SECTEUR_MONTAGE, dossierVide, type DossierSaisie } from "@/lib/montage";
 import FicheMarche, { ficheComplete } from "@/components/prestations/FicheMarche";
+import { SECTORS as CATALOGUE, trouverDomaine, prixOffre } from "@/lib/catalogue";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Service { id: string; title: string; description: string; priceMin: number; priceMax: number | null; duration: string | null; }
 
-/* ─── Données statiques ──────────────────────────────────────────────────── */
+/* ─── Catalogue (source commune avec la page /services) ────────────────── */
 const SECTORS = [
-  { value: "Conseil Stratégique",          icon: "fas fa-chess",              color: "from-primary to-accent",      desc: "Stratégie d'entreprise, audit, feuille de route" },
-  { value: "Marchés Publics & Dossiers",   icon: "fas fa-file-contract",      color: "from-primary to-accent",    desc: "Appels d'offres, dossiers de candidature, marchés publics" },
-  { value: "Juridique & Finance",          icon: "fas fa-scale-balanced",     color: "from-primary to-accent",    desc: "Droit des affaires, comptabilité, fiscalité OHADA" },
-  { value: "Marketing Digital",            icon: "fas fa-bullhorn",           color: "from-primary to-accent",     desc: "SEO, réseaux sociaux, publicité digitale, branding" },
-  { value: "BTP & Génie Civil",            icon: "fas fa-helmet-safety",      color: "from-primary to-accent",  desc: "Études, plans, suivi de chantiers, devis travaux" },
-  { value: "Solutions Numériques",         icon: "fas fa-code",               color: "from-primary to-accent",       desc: "Sites web, applications, logiciels sur mesure" },
-  { value: "Transformation Digitale",      icon: "fas fa-rocket",             color: "from-primary to-accent",    desc: "Digitalisation, automatisation, ERP, CRM" },
-  { value: "Data & Business Intelligence", icon: "fas fa-chart-line",         color: "from-primary to-accent",   desc: "Tableaux de bord, analyses, rapports décisionnels" },
-  { value: "Formation & Coaching",         icon: "fas fa-graduation-cap",     color: "from-primary to-accent",    desc: "Formation professionnelle, coaching, montée en compétences" },
-  { value: "RSE & Développement Durable",  icon: "fas fa-leaf",               color: "from-primary to-accent",     desc: "Stratégie RSE, impact environnemental, rapports durabilité" },
-  { value: "Finance & Investissement",     icon: "fas fa-coins",              color: "from-primary to-accent",  desc: "Business plan, levée de fonds, analyse financière" },
-  { value: "Autre",                        icon: "fas fa-box-open",           color: "from-primary to-accent",      desc: "Besoin spécifique non listé ci-dessus" },
+  ...CATALOGUE.map((d) => ({ value: d.label, id: d.id, icon: d.icon, color: "from-primary to-accent", desc: d.intro })),
+  { value: "Autre", id: "autre", icon: "fas fa-box-open", color: "from-primary to-accent", desc: "Besoin spécifique non listé ci-dessus" },
 ];
 
-/** Identifiants des secteurs de la page /services (lien « Démarrer ») */
-const SECTEURS_PAGE: Record<string, string> = {
-  conseil: "Conseil Stratégique", "marches-publics": "Marchés Publics & Dossiers", juridique: "Juridique & Finance",
-  marketing: "Marketing Digital", btp: "BTP & Génie Civil", numerique: "Solutions Numériques",
-  transformation: "Transformation Digitale", data: "Data & Business Intelligence", formation: "Formation & Coaching",
-  rse: "RSE & Développement Durable", finance: "Finance & Investissement",
-};
+/** Offre proposée à l'étape 2 : offre du catalogue (prix indicatif) ou service ajouté dans l'admin. */
+type Choix = Service & { source: "catalogue" | "base"; prix: string };
 
 const BUDGETS  = ["< 100 000 XOF", "100 000 – 300 000 XOF", "300 000 – 500 000 XOF", "500 000 – 1 000 000 XOF", "> 1 000 000 XOF", "À discuter"];
 const DEADLINES = ["Urgent (< 1 semaine)", "2 semaines", "1 mois", "2-3 mois", "Plus de 3 mois", "Flexible"];
@@ -45,7 +31,7 @@ export default function NouvelleDemandePage() {
 
   const [step, setStep]           = useState(1); // 1=Secteur 2=Service 3=Besoin 4=Infos 5=Confirmation
   const [sector, setSector]       = useState<string>("");
-  const [services, setServices]   = useState<Service[]>([]);
+  const [services, setServices]   = useState<Choix[]>([]);
   const [serviceId, setServiceId] = useState<string>("");
   const [customService, setCustomService] = useState("");
   const [brief, setBrief]         = useState("");
@@ -63,6 +49,18 @@ export default function NouvelleDemandePage() {
   const [envoiDao, setEnvoiDao]   = useState(false);
   const daoRef = useRef<HTMLInputElement>(null);
   const montage = sector === SECTEUR_MONTAGE;
+  // « Mes entreprises » : entreprise soumissionnaire et reprise automatique des pièces de son coffre
+  const [entreprises, setEntreprises] = useState<{ id: string; nom: string; pieces: { dateExpiration: string | null }[] }[]>([]);
+  const [entrepriseId, setEntrepriseId] = useState("");
+  useEffect(() => {
+    fetch("/api/client/entreprises").then((r) => r.json()).then((d) => {
+      const liste = d.entreprises ?? [];
+      setEntreprises(liste);
+      // Arrivée depuis « Mes entreprises » : entreprise déjà choisie
+      const choisie = liste.find((x: { id: string }) => x.id === new URLSearchParams(window.location.search).get("entreprise"));
+      if (choisie) { setEntrepriseId(choisie.id); setFiche((f) => ({ ...f, soumissionnaire: choisie.nom })); setCompany(choisie.nom); }
+    }).catch(() => {});
+  }, []);
 
   // Service choisi sur la page /services (?sector=…&service=…)
   const [servicePrevu, setServicePrevu] = useState("");
@@ -91,7 +89,7 @@ export default function NouvelleDemandePage() {
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     if (q.get("avis")) return;
-    const sec = SECTEURS_PAGE[q.get("sector") ?? ""] ?? SECTORS.find((x) => x.value === q.get("sector"))?.value;
+    const sec = trouverDomaine(q.get("sector"))?.label;
     if (sec) {
       setSector(sec);
       setServicePrevu(q.get("service") ?? "");
@@ -99,24 +97,34 @@ export default function NouvelleDemandePage() {
     }
   }, []);
 
-  // Chargement des services du secteur sélectionné (catalogue public)
+  // Offres du domaine : catalogue commun + services ajoutés dans l'admin (sans doublon d'intitulé)
   useEffect(() => {
     if (!sector || sector === "Autre") { setServices([]); setServiceId(""); return; }
+    const domaine = trouverDomaine(sector);
+    const duCatalogue: Choix[] = (domaine?.services ?? []).map((o) => ({
+      id: `offre:${o.title}`, title: o.title, description: o.description, priceMin: 0, priceMax: null,
+      duration: o.duration ?? null, source: "catalogue", prix: prixOffre(o),
+    }));
+    const choisir = (liste: Choix[]) => {
+      setServices(liste);
+      const prevu = servicePrevu.trim().toLowerCase();
+      const trouve = prevu ? liste.find((s) => s.title.trim().toLowerCase() === prevu) : null;
+      if (trouve) { setServiceId(trouve.id); setCustomService(trouve.source === "catalogue" ? trouve.title : ""); }
+      else if (prevu) { setServiceId("autre"); setCustomService(servicePrevu); }
+      else setServiceId("");
+    };
+    choisir(duCatalogue);
     setLoadingServices(true);
     fetch("/api/services")
       .then((r) => r.json())
       .then((d) => {
-        const filtered = (d.services ?? []).filter((s: Service & { domain: string; isActive: boolean }) =>
-          s.domain === sector && s.isActive
-        );
-        setServices(filtered);
-        const prevu = servicePrevu.trim().toLowerCase();
-        const trouve = prevu ? filtered.find((s: Service) => s.title.trim().toLowerCase() === prevu) : null;
-        if (trouve) { setServiceId(trouve.id); setCustomService(""); }
-        else if (prevu) { setServiceId("autre"); setCustomService(servicePrevu); }
-        else setServiceId("");
+        const titres = new Set(duCatalogue.map((o) => o.title.trim().toLowerCase()));
+        const deLaBase: Choix[] = (d.services ?? [])
+          .filter((s: Service & { domain: string; isActive: boolean }) => s.isActive && trouverDomaine(s.domain)?.id === domaine?.id && !titres.has(s.title.trim().toLowerCase()))
+          .map((s: Service) => ({ ...s, source: "base" as const, prix: `${s.priceMin.toLocaleString("fr-FR")}${s.priceMax ? ` – ${s.priceMax.toLocaleString("fr-FR")}` : " et plus"} XOF` }));
+        if (deLaBase.length) choisir([...duCatalogue, ...deLaBase]);
       })
-      .catch(() => setServices([]))
+      .catch(() => {})
       .finally(() => setLoadingServices(false));
   }, [sector, servicePrevu]);
 
@@ -155,10 +163,12 @@ export default function NouvelleDemandePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sector, serviceId: serviceId || null, customService: customService || null,
+          sector,
+          serviceId: selectedService?.source === "base" ? selectedService.id : null,
+          customService: selectedService?.source === "catalogue" ? selectedService.title : (customService || null),
           brief, budget, deadline, company, phone,
           attachments: files.map((f) => f.url),
-          ...(montage ? { dossier: fiche, dao: dao ? { url: dao.url, nom: dao.name } : null } : {}),
+          ...(montage ? { dossier: fiche, dao: dao ? { url: dao.url, nom: dao.name } : null, entrepriseId: entrepriseId || null } : {}),
         }),
       });
       const d = await r.json();
@@ -261,7 +271,7 @@ export default function NouvelleDemandePage() {
                   placeholder="Ex: Traduction de documents, photographie..."
                 />
               </div>
-            ) : loadingServices ? (
+            ) : loadingServices && services.length === 0 ? (
               <div className="bg-gray-50 rounded-2xl p-6 text-center text-gray-400 text-sm">
                 <i className="fas fa-spinner fa-spin text-2xl mb-2 block" />
                 Chargement des services…
@@ -281,7 +291,7 @@ export default function NouvelleDemandePage() {
                 {services.map((s) => (
                   <button
                     key={s.id}
-                    onClick={() => setServiceId(s.id)}
+                    onClick={() => { setServiceId(s.id); setCustomService(s.source === "catalogue" ? s.title : ""); }}
                     className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${serviceId === s.id ? "border-accent bg-accent/5" : "border-gray-100 bg-white hover:border-gray-200"}`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -289,7 +299,7 @@ export default function NouvelleDemandePage() {
                         <p className={`font-syne font-bold text-sm ${serviceId === s.id ? "text-accent" : "text-primary"}`}>{s.title}</p>
                         <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{s.description}</p>
                         <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                          <span><i className="fas fa-tag mr-1" />{s.priceMin.toLocaleString()}{s.priceMax ? ` – ${s.priceMax.toLocaleString()}` : "+"} XOF</span>
+                          <span><i className="fas fa-tag mr-1" />{s.prix}</span>
                           {s.duration && <span><i className="fas fa-clock mr-1" />{s.duration}</span>}
                         </div>
                       </div>
@@ -350,6 +360,27 @@ export default function NouvelleDemandePage() {
             {montage && (
               <>
                 {avisVeille && <p className="text-xs text-accent bg-accent/5 rounded-xl px-3 py-2"><i className="fas fa-binoculars mr-1.5" />Fiche pré-remplie depuis votre veille (avis {avisVeille}). Vérifiez-la et indiquez l&apos;entreprise qui soumissionne.</p>}
+                <div className="rounded-2xl border border-su-lavande bg-su-brume p-4 space-y-2">
+                  <label htmlFor="f-entreprise" className="block text-sm font-medium text-su-nuit">Entreprise qui soumissionne</label>
+                  {entreprises.length > 0 ? (
+                    <select id="f-entreprise" value={entrepriseId}
+                      onChange={(e) => {
+                        const id = e.target.value; setEntrepriseId(id);
+                        const ent = entreprises.find((x) => x.id === id);
+                        if (ent) { setFiche((f) => ({ ...f, soumissionnaire: ent.nom })); setCompany(ent.nom); }
+                      }}
+                      className="w-full border border-su-lavande bg-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-su-bleu">
+                      <option value="">Autre entreprise (saisie ci-dessous)</option>
+                      {entreprises.map((x) => <option key={x.id} value={x.id}>{x.nom} — {x.pieces.length} pièce(s) au coffre</option>)}
+                    </select>
+                  ) : null}
+                  <p className="text-xs text-gray-500">
+                    {entreprises.length > 0
+                      ? "Les pièces de son coffre encore valides à la date limite seront reprises automatiquement."
+                      : "Enregistrez vos entreprises et leurs pièces une fois pour toutes : elles seront reprises à chaque dossier."}
+                    {" "}<a href="/dashboard/client/entreprises" className="font-semibold text-su-bleu underline">Mes entreprises</a>
+                  </p>
+                </div>
                 <FicheMarche valeur={fiche} onChange={setFiche} />
                 <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
                   <p className="text-sm font-medium text-gray-700"><i className="fas fa-file-contract mr-1.5 text-accent" />Dossier d&apos;appel d&apos;offres (DAO) <span className="text-gray-400 font-normal">— recommandé</span></p>
@@ -408,13 +439,13 @@ export default function NouvelleDemandePage() {
               )}
               <button
                 onClick={() => fileRef.current?.click()}
-                disabled={uploading || files.length >= 5}
+                disabled={uploading || files.length >= 10}
                 className="flex items-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500 hover:border-accent hover:text-accent transition-colors w-full justify-center disabled:opacity-50"
               >
                 {uploading ? <><span className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />Upload en cours…</> : <><i className="fas fa-cloud-arrow-up" />Ajouter un fichier (PDF, image, Word…)</>}
               </button>
               <input ref={fileRef} type="file" className="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.zip,.txt" onChange={handleFileUpload} />
-              {files.length >= 5 && <p className="text-xs text-gray-400 mt-1">Maximum 5 fichiers atteint.</p>}
+              {files.length >= 10 && <p className="text-xs text-gray-400 mt-1">Maximum 10 fichiers atteint.</p>}
             </div>
 
             <div className="flex gap-3">
@@ -447,13 +478,13 @@ export default function NouvelleDemandePage() {
                   {BUDGETS.map((b) => <option key={b}>{b}</option>)}
                 </select>
               </div>
-              <div>
+              {!montage && <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Délai souhaité</label>
                 <select value={deadline} onChange={(e) => setDeadline(e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
                   <option value="">Sélectionner…</option>
                   {DEADLINES.map((d) => <option key={d}>{d}</option>)}
                 </select>
-              </div>
+              </div>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -473,6 +504,7 @@ export default function NouvelleDemandePage() {
               <div className="flex justify-between"><span className="text-gray-500">Secteur</span><span className="font-medium text-primary">{sector}</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Service</span><span className="font-medium text-primary">{selectedService?.title ?? customService ?? "Personnalisé"}</span></div>
               {montage && <div className="flex justify-between gap-4"><span className="text-gray-500">Avis</span><span className="font-medium text-primary text-right">{fiche.referenceAvis}</span></div>}
+              {montage && entrepriseId && <div className="flex justify-between gap-4"><span className="text-gray-500">Coffre</span><span className="font-medium text-primary text-right">Pièces valides reprises de {entreprises.find((x) => x.id === entrepriseId)?.nom}</span></div>}
               {montage && <div className="flex justify-between gap-4"><span className="text-gray-500">DAO</span><span className="font-medium text-primary text-right">{dao ? "Joint" : "À déposer plus tard"}</span></div>}
               <div className="flex justify-between"><span className="text-gray-500">Pièces jointes</span><span className="font-medium text-primary">{files.length} fichier(s)</span></div>
             </div>
@@ -508,7 +540,7 @@ export default function NouvelleDemandePage() {
               <button onClick={() => router.push("/dashboard/client/prestations")} className="bg-su-bleu text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
                 <i className="fas fa-briefcase mr-2" />Voir mes prestations
               </button>
-              <button onClick={() => { setStep(1); setSector(""); setServiceId(""); setBrief(""); setFiles([]); setFiche(dossierVide()); setDao(null); }} className="border border-gray-200 px-6 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
+              <button onClick={() => { setStep(1); setSector(""); setServiceId(""); setBrief(""); setFiles([]); setFiche(dossierVide()); setDao(null); setEntrepriseId(""); }} className="border border-gray-200 px-6 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
                 Nouvelle demande
               </button>
             </div>

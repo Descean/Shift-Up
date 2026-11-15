@@ -9,6 +9,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { sendLivrableClient } from "@/lib/email";
+import { avertirClient } from "@/lib/notifications";
 import { envoyer, livrableAccessible } from "@/lib/prestations";
 
 async function requireAdmin() {
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           notifierClientWhatsApp(prestation.clientId, "shiftup_livrable", [prestation.client.name ?? "", serviceName, lienEspaceClient()]),
         ]);
       }
+      await avertirClient(id, "LIVRABLE", "Livrable disponible", `« ${title} » est disponible dans votre espace.`, { courriel: false });
     }
 
     return NextResponse.json({ livrable });
@@ -93,6 +95,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           notifierClientWhatsApp(prestation.clientId, "shiftup_livrable", [prestation.client.name ?? "", serviceName, lienEspaceClient()]),
         ]);
       }
+      await avertirClient(id, "LIVRABLE", "Livrable disponible", `« ${livrable.title} » est disponible dans votre espace.`, { courriel: false });
     }
 
     return NextResponse.json({ livrable });

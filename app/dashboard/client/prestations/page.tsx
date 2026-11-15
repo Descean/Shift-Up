@@ -10,6 +10,9 @@ import { televerser } from "@/lib/televerser";
 import { bilanPieces, lireMontage } from "@/lib/montage";
 import { PiecesClient, ResumeDossier } from "@/components/prestations/Pieces";
 import SuiviDossier, { BadgeSuivi } from "@/components/prestations/Suivi";
+import Frise from "@/components/prestations/Frise";
+import Discussion from "@/components/prestations/Discussion";
+import Journal from "@/components/prestations/Journal";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
 interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; verrouille?: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
@@ -58,7 +61,8 @@ export default function ClientPrestationsPage() {
   const router = useRouter();
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [loading, setLoading]         = useState(true);
-  const [selected, setSelected]       = useState<string | null>(null);
+  // Fiche ouverte depuis un lien (?id=…) : accueil, notification, courriel
+  const [selected, setSelected]       = useState<string | null>(() => (typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("id")));
   const [paying, setPaying]           = useState(false);
 
   const [agit, setAgit]               = useState<string | null>(null);
@@ -70,6 +74,16 @@ export default function ClientPrestationsPage() {
       .finally(() => setLoading(false));
   }
   useEffect(() => { charger(); }, []);
+
+  const ficheRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (selected && !loading) setTimeout(() => ficheRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+  }, [selected, loading]);
+  // Mise à jour automatique toutes les 60 s (étapes, paiements, livrables)
+  useEffect(() => {
+    const t = setInterval(() => { void fetch("/api/prestations").then((r) => r.json()).then((d) => setPrestations(d.prestations ?? [])).catch(() => {}); }, 60_000);
+    return () => clearInterval(t);
+  }, []);
 
   /** Décision du client (devis, livraison). Renvoie true si elle a été enregistrée. */
   async function decider(id: string, action: string, commentaire?: string) {
@@ -115,8 +129,8 @@ export default function ClientPrestationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-syne font-black text-2xl text-primary">Mes Prestations</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Suivez l&apos;avancement de vos projets SHIFT UP.</p>
+          <h1 className="font-syne font-extrabold text-2xl text-primary">Mes demandes</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Devis, paiements, étapes, livrables et échanges avec l&apos;équipe, demande par demande.</p>
         </div>
         <Link href="/dashboard/client/nouvelle-demande" className="bg-su-bleu text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2">
           <i className="fas fa-plus" />Nouvelle demande
@@ -158,7 +172,7 @@ export default function ClientPrestationsPage() {
       {/* Panneau détail */}
       <AnimatePresence>
         {detail && (
-          <motion.div key={detail.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
+          <motion.div ref={ficheRef} key={detail.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="scroll-mt-24 bg-white rounded-2xl border border-su-lavande overflow-hidden">
             {/* Header panneau */}
             <div className="bg-su-nuit p-5 flex items-start justify-between">
               <div>
@@ -169,6 +183,9 @@ export default function ClientPrestationsPage() {
             </div>
 
             <div className="p-6 space-y-5">
+              {/* Où en est la demande, et ce que le client doit faire */}
+              <Frise p={detail} />
+
               {/* Statut + progress */}
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -382,6 +399,18 @@ export default function ClientPrestationsPage() {
                   onDecider={(action, c) => decider(detail.id, action, c)}
                 />
               )}
+
+              {/* Discussion avec l'équipe sur cette demande */}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 mb-2"><i className="fas fa-comments mr-1.5" />Discussion avec l&apos;équipe</p>
+                <Discussion prestationId={detail.id} close={detail.status === "ANNULEE"} />
+              </div>
+
+              {/* Historique de la demande */}
+              <details className="group rounded-2xl border border-su-lavande px-4 py-3">
+                <summary className="cursor-pointer text-xs font-semibold text-gray-500"><i className="fas fa-clock-rotate-left mr-1.5" />Historique de la demande</summary>
+                <div className="mt-4"><Journal prestationId={detail.id} /></div>
+              </details>
             </div>
           </motion.div>
         )}

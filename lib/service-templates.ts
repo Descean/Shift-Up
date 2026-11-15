@@ -4,6 +4,7 @@
  * Génère automatiquement les phases d'une prestation selon le domaine du service.
  * Utilisé lors du passage en statut EN_COURS (paiement confirmé).
  */
+import { trouverDomaine } from "@/lib/catalogue";
 
 export interface PhaseTemplate {
   title: string;
@@ -73,7 +74,16 @@ const defaultTemplate: PhaseTemplate[] = [
   { title: "Livraison", description: "Remise des livrables et validation par le client.", duration: "1-2 jours", order: 2 },
 ];
 
+/** Clé des modèles d'étapes pour chaque domaine du catalogue (les libellés ont changé avec la refonte). */
+const MODELE_PAR_DOMAINE: Record<string, string> = {
+  conseil: "Conseil Stratégique", "marches-publics": "Marchés Publics & Dossiers", numerique: "Solutions Numériques",
+  transformation: "Solutions Numériques", formation: "Formation", marketing: "Marketing Digital",
+  juridique: "Juridique & Finance", finance: "Juridique & Finance",
+};
+
 export function getPhaseTemplates(sector?: string | null): PhaseTemplate[] {
   if (!sector) return defaultTemplate;
-  return templates[sector] ?? defaultTemplate;
+  if (templates[sector]) return templates[sector];
+  const id = trouverDomaine(sector)?.id;
+  return (id && templates[MODELE_PAR_DOMAINE[id]]) || defaultTemplate;
 }

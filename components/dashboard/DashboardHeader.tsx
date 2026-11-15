@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import Cloche from "@/components/dashboard/Cloche";
 
 interface DashboardHeaderProps {
   user?: {
@@ -32,6 +33,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3 ml-auto">
+        <Cloche />
+
         {/* Help */}
         <Link
           href="/faq"

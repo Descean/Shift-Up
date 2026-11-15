@@ -10,6 +10,8 @@ import prisma from "@/lib/prisma";
 import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { getPhaseTemplates } from "@/lib/service-templates";
 import { sendPaiementAdmin } from "@/lib/email";
+import { nomService } from "@/lib/prestations-noms";
+import { avertirClient } from "@/lib/notifications";
 
 export const TYPE_APERCU = "APERCU";
 
@@ -24,9 +26,7 @@ export function livrableAccessible(l: { type: string; isAvailable: boolean }, p:
   return l.isAvailable && (l.type === TYPE_APERCU || soldeRegle(p));
 }
 
-export function nomService(p: { service?: { title: string } | null; customService?: string | null; sector?: string | null }) {
-  return p.service?.title ?? p.customService ?? p.sector ?? "Prestation";
-}
+export { nomService } from "@/lib/prestations-noms";
 
 /** Prépare une prestation pour l'espace client : liens des livrables verrouillés retirés. */
 export function vueClient<T extends Montants & { livrables?: { type: string; isAvailable: boolean; url: string | null }[] }>(p: T) {
@@ -97,5 +97,13 @@ export async function confirmerPaiement(paymentId: string) {
     }),
     alerterEquipeWhatsApp("Paiement reçu", `${maj.client.name ?? maj.client.email ?? "Client"} — ${Math.round(payment.amount).toLocaleString("fr-FR")} F — ${nomService(maj)}`),
   ]);
+  const montant = `${Math.round(payment.amount).toLocaleString("fr-FR")} F`;
+  const reste = Math.max(0, maj.amount - maj.amountPaid);
+  await avertirClient(p.id, "PAIEMENT", "Paiement reçu",
+    demarrage
+      ? `Nous avons bien reçu votre acompte de ${montant}. Les travaux démarrent : vous pouvez suivre chaque étape dans votre espace.`
+      : reste > 1
+        ? `Nous avons bien reçu votre paiement de ${montant}. Il reste ${Math.round(reste).toLocaleString("fr-FR")} F à régler.`
+        : `Nous avons bien reçu votre paiement de ${montant}. Votre prestation est entièrement réglée : les livrables sont téléchargeables.`);
   return true;
 }

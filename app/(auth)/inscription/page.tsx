@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { retourDepuisAdresse } from "@/lib/retour";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,7 +83,7 @@ export default function InscriptionPage() {
           password: data.password,
           redirect: false,
         });
-        router.push("/dashboard/client");
+        router.push(retourDepuisAdresse());
       } else {
         toast.error(json.error || "Erreur lors de la création du compte");
       }
@@ -98,7 +99,7 @@ export default function InscriptionPage() {
       <h1 className="font-syne font-black text-3xl text-primary mb-2">Créer un compte</h1>
       <p className="text-gray-500 mb-6">
         Déjà inscrit ?{" "}
-        <Link href="/connexion" className="text-accent font-semibold hover:underline">
+        <Link href="/connexion" className="text-accent font-semibold hover:underline" onClick={(e) => { e.preventDefault(); router.push(`/connexion${window.location.search}`); }}>
           Se connecter
         </Link>
       </p>
