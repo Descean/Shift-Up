@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -13,11 +13,12 @@ import SuiviDossier, { BadgeSuivi } from "@/components/prestations/Suivi";
 import Frise from "@/components/prestations/Frise";
 import Discussion from "@/components/prestations/Discussion";
 import Journal from "@/components/prestations/Journal";
+import Visionneuse from "@/components/prestations/Visionneuse";
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface Phase { id: string; title: string; status: string; progress: number; order: number; }
 interface Livrable { id: string; title: string; type: string; url: string | null; isAvailable: boolean; verrouille?: boolean; observation?: string | null; phase?: { id: string; title: string; order: number } | null; }
 interface QuoteItem { label: string; amount: number; }
-interface Quote { items: QuoteItem[]; deposit: number; total: number; validity?: string; terms?: string; }
+interface Quote { items: QuoteItem[]; deposit: number; total: number; validity?: string; terms?: string; auto?: boolean; resume?: string; livrables?: { titre: string; description?: string }[]; pointsAttention?: string[]; }
 interface Prestation {
   id: string;
   service: { title: string } | null;
@@ -35,6 +36,8 @@ interface Prestation {
   deadline: string | null;
   company: string | null;
   createdAt: string;
+  endDate?: string | null;
+  updatedAt?: string;
   estimatedEndDate: string | null;
   prestationPhases: Phase[];
   livrables: Livrable[];
@@ -81,7 +84,7 @@ export default function ClientPrestationsPage() {
   }, [selected, loading]);
   // Mise à jour automatique toutes les 60 s (étapes, paiements, livrables)
   useEffect(() => {
-    const t = setInterval(() => { void fetch("/api/prestations").then((r) => r.json()).then((d) => setPrestations(d.prestations ?? [])).catch(() => {}); }, 60_000);
+    const t = setInterval(() => { void fetch("/api/prestations").then((r) => r.json()).then((d) => setPrestations(d.prestations ?? [])).catch(() => {}); }, 15_000);
     return () => clearInterval(t);
   }, []);
 
@@ -185,6 +188,7 @@ export default function ClientPrestationsPage() {
             <div className="p-6 space-y-5">
               {/* Où en est la demande, et ce que le client doit faire */}
               <Frise p={detail} />
+              <AvisEffacement p={detail} />
 
               {/* Statut + progress */}
               <div>
@@ -268,6 +272,24 @@ export default function ClientPrestationsPage() {
                     <p className="font-syne font-bold text-accent-700 text-sm">Votre devis est prêt</p>
                   </div>
                   <div className="p-5 space-y-3">
+                    {/* Ce que nous avons compris et ce que vous recevrez (devis automatique) */}
+                    {detail.quote.resume && <p className="text-sm leading-relaxed text-su-nuit">{detail.quote.resume}</p>}
+                    {detail.quote.livrables && detail.quote.livrables.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1.5">Ce que vous recevrez</p>
+                        <ul className="space-y-1">
+                          {detail.quote.livrables.map((l, i) => (
+                            <li key={i} className="flex gap-2 text-sm text-gray-700"><i className="fas fa-check mt-1 text-[10px] text-su-bleu" /><span><strong className="font-medium text-su-nuit">{l.titre}</strong>{l.description ? ` — ${l.description}` : ""}</span></li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {detail.quote.pointsAttention && detail.quote.pointsAttention.length > 0 && (
+                      <div className="rounded-xl bg-amber-50 px-3.5 py-2.5 text-xs text-amber-800">
+                        <p className="mb-1 font-semibold"><i className="fas fa-triangle-exclamation mr-1" />Points à vérifier dans votre dossier</p>
+                        <ul className="list-disc space-y-0.5 pl-4">{detail.quote.pointsAttention.map((x, i) => <li key={i}>{x}</li>)}</ul>
+                      </div>
+                    )}
                     {/* Lignes devis */}
                     <table className="w-full text-sm">
                       <tbody>
@@ -329,8 +351,14 @@ export default function ClientPrestationsPage() {
                       {detail.status === "DEVIS_ENVOYE" ? "Accepter le devis et payer l'acompte" : "Payer l'acompte et démarrer"} — {detail.quote.deposit.toLocaleString()} XOF
                     </button>
                     <ChoixDevis onDecider={(action, c) => decider(detail.id, action, c)} occupe={agit !== null} />
+                    {detail.quote.auto && <p className="text-center text-[11px] text-gray-500">Devis établi automatiquement à partir de votre dossier. « Demander une modification » l&apos;envoie à l&apos;équipe, qui l&apos;ajuste et vous le renvoie.</p>}
                   </div>
                 </div>
+              )}
+
+              {/* Lecture du dossier en cours (devis automatique) */}
+              {detail.status === "EN_ATTENTE" && !detail.quote && (
+                <AnalyseEnCours statut={(detail.customFields as { analyseIA?: { statut?: string } } | null)?.analyseIA?.statut} />
               )}
 
               {/* Pièces jointes (hors pièces du dossier, déjà listées plus haut) */}
@@ -429,8 +457,41 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+/* ─── Effacement des fichiers 30 jours après la fin ─────────────────────── */
+function AvisEffacement({ p }: { p: { status: string; endDate?: string | null; updatedAt?: string; customFields?: unknown } }) {
+  if (!["TERMINEE", "ANNULEE"].includes(p.status)) return null;
+  const cf = (p.customFields ?? {}) as { effaceLe?: string };
+  if (cf.effaceLe) {
+    return <p className="rounded-xl bg-gray-50 px-4 py-2.5 text-xs text-gray-600"><i className="fas fa-broom mr-1.5" />Les fichiers et les échanges de cette demande ont été effacés le {new Date(cf.effaceLe).toLocaleDateString("fr-FR")}. Le devis et les factures restent disponibles.</p>;
+  }
+  const fin = p.endDate ?? p.updatedAt;
+  if (!fin) return null;
+  const date = new Date(new Date(fin).getTime() + 30 * 86_400_000).toLocaleDateString("fr-FR");
+  return <p className="rounded-xl bg-amber-50 px-4 py-2.5 text-xs text-amber-800"><i className="fas fa-clock mr-1.5" />Les fichiers et les échanges de cette demande seront effacés le {date}. Téléchargez les livrables que vous souhaitez garder.</p>;
+}
+
+/* ─── Lecture du dossier par l'IA (avant le devis) ──────────────────────── */
+function AnalyseEnCours({ statut }: { statut?: string }) {
+  const enCours = statut === "en_attente" || statut === "en_cours";
+  return (
+    <div className="flex items-center gap-4 rounded-2xl border border-su-lavande bg-su-brume p-5">
+      {enCours
+        ? <span className="h-8 w-8 flex-none animate-spin rounded-full border-2 border-su-bleu border-t-transparent" />
+        : <i className="fas fa-user-clock text-2xl text-su-bleu" />}
+      <div>
+        <p className="text-sm font-semibold text-su-nuit">{enCours ? "Nous lisons votre dossier" : "Votre dossier est entre les mains de l'équipe"}</p>
+        <p className="text-xs text-gray-600">{enCours
+          ? "Votre devis, avec la liste de ce que vous recevrez et les étapes, s'affiche ici dans quelques minutes. Vous recevrez aussi un courriel."
+          : "Le devis vous sera envoyé sous 48 heures ouvrées. Vous serez prévenu par courriel et dans votre espace."}</p>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Livrables + Observations ───────────────────────────────────────────── */
 function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; prestationId: string }) {
+  const [lecture, setLecture] = useState<Livrable | null>(null);
+  const fermerLecture = useCallback(() => setLecture(null), []);
   const [obs, setObs] = useState<Record<string, string>>({});
   const [sending, setSending] = useState<string | null>(null);
   const [recording, setRecording] = useState<string | null>(null); // livrableId en cours d'enregistrement
@@ -517,8 +578,11 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
   return (
     <div>
       <p className="text-xs font-semibold text-gray-500 mb-2">
-        <i className="fas fa-box-open mr-1.5" />Livrables disponibles
+        <i className="fas fa-box-open mr-1.5" />Livrables
       </p>
+      {lecture && (
+        <Visionneuse livrableId={lecture.id} titre={lecture.title} lienTelechargement={lecture.verrouille ? null : lecture.url} onFermer={fermerLecture} />
+      )}
       <div className="space-y-4">
         {grouped.map((group) => (
           <div key={group.phaseId ?? "no-phase"}>
@@ -529,43 +593,37 @@ function LivrablesSection({ livrables, prestationId }: { livrables: Livrable[]; 
             )}
             <div className="space-y-3">
         {group.items.map((l) => (
-          <div key={l.id} className={`${l.verrouille ? "bg-gray-50 border-gray-200" : "bg-green-50 border-green-200"} border rounded-xl overflow-hidden`}>
-            {l.verrouille ? (
-              <div className="flex items-center gap-3 p-3">
-                <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <i className="fas fa-lock text-gray-500 text-sm" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-700">{l.title}</p>
-                  <p className="text-xs text-gray-500">Téléchargeable après le règlement du solde</p>
-                </div>
-              </div>
-            ) : (
-            <a href={l.url ?? "#"} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3 hover:bg-green-100 transition-colors">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i className={`fas fa-${l.type === "APERCU" ? "eye" : (typeIcon[l.type] ?? "file")} text-green-600 text-sm`} />
+          <div key={l.id} className="rounded-xl border border-su-lavande bg-white overflow-hidden">
+            <div className="flex flex-wrap items-center gap-3 p-3">
+              <div className="w-9 h-9 bg-su-brume rounded-lg flex items-center justify-center flex-shrink-0">
+                <i className={`fas fa-${typeIcon[l.type] ?? "file"} text-su-bleu text-sm`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-green-800">{l.title}</p>
-                <p className="text-xs text-green-600">{l.type === "APERCU" ? "Aperçu provisoire, pour relecture" : l.type}</p>
+                <p className="text-sm font-medium text-su-nuit">{l.title}</p>
+                <p className="text-xs text-gray-500">{l.verrouille ? "Lecture dans votre espace · téléchargement après le solde" : "Prêt à télécharger"}</p>
               </div>
-              <i className="fas fa-arrow-up-right-from-square text-green-600 text-xs" />
-            </a>
-            )}
+              <button onClick={() => setLecture(l)} className="rounded-full bg-su-bleu px-4 py-2 text-xs font-semibold text-white hover:bg-su-cadet">
+                <i className="fas fa-book-open mr-1.5" />Lire
+              </button>
+              {!l.verrouille && l.url && (
+                <a href={l.url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-su-clair px-4 py-2 text-xs font-semibold text-su-bleu hover:border-su-bleu">
+                  <i className="fas fa-download mr-1.5" />Télécharger
+                </a>
+              )}
+            </div>
             {/* Observation */}
-            <div className="px-3 pb-3 border-t border-green-200 pt-2 space-y-2">
+            <div className="px-3 pb-3 border-t border-su-lavande pt-2 space-y-2">
               {l.observation && (
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-gray-500 italic pt-1">
                   <i className="fas fa-comment mr-1" />Votre dernière observation : {l.observation}
                 </p>
               )}
               <textarea
                 rows={2}
-                placeholder="Ajouter une observation ou retour sur ce livrable…"
+                placeholder="Vos observations sur ce livrable (elles partent au chargé de votre dossier)…"
                 value={obs[l.id] ?? ""}
                 onChange={(e) => setObs((prev) => ({ ...prev, [l.id]: e.target.value }))}
-                className="w-full text-xs border border-green-200 rounded-lg px-3 py-2 focus:outline-none focus:border-accent resize-none bg-white"
+                className="w-full text-xs border border-su-lavande rounded-lg px-3 py-2 focus:outline-none focus:border-su-bleu resize-none bg-white"
               />
               {/* Voice note status */}
               {uploading === l.id && (
@@ -721,7 +779,7 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
           <div className="flex items-center gap-2 mb-1">
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
             <p className="font-syne font-bold text-primary text-sm truncate">{name}</p>
-            {hasDevis && <span className="text-[10px] bg-accent-100 text-accent-600 font-bold px-2 py-0.5 rounded-full animate-pulse">ACTION REQUISE</span>}
+            {hasDevis && <span className="text-[11px] bg-su-bleu text-white font-semibold px-2 py-0.5 rounded-full">À faire</span>}
           </div>
           <div className="flex items-center gap-3 ml-4">
             <StatusBadge status={p.status} />

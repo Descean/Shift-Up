@@ -72,7 +72,11 @@ export async function confirmerPaiement(paymentId: string) {
   });
 
   if (demarrage && (await prisma.prestationPhase.count({ where: { prestationId: p.id } })) === 0) {
-    const templates = getPhaseTemplates(p.sector ?? null);
+    // Étapes du plan joint au devis (devis automatique ou devis de l'admin), sinon modèle du domaine
+    const duPlan = ((p.plan as { phases?: { title?: string; description?: string; order?: number }[] } | null)?.phases ?? [])
+      .filter((x) => x?.title?.trim())
+      .map((x, i) => ({ title: x.title!.trim().slice(0, 200), description: x.description ?? "", order: i }));
+    const templates = duPlan.length ? duPlan : getPhaseTemplates(p.sector ?? null);
     if (templates.length > 0) {
       await prisma.prestationPhase.createMany({
         data: templates.map((t) => ({
