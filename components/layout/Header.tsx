@@ -48,8 +48,8 @@ export default function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isDark
-          ? "bg-primary/98 backdrop-blur-md shadow-lg py-3"
-          : "bg-white/95 backdrop-blur-md border-b border-primary/8 py-4"
+          ? "bg-su-nuit/95 backdrop-blur-md shadow-lg py-3"
+          : "bg-su-brume/95 backdrop-blur-md border-b border-su-lavande py-4"
       )}
     >
       <div className="container-custom flex items-center justify-between">
@@ -71,11 +71,11 @@ export default function Header() {
           <div className="hidden sm:block">
             <p className={cn(
               "font-syne font-bold text-xl leading-none transition-colors duration-300",
-              isDark ? "text-white" : "text-primary"
+              isDark ? "text-white" : "text-su-nuit"
             )}>
               SHIFT UP
             </p>
-            <p className="text-accent text-[10px] tracking-widest uppercase">
+            <p className={cn("text-[10px] tracking-widest uppercase transition-colors duration-300", isDark ? "text-su-ciel" : "text-su-bleu")}>
               Excellence • Innovation
             </p>
           </div>
@@ -91,7 +91,7 @@ export default function Header() {
                 "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
                 isDark
                   ? "text-white/80 hover:text-white hover:bg-white/10"
-                  : "text-primary/70 hover:text-primary hover:bg-primary/8"
+                  : "text-su-nuit/70 hover:text-su-nuit hover:bg-su-lavande/60"
               )}
             >
               {link.label}
@@ -107,23 +107,23 @@ export default function Header() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200",
-                  isDark ? "bg-white/10 hover:bg-white/20" : "bg-primary/8 hover:bg-primary/15"
+                  isDark ? "bg-white/10 hover:bg-white/20" : "bg-su-lavande/60 hover:bg-su-lavande"
                 )}
               >
-                <div className="w-7 h-7 bg-gradient-to-br from-accent to-secondary rounded-full flex items-center justify-center">
+                <div className="w-7 h-7 bg-gradient-to-br from-su-bleu to-su-cadet rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-bold">
                     {session.user?.name?.charAt(0) || "U"}
                   </span>
                 </div>
                 <span className={cn(
                   "text-sm font-medium max-w-[120px] truncate transition-colors duration-300",
-                  isDark ? "text-white" : "text-primary"
+                  isDark ? "text-white" : "text-su-nuit"
                 )}>
                   {session.user?.name}
                 </span>
                 <i className={cn(
                   "fas fa-chevron-down text-xs transition-colors duration-300",
-                  isDark ? "text-white/60" : "text-primary/65"
+                  isDark ? "text-white/60" : "text-su-nuit/65"
                 )} />
               </button>
               <AnimatePresence>
@@ -138,7 +138,7 @@ export default function Header() {
                       href={dashboardHref}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      <i className="fas fa-grid-2 text-accent w-4" />
+                      <i className="fas fa-grid-2 text-su-bleu w-4" />
                       Mon tableau de bord
                     </Link>
                     <Link
@@ -146,7 +146,7 @@ export default function Header() {
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      <i className="fas fa-user text-accent w-4" />
+                      <i className="fas fa-user text-su-bleu w-4" />
                       Mon profil
                     </Link>
                     <hr className="border-gray-100" />
@@ -167,11 +167,11 @@ export default function Header() {
                 href="/connexion"
                 variant="ghost"
                 size="sm"
-                className={isDark ? "text-white hover:bg-white/10" : "text-primary hover:bg-primary/8"}
+                className={isDark ? "text-white hover:bg-white/10" : "text-su-nuit hover:bg-su-lavande/60"}
               >
                 Connexion
               </Button>
-              <Button href="/inscription" variant="gradient" size="sm" animate={false}>
+              <Button href="/inscription" variant="gradient" size="sm" animate={false} className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
                 Commencer
                 <i className="fas fa-arrow-right text-sm" />
               </Button>
@@ -188,17 +188,17 @@ export default function Header() {
         >
           <span className={cn(
             "block w-6 h-0.5 transition-all duration-300",
-            isDark ? "bg-white" : "bg-primary",
+            isDark ? "bg-white" : "bg-su-nuit",
             mobileOpen && "rotate-45 translate-y-2"
           )} />
           <span className={cn(
             "block w-6 h-0.5 transition-all duration-300",
-            isDark ? "bg-white" : "bg-primary",
+            isDark ? "bg-white" : "bg-su-nuit",
             mobileOpen && "opacity-0"
           )} />
           <span className={cn(
             "block w-6 h-0.5 transition-all duration-300",
-            isDark ? "bg-white" : "bg-primary",
+            isDark ? "bg-white" : "bg-su-nuit",
             mobileOpen && "-rotate-45 -translate-y-2"
           )} />
         </button>
@@ -214,8 +214,8 @@ export default function Header() {
             className={cn(
               "lg:hidden backdrop-blur-md border-t overflow-hidden",
               isDark
-                ? "bg-primary/98 border-white/10"
-                : "bg-white/98 border-primary/8"
+                ? "bg-su-nuit/95 border-white/10"
+                : "bg-su-brume/98 border-su-lavande"
             )}
           >
             <div className="container-custom py-4 flex flex-col gap-1">
@@ -228,16 +228,16 @@ export default function Header() {
                     "px-4 py-3 rounded-xl transition-colors",
                     isDark
                       ? "text-white/80 hover:text-white hover:bg-white/10"
-                      : "text-primary/70 hover:text-primary hover:bg-primary/8"
+                      : "text-su-nuit/70 hover:text-su-nuit hover:bg-su-lavande/60"
                   )}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-primary/10">
+              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-su-lavande">
                 {session ? (
                   <>
-                    <Button href={dashboardHref} variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-primary/30 text-primary"}>
+                    <Button href={dashboardHref} variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-su-bleu/40 text-su-nuit"}>
                       <i className="fas fa-grid-2" />
                       Mon tableau de bord
                     </Button>
@@ -247,10 +247,10 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Button href="/connexion" variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-primary/30 text-primary"}>
+                    <Button href="/connexion" variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-su-bleu/40 text-su-nuit"}>
                       Connexion
                     </Button>
-                    <Button href="/inscription" variant="gradient" size="md">
+                    <Button href="/inscription" variant="gradient" size="md" className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
                       Commencer gratuitement
                     </Button>
                   </>
