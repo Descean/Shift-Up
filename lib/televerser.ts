@@ -6,14 +6,18 @@ import { createClient } from "@supabase/supabase-js";
 
 export const TAILLE_MAX_TELEVERSEMENT = 50 * 1024 * 1024;
 
-export async function televerser(file: File): Promise<{ url: string; name: string; size: number }> {
+/** Visiteur sans compte : passer { jeton } (null au premier dépôt) ; le jeton à réutiliser est renvoyé. */
+export async function televerser(file: File, visiteur?: { jeton: string | null }): Promise<{ url: string; name: string; size: number; jeton?: string }> {
   if (file.size > TAILLE_MAX_TELEVERSEMENT) throw new Error("Fichier trop volumineux (50 Mo maximum).");
-  const type = file.type || "application/octet-stream";
-  const r = await fetch("/api/upload/url", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nom: file.name, type, taille: file.size }) });
+  const type = (file.type || "application/octet-stream").split(";")[0].trim();
+  const r = await fetch(visiteur ? "/api/upload/visiteur" : "/api/upload/url", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nom: file.name, type, taille: file.size, ...(visiteur ? { jeton: visiteur.jeton } : {}) }),
+  });
   const t = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(t.error ?? "Envoi impossible.");
   const sb = createClient(t.supabaseUrl, t.anonKey, { auth: { persistSession: false } });
   const { error } = await sb.storage.from("documents").uploadToSignedUrl(t.path, t.token, file, { contentType: type });
   if (error) throw new Error("Le fichier n'a pas pu être envoyé.");
-  return { url: t.url, name: file.name, size: file.size };
+  return { url: t.url, name: file.name, size: file.size, ...(t.jeton ? { jeton: t.jeton as string } : {}) };
 }

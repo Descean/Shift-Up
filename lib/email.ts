@@ -58,7 +58,7 @@ export async function sendDemandeConfirmation({ to, name, serviceName, prestatio
   const content = `
     <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
     <p style="color:#555;margin:0 0 20px;">Bonjour <strong>${esc(name)}</strong>,</p>
-    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong>. Notre équipe va l'analyser et vous envoyer un devis personnalisé sous <strong>48h ouvrées</strong>.</p>
+    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong>. Nous lisons votre dossier et vous prévenons dès que le devis est prêt.</p>
     <div style="background:#EFF4F7;border:1px solid #BACFDC;border-radius:10px;padding:16px;margin:20px 0;">
       <p style="margin:0;color:#31487A;font-size:14px;"><strong>Référence demande :</strong> ${prestationId.slice(-8).toUpperCase()}</p>
     </div>
@@ -155,7 +155,7 @@ export async function sendActivationCompte({ to, name, serviceName, prestationId
   const content = `
     <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre demande a bien été reçue ✅</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
-    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong> (référence <strong>${esc(prestationId.slice(-8).toUpperCase())}</strong>). Vous recevrez notre devis sous <strong>48 h ouvrées</strong>.</p>
+    <p style="color:#555;line-height:1.6;">Nous avons bien reçu votre demande pour <strong>${esc(serviceName)}</strong> (référence <strong>${esc(prestationId.slice(-8).toUpperCase())}</strong>). Nous vous prévenons dès que le devis est prêt.</p>
     <p style="color:#555;line-height:1.6;">Un espace client a été ouvert à votre nom : vous y suivrez le devis, les paiements et les livrables. Choisissez votre mot de passe pour l'activer :</p>
     ${btn("Activer mon espace client →", lien)}
     <p style="color:#888;font-size:13px;margin-top:8px;">Ce lien est valable 7 jours. Passé ce délai, utilisez « Mot de passe oublié » sur la page de connexion.</p>
