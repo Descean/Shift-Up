@@ -66,6 +66,16 @@ const config: Config = {
         dark: "#0A2533",
         light: "#F7F8FA",
         paper: "#FAFAF9",
+        // Palette de la refonte (accueil) : Oxford Blue, Space cadet, YInMn Blue, Jordy Blue, Lavender
+        su: {
+          nuit: "#192338",
+          cadet: "#1E2E4F",
+          bleu: "#31487A",
+          ciel: "#8FB3E2",
+          clair: "#B4C9E8",
+          lavande: "#D9E1F1",
+          brume: "#EEF2F9",
+        },
       },
       fontFamily: {
         syne: ["var(--font-syne)", "sans-serif"],

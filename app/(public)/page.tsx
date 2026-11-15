@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Hero from "@/components/home/Hero";
-import ServicesSection from "@/components/home/ServicesSection";
-import CountersSection from "@/components/home/CountersSection";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
-import CTASection from "@/components/home/CTASection";
+import HeroCercle from "@/components/home/HeroCercle";
+import EspaceClientSection from "@/components/home/EspaceClientSection";
+import { EngagementsSection, DomainesSection } from "@/components/home/EngagementsDomaines";
+import EquipeSection from "@/components/home/EquipeSection";
+import RendezVousSection from "@/components/home/RendezVousSection";
 
 export const revalidate = 3600;
 
@@ -67,11 +67,12 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Hero />
-      <CountersSection />
-      <ServicesSection />
-      <TestimonialsSection />
-      <CTASection />
+      <HeroCercle />
+      <EspaceClientSection />
+      <EngagementsSection />
+      <DomainesSection />
+      <EquipeSection />
+      <RendezVousSection />
     </>
   );
 }
