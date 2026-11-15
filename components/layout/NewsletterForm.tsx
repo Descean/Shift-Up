@@ -42,12 +42,12 @@ export default function NewsletterForm() {
         placeholder="votre@email.com"
         required
         disabled={loading}
-        className="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-accent w-full md:w-64 transition-colors disabled:opacity-60"
+        className="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-su-ciel w-full md:w-64 transition-colors disabled:opacity-60"
       />
       <button
         type="submit"
         disabled={loading || !email.trim()}
-        className="bg-accent hover:bg-accent/90 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap disabled:opacity-60"
+        className="bg-su-bleu hover:bg-su-cadet text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap disabled:opacity-60"
       >
         {loading ? (
           <span className="flex items-center gap-2">

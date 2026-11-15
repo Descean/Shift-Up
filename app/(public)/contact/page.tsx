@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
-import Button from "@/components/ui/Button";
+import { BandeauTitre, TitrePoints, titreFont } from "@/components/site/Gabarit";
+import { Icone } from "@/components/home/icones";
+import { ENTREPRISE } from "@/lib/entreprise";
 
 /**
  * Schéma de validation Zod du formulaire de contact.
@@ -39,14 +40,28 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const services = [
-  "Conseil Stratégique",
-  "Solutions Numériques",
-  "Formation & Coaching",
-  "Marketing Digital",
-  "Juridique & Fiscal",
-  "Finance & Comptabilité",
+  "Montage de dossiers d'appel d'offres",
+  "Conseil stratégique",
+  "Solutions numériques",
+  "Formation & coaching",
+  "Marketing digital",
+  "Juridique & fiscal",
+  "Finance & comptabilité",
   "Autre",
 ];
+
+const CARTE_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ENTREPRISE.siege)}`;
+
+const INFOS = [
+  { icone: "lieu", titre: "Adresse", lignes: ["Maison Léopold TCHIBOZO, Tankpè", "Abomey-Calavi, Atlantique, Bénin"], href: CARTE_URL },
+  { icone: "telephone", titre: "Téléphone", lignes: [ENTREPRISE.telephone], href: `tel:${ENTREPRISE.telephoneLien}` },
+  { icone: "whatsapp", titre: "WhatsApp", lignes: ["Réponse rapide en journée"], href: `https://wa.me/${ENTREPRISE.telephoneLien.replace("+", "")}` },
+  { icone: "mail", titre: "E-mail", lignes: [ENTREPRISE.email], href: `mailto:${ENTREPRISE.email}` },
+  { icone: "horloge", titre: "Horaires", lignes: ["Du lundi au vendredi", "de 8 h à 18 h"] },
+];
+
+const champ = "w-full rounded-xl border border-su-lavande bg-white px-4 py-3 text-[15px] text-su-nuit transition-colors placeholder:text-[#9CA3AF] focus:border-su-bleu focus:outline-none";
+const libelle = "mb-1.5 block text-sm font-semibold text-su-nuit";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -74,7 +89,7 @@ export default function ContactPage() {
         body: JSON.stringify(data),
       });
       if (res.ok) {
-        toast.success("Message envoyé ! Nous vous répondrons dans les 24h.");
+        toast.success("Message envoyé ! Nous vous répondons sous 24 heures ouvrées.");
         reset();
       } else {
         throw new Error();
@@ -88,245 +103,96 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="bg-primary pt-28 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
-        <div className="container-custom relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <i className="fas fa-envelope" />
-              Parlons de votre projet
-            </span>
-            <h1 className="font-syne font-black text-4xl sm:text-5xl text-white mb-4">
-              Contactez <span className="gradient-text">SHIFT UP</span>
-            </h1>
-            <p className="text-white/60 text-xl">
-              Notre équipe vous répond dans les 24h ouvrées. Premier RDV de diagnostic offert.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <BandeauTitre titre="Parlons de" accent="votre projet."
+        texte="Une question, un dossier à monter, un devis ? Écrivez-nous : nous répondons sous 24 heures ouvrées. Le premier rendez-vous de diagnostic est offert." />
 
-      <section className="section-padding bg-paper">
-        <div className="container-custom">
-          <div className="grid lg:grid-cols-5 gap-10">
-            {/* Contact info */}
-            <div className="lg:col-span-2 space-y-6">
-              {[
-                {
-                  icon: "fas fa-map-marker-alt",
-                  title: "Adresse",
-                  lines: ["Abomey-Calavi, Atlantique", "République du Bénin"],
-                  color: "from-primary to-accent",
-                },
-                {
-                  icon: "fas fa-phone",
-                  title: "Téléphone",
-                  lines: ["(+229) 01 95 03 50 99"],
-                  href: "tel:+2290195035099",
-                  color: "from-primary to-accent",
-                },
-                {
-                  icon: "fas fa-envelope",
-                  title: "Email",
-                  lines: ["contact@shiftup.bj"],
-                  href: "mailto:contact@shiftup.bj",
-                  color: "from-primary to-accent",
-                },
-                {
-                  icon: "fas fa-clock",
-                  title: "Horaires",
-                  lines: ["Lun – Ven : 8h – 18h", "Sam : 9h – 13h"],
-                  color: "from-primary to-accent",
-                },
-              ].map((c) => (
-                <motion.div
-                  key={c.title}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="flex gap-4 bg-white p-5 rounded-2xl shadow-card"
-                >
-                  <div className={`w-12 h-12 bg-gradient-to-br ${c.color} rounded-xl flex items-center justify-center flex-shrink-0 text-white`}>
-                    <i className={c.icon} />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-primary mb-1">{c.title}</p>
-                    {c.lines.map((l) =>
-                      c.href ? (
-                        <a key={l} href={c.href} className="block text-gray-500 text-sm hover:text-accent transition-colors">
-                          {l}
-                        </a>
-                      ) : (
-                        <p key={l} className="text-gray-500 text-sm">{l}</p>
-                      )
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-
-              {/* WhatsApp */}
-              <a
-                href="https://wa.me/2290195035099"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 bg-accent p-5 rounded-2xl text-white hover:bg-accent-600 transition-colors"
-              >
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <i className="fab fa-whatsapp text-2xl" />
-                </div>
-                <div>
-                  <p className="font-bold">WhatsApp Business</p>
-                  <p className="text-white/80 text-sm">Message instantané disponible</p>
-                </div>
-                <i className="fas fa-arrow-right ml-auto" />
-              </a>
-
-              {/* Calendly */}
-              <a
-                href="/contact#formulaire"
-                className="flex items-center gap-4 bg-accent p-5 rounded-2xl text-white hover:bg-accent/90 transition-colors"
-              >
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <i className="fas fa-calendar-alt text-xl" />
-                </div>
-                <div>
-                  <p className="font-bold">Demander un rendez-vous</p>
-                  <p className="text-white/80 text-sm">Diagnostic offert : nous vous proposons un créneau</p>
-                </div>
-                <i className="fas fa-arrow-right ml-auto" />
-              </a>
-            </div>
-
-            {/* Contact form */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="lg:col-span-3 bg-white rounded-3xl shadow-card p-8"
-            >
-              <h2 className="font-syne font-bold text-2xl text-primary mb-2">Envoyez-nous un message</h2>
-              <p className="text-gray-500 text-sm mb-6">Réponse garantie sous 24h ouvrées</p>
-
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <div className="grid sm:grid-cols-2 gap-5">
-                  <div>
-                    <label htmlFor="f-name" className="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
-                    <input
-                      id="f-name"
-                      {...register("name")}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
-                      placeholder="Jean Dupont"
-                    />
-                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="f-email" className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                    <input
-                      id="f-email"
-                      {...register("email")}
-                      type="email"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
-                      placeholder="vous@exemple.com"
-                    />
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-5">
-                  <div>
-                    <label htmlFor="f-phone" className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                    <input
-                      id="f-phone"
-                      {...register("phone")}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
-                      placeholder="+229 01 XX XX XX XX"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="f-service" className="block text-sm font-medium text-gray-700 mb-2">Service concerné</label>
-                    <select
-                      id="f-service"
-                      {...register("service")}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors bg-white"
-                    >
-                      <option value="">Sélectionner...</option>
-                      {services.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="f-subject" className="block text-sm font-medium text-gray-700 mb-2">Objet *</label>
-                  <input
-                    id="f-subject"
-                    {...register("subject")}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors"
-                    placeholder="Sujet de votre message"
-                  />
-                  {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>}
-                </div>
-
-                <div>
-                  <label htmlFor="f-message" className="block text-sm font-medium text-gray-700 mb-2">Message *</label>
-                  <textarea
-                    id="f-message"
-                    {...register("message")}
-                    rows={5}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors resize-none"
-                    placeholder="Décrivez votre projet ou votre besoin..."
-                  />
-                  {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>}
-                </div>
-
-                {/*
-                 * ── Case de consentement explicite ────────────────────────
-                 * Obligatoire selon l'Article 72 du Code du Numérique béninois.
-                 * La case N'EST PAS pré-cochée (valeur par défaut: false).
-                 * L'utilisateur doit cocher activement pour donner son consentement.
-                 *
-                 * Finalité du traitement : répondre à votre demande de contact,
-                 * vous rappeler si besoin, vous envoyer un devis.
-                 * Durée de conservation : 3 ans après le dernier contact.
-                 */}
-                <label className="flex items-start gap-3 cursor-pointer group">
-                  <input
-                    {...register("consentData")}
-                    type="checkbox"
-                    defaultChecked={false}
-                    className="mt-0.5 w-4 h-4 rounded text-accent border-gray-300 focus:ring-accent flex-shrink-0"
-                  />
-                  <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
-                    J'accepte que SHIFT UP traite mes données personnelles (nom, email, message)
-                    dans le but de répondre à ma demande.{" "}
-                    <a href="/confidentialite" className="text-accent hover:underline font-medium">
-                      Politique de confidentialité →
-                    </a>
+      <section className="bg-white pb-24 pt-16">
+        <div className="mx-auto grid max-w-[1200px] items-start gap-10 px-6 lg:grid-cols-[400px_minmax(0,1fr)]">
+          <div className="flex flex-col gap-3.5">
+            {INFOS.map((c) => {
+              const contenu = (
+                <>
+                  <span className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-su-brume text-su-bleu"><Icone nom={c.icone} taille={22} /></span>
+                  <span className="flex flex-col gap-0.5">
+                    <span className={`${titreFont} text-base font-bold text-su-nuit`}>{c.titre}</span>
+                    {c.lignes.map((l) => <span key={l} className="text-sm text-[#4B5563]">{l}</span>)}
                   </span>
-                </label>
-                {errors.consentData && (
-                  <p className="text-red-500 text-xs -mt-2 flex items-center gap-1">
-                    <i className="fas fa-circle-exclamation text-xs" />
-                    {errors.consentData.message}
-                  </p>
-                )}
+                </>
+              );
+              const cls = "flex items-center gap-4 rounded-2xl border border-su-lavande bg-white px-5 py-[18px]";
+              return c.href ? (
+                <a key={c.titre} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer"
+                  className={`${cls} transition-colors hover:border-su-bleu`}>{contenu}</a>
+              ) : <div key={c.titre} className={cls}>{contenu}</div>;
+            })}
+            <a href={CARTE_URL} target="_blank" rel="noopener noreferrer"
+              className="relative flex h-[200px] flex-col justify-end overflow-hidden rounded-2xl bg-su-nuit p-6 text-white">
+              <span aria-hidden="true" className="absolute right-[-60px] top-[-80px] h-[240px] w-[240px] rounded-full border-[28px] border-su-cadet" />
+              <span aria-hidden="true" className="absolute left-[40%] top-[38%] flex h-11 w-11 items-center justify-center rounded-full bg-su-bleu ring-8 ring-su-bleu/30"><Icone nom="lieu" taille={22} /></span>
+              <span className={`${titreFont} relative text-lg font-bold`}>Nous trouver à Tankpè</span>
+              <span className="relative flex items-center gap-1.5 text-sm text-su-ciel">Ouvrir dans Google Maps <Icone nom="fleche" taille={16} epaisseur={2} /></span>
+            </a>
+          </div>
 
-                <Button type="submit" variant="gradient" size="lg" loading={loading} className="w-full">
-                  {loading ? "Envoi en cours..." : "Envoyer le message"}
-                  {!loading && <i className="fas fa-paper-plane" />}
-                </Button>
+          <div id="formulaire" className="scroll-mt-28 rounded-3xl border border-su-lavande bg-su-brume p-7 sm:p-9">
+            <TitrePoints taille="text-[28px]">Envoyez-nous un message</TitrePoints>
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-7 flex flex-col gap-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="f-name" className={libelle}>Nom complet *</label>
+                  <input id="f-name" {...register("name")} className={champ} placeholder="Votre nom" />
+                  {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="f-email" className={libelle}>E-mail *</label>
+                  <input id="f-email" {...register("email")} type="email" className={champ} placeholder="vous@exemple.com" />
+                  {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+                </div>
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="f-phone" className={libelle}>Téléphone</label>
+                  <input id="f-phone" {...register("phone")} className={champ} placeholder="+229 01 XX XX XX XX" />
+                </div>
+                <div>
+                  <label htmlFor="f-service" className={libelle}>Service concerné</label>
+                  <select id="f-service" {...register("service")} className={champ}>
+                    <option value="">Sélectionner…</option>
+                    {services.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="f-subject" className={libelle}>Objet *</label>
+                <input id="f-subject" {...register("subject")} className={champ} placeholder="Sujet de votre message" />
+                {errors.subject && <p className="mt-1 text-xs text-red-600">{errors.subject.message}</p>}
+              </div>
+              <div>
+                <label htmlFor="f-message" className={libelle}>Message *</label>
+                <textarea id="f-message" {...register("message")} rows={5} className={`${champ} resize-none`} placeholder="Décrivez votre projet ou votre besoin…" />
+                {errors.message && <p className="mt-1 text-xs text-red-600">{errors.message.message}</p>}
+              </div>
 
-                {/* Mention légale récapitulative sous le bouton */}
-                <p className="text-xs text-gray-400 text-center">
-                  <i className="fas fa-lock mr-1" />
-                  Vos données sont traitées conformément au{" "}
-                  <strong>Code du Numérique béninois (Loi n°2017-20)</strong>.{" "}
-                  DPO : <a href="mailto:dpo@shiftup.bj" className="text-accent hover:underline">dpo@shiftup.bj</a>
-                </p>
-              </form>
-            </motion.div>
+              {/* Consentement explicite, case non pré-cochée (Art. 72 du Code du numérique béninois) */}
+              <label className="flex cursor-pointer items-start gap-3">
+                <input {...register("consentData")} type="checkbox" defaultChecked={false}
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-su-clair accent-su-bleu" />
+                <span className="text-sm leading-relaxed text-[#4B5563]">
+                  J&apos;accepte que SHIFT UP traite mes données personnelles (nom, e-mail, message) pour répondre à ma demande.{" "}
+                  <a href="/confidentialite" className="font-semibold text-su-bleu underline">Politique de confidentialité</a>
+                </span>
+              </label>
+              {errors.consentData && <p className="-mt-2 text-xs text-red-600">{errors.consentData.message}</p>}
+
+              <button type="submit" disabled={loading}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-su-bleu px-7 py-4 text-base font-semibold text-white transition-colors hover:bg-su-cadet disabled:opacity-60">
+                {loading ? "Envoi en cours…" : <>Envoyer le message <Icone nom="fleche" taille={18} epaisseur={2} /></>}
+              </button>
+              <p className="m-0 text-center text-xs text-[#6B7280]">
+                Vos données sont traitées conformément au Code du numérique béninois (loi n° 2017-20). DPO :{" "}
+                <a href="mailto:dpo@shiftup.bj" className="text-su-bleu underline">dpo@shiftup.bj</a>
+              </p>
+            </form>
           </div>
         </div>
       </section>

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import prisma from "@/lib/prisma";
+import NewsletterForm from "@/components/layout/NewsletterForm";
+import { BandeauTitre, Puce, TitrePoints, titreFont } from "@/components/site/Gabarit";
+import { Icone } from "@/components/home/icones";
 
 export const dynamic = "force-dynamic";
 
@@ -10,179 +13,102 @@ export const metadata: Metadata = {
   description: "Articles, actualités et ressources sur le conseil stratégique, le numérique et l'entrepreneuriat au Bénin.",
 };
 
-const COVER_COLORS = [
-  "from-accent-600 to-accent",
-  "from-accent-600 to-secondary-500",
-  "from-secondary-500 to-secondary-400",
-  "from-secondary to-primary-500",
-  "from-accent-600 to-accent-500",
-  "from-primary-600 to-primary-400",
-];
+const FONDS = ["bg-su-nuit", "bg-su-cadet", "bg-su-bleu"];
 
-const categories = [
-  "Tous",
-  "Conseil & Stratégie",
-  "Marchés Publics & Dossiers",
-  "Juridique & Comptabilité",
-  "Communication & Marketing",
-  "BTP & Génie Civil",
-  "Solutions Numériques",
-  "Transformation Digitale",
-  "Data & Business Intelligence",
-  "Formation & Coaching",
-  "RSE & Développement Durable",
-  "Finance & Investissement",
-];
+function Couverture({ image, categorie, index, grande = false }: { image: string | null; categorie: string; index: number; grande?: boolean }) {
+  return (
+    <div className={`relative overflow-hidden ${grande ? "min-h-[280px] lg:min-h-full" : "h-44"} ${FONDS[index % FONDS.length]}`}
+      style={image ? { backgroundImage: `url(${image})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+      {!image && <>
+        <span aria-hidden="true" className="absolute right-[-70px] top-[-90px] h-[260px] w-[260px] rounded-full border-[30px] border-white/10" />
+        <span aria-hidden="true" className="absolute bottom-[-60px] left-[-40px] h-[180px] w-[180px] rounded-full border border-su-ciel/40" />
+      </>}
+      <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-su-bleu">{categorie}</span>
+    </div>
+  );
+}
 
-export default async function BlogPage() {
+export default async function BlogPage({ searchParams }: { searchParams: Promise<{ categorie?: string }> }) {
+  const { categorie } = await searchParams;
   const dbPosts = await prisma.blogPost.findMany({
     where: { published: true },
     orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
     select: {
-      id: true, slug: true, title: true, excerpt: true,
-      category: true, tags: true, authorName: true,
-      publishedAt: true, readTime: true, views: true, featured: true,
+      id: true, slug: true, title: true, excerpt: true, coverImage: true,
+      category: true, authorName: true, publishedAt: true, readTime: true, featured: true,
     },
   }).catch(() => []);
 
-  const posts = dbPosts.map((p, i) => ({
-    ...p,
-    author: p.authorName,
-    authorInitials: p.authorName.split(" ").map((n: string) => n[0]).slice(0, 2).join(""),
-    coverColor: COVER_COLORS[i % COVER_COLORS.length],
-  }));
-
-  const featured = posts.find((p) => p.featured);
-  const rest = posts.filter((p) => !p.featured);
+  const categories = Array.from(new Set(dbPosts.map((p) => p.category)));
+  const posts = categorie ? dbPosts.filter((p) => p.category === categorie) : dbPosts;
+  const featured = posts.find((p) => p.featured) ?? posts[0];
+  const rest = posts.filter((p) => p !== featured);
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="bg-primary pt-28 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
-        <div className="container-custom relative z-10 max-w-2xl">
-          <span className="inline-flex items-center gap-2 bg-white/10 text-accent-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <i className="fas fa-newspaper" />
-            Blog & Ressources
-          </span>
-          <h1 className="font-syne font-black text-4xl sm:text-5xl text-white mb-4">
-            Insights & <span className="gradient-text">Expertise</span>
-          </h1>
-          <p className="text-white/60 text-xl">
-            Articles de fond, guides pratiques et actualités sur l'entrepreneuriat, le digital et la stratégie.
-          </p>
-        </div>
-      </section>
-
-      <section className="section-padding bg-paper">
-        <div className="container-custom">
-          {/* Category filter */}
-          <div className="flex gap-2 flex-wrap mb-10">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  cat === "Tous"
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-white text-gray-500 hover:text-primary border border-gray-100"
-                }`}
-              >
-                {cat}
-              </button>
+      <BandeauTitre titre="Conseils et repères" accent="pour entreprendre au Bénin."
+        texte="Marchés publics, fiscalité, formation, numérique : des articles concrets, écrits par l'équipe SHIFT UP.">
+        {categories.length > 1 && (
+          <div className="flex flex-wrap gap-2.5">
+            <Link href="/blog"><Puce actif={!categorie}>Tous les articles</Puce></Link>
+            {categories.map((c) => (
+              <Link key={c} href={`/blog?categorie=${encodeURIComponent(c)}`}><Puce actif={categorie === c}>{c}</Puce></Link>
             ))}
           </div>
+        )}
+      </BandeauTitre>
 
-          {/* Featured post */}
-          {featured && (
-            <Link href={`/blog/${featured.slug}`} className="block mb-10 group">
-              <div className="bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300">
-                <div className={`h-64 bg-gradient-to-br ${featured.coverColor} relative`}>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <i className="fas fa-newspaper text-white/20 text-9xl" />
-                  </div>
-                  <div className="absolute top-5 left-5">
-                    <span className="bg-white text-primary text-xs font-bold px-3 py-1.5 rounded-full">
-                      A la une
-                    </span>
-                  </div>
-                </div>
-                <div className="p-8">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <span className="bg-accent/10 text-accent text-xs font-semibold px-3 py-1 rounded-full">
-                      {featured.category}
-                    </span>
-                    <span className="text-gray-400 text-xs">
-                      {formatDate(featured.publishedAt ?? new Date())}
-                    </span>
-                    <span className="text-gray-400 text-xs">
-                      <i className="fas fa-clock mr-1" />
-                      {featured.readTime} min
-                    </span>
-                    <span className="text-gray-400 text-xs">
-                      <i className="fas fa-eye mr-1" />
-                      {featured.views.toLocaleString()} vues
-                    </span>
-                  </div>
-                  <h2 className="font-syne font-black text-2xl sm:text-3xl text-primary mb-3 group-hover:text-accent transition-colors">
-                    {featured.title}
-                  </h2>
-                  <p className="text-gray-500 leading-relaxed">{featured.excerpt}</p>
-                  <div className="mt-5 flex items-center gap-2 text-accent font-semibold text-sm group-hover:gap-3 transition-all">
-                    Lire l'article <i className="fas fa-arrow-right text-xs" />
-                  </div>
-                </div>
+      <section className="bg-white py-16">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-12 px-6">
+          {!featured ? (
+            <div className="rounded-2xl border border-su-lavande bg-su-brume p-10 text-center">
+              <h2 className={`${titreFont} m-0 mb-2 text-xl font-bold text-su-nuit`}>Les premiers articles arrivent bientôt</h2>
+              <p className="m-0 text-[#4B5563]">Inscrivez-vous à la lettre ci-dessous pour les recevoir dès leur parution.</p>
+            </div>
+          ) : (
+            <Link href={`/blog/${featured.slug}`}
+              className="group grid overflow-hidden rounded-3xl border border-su-lavande bg-white transition-shadow hover:shadow-[0_16px_40px_rgba(30,46,79,0.12)] lg:grid-cols-[1.1fr_1fr]">
+              <Couverture image={featured.coverImage} categorie={featured.category} index={0} grande />
+              <div className="flex flex-col justify-center gap-4 p-8 sm:p-10">
+                <span className="text-[13px] text-[#6B7280]">{formatDate(featured.publishedAt ?? new Date())} · {featured.readTime} min de lecture</span>
+                <h2 className={`${titreFont} m-0 text-[26px] font-extrabold leading-tight text-su-nuit group-hover:text-su-bleu sm:text-[30px]`}>{featured.title}</h2>
+                <p className="m-0 text-base leading-relaxed text-[#4B5563]">{featured.excerpt}</p>
+                <span className="inline-flex items-center gap-2 text-[15px] font-semibold text-su-bleu">Lire l&apos;article <Icone nom="fleche" taille={18} epaisseur={2} /></span>
               </div>
             </Link>
           )}
 
-          {/* Posts grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rest.map((post) => (
-              <Link key={post.id} href={`/blog/${post.slug}`} className="block group">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 h-full">
-                  <div className={`h-44 bg-gradient-to-br ${post.coverColor} relative`}>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <i className="fas fa-newspaper text-white/20 text-7xl" />
+          {rest.length > 0 && (
+            <div className="flex flex-col gap-8">
+              <TitrePoints>Derniers articles</TitrePoints>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {rest.map((post, i) => (
+                  <Link key={post.id} href={`/blog/${post.slug}`}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-su-lavande bg-white transition-shadow hover:shadow-[0_12px_30px_rgba(30,46,79,0.12)]">
+                    <Couverture image={post.coverImage} categorie={post.category} index={i + 1} />
+                    <div className="flex flex-1 flex-col gap-2.5 p-6">
+                      <span className="text-xs text-[#6B7280]">{formatDate(post.publishedAt ?? new Date())} · {post.readTime} min</span>
+                      <h3 className={`${titreFont} m-0 line-clamp-2 text-lg font-bold leading-snug text-su-nuit group-hover:text-su-bleu`}>{post.title}</h3>
+                      <p className="m-0 line-clamp-3 text-sm leading-relaxed text-[#4B5563]">{post.excerpt}</p>
+                      <span className="mt-auto pt-2 text-xs text-[#6B7280]">{post.authorName}</span>
                     </div>
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
-                        {post.category}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 mb-3 text-gray-400 text-xs">
-                      <span>{formatDate(post.publishedAt ?? new Date())}</span>
-                      <span>•</span>
-                      <span>{post.readTime} min de lecture</span>
-                    </div>
-                    <h3 className="font-syne font-bold text-base text-primary mb-2 group-hover:text-accent transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-4">{post.excerpt}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 bg-gradient-to-br from-accent to-secondary rounded-lg flex items-center justify-center text-white text-xs font-bold">
-                          {post.authorInitials}
-                        </div>
-                        <span className="text-xs text-gray-500">{post.author}</span>
-                      </div>
-                      <span className="text-gray-400 text-xs">
-                        <i className="fas fa-eye mr-1" />{post.views.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
-          {/* Load more */}
-          <div className="text-center mt-10">
-            <button className="bg-white border border-gray-200 text-primary px-8 py-3 rounded-xl font-semibold hover:border-accent hover:text-accent transition-all duration-200">
-              Charger plus d'articles
-              <i className="fas fa-arrow-down ml-2" />
-            </button>
+      <section className="bg-white pb-24">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <div className="relative grid items-center gap-8 overflow-hidden rounded-3xl bg-su-nuit p-8 sm:p-12 lg:grid-cols-2">
+            <span aria-hidden="true" className="absolute right-[-120px] top-[-160px] h-[400px] w-[400px] rounded-full border border-su-ciel/25" />
+            <div className="relative flex flex-col gap-3">
+              <TitrePoints taille="text-[28px]" clair>La lettre SHIFT UP</TitrePoints>
+              <p className="m-0 text-[15px] leading-relaxed text-su-lavande">Un e-mail par mois : nouveaux articles, appels d&apos;offres à surveiller et dates des formations.</p>
+            </div>
+            <div className="relative"><NewsletterForm /></div>
           </div>
         </div>
       </section>
