@@ -20,7 +20,7 @@ export function etapeCourante(p: Entree): number {
 /** Ce que le client doit faire maintenant, ou ce qu'il attend. */
 export function prochaineAction(p: Entree): { texte: string; aFaire: boolean } {
   switch (p.status) {
-    case "EN_ATTENTE": return { texte: "Nous étudions votre demande : le devis arrive sous 48 heures ouvrées.", aFaire: false };
+    case "EN_ATTENTE": return { texte: "Nous étudions votre demande : votre devis s'affichera ici dès qu'il sera prêt.", aFaire: false };
     case "DEVIS_ENVOYE": return { texte: "Votre devis est prêt : acceptez-le, demandez une modification ou refusez-le.", aFaire: true };
     case "EN_ATTENTE_PAIEMENT": return { texte: `Payez l'acompte${p.quote?.deposit ? ` (${p.quote.deposit.toLocaleString("fr-FR")} F)` : ""} pour démarrer les travaux.`, aFaire: true };
     case "EN_COURS": return { texte: "Les travaux sont en cours : suivez les étapes ci-dessous.", aFaire: false };

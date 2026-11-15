@@ -779,7 +779,7 @@ function PrestationCard({ p, index, name, onSelect, selected }: { p: Prestation;
           <div className="flex items-center gap-2 mb-1">
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
             <p className="font-syne font-bold text-primary text-sm truncate">{name}</p>
-            {hasDevis && <span className="text-[10px] bg-accent-100 text-accent-600 font-bold px-2 py-0.5 rounded-full animate-pulse">ACTION REQUISE</span>}
+            {hasDevis && <span className="text-[11px] bg-su-bleu text-white font-semibold px-2 py-0.5 rounded-full">À faire</span>}
           </div>
           <div className="flex items-center gap-3 ml-4">
             <StatusBadge status={p.status} />
