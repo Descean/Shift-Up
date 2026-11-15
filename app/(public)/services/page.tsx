@@ -508,6 +508,22 @@ export default function ServicesPage() {
       )
     : SECTORS;
 
+  // Ouvre directement le service demandé dans l'URL (ex. /services#numerique, depuis l'accueil ou le menu)
+  useEffect(() => {
+    const ALIAS: Record<string, string> = { dossiers: "marches-publics" };
+    const lireAncre = () => {
+      const brut = decodeURIComponent(window.location.hash.replace("#", "")).trim();
+      const id = ALIAS[brut] ?? brut;
+      if (id && SECTORS.some((s) => s.id === id)) {
+        setActiveSector(id);
+        setTimeout(() => contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      }
+    };
+    lireAncre();
+    window.addEventListener("hashchange", lireAncre);
+    return () => window.removeEventListener("hashchange", lireAncre);
+  }, []);
+
   function selectSector(id: string) {
     setActiveSector(id);
     setSidebarOpen(false);

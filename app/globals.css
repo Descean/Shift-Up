@@ -254,3 +254,36 @@
 .article-body .article-table, .article-body > table { overflow-x: auto; display: block; }
 .article-body th, .article-body td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; }
 .article-body th { background: #EEF2F5; color: #0A2533; font-weight: 600; }
+
+/* ── Accueil (refonte) : anneau des services ─────────────────────────────── */
+.su-ringwrap { position: absolute; top: 0; bottom: 0; left: 50%; width: 1200px; margin-left: -600px; z-index: 2; pointer-events: none; }
+.su-ring { position: absolute; width: 700px; height: 700px; top: 50%; right: -206px; margin-top: -314px; border-radius: 50%;
+  background: radial-gradient(circle at center, transparent 0 262px, #D9E1F1 264px, #B4C9E8 284px, #8FB3E2 306px, #B4C9E8 328px, #D9E1F1 346px, transparent 350px); }
+.su-orb { position: absolute; inset: 0; transform: rotate(var(--a)); animation: su-orbit 60s linear infinite; }
+.su-orb > .su-ic { position: absolute; left: 50%; top: 44px; width: 80px; height: 80px; border-radius: 50%; background: #31487A; color: #fff; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; border: 4px solid #fff; box-sizing: border-box;
+  box-shadow: 0 12px 26px rgba(30, 46, 79, 0.3); pointer-events: auto; cursor: pointer;
+  transform: translate(-50%, -50%) rotate(calc(-1 * var(--a))); animation: su-counter 60s linear infinite; transition: background 0.2s; }
+.su-orb > .su-ic:hover, .su-orb > .su-ic:focus-visible { background: #1E2E4F; }
+.su-orb > .su-ic:focus-visible { outline: 3px solid #8FB3E2; outline-offset: 3px; }
+.su-ring:focus-within .su-orb, .su-ring:focus-within .su-ic { animation-play-state: paused; }
+.su-ring:hover .su-orb, .su-ring:hover .su-ic { animation-play-state: paused; }
+@keyframes su-orbit { from { transform: rotate(var(--a)); } to { transform: rotate(calc(var(--a) + 360deg)); } }
+@keyframes su-counter { from { transform: translate(-50%, -50%) rotate(calc(-1 * var(--a))); } to { transform: translate(-50%, -50%) rotate(calc(-1 * var(--a) - 360deg)); } }
+@media (prefers-reduced-motion: reduce) { .su-orb, .su-orb > .su-ic { animation: none; } }
+@media (max-width: 1023px) {
+  .su-hero { padding-bottom: 380px !important; }
+  .su-ringwrap { width: 100%; left: 0; margin-left: 0; }
+  .su-ring { top: auto; bottom: -380px; margin-top: 0; right: 50%; margin-right: -350px; }
+}
+
+/* ── Accueil (refonte) : présentation de l'équipe ────────────────────────── */
+@media (max-width: 1023px) {
+  .su-slide { height: auto !important; }
+  .su-slide-photo { position: relative !important; width: 100% !important; height: 300px !important; clip-path: none !important; }
+  .su-slide-deco, .su-slide-wing, .su-slide-rail, .su-slide-sign, .su-slide-more { display: none !important; }
+  .su-slide-card { position: relative !important; left: 0 !important; top: 0 !important; width: auto !important; margin: 20px !important; border-radius: 22px !important; }
+  .su-slide-inner { padding: 44px 22px 32px 44px !important; }
+  .su-slide-title { font-size: 36px !important; }
+  .su-slide-card p { text-align: left !important; }
+}
