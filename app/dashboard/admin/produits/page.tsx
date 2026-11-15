@@ -187,7 +187,7 @@ export default function AdminProduitsPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 bg-su-bleu text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
         >
           <i className="fas fa-plus" />Nouveau produit
         </button>
@@ -220,7 +220,7 @@ export default function AdminProduitsPage() {
       {loading ? (
         <div className="flex justify-center py-16"><span className="w-7 h-7 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-card p-16 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-2xl border border-su-lavande p-16 text-center text-gray-400 text-sm">
           <i className="fas fa-box-open text-3xl mb-3 block" />
           {filterType === "ALL" ? "Aucun produit. Créez le premier !" : `Aucun produit de type "${getTypeInfo(filterType).label}".`}
         </div>
@@ -234,7 +234,7 @@ export default function AdminProduitsPage() {
                 layout
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-card overflow-hidden flex flex-col"
+                className="bg-white rounded-2xl border border-su-lavande overflow-hidden flex flex-col"
               >
                 {/* Thumbnail / placeholder */}
                 <div className={`relative h-36 flex items-center justify-center ${typeInfo.bg}`}>
@@ -514,7 +514,7 @@ export default function AdminProduitsPage() {
                   <button
                     onClick={save}
                     disabled={saving || !form.name.trim()}
-                    className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60"
+                    className="flex-1 bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60"
                   >
                     {saving ? (
                       <span className="flex items-center justify-center gap-2">

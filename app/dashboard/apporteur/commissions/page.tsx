@@ -50,7 +50,7 @@ export default function ApporteurCommissionsPage() {
         {s.pendingEarnings >= 30000 && (
           <Link
             href="/dashboard/apporteur/commissions/reclamer"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-accent to-secondary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+            className="inline-flex items-center gap-2 bg-su-bleu text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
           >
             <i className="fas fa-money-bill-transfer" />
             Réclamer mes commissions
@@ -66,7 +66,7 @@ export default function ApporteurCommissionsPage() {
           { label: "Déjà versé",   value: `${s.paidEarnings.toLocaleString()} F`,     icon: "fa-check-circle", color: "from-primary to-accent" },
           { label: "Conversions",  value: s.totalReferrals,                            icon: "fa-handshake",    color: "from-primary to-accent" },
         ].map((card) => (
-          <motion.div key={card.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
+          <motion.div key={card.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-su-lavande p-5 flex items-center gap-4">
             <div className={`w-12 h-12 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center text-white flex-shrink-0`}>
               <i className={`fas ${card.icon}`} />
             </div>
@@ -102,7 +102,7 @@ export default function ApporteurCommissionsPage() {
       </div>
 
       {/* Commission history placeholder */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-su-lavande p-6">
         <h2 className="font-syne font-bold text-primary mb-4">
           <i className="fas fa-list-ul mr-2 text-accent" />
           Historique des commissions

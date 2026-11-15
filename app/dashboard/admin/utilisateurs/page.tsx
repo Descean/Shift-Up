@@ -165,7 +165,7 @@ export default function AdminUtilisateursPage() {
       </div>
 
       {/* ── Tableau des utilisateurs ──────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
         {loadingList && (
           <div className="flex justify-center py-12">
             <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -176,12 +176,12 @@ export default function AdminUtilisateursPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Utilisateur</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Rôle</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Statut</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Note</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Prestations</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-widest">Inscription</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Utilisateur</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Rôle</th>
+                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Statut</th>
+                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Note</th>
+                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Prestations</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Inscription</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>
@@ -200,7 +200,7 @@ export default function AdminUtilisateursPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {/* Avatar généré avec initiales */}
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-su-bleu flex items-center justify-center flex-shrink-0">
                         <span className="text-white text-xs font-bold">
                           {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                         </span>
@@ -314,7 +314,7 @@ export default function AdminUtilisateursPage() {
 
                 {/* Récapitulatif identité */}
                 <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-su-bleu flex items-center justify-center">
                     <span className="text-white text-sm font-bold">
                       {editing.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                     </span>
@@ -387,7 +387,7 @@ export default function AdminUtilisateursPage() {
                   <button
                     onClick={saveEdit}
                     disabled={saving}
-                    className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
+                    className="flex-1 bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
                   >
                     {saving ? (
                       <span className="flex items-center justify-center gap-2">

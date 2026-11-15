@@ -120,7 +120,7 @@ export default function ApporteurCampagnesPage() {
           { label: "Leads générés", value: totalLeads,        icon: "fa-user-plus",     color: "from-primary to-accent" },
           { label: "Conversions",   value: totalConversions,  icon: "fa-check-circle",  color: "from-primary to-accent" },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
+          <div key={s.label} className="bg-white rounded-2xl border border-su-lavande p-4 flex items-center gap-3">
             <div className={`w-10 h-10 bg-gradient-to-br ${s.color} rounded-xl flex items-center justify-center text-white flex-shrink-0`}>
               <i className={`fas ${s.icon} text-sm`} />
             </div>
@@ -134,7 +134,7 @@ export default function ApporteurCampagnesPage() {
 
       {/* Formulaire nouvelle campagne */}
       {showNew && (
-        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-2xl shadow-card p-6">
+        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-2xl border border-su-lavande p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-syne font-bold text-primary">Créer une campagne</h2>
             <button onClick={() => setShowNew(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times" /></button>
@@ -182,7 +182,7 @@ export default function ApporteurCampagnesPage() {
 
       {/* Liste */}
       {campaigns.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">
           <i className="fas fa-bullhorn text-3xl mb-3 block" />
           Aucune campagne. Créez votre première campagne pour commencer à prospecter.
         </div>
@@ -190,7 +190,7 @@ export default function ApporteurCampagnesPage() {
         <div className="space-y-4">
           {campaigns.map((c, i) => (
             <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              className="bg-white rounded-2xl shadow-card p-5">
+              className="bg-white rounded-2xl border border-su-lavande p-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">

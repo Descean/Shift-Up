@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { StatCard } from "@/components/ui/Card";
 import { PrestationStatusBadge } from "@/components/ui/Badge";
+import { TitrePoints } from "@/components/site/Gabarit";
 
 type Phase = { title: string; progress: number; done: boolean; active?: boolean };
 type Prestation = {
@@ -54,10 +55,8 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="font-syne font-black text-2xl text-primary">
-            Bonjour, {user?.name?.split(" ")[0]} !
-          </h1>
-          <p className="text-gray-500 text-sm">Voici un résumé de votre espace client</p>
+          <TitrePoints as="h1" taille="text-[28px]">Mon espace client</TitrePoints>
+          <p className="mt-1 text-gray-500 text-sm">Vos prestations, vos paiements et vos échanges avec l&apos;équipe.</p>
         </div>
       </motion.div>
 
@@ -73,7 +72,7 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           {!current ? (
-            <div className="bg-white rounded-2xl shadow-card p-10 text-center text-gray-400">
+            <div className="bg-white rounded-2xl border border-su-lavande p-10 text-center text-gray-500">
               <i className="fas fa-briefcase text-3xl mb-3 block" />
               <p className="font-medium">Aucune prestation en cours</p>
               <Link href="/services" className="mt-4 inline-block text-accent text-sm hover:underline">
@@ -81,10 +80,10 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
               </Link>
             </div>
           ) : (
-          <div className="bg-white rounded-2xl shadow-card p-6">
+          <div className="bg-white rounded-2xl border border-su-lavande p-6">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Prestation en cours</p>
+                <p className="text-sm text-gray-500 mb-1">Prestation en cours</p>
                 <h2 className="font-syne font-bold text-xl text-primary">{current.service.title}</h2>
                 <p className="text-gray-500 text-sm capitalize">{current.service.domain}</p>
               </div>
@@ -112,10 +111,10 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
               <div className="space-y-3">
                 {current.phases.map((phase, i) => (
                   <div key={i} className={`flex items-center gap-4 p-3 rounded-xl transition-colors ${
-                    phase.active ? "bg-accent/5 border border-accent/20" : "bg-gray-50"
+                    phase.active ? "bg-su-brume border border-su-clair" : "bg-gray-50"
                   }`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      phase.done ? "bg-secondary text-white" : phase.active ? "bg-accent text-white" : "bg-gray-200 text-gray-500"
+                      phase.done ? "bg-su-nuit text-white" : phase.active ? "bg-su-bleu text-white" : "bg-gray-200 text-gray-500"
                     }`}>
                       {phase.done ? <i className="fas fa-check text-xs" /> : i + 1}
                     </div>
@@ -139,7 +138,7 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
         <div className="space-y-5">
           {/* Payment */}
           {current && (
-          <div className="bg-white rounded-2xl shadow-card p-5">
+          <div className="bg-white rounded-2xl border border-su-lavande p-5">
             <h3 className="font-syne font-bold text-primary mb-4">Paiement</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
@@ -160,7 +159,7 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
             </div>
             <div className="progress-bar mt-3">
               <div
-                className="h-2 rounded-full bg-gradient-to-r from-secondary to-accent"
+                className="h-2 rounded-full bg-su-bleu"
                 style={{ width: `${current.amount > 0 ? (current.amountPaid / current.amount) * 100 : 0}%` }}
               />
             </div>
@@ -172,25 +171,25 @@ export default function ClientDashboard({ user }: ClientDashboardProps) {
 
           {/* Affiliation code */}
           {user?.affiliationCode && (
-          <div className="bg-gradient-to-br from-primary to-primary/90 rounded-2xl p-5">
+          <div className="bg-su-nuit rounded-2xl p-5">
             <h3 className="font-syne font-bold text-white mb-3 flex items-center gap-2">
-              <i className="fas fa-share-nodes text-accent" />
+              <i className="fas fa-share-nodes text-su-ciel" />
               Mon code d'affiliation
             </h3>
             <div className="bg-white/10 rounded-xl px-4 py-3 flex items-center justify-between mb-3">
               <span className="text-white font-mono font-bold tracking-widest">{user.affiliationCode}</span>
-              <button onClick={() => navigator.clipboard.writeText(user.affiliationCode!)} className="text-accent hover:text-secondary transition-colors">
+              <button onClick={() => navigator.clipboard.writeText(user.affiliationCode!)} aria-label="Copier le code" className="text-su-ciel hover:text-white transition-colors">
                 <i className="fas fa-copy" />
               </button>
             </div>
-            <p className="text-white/50 text-xs">
+            <p className="text-su-lavande text-xs">
               Partagez ce code et gagnez des commissions sur chaque nouveau client.
             </p>
           </div>
           )}
 
           {/* Quick actions */}
-          <div className="bg-white rounded-2xl shadow-card p-5">
+          <div className="bg-white rounded-2xl border border-su-lavande p-5">
             <h3 className="font-syne font-bold text-primary mb-4">Actions rapides</h3>
             <div className="space-y-2">
               {[

@@ -137,7 +137,7 @@ export default function SecuritePage() {
           <button
             onClick={startSetup}
             disabled={submitting}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-primary text-white font-semibold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 bg-su-bleu text-white font-semibold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60"
           >
             {submitting ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-shield-check" /> Activer le 2FA</>}
           </button>
@@ -195,7 +195,7 @@ export default function SecuritePage() {
               <button
                 onClick={confirmSetup}
                 disabled={submitting || code.length < 6}
-                className="flex-1 bg-gradient-to-r from-accent to-primary text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="flex-1 bg-su-bleu text-white font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {submitting ? <i className="fas fa-spinner fa-spin" /> : "Confirmer et activer"}
               </button>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { TitrePoints } from "@/components/site/Gabarit";
 import { StatCard } from "@/components/ui/Card";
 
 const levels = [
@@ -42,10 +43,8 @@ export default function ApporteurDashboard({ user }: Props) {
   return (
     <div className="space-y-6 max-w-6xl">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-syne font-black text-2xl text-primary">
-          Espace Apporteur — {user?.name}
-        </h1>
-        <p className="text-gray-500 text-sm">Suivez vos commissions et votre progression</p>
+        <TitrePoints as="h1" taille="text-[28px]">Mon espace apporteur</TitrePoints>
+        <p className="mt-1 text-gray-500 text-sm">Vos commissions, vos affiliés et votre progression{user?.name ? `, ${user.name.split(" ")[0]}` : ""}.</p>
       </motion.div>
 
       {/* Stats */}
@@ -58,11 +57,11 @@ export default function ApporteurDashboard({ user }: Props) {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Accès rapides */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-su-lavande p-6">
           <h2 className="font-syne font-bold text-lg text-primary mb-5">Mes commissions & actions</h2>
           <div className="space-y-3">
             <Link href="/dashboard/apporteur/commissions" className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
-              <div className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white flex-shrink-0">
+              <div className="w-10 h-10 bg-su-bleu rounded-xl flex items-center justify-center text-white flex-shrink-0">
                 <i className="fas fa-coins text-sm" />
               </div>
               <div className="flex-1">
@@ -99,32 +98,32 @@ export default function ApporteurDashboard({ user }: Props) {
 
         {/* Level progression */}
         <div className="space-y-4">
-          <div className="bg-primary rounded-2xl p-5">
+          <div className="bg-su-nuit rounded-2xl p-5">
             <h3 className="font-syne font-bold text-white mb-4">Classement trimestriel</h3>
             <div className="space-y-3">
               {levels.map((l, i) => (
                 <div
                   key={l.name}
                   className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                    l.name === currentLevel.name ? "bg-white/15" : "opacity-40"
+                    l.name === currentLevel.name ? "bg-su-bleu" : "opacity-70"
                   }`}
                 >
                   <i className={`${l.icon} ${l.color} text-lg`} />
                   <div className="flex-1">
                     <p className="text-white text-sm font-medium">{l.name}</p>
-                    <p className="text-white/40 text-xs">
+                    <p className="text-su-ciel text-xs">
                       {l.max === Infinity ? `≥ ${l.min} affiliés` : `${l.min}–${l.max} affiliés`}
                     </p>
                   </div>
                   {l.name === currentLevel.name && (
-                    <span className="text-accent-200 text-xs font-bold">Actuel</span>
+                    <span className="text-white text-xs font-bold">Actuel</span>
                   )}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-card p-5">
+          <div className="bg-white rounded-2xl border border-su-lavande p-5">
             <h3 className="font-syne font-bold text-primary mb-3">Progression vers {nextLevel?.name ?? "Diamant"}</h3>
             <div className="flex justify-between mb-2">
               <span className="text-sm text-gray-500">Affiliés</span>

@@ -12,7 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session) redirect("/connexion");
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-su-brume flex">
       <DashboardSidebar role={session.user?.role as string} />
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop header only */}

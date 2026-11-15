@@ -101,7 +101,7 @@ export default function AdminFormationsPage() {
           { label: "En attente", value: pendingCount, icon: "fas fa-clock", color: "from-primary to-accent" },
           { label: "Revenus FCFA", value: totalRevenu.toLocaleString("fr-FR"), icon: "fas fa-coins", color: "from-primary to-accent" },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl shadow-card p-4">
+          <div key={s.label} className="bg-white rounded-2xl border border-su-lavande p-4">
             <div className={`w-9 h-9 bg-gradient-to-br ${s.color} rounded-xl flex items-center justify-center text-white text-sm mb-2`}>
               <i className={s.icon} />
             </div>
@@ -112,7 +112,7 @@ export default function AdminFormationsPage() {
       </div>
 
       {/* Filtres */}
-      <div className="bg-white rounded-2xl shadow-card p-4 mb-4 flex flex-wrap gap-3">
+      <div className="bg-white rounded-2xl border border-su-lavande p-4 mb-4 flex flex-wrap gap-3">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -143,7 +143,7 @@ export default function AdminFormationsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-gray-400">
             <i className="fas fa-spinner fa-spin text-2xl mb-3 block text-accent" />
@@ -160,7 +160,7 @@ export default function AdminFormationsPage() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50 text-left">
                   {["Référence", "Participant", "Formation", "Paiement", "Statut", "Date", "Actions"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-4 py-3 text-xs font-bold text-gray-400 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>

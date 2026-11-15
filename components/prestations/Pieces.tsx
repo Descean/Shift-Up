@@ -84,7 +84,7 @@ function Avancement({ pieces }: { pieces: Piece[] }) {
         <span>{b.recues} / {b.total} pièce(s) reçue(s){b.valides ? ` · ${b.valides} conforme(s)` : ""}</span>
         <span className="font-semibold text-primary">{pct}%</span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-accent to-secondary rounded-full transition-all" style={{ width: `${pct}%` }} /></div>
+      <div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-su-bleu rounded-full transition-all" style={{ width: `${pct}%` }} /></div>
       {(b.aReprendre > 0 || b.indisponibles > 0) && (
         <p className="text-xs mt-1.5 text-gray-500">
           {b.aReprendre > 0 && <span className="text-red-600 font-medium mr-3">{b.aReprendre} à reprendre</span>}
@@ -128,7 +128,7 @@ export function ResumeDossier({ dossier, depot, resultat }: { dossier: Dossier; 
     <div className="border border-gray-100 rounded-2xl overflow-hidden">
       <div className="bg-gray-50 px-4 py-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Appel d&apos;offres</p>
+          <p className="text-[11px] font-semibold text-gray-500">Appel d&apos;offres</p>
           <p className="text-sm font-semibold text-primary">{dossier.intitule}</p>
         </div>
         <BadgeSuivi dossier={dossier} depot={depot} resultat={resultat} compact={false} />
@@ -192,7 +192,7 @@ export function PiecesClient({ prestationId, pieces: depart, close = false, onMa
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide"><i className="fas fa-folder-open mr-1.5" />Pièces à fournir</p>
+        <p className="text-xs font-semibold text-gray-500"><i className="fas fa-folder-open mr-1.5" />Pièces à fournir</p>
         {b.attendues > 0 && !close && <span className="text-[11px] font-bold text-accent">{b.attendues} en attente</span>}
       </div>
       <Avancement pieces={pieces} />
@@ -202,7 +202,7 @@ export function PiecesClient({ prestationId, pieces: depart, close = false, onMa
 
       {grouper(pieces).map((g) => (
         <div key={g.categorie}>
-          <p className="text-[11px] font-semibold text-accent uppercase tracking-wide mb-1.5">{g.categorie}</p>
+          <p className="text-[11px] font-semibold text-accent mb-1.5">{g.categorie}</p>
           <ul className="space-y-2">
             {g.items.map((p) => {
               const modifiable = !close && p.statut !== "NON_REQUIS";
@@ -271,7 +271,7 @@ export function PiecesClient({ prestationId, pieces: depart, close = false, onMa
             <textarea rows={2} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Message pour l'équipe (facultatif)"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-accent resize-none bg-white" />
             <button disabled={occupe} onClick={async () => { if (await appliquer({ action: "notifier", message: message || null })) setMessage(""); }}
-              className="w-full bg-gradient-to-r from-accent to-secondary text-white rounded-lg py-2 text-xs font-semibold hover:opacity-90 disabled:opacity-50">
+              className="w-full bg-su-bleu text-white rounded-lg py-2 text-xs font-semibold hover:opacity-90 disabled:opacity-50">
               <i className="fas fa-paper-plane mr-1.5" />Prévenir SHIFT UP
             </button>
           </div>
@@ -329,7 +329,7 @@ export function PiecesAdmin({ prestationId, dossier: dossierDepart, pieces: depa
 
       {grouper(pieces).map((g) => (
         <div key={g.categorie}>
-          <p className="text-[11px] font-semibold text-accent uppercase tracking-wide mb-1.5">{g.categorie}</p>
+          <p className="text-[11px] font-semibold text-accent mb-1.5">{g.categorie}</p>
           <ul className="space-y-2">
             {g.items.map((p) => (
               <li key={p.id} className="border border-gray-100 rounded-xl p-3">

@@ -122,7 +122,7 @@ export default function EtudiantProfilPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {stats.map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl shadow-card p-4 text-center">
+          <div key={s.label} className="bg-white rounded-2xl border border-su-lavande p-4 text-center">
             <i className={`fas ${s.icon} ${s.color} text-lg mb-2`} />
             <p className="font-syne font-black text-primary">{s.value}</p>
             <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
@@ -131,9 +131,9 @@ export default function EtudiantProfilPage() {
       </div>
 
       {/* Informations personnelles */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl shadow-card p-6">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl border border-su-lavande p-6">
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-secondary flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-su-bleu flex items-center justify-center">
             <span className="text-white text-xl font-black">{name.split(" ").map((n) => n[0]).slice(0, 2).join("") || "?"}</span>
           </div>
           <div>
@@ -143,7 +143,7 @@ export default function EtudiantProfilPage() {
           </div>
         </div>
 
-        <h2 className="font-syne font-bold text-primary mb-4 text-sm uppercase tracking-widest">Informations personnelles</h2>
+        <h2 className="font-syne font-bold text-primary mb-4 text-sm">Informations personnelles</h2>
         <form onSubmit={saveInfo} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
@@ -186,7 +186,7 @@ export default function EtudiantProfilPage() {
             </div>
           </div>
           <button type="submit" disabled={savingInfo}
-            className="w-full bg-gradient-to-r from-accent to-secondary text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60">
+            className="w-full bg-su-bleu text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60">
             {savingInfo ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Enregistrement…</span>
               : <><i className="fas fa-check mr-2" />Enregistrer les modifications</>}
           </button>
@@ -194,8 +194,8 @@ export default function EtudiantProfilPage() {
       </motion.div>
 
       {/* Mot de passe */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-2xl shadow-card p-6">
-        <h2 className="font-syne font-bold text-primary mb-4 text-sm uppercase tracking-widest">Changer le mot de passe</h2>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-2xl border border-su-lavande p-6">
+        <h2 className="font-syne font-bold text-primary mb-4 text-sm">Changer le mot de passe</h2>
         <form onSubmit={savePassword} className="space-y-4">
           {[
             { label: "Mot de passe actuel",              value: currentPwd, setter: setCurrentPwd, placeholder: "Mot de passe actuel", showToggle: true },

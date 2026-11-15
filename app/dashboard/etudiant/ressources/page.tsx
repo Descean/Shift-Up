@@ -77,7 +77,7 @@ export default function EtudiantRessourcesPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">
           {resources.length === 0 ? "Aucune ressource disponible pour le moment." : "Aucune ressource trouvée."}
         </div>
       ) : (
@@ -86,7 +86,7 @@ export default function EtudiantRessourcesPage() {
             const typeInfo = typeStyle[res.type] ?? typeStyle.LIEN;
             return (
               <motion.div key={res.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                className="bg-white rounded-2xl shadow-card p-5 flex flex-col">
+                className="bg-white rounded-2xl border border-su-lavande p-5 flex flex-col">
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${typeInfo.bg}`}>
                     <i className={`fas ${typeInfo.icon} text-xs`} />{typeInfo.label}

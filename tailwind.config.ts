@@ -9,45 +9,45 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Charte SHIFT UP : bleu marine, blanc, noir, gris (+ nuances dérivées uniquement)
+        // Charte SHIFT UP (refonte 2026) : Oxford Blue, Space cadet, YInMn Blue, Jordy Blue, Lavender
         primary: {
-          DEFAULT: "#0A2533", // bleu marine
-          50: "#EEF2F5",
-          100: "#D9E1E7",
-          200: "#B3C2CD",
-          300: "#8399A9",
-          400: "#4F6B7E",
-          500: "#0A2533",
-          600: "#08202C",
-          700: "#061A24",
-          800: "#04131B",
-          900: "#020C11",
+          DEFAULT: "#192338", // Oxford Blue
+          50: "#F1F3F7",
+          100: "#DDE2EB",
+          200: "#BBC3D1",
+          300: "#8C97AD",
+          400: "#4F5C76",
+          500: "#192338",
+          600: "#151E30",
+          700: "#121928",
+          800: "#0E1420",
+          900: "#0A0E17",
         },
         accent: {
-          DEFAULT: "#2D5B78", // bleu marine moyen (acier)
-          50: "#EFF4F7",
-          100: "#DDE7EE",
-          200: "#BACFDC",
-          300: "#8FAEC2",
-          400: "#5F87A2",
-          500: "#2D5B78",
-          600: "#244B63",
-          700: "#1C3B4E",
-          800: "#152C3A",
-          900: "#0E1E28",
+          DEFAULT: "#31487A", // YInMn Blue
+          50: "#EEF2F9",
+          100: "#D9E1F1",
+          200: "#B4C9E8",
+          300: "#8FB3E2",
+          400: "#5F7DB0",
+          500: "#31487A",
+          600: "#2A3E69",
+          700: "#233458",
+          800: "#1E2E4F",
+          900: "#192338",
         },
         secondary: {
-          DEFAULT: "#5F6772", // gris anthracite
-          50: "#F5F6F7",
-          100: "#E8EAED",
-          200: "#D1D5DA",
-          300: "#AEB4BC",
-          400: "#858D97",
-          500: "#5F6772",
-          600: "#4B525B",
-          700: "#3A3F46",
-          800: "#26292E",
-          900: "#111315",
+          DEFAULT: "#1E2E4F", // Space cadet
+          50: "#F0F2F7",
+          100: "#DCE1EB",
+          200: "#B9C2D5",
+          300: "#8E9AB8",
+          400: "#556689",
+          500: "#1E2E4F",
+          600: "#1A2844",
+          700: "#162139",
+          800: "#111A2D",
+          900: "#0D1322",
         },
         // Gris froids alignés sur le marine (remplacent les gris Tailwind par défaut)
         gray: {
@@ -63,7 +63,7 @@ const config: Config = {
           900: "#111315",
         },
         ink: "#111315", // noir
-        dark: "#0A2533",
+        dark: "#192338",
         light: "#F7F8FA",
         paper: "#FAFAF9",
         // Palette de la refonte (accueil) : Oxford Blue, Space cadet, YInMn Blue, Jordy Blue, Lavender
@@ -121,20 +121,20 @@ const config: Config = {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-hero":
-          "linear-gradient(135deg, #0A2533 0%, #12354A 50%, #0A2533 100%)",
+          "linear-gradient(135deg, #192338 0%, #1E2E4F 50%, #192338 100%)",
         "gradient-card":
-          "linear-gradient(135deg, rgba(45,91,120,0.08) 0%, rgba(95,103,114,0.04) 100%)",
+          "linear-gradient(135deg, rgba(49,72,122,0.08) 0%, rgba(30,46,79,0.04) 100%)",
         "mesh-gradient":
-          "radial-gradient(at 40% 20%, rgba(143,174,194,0.12) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(255,255,255,0.05) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(10,37,51,0.8) 0px, transparent 50%)",
+          "radial-gradient(at 40% 20%, rgba(143,179,226,0.12) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(255,255,255,0.05) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(25,35,56,0.8) 0px, transparent 50%)",
       },
       backdropBlur: {
         xs: "2px",
       },
       boxShadow: {
-        glow: "0 6px 20px rgba(10,37,51,0.18)",
-        "glow-green": "0 6px 20px rgba(10,37,51,0.18)",
+        glow: "0 6px 20px rgba(30,46,79,0.18)",
+        "glow-green": "0 6px 20px rgba(30,46,79,0.18)",
         card: "0 1px 3px rgba(10,37,51,0.06), 0 4px 16px rgba(10,37,51,0.06)",
-        "card-hover": "0 2px 6px rgba(10,37,51,0.08), 0 12px 32px rgba(10,37,51,0.12)",
+        "card-hover": "0 2px 6px rgba(30,46,79,0.06), 0 12px 30px rgba(30,46,79,0.12)",
       },
     },
   },

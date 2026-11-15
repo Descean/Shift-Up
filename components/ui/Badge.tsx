@@ -10,9 +10,9 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  accent: "bg-accent/10 text-accent border-accent/20",
-  secondary: "bg-secondary/10 text-secondary border-secondary/20",
-  primary: "bg-primary/10 text-primary border-primary/20",
+  accent: "bg-su-brume text-su-bleu border-su-lavande",
+  secondary: "bg-su-lavande text-su-cadet border-su-clair",
+  primary: "bg-su-nuit text-white border-su-nuit",
   success: "bg-green-50 text-green-700 border-green-200",
   warning: "bg-amber-50 text-amber-700 border-amber-200",
   danger: "bg-red-50 text-red-700 border-red-200",

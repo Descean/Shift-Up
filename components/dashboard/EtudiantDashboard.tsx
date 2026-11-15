@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TitrePoints } from "@/components/site/Gabarit";
 import { motion } from "framer-motion";
 import { StatCard } from "@/components/ui/Card";
 
@@ -18,11 +19,11 @@ interface Props {
 }
 
 const typeColors: Record<string, string> = {
-  DATA_ENTRY:    "from-accent-500 to-accent",
-  REDACTION:     "from-accent-500 to-secondary-500",
-  RECHERCHE:     "from-secondary-400 to-secondary-400",
-  TEST_LOGICIEL: "from-secondary to-primary-500",
-  AUTRE:         "from-gray-400 to-gray-500",
+  DATA_ENTRY:    "bg-su-bleu",
+  REDACTION:     "bg-su-cadet",
+  RECHERCHE:     "bg-su-nuit",
+  TEST_LOGICIEL: "bg-[#5F7DB0]",
+  AUTRE:         "bg-gray-500",
 };
 
 const typeLabels: Record<string, string> = {
@@ -55,10 +56,8 @@ export default function EtudiantDashboard({ user }: Props) {
   return (
     <div className="space-y-6 max-w-6xl">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-syne font-black text-2xl text-primary">
-          Espace Étudiant — {user?.name}
-        </h1>
-        <p className="text-gray-500 text-sm">Apprenez, contribuez et développez vos compétences</p>
+        <TitrePoints as="h1" taille="text-[28px]">Mon espace étudiant</TitrePoints>
+        <p className="mt-1 text-gray-500 text-sm">Micro-tâches, ressources et badges{user?.name ? `, ${user.name.split(" ")[0]}` : ""}.</p>
       </motion.div>
 
       {/* Stats */}
@@ -71,10 +70,10 @@ export default function EtudiantDashboard({ user }: Props) {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Micro-tasks */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-su-lavande p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-syne font-bold text-lg text-primary">Micro-tâches disponibles</h2>
-            <span className="bg-accent/10 text-accent text-xs font-semibold px-3 py-1 rounded-full">
+            <span className="bg-su-brume text-su-bleu text-xs font-semibold px-3 py-1 rounded-full">
               {available.length} disponibles
             </span>
           </div>
@@ -89,7 +88,7 @@ export default function EtudiantDashboard({ user }: Props) {
           <div className="space-y-3">
             {tasks.slice(0, 5).map((task) => (
               <div key={task.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-accent/30 transition-all">
-                <div className={`w-10 h-10 bg-gradient-to-br ${typeColors[task.type] ?? "from-gray-400 to-gray-500"} rounded-xl flex items-center justify-center flex-shrink-0 text-white text-xs font-bold`}>
+                <div className={`w-10 h-10 ${typeColors[task.type] ?? "bg-gray-500"} rounded-xl flex items-center justify-center flex-shrink-0 text-white text-xs font-bold`}>
                   {(typeLabels[task.type] ?? "?").charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -104,7 +103,7 @@ export default function EtudiantDashboard({ user }: Props) {
                   <p className="font-bold text-secondary text-sm">{task.reward.toLocaleString()} F</p>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                     task.status === "DISPONIBLE" ? "bg-green-50 text-green-600" :
-                    task.status === "EN_COURS" ? "bg-accent/10 text-accent" :
+                    task.status === "EN_COURS" ? "bg-su-brume text-su-bleu" :
                     "bg-gray-100 text-gray-500"
                   }`}>
                     {task.status === "DISPONIBLE" ? "Disponible" : task.status === "EN_COURS" ? "En cours" : task.status}
@@ -119,16 +118,16 @@ export default function EtudiantDashboard({ user }: Props) {
         <div className="space-y-5">
           <div className="bg-primary rounded-2xl p-5">
             <h3 className="font-syne font-bold text-white mb-3">Passerelle emploi</h3>
-            <p className="text-white/50 text-xs mb-4">
+            <p className="text-su-lavande text-xs mb-4">
               Complétez 10 tâches pour accéder aux opportunités de stage et d'emploi chez SHIFT UP.
             </p>
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${Math.min((completed / 10) * 100, 100)}%` }} />
             </div>
-            <p className="text-white/40 text-xs mt-2">{completed}/10 tâches complétées</p>
+            <p className="text-su-ciel text-xs mt-2">{completed}/10 tâches complétées</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-card p-5">
+          <div className="bg-white rounded-2xl border border-su-lavande p-5">
             <h3 className="font-syne font-bold text-primary mb-3">Accès rapides</h3>
             <div className="space-y-2 text-sm">
               <a href="/dashboard/etudiant/taches" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 text-gray-600 transition-colors">

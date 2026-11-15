@@ -65,7 +65,7 @@ export default function VeillePage() {
   const valide = c.secteurs.length > 0 || liste(c.motsCles).length > 0;
 
   if (!charge) return <div className="flex items-center justify-center h-64"><span className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>;
-  if (indispo) return <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-card p-8 text-center text-gray-500">La veille des appels d&apos;offres ouvre très bientôt.</div>;
+  if (indispo) return <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-su-lavande p-8 text-center text-gray-500">La veille des appels d&apos;offres ouvre très bientôt.</div>;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -75,7 +75,7 @@ export default function VeillePage() {
       </div>
 
       {abonnement && statut && (
-        <div className="bg-white rounded-2xl shadow-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-white rounded-2xl border border-su-lavande p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${statut[1]}`}>{statut[0]}</span>
             <p className="text-xs text-gray-500 mt-2">
@@ -90,14 +90,14 @@ export default function VeillePage() {
       )}
 
       {edition && (
-        <div className="bg-white rounded-2xl shadow-card p-6 space-y-5">
+        <div className="bg-white rounded-2xl border border-su-lavande p-6 space-y-5">
           <p className="font-syne font-bold text-primary">{abonnement ? "Mes critères" : "Choisissez ce que vous voulez recevoir"}</p>
           <fieldset>
             <legend className="text-sm font-medium text-gray-700 mb-2">Secteurs d&apos;activité</legend>
             <div className="grid sm:grid-cols-2 gap-2">
               {Object.keys(SECTEURS_VEILLE).map((s) => (
                 <label key={s} className={`flex items-center gap-2 text-sm rounded-xl border px-3 py-2 cursor-pointer ${c.secteurs.includes(s) ? "border-accent bg-accent/5 text-primary" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
-                  <input type="checkbox" checked={c.secteurs.includes(s)} onChange={() => basculer("secteurs", s)} className="w-4 h-4 flex-shrink-0 accent-[#0A2533]" />{s}
+                  <input type="checkbox" checked={c.secteurs.includes(s)} onChange={() => basculer("secteurs", s)} className="w-4 h-4 flex-shrink-0 accent-[#192338]" />{s}
                 </label>
               ))}
             </div>
@@ -134,7 +134,7 @@ export default function VeillePage() {
           </fieldset>
           <div className="flex gap-2">
             {abonnement && <button onClick={() => { setEdition(false); remplir(abonnement); }} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm text-gray-600">Annuler</button>}
-            <button disabled={occupe || !valide} onClick={enregistrer} className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+            <button disabled={occupe || !valide} onClick={enregistrer} className="flex-1 bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50">
               {abonnement && abonnement.statut !== "EXPIRE" ? "Enregistrer mes critères" : "Demander mon abonnement"}
             </button>
           </div>
@@ -148,13 +148,13 @@ export default function VeillePage() {
         <section className="space-y-3">
           <h2 className="font-syne font-bold text-primary text-sm">Avis qui vous correspondent ({ouverts.length} ouvert{ouverts.length > 1 ? "s" : ""})</h2>
           {ouverts.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-card p-8 text-center text-gray-400 text-sm">
+            <div className="bg-white rounded-2xl border border-su-lavande p-8 text-center text-gray-400 text-sm">
               {abonnement.statut === "ACTIF" ? "Aucun avis pour l'instant : vous serez prévenu par courriel dès qu'un avis correspond à vos critères." : "Les avis apparaîtront ici dès que votre veille sera active."}
             </div>
           ) : ouverts.map((a) => {
             const j = jours(a.dateLimite);
             return (
-              <article key={a.id} className="bg-white rounded-2xl shadow-card p-5 space-y-2">
+              <article key={a.id} className="bg-white rounded-2xl border border-su-lavande p-5 space-y-2">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-sm font-semibold text-primary leading-snug line-clamp-3" title={a.objet}>{a.objet}</p>
                   {j !== null && <span className={`flex-shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ${j <= 3 ? "bg-red-600 text-white" : j <= 7 ? "bg-amber-100 text-amber-800" : "bg-accent/10 text-accent"}`}>{j <= 0 ? "Aujourd'hui" : `J-${j}`}</span>}

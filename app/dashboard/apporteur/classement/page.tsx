@@ -52,7 +52,7 @@ export default function ApporteurClassementPage() {
       </div>
 
       {leaderboard.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400">
+        <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400">
           <i className="fas fa-trophy text-3xl mb-3 block" />
           <p>Aucun apporteur enregistré pour le moment.</p>
         </div>
@@ -60,7 +60,7 @@ export default function ApporteurClassementPage() {
         <>
           {/* Podium */}
           {topThree.length >= 3 && (
-            <div className="bg-white rounded-2xl shadow-card p-6">
+            <div className="bg-white rounded-2xl border border-su-lavande p-6">
               <h2 className="font-syne font-bold text-primary mb-6 text-center"><i className="fas fa-trophy mr-2 text-secondary-500" />Top 3 du mois</h2>
               <div className="flex items-end justify-center gap-4">
                 {/* 2nd */}
@@ -90,7 +90,7 @@ export default function ApporteurClassementPage() {
           )}
 
           {/* Full leaderboard */}
-          <div className="bg-white rounded-2xl shadow-card p-6">
+          <div className="bg-white rounded-2xl border border-su-lavande p-6">
             <h2 className="font-syne font-bold text-primary mb-4">Classement complet</h2>
             <div className="space-y-3">
               {leaderboard.map((ap, i) => (
@@ -119,7 +119,7 @@ export default function ApporteurClassementPage() {
 
           {/* Motivation */}
           {me && nextLevelMap[me.level] && (
-            <div className="bg-gradient-to-r from-accent/5 to-secondary/5 rounded-2xl p-5 text-center">
+            <div className="bg-su-brume rounded-2xl p-5 text-center">
               <i className="fas fa-rocket text-accent text-2xl mb-2 block" />
               <p className="font-syne font-bold text-primary">Vous êtes {me.rank}ème !</p>
               <p className="text-sm text-gray-500 mt-1">

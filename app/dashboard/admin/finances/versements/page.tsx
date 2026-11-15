@@ -125,7 +125,7 @@ export default function AdminVersementsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <span className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />

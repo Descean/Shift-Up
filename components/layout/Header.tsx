@@ -138,7 +138,7 @@ export default function Header() {
                       href={dashboardHref}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      <i className="fas fa-grid-2 text-su-bleu w-4" />
+                      <i className="fas fa-table-cells-large text-su-bleu w-4" />
                       Mon tableau de bord
                     </Link>
                     <Link
@@ -238,7 +238,7 @@ export default function Header() {
                 {session ? (
                   <>
                     <Button href={dashboardHref} variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-su-bleu/40 text-su-nuit"}>
-                      <i className="fas fa-grid-2" />
+                      <i className="fas fa-table-cells-large" />
                       Mon tableau de bord
                     </Button>
                     <Button onClick={() => signOut({ callbackUrl: "/" })} variant="ghost" size="md" className="text-red-400">

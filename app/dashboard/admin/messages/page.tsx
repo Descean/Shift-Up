@@ -124,24 +124,24 @@ export default function AdminMessagesPage() {
       </motion.div>
 
       {contacts.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-card p-12 text-center">
+        <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center">
           <i className="fas fa-envelope text-3xl text-gray-200 block mb-3" />
           <p className="text-gray-400 text-sm">Aucun message client pour l'instant.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-card overflow-hidden" style={{ height: "calc(100vh - 220px)", minHeight: "500px" }}>
+        <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden" style={{ height: "calc(100vh - 220px)", minHeight: "500px" }}>
           <div className="flex h-full">
 
             {/* ── Contacts ── */}
             <div className={`border-r border-gray-100 flex flex-col ${selected ? "hidden sm:flex sm:w-72 lg:w-80" : "flex w-full sm:w-72 lg:w-80"}`}>
               <div className="p-3 border-b border-gray-100">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Clients ({contacts.length})</p>
+                <p className="text-xs font-semibold text-gray-400">Clients ({contacts.length})</p>
               </div>
               <div className="flex-1 overflow-y-auto">
                 {contacts.map((c) => (
                   <button key={c.id} onClick={() => selectContact(c)}
                     className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-center gap-3 ${selected?.id === c.id ? "bg-accent/5 border-l-4 border-l-accent" : ""}`}>
-                    <div className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="w-10 h-10 bg-su-bleu rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                       {initials(c.name)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -170,7 +170,7 @@ export default function AdminMessagesPage() {
                     <button onClick={() => setSelected(null)} className="sm:hidden text-gray-400 hover:text-gray-600 mr-1">
                       <i className="fas fa-arrow-left" />
                     </button>
-                    <div className="w-9 h-9 bg-gradient-to-br from-accent to-secondary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="w-9 h-9 bg-su-bleu rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                       {initials(selected.name)}
                     </div>
                     <div>
@@ -189,7 +189,7 @@ export default function AdminMessagesPage() {
                       <div className="text-center text-gray-400 text-sm py-10">Aucun message.</div>
                     ) : thread.map((m) => (
                       <div key={m.id} className={`flex gap-2 ${m.isMine ? "flex-row-reverse" : ""}`}>
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 ${m.isMine ? "bg-secondary" : "bg-gradient-to-br from-accent to-secondary"}`}>
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 ${m.isMine ? "bg-secondary" : "bg-su-bleu"}`}>
                           {m.isMine ? "M" : initials(m.senderName)}
                         </div>
                         <div className={`max-w-[75%] flex flex-col gap-1 ${m.isMine ? "items-end" : "items-start"}`}>
@@ -216,7 +216,7 @@ export default function AdminMessagesPage() {
                         className="flex-1 bg-gray-50 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
                       />
                       <button onClick={sendReply} disabled={!reply.trim() || sending}
-                        className="w-10 h-10 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 flex-shrink-0">
+                        className="w-10 h-10 bg-su-bleu rounded-xl flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 flex-shrink-0">
                         {sending ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <i className="fas fa-paper-plane text-sm" />}
                       </button>
                     </div>

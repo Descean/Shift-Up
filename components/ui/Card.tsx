@@ -26,8 +26,8 @@ export default function Card({
     "rounded-2xl p-6",
     glass
       ? "bg-white/5 backdrop-blur-sm border border-white/10"
-      : "bg-white border border-gray-100 shadow-card",
-    hover && "transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover",
+      : "bg-white border border-su-lavande",
+    hover && "transition-shadow duration-300 hover:shadow-[0_12px_30px_rgba(30,46,79,0.12)]",
     onClick && "cursor-pointer",
     className
   );
@@ -70,9 +70,9 @@ export function StatCard({
   color?: "accent" | "secondary" | "primary";
 }) {
   const colorMap = {
-    accent: "text-accent bg-accent/10",
-    secondary: "text-secondary bg-secondary/10",
-    primary: "text-primary bg-primary/10",
+    accent: "text-su-bleu bg-su-brume",
+    secondary: "text-su-cadet bg-su-lavande",
+    primary: "text-white bg-su-nuit",
   };
 
   return (
@@ -80,12 +80,12 @@ export function StatCard({
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-gray-500 mb-1">{label}</p>
-          <p className="text-2xl font-bold font-syne text-primary">{value}</p>
+          <p className="text-[26px] font-extrabold font-syne text-su-nuit">{value}</p>
           {trendValue && (
             <p
               className={cn(
                 "text-xs mt-1 font-medium",
-                trend === "up" ? "text-secondary" : trend === "down" ? "text-red-500" : "text-gray-400"
+                trend === "up" ? "text-emerald-700" : trend === "down" ? "text-red-500" : "text-gray-400"
               )}
             >
               {trend === "up" ? "+" : trend === "down" ? "-" : ""}

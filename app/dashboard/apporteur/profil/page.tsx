@@ -52,7 +52,7 @@ export default function ApporteurProfilPage() {
 
   if (!profile) {
     return (
-      <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400">
+      <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400">
         <i className="fas fa-user-slash text-3xl mb-3 block" />
         <p>Profil apporteur introuvable.</p>
       </div>
@@ -114,7 +114,7 @@ export default function ApporteurProfilPage() {
       </motion.div>
 
       {/* Profile form */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-su-lavande p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-syne font-bold text-primary">
             <i className="fas fa-user-edit mr-2 text-accent" />
@@ -204,7 +204,7 @@ export default function ApporteurProfilPage() {
       </div>
 
       {/* Code affiliation */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-su-lavande p-6">
         <h2 className="font-syne font-bold text-primary mb-4">
           <i className="fas fa-link mr-2 text-accent" />
           Mon code & lien d'affiliation

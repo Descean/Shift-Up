@@ -54,8 +54,8 @@ export default function EtudiantPortfolioPage() {
           { label: "Projets publics",  value: publicItems,                             icon: "fa-eye",         color: "text-secondary" },
           { label: "Total gagné",      value: `${totalEarned.toLocaleString()} F`,     icon: "fa-coins",       color: "text-green-600" },
         ].map((card) => (
-          <div key={card.label} className="bg-white rounded-2xl shadow-card p-5">
-            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">{card.label}</p>
+          <div key={card.label} className="bg-white rounded-2xl border border-su-lavande p-5">
+            <p className="text-xs text-gray-400 mb-1">{card.label}</p>
             <p className={`font-syne font-black text-2xl ${card.color}`}>{card.value}</p>
           </div>
         ))}
@@ -69,7 +69,7 @@ export default function EtudiantPortfolioPage() {
 
       {/* Liste */}
       {items.length === 0 && (
-        <div className="bg-white rounded-2xl shadow-card p-12 text-center">
+        <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center">
           <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <i className="fas fa-folder-open text-gray-300 text-2xl" />
           </div>
@@ -79,7 +79,7 @@ export default function EtudiantPortfolioPage() {
 
       <div className="space-y-4">
         {items.map((item, i) => (
-          <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-white rounded-2xl shadow-card p-5">
+          <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-white rounded-2xl border border-su-lavande p-5">
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2 mb-2">

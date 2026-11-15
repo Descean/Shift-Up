@@ -95,7 +95,7 @@ export default function AdminVeillePage() {
               ["Abonnés actifs", String(d.abonnements.filter((a) => a.statut === "ACTIF").length), "fa-user-check"],
               ["Dernière collecte", dateFr(d.stats?.derniereCollecte ?? null, true), "fa-clock"],
             ].map(([l, v, ic]) => (
-              <div key={l} className="bg-white rounded-2xl shadow-card px-4 py-3">
+              <div key={l} className="bg-white rounded-2xl border border-su-lavande px-4 py-3">
                 <p className="text-[11px] text-gray-500"><i className={`fas ${ic} mr-1.5 text-accent`} />{l}</p>
                 <p className="font-syne font-black text-primary text-lg mt-0.5 truncate">{v}</p>
               </div>
@@ -109,7 +109,7 @@ export default function AdminVeillePage() {
           </div>
 
           {/* Abonnés */}
-          <section className="bg-white rounded-2xl shadow-card overflow-hidden">
+          <section className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100"><h2 className="font-syne font-bold text-primary text-sm">Abonnés ({d.abonnements.length})</h2></div>
             {d.abonnements.length === 0 ? <p className="p-6 text-sm text-gray-400 text-center">Aucune demande d&apos;abonnement pour l&apos;instant.</p> : (
               <div className="divide-y divide-gray-50">
@@ -162,7 +162,7 @@ export default function AdminVeillePage() {
           </section>
 
           {/* Avis */}
-          <section className="bg-white rounded-2xl shadow-card overflow-hidden">
+          <section className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
               <h2 className="font-syne font-bold text-primary text-sm">Avis ouverts</h2>
               <div className="flex gap-2">
@@ -205,7 +205,7 @@ export default function AdminVeillePage() {
       )}
 
       {/* Sources à consulter à la main */}
-      <section className="bg-white rounded-2xl shadow-card p-5 space-y-3">
+      <section className="bg-white rounded-2xl border border-su-lavande p-5 space-y-3">
         <h2 className="font-syne font-bold text-primary text-sm"><i className="fas fa-hand-pointer text-accent mr-1.5" />Sites à consulter à la main</h2>
         <p className="text-xs text-gray-500">Ces sites ne peuvent pas être lus automatiquement. Ajoutez leurs avis avec « Ajouter un avis » : ils seront envoyés aux abonnés concernés.</p>
         <ul className="grid sm:grid-cols-2 gap-2">
@@ -219,7 +219,7 @@ export default function AdminVeillePage() {
       </section>
 
       {/* WhatsApp */}
-      <section className="bg-white rounded-2xl shadow-card p-5 space-y-4" id="whatsapp">
+      <section className="bg-white rounded-2xl border border-su-lavande p-5 space-y-4" id="whatsapp">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="font-syne font-bold text-primary text-sm"><i className="fab fa-whatsapp text-green-600 mr-1.5" />Notifications WhatsApp</h2>

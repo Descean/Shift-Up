@@ -75,11 +75,11 @@ export default function AdminAnalyticsPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi, i) => (
-          <motion.div key={kpi.label} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-white rounded-2xl shadow-card p-5">
+          <motion.div key={kpi.label} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-white rounded-2xl border border-su-lavande p-5">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center mb-4`}>
               <i className={`fas ${kpi.icon} text-white text-sm`} />
             </div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">{kpi.label}</p>
+            <p className="text-xs text-gray-400 mb-1">{kpi.label}</p>
             {loading ? (
               <div className="h-8 w-24 bg-gray-100 rounded animate-pulse mb-1" />
             ) : (
@@ -96,7 +96,7 @@ export default function AdminAnalyticsPage() {
 
       {/* Répartitions */}
       <div className="grid lg:grid-cols-2 gap-5">
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-white rounded-2xl border border-su-lavande p-6">
           <h2 className="font-syne font-bold text-primary mb-5">Prestations par statut</h2>
           <div className="space-y-3">
             {prestationsByStatus.map((item) => (
@@ -112,7 +112,7 @@ export default function AdminAnalyticsPage() {
           <p className="text-xs text-gray-400 mt-4">Total : {totalPrestations} prestations</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-white rounded-2xl border border-su-lavande p-6">
           <h2 className="font-syne font-bold text-primary mb-5">Utilisateurs par rôle</h2>
           <div className="space-y-3">
             {usersByRole.map((item) => (
@@ -132,7 +132,7 @@ export default function AdminAnalyticsPage() {
       <GraphiqueMensuel key={s ? "pret" : "attente"} initial={s?.mensuel ?? null} titre="Encaissements mensuels" />
 
       {/* Top services */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-su-lavande p-6">
         <h2 className="font-syne font-bold text-primary mb-5">Top services demandés</h2>
         <p className="text-xs text-gray-500 mb-4">Nombre de demandes de prestation par service.</p>
         {!s?.topServices?.length ? (

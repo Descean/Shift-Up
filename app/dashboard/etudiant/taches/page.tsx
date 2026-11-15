@@ -147,13 +147,13 @@ export default function EtudiantTachesPage() {
       {/* Liste */}
       <div className="space-y-4">
         {filtered.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-card p-12 text-center text-gray-400 text-sm">
+          <div className="bg-white rounded-2xl border border-su-lavande p-12 text-center text-gray-400 text-sm">
             {tasks.length === 0 ? "Aucune tâche disponible pour le moment." : "Aucune tâche dans cette catégorie."}
           </div>
         )}
 
         {filtered.map((task) => (
-          <motion.div key={task.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-card p-5">
+          <motion.div key={task.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-su-lavande p-5">
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -178,7 +178,7 @@ export default function EtudiantTachesPage() {
 
               <div className="flex-shrink-0 flex flex-col gap-2 min-w-[120px]">
                 {task.status === "DISPONIBLE" && (
-                  <button onClick={() => takeTask(task.id)} className="bg-gradient-to-r from-accent to-secondary text-white px-4 py-2 rounded-xl text-xs font-semibold hover:opacity-90">
+                  <button onClick={() => takeTask(task.id)} className="bg-su-bleu text-white px-4 py-2 rounded-xl text-xs font-semibold hover:opacity-90">
                     <i className="fas fa-hand-pointer mr-1" />Prendre
                   </button>
                 )}
@@ -220,7 +220,7 @@ export default function EtudiantTachesPage() {
                 <div className="flex gap-3">
                   <button onClick={() => setSubmitting(null)} disabled={saving} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600">Annuler</button>
                   <button onClick={submitTask} disabled={saving || !deliverableUrl.trim()}
-                    className="flex-1 bg-gradient-to-r from-accent to-secondary text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60">
+                    className="flex-1 bg-su-bleu text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60">
                     {saving ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Envoi…</span> : "Envoyer"}
                   </button>
                 </div>
