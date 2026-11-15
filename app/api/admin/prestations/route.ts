@@ -119,6 +119,8 @@ export async function PATCH(req: NextRequest) {
         ...(data.phases          ? { phases: data.phases }                              : {}),
         ...(data.estimatedEndDate ? { estimatedEndDate: new Date(data.estimatedEndDate) } : {}),
         ...(data.endDate          ? { endDate: new Date(data.endDate) }                 : {}),
+        // Date de fin : point de départ des 30 jours avant l'effacement des fichiers et échanges
+        ...(["TERMINEE", "ANNULEE"].includes(data.status ?? "") && !data.endDate && !existing.endDate ? { endDate: new Date() } : {}),
       },
       include: {
         client:  { select: { name: true, email: true } },

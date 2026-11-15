@@ -137,3 +137,42 @@ export async function migrerAncienBucket() {
   if (b.public) await sb().storage.updateBucket(BUCKET_ANCIEN, { public: false });
   return { migre: true, liensReecrits: n, etaitPublic: b.public };
 }
+
+/** Retrouve le compartiment et le chemin d'un lien interne (« /api/fichiers/<bucket>/<chemin> »). */
+export function decouperLien(url: string): { bucket: string; path: string } | null {
+  try {
+    const p = decodeURIComponent(new URL(url, APP_URL).pathname);
+    const m = p.match(/^\/api\/fichiers\/([^/]+)\/(.+)$/);
+    if (!m || m[2].includes("..")) return null;
+    return { bucket: m[1], path: m[2] };
+  } catch {
+    return null;
+  }
+}
+
+/** Lit le contenu d'un fichier stocké (côté serveur uniquement). */
+export async function lireFichier(url: string): Promise<{ octets: Buffer; type: string; nom: string } | null> {
+  const l = decouperLien(url);
+  if (!l || !supabaseConfigure) return null;
+  const { data, error } = await sb().storage.from(l.bucket).download(l.path);
+  if (error || !data) return null;
+  return { octets: Buffer.from(await data.arrayBuffer()), type: data.type || "application/octet-stream", nom: l.path.split("/").pop() ?? "fichier" };
+}
+
+/** Supprime des fichiers stockés (liens internes) ; ignore ceux qui n'existent plus. Renvoie le nombre supprimé. */
+export async function supprimerFichiers(urls: string[]): Promise<number> {
+  if (!supabaseConfigure) return 0;
+  const parBucket = new Map<string, string[]>();
+  for (const u of new Set(urls)) {
+    const l = decouperLien(u);
+    if (l) parBucket.set(l.bucket, [...(parBucket.get(l.bucket) ?? []), l.path]);
+  }
+  let n = 0;
+  for (const [bucket, chemins] of parBucket) {
+    for (let i = 0; i < chemins.length; i += 100) {
+      const { data } = await sb().storage.from(bucket).remove(chemins.slice(i, i + 100));
+      n += data?.length ?? 0;
+    }
+  }
+  return n;
+}

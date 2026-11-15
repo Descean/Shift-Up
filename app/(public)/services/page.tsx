@@ -12,7 +12,7 @@ import { useSession } from "next-auth/react";
 function ServiceCard({ service, sectorId, index }: { service: ServiceItem; sectorId: string; index: number }) {
   const { data: session } = useSession();
   const href = session
-    ? `/dashboard/client/nouvelle-demande?sector=${encodeURIComponent(sectorId)}&service=${encodeURIComponent(service.title)}`
+    ? `/dashboard/client/nouvelle-demande/formulaire?sector=${encodeURIComponent(sectorId)}&service=${encodeURIComponent(service.title)}`
     : `/services/souscrire?secteur=${encodeURIComponent(sectorId)}&offre=${encodeURIComponent(service.title)}`;
 
   return (
@@ -205,7 +205,7 @@ export default function ServicesPage() {
                     className="w-full resize-none rounded-xl border border-su-lavande bg-white px-4 py-3 text-[15px] focus:border-su-bleu focus:outline-none"
                     placeholder={`Ex. : j'ai besoin d'aide pour ${sector.services[0]?.title.toLowerCase()}…`} />
                   <div className="flex flex-wrap gap-3">
-                    <Link href={session ? `/dashboard/client/nouvelle-demande?sector=${sector.id}` : `/services/souscrire?secteur=${sector.id}`}
+                    <Link href={session ? `/dashboard/client/nouvelle-demande/formulaire?sector=${sector.id}` : `/services/souscrire?secteur=${sector.id}`}
                       className="inline-flex items-center gap-2 rounded-full bg-su-bleu px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-su-cadet">
                       Demander un devis <Icone nom="fleche" taille={16} epaisseur={2} />
                     </Link>

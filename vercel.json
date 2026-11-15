@@ -1,6 +1,16 @@
 {
   "crons": [
-    { "path": "/api/cron/recrutement", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/veille", "schedule": "20 5 * * *" }
+    {
+      "path": "/api/cron/recrutement",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/veille",
+      "schedule": "20 5 * * *"
+    },
+    {
+      "path": "/api/cron/effacement",
+      "schedule": "40 2 * * *"
+    }
   ]
 }

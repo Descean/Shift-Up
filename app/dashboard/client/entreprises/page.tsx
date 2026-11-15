@@ -153,7 +153,7 @@ export default function MesEntreprisesPage() {
                   <div className="flex flex-wrap gap-2">
                     <button onClick={() => setEdition({ id: e.id, fiche: { nom: e.nom, formeJuridique: e.formeJuridique ?? "", rccm: e.rccm ?? "", ifu: e.ifu ?? "", representant: e.representant ?? "", telephone: e.telephone ?? "", email: e.email ?? "", adresse: e.adresse ?? "" } })}
                       className="rounded-full border border-su-clair px-4 py-2 text-xs font-semibold text-su-bleu">Modifier la fiche</button>
-                    <Link href={`/dashboard/client/nouvelle-demande?sector=marches-publics&entreprise=${e.id}`} className="rounded-full bg-su-bleu px-4 py-2 text-xs font-semibold text-white">Monter un dossier pour cette entreprise</Link>
+                    <Link href={`/dashboard/client/nouvelle-demande?entreprise=${e.id}`} className="rounded-full bg-su-bleu px-4 py-2 text-xs font-semibold text-white">Monter un dossier pour cette entreprise</Link>
                     <button onClick={() => supprimer(e)} className="rounded-full px-4 py-2 text-xs font-semibold text-red-600">Supprimer</button>
                   </div>
                   <Coffre entreprise={e} onMaj={charger} />

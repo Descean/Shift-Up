@@ -51,7 +51,14 @@ const nextConfig = {
   // ── Packages Node.js à ne pas bundler côté serveur ────────────────────────
   // Prisma et bcryptjs utilisent des binaires natifs — doivent rester externes.
   // (déplacé hors de experimental depuis Next.js 15)
-  serverExternalPackages: ["@prisma/client", "bcryptjs", "@react-pdf/renderer"],
+  serverExternalPackages: ["@prisma/client", "bcryptjs", "@react-pdf/renderer", "pdfjs-dist", "@napi-rs/canvas", "mammoth"],
+
+  // Polices et tables de caractères de pdf.js, lues sur disque pour l'aperçu des livrables et l'analyse des dossiers
+  outputFileTracingIncludes: {
+    "/api/livrables/**": ["./node_modules/pdfjs-dist/standard_fonts/**", "./node_modules/pdfjs-dist/cmaps/**"],
+    "/api/prestations/**": ["./node_modules/pdfjs-dist/standard_fonts/**", "./node_modules/pdfjs-dist/cmaps/**"],
+    "/api/admin/prestations/**": ["./node_modules/pdfjs-dist/standard_fonts/**", "./node_modules/pdfjs-dist/cmaps/**"],
+  },
 
   // ── En-têtes de sécurité HTTP ─────────────────────────────────────────────
   // Appliqués à toutes les routes (source: "/(.*)" = pattern regex catch-all).

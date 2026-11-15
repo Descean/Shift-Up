@@ -187,6 +187,42 @@ function phaseStatusLabel(s: string): string {
 }
 
 
+
+// ─── Lecture automatique du dossier (devis automatique) ───
+function AnalyseIA({ prestation, onDone }: { prestation: Prestation; onDone: () => void }) {
+  const cf = (prestation.customFields ?? {}) as { analyseIA?: { statut?: string; raison?: string }; transcriptionVocale?: string };
+  const q = prestation.quote as (Quote & { auto?: boolean; resume?: string; livrables?: { titre: string }[]; pointsAttention?: string[] }) | null;
+  const [envoi, setEnvoi] = useState(false);
+  const statut = cf.analyseIA?.statut;
+  if (!statut && !q?.auto) return null;
+
+  async function relancer() {
+    setEnvoi(true);
+    try {
+      const r = await fetch(`/api/admin/prestations/${prestation.id}/analyse`, { method: "POST" });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) toast.error(d.error ?? "Analyse impossible."); else { toast.success("Devis automatique envoyé au client."); onDone(); }
+    } finally { setEnvoi(false); }
+  }
+
+  return (
+    <div className="mt-3 space-y-2 rounded-xl border border-su-lavande bg-su-brume p-3 text-xs text-su-nuit">
+      <p className="font-semibold"><i className="fas fa-wand-magic-sparkles mr-1.5 text-su-bleu" />
+        {q?.auto ? "Devis automatique envoyé au client" : statut === "en_cours" || statut === "en_attente" ? "Lecture du dossier en cours…" : statut === "echec" ? "La lecture automatique a échoué : devis à préparer" : "Devis à préparer à la main (IA non configurée)"}
+      </p>
+      {statut === "echec" && cf.analyseIA?.raison && <p className="text-red-700">{cf.analyseIA.raison}</p>}
+      {q?.resume && <p className="leading-relaxed">{q.resume}</p>}
+      {q?.livrables && q.livrables.length > 0 && <p><strong>Livrables :</strong> {q.livrables.map((l) => l.titre).join(" ; ")}</p>}
+      {q?.pointsAttention && q.pointsAttention.length > 0 && <p className="text-amber-800"><strong>Points d&apos;attention :</strong> {q.pointsAttention.join(" ; ")}</p>}
+      {cf.transcriptionVocale && <p><strong>Message vocal :</strong> « {cf.transcriptionVocale} »</p>}
+      {q?.auto && <p className="text-gray-600">Pour l&apos;ajuster, modifiez-le dans l&apos;onglet « Devis & plan » et renvoyez-le.</p>}
+      {!q && prestation.status === "EN_ATTENTE" && statut !== "en_cours" && (
+        <button onClick={relancer} disabled={envoi} className="rounded-lg bg-su-bleu px-3 py-1.5 font-semibold text-white disabled:opacity-50">{envoi ? "Lecture du dossier…" : "Lancer la lecture automatique"}</button>
+      )}
+    </div>
+  );
+}
+
 // ─── Paiement reçu hors ligne (Mobile Money sur le numéro SHIFT UP, espèces, virement) ───
 const MOYENS_PAIEMENT = [
   { id: "MOBILE_MONEY", label: "Mobile Money (numéro SHIFT UP)" },
@@ -1310,6 +1346,7 @@ function DetailPanel({
           </p>
         )}
 
+        <AnalyseIA prestation={prestation} onDone={onRefresh} />
         <EnregistrerPaiement prestation={prestation} onDone={onRefresh} />
 
         {/* Attachments */}
