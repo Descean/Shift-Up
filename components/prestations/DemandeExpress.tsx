@@ -194,7 +194,7 @@ export default function DemandeExpress({ publique = false }: { publique?: boolea
               <li key={f.url} className="flex items-center gap-2 rounded-xl bg-su-brume px-3 py-2 text-sm">
                 <i className="fas fa-file-lines text-su-bleu" />
                 <span className="min-w-0 flex-1 truncate text-su-nuit">{f.nom}</span>
-                <span className="text-xs text-gray-500">{(f.taille / 1_048_576).toFixed(1)} Mo</span>
+                <span className="text-xs text-gray-500">{f.taille < 1_048_576 ? `${Math.max(1, Math.round(f.taille / 1024))} Ko` : `${(f.taille / 1_048_576).toFixed(1)} Mo`}</span>
                 <button onClick={() => setFichiers((l) => l.filter((x) => x.url !== f.url))} aria-label={`Retirer ${f.nom}`} className="px-1 text-gray-400 hover:text-red-600"><i className="fas fa-xmark" /></button>
               </li>
             ))}
