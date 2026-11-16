@@ -17,7 +17,7 @@ export default async function HeroCercle() {
   ];
 
   return (
-    <section className="su-hero relative overflow-hidden bg-su-brume pt-36 pb-28">
+    <section className="su-hero relative overflow-hidden bg-su-brume pt-36 pb-28 lg:flex lg:min-h-[760px] lg:items-center">
       <div className="su-ringwrap">
         <nav className="su-ring" aria-label="Nos services">
           {SERVICES.map((s, i) => (
@@ -30,7 +30,7 @@ export default async function HeroCercle() {
         </nav>
       </div>
 
-      <div className="relative z-[1] mx-auto grid max-w-[1200px] items-center gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_240px]">
+      <div className="relative z-[1] mx-auto grid w-full max-w-[1200px] items-center gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_240px]">
         <div className="flex max-w-[640px] flex-col gap-6">
           <h1 className={`${manrope.className} m-0 text-[40px] font-extrabold leading-[1.08] tracking-tight text-su-nuit sm:text-[52px]`}>
             Transformez votre vision
@@ -47,15 +47,6 @@ export default async function HeroCercle() {
             <Link href="#services" className="rounded-full border border-su-clair bg-white px-6 py-[14px] text-[15px] font-semibold text-su-bleu transition-colors hover:border-su-bleu">
               Découvrir nos services
             </Link>
-          </div>
-          <div className="mt-3 flex max-w-[320px] flex-col gap-2.5 self-start rounded-[14px] border border-su-lavande bg-white px-[18px] py-4 shadow-[0_12px_30px_rgba(30,46,79,0.12)]">
-            <span className={`${manrope.className} text-base font-bold text-su-nuit`}>Montage de dossiers</span>
-            <span className="text-sm leading-normal text-[#374151]">Appels d&apos;offres, financement bancaire, subventions : un dossier complet, prêt à déposer.</span>
-            <div className="flex flex-wrap gap-1.5">
-              {["Analyse du DAO", "Montage", "Dépôt"].map((t) => (
-                <span key={t} className="rounded-md border border-su-lavande bg-su-brume px-2.5 py-1 text-xs font-medium text-su-bleu">{t}</span>
-              ))}
-            </div>
           </div>
         </div>
 
