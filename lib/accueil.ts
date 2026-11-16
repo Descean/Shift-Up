@@ -7,7 +7,7 @@
  *
  * - dossiers montés          = départ + prestations du domaine « Dossiers » terminées depuis la date d'arrêt
  * - entreprises accompagnées = départ + clients ayant eu une première prestation terminée depuis la date d'arrêt
- * - dossiers gagnés          = départ (le résultat d'attribution n'est pas encore saisi dans l'admin)
+ * - dossiers gagnés          = départ + soumissions marquées « gagné » (par l'admin ou par Tendo) depuis la date d'arrêt
  */
 import prisma from "@/lib/prisma";
 
@@ -24,8 +24,18 @@ export type ChiffresAccueil = {
   dossiersGagnes: number;
 };
 
+/** Soumissions gagnées depuis la date d'arrêt (0 si la table n'existe pas encore). */
+async function gagnesDepuisArret(arreteAu: Date): Promise<number> {
+  try {
+    return await prisma.soumission.count({ where: { resultat: "GAGNE", resultatAt: { gte: arreteAu } } });
+  } catch {
+    return 0;
+  }
+}
+
 export async function getChiffresAccueil(): Promise<ChiffresAccueil> {
   const { arreteAu } = CHIFFRES_DEPART;
+  const gagnes = CHIFFRES_DEPART.dossiersGagnes + (await gagnesDepuisArret(arreteAu));
   try {
     const [dossiers, nouveauxClients] = await Promise.all([
       prisma.prestation.count({
@@ -38,13 +48,13 @@ export async function getChiffresAccueil(): Promise<ChiffresAccueil> {
     return {
       dossiersMontes: CHIFFRES_DEPART.dossiersMontes + dossiers,
       entreprisesAccompagnees: CHIFFRES_DEPART.entreprisesAccompagnees + nouveauxClients,
-      dossiersGagnes: CHIFFRES_DEPART.dossiersGagnes,
+      dossiersGagnes: gagnes,
     };
   } catch {
     return {
       dossiersMontes: CHIFFRES_DEPART.dossiersMontes,
       entreprisesAccompagnees: CHIFFRES_DEPART.entreprisesAccompagnees,
-      dossiersGagnes: CHIFFRES_DEPART.dossiersGagnes,
+      dossiersGagnes: gagnes,
     };
   }
 }

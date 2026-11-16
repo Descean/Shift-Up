@@ -68,6 +68,7 @@ const navByRole: Record<string, NavItem[]> = {
   ADMIN: [
     { href: "/dashboard/admin", icon: "fas fa-table-cells-large", label: "Vue d'ensemble" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
+    { href: "/dashboard/admin/soumissions", icon: "fas fa-trophy", label: "Résultats des dossiers" },
     { href: "/dashboard/admin/veille", icon: "fas fa-binoculars", label: "Veille & WhatsApp" },
     { href: "/dashboard/admin/whatsapp", icon: "fab fa-whatsapp", label: "Messages WhatsApp" },
     { href: "/dashboard/admin/utilisateurs", icon: "fas fa-users", label: "Utilisateurs" },
@@ -88,6 +89,7 @@ const navByRole: Record<string, NavItem[]> = {
   DEVELOPER: [
     { href: "/dashboard/admin", icon: "fas fa-table-cells-large", label: "Vue d'ensemble" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
+    { href: "/dashboard/admin/soumissions", icon: "fas fa-trophy", label: "Résultats des dossiers" },
     { href: "/dashboard/admin/veille", icon: "fas fa-binoculars", label: "Veille & WhatsApp" },
     { href: "/dashboard/admin/whatsapp", icon: "fab fa-whatsapp", label: "Messages WhatsApp" },
     { href: "/dashboard/admin/utilisateurs", icon: "fas fa-users", label: "Utilisateurs" },

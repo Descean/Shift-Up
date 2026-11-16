@@ -274,6 +274,42 @@ model Prestation {
   prestationPhases PrestationPhase[]
   livrables        Livrable[]
   notifications    Notification[]
+  soumissions      Soumission[]
+}
+
+// ============================================================
+// RÉSULTATS DES DOSSIERS DÉPOSÉS (suivis par Tendo)
+// ============================================================
+
+/// Offre déposée pour un client. Tendo cherche le résultat (PV d'attribution)
+/// pendant le délai de validité de l'offre, puis renseigne `resultat`.
+model Soumission {
+  id                   String      @id @default(cuid())
+  prestationId         String?
+  prestation           Prestation? @relation(fields: [prestationId], references: [id], onDelete: SetNull)
+  entrepriseId         String?
+  entreprise           Entreprise? @relation(fields: [entrepriseId], references: [id], onDelete: SetNull)
+  entrepriseNom        String // raison sociale exacte, telle qu'elle figure sur l'offre
+  entrepriseSigle      String?
+  reference            String? // référence du marché (ex. F_DAF_122310)
+  autorite             String
+  objet                String
+  lots                 String?
+  dateDepot            DateTime
+  validiteJours        Int         @default(90)
+  montantOffre         Float?
+  resultat             String      @default("EN_ATTENTE") // EN_ATTENTE | GAGNE | NON_RETENU | A_VERIFIER
+  attributaire         String?
+  montantAttribue      Float?
+  preuveUrl            String?
+  detecteParTendo      Boolean     @default(false)
+  resultatAt           DateTime?
+  derniereVerification DateTime?
+  note                 String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  @@index([resultat])
 }
 
 // ============================================================
@@ -317,6 +353,7 @@ model Entreprise {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   pieces         PieceEntreprise[]
+  soumissions    Soumission[]
 
   @@index([userId])
 }
