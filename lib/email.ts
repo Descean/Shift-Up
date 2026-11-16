@@ -726,7 +726,7 @@ export async function sendDossierOuvertClient({ to, name, monteur, titre, lien }
   const content = `
     <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre dossier est ouvert</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
-    <p style="color:#555;line-height:1.6;"><strong>${esc(monteur)}</strong> a ouvert votre dossier « ${esc(titre)} » sur SHIFT UP. Vous y recevrez le devis, réglerez l'acompte en ligne et suivrez chaque étape du montage.</p>
+    <p style="color:#555;line-height:1.6;"><strong>${esc(monteur)}</strong> a ouvert votre dossier « ${esc(titre)} » sur SHIFT UP. Vous y recevrez le devis, réglerez l'acompte en ligne et suivrez chaque étape jusqu'à la livraison.</p>
     ${btn("Voir mon dossier →", lien)}
     <p style="color:#999;font-size:13px;">Ensuite, connectez-vous avec votre adresse e-mail : un lien vous est envoyé à chaque fois.</p>
     <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;

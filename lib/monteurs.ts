@@ -11,6 +11,7 @@
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { estDirection } from "@/lib/roles";
+import { competencesDe, TOUTES_COMPETENCES, type Competences } from "@/lib/competences";
 
 export type ContexteEquipe = { userId: string; direction: boolean; independant: boolean; actif: boolean; statut: string };
 
@@ -76,4 +77,11 @@ export async function soldeMonteur(userId: string) {
   ]);
   const gagne = g._sum.net ?? 0, verse = v._sum.amount ?? 0;
   return { gagne, verse, disponible: Math.max(0, gagne - verse) };
+}
+
+/** Services que ce membre de l'équipe peut ouvrir pour ses clients (Direction et internes : tout le catalogue). */
+export async function competencesPartenaire(c: ContexteEquipe): Promise<Competences> {
+  if (c.direction || !c.independant) return TOUTES_COMPETENCES;
+  const p = await profilMonteur(c.userId);
+  return competencesDe(p?.specialites);
 }

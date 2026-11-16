@@ -5,6 +5,16 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { NATURES, type Tarifs } from "@/lib/tarifs-montage";
 import { dateFr } from "@/components/espace/elements";
+import { SECTORS } from "@/lib/catalogue";
+import { competencesDe, DOMAINE_MONTAGE } from "@/lib/competences";
+
+/** Compétences lisibles d'un partenaire (services qu'il peut ouvrir pour ses clients). */
+function libellesCompetences(specialites: string[]) {
+  const c = competencesDe(specialites);
+  return c.domaines.map((id) => id === DOMAINE_MONTAGE
+    ? `Montage (${NATURES.filter((n) => c.natures.includes(n.id)).map((n) => n.label.replace(/ \(DAO\)$/, "")).join(", ")})`
+    : SECTORS.find((s) => s.id === id)?.label ?? id).join(" · ");
+}
 
 type Monteur = { id: string; nom: string | null; email: string | null; telephone: string | null; ville: string | null; experience: string | null; specialites: string[]; presentation: string | null; creeLe: string; statut: string; type: string; dossiersEnCours: number; solde: number };
 type Versement = { id: string; monteur: string | null; montant: number; operateur: string; numero: string; statut: string; reference: string; date: string };
@@ -47,6 +57,7 @@ function Monteurs() {
                 <p className="font-semibold text-su-nuit">{m.nom} <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${m.statut === "ACTIF" ? "bg-emerald-50 text-emerald-700" : m.statut === "EN_ATTENTE" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700"}`}>{STATUT_M[m.statut] ?? m.statut}</span>
                   <span className="ml-1 rounded-full bg-su-brume px-2 py-0.5 text-[10px] font-bold text-su-bleu">{m.type === "INDEPENDANT" ? "Indépendant" : "Interne"}</span></p>
                 <p className="text-xs text-gray-500">{m.email} · {m.telephone ?? "—"}{m.ville ? ` · ${m.ville}` : ""}{m.experience ? ` · ${m.experience}` : ""} · inscrit le {dateFr(m.creeLe)}</p>
+                {m.type === "INDEPENDANT" && <p className="mt-1 text-xs text-su-bleu"><span className="font-semibold">Compétences :</span> {libellesCompetences(m.specialites)}</p>}
                 {m.presentation && <p className="mt-1 line-clamp-2 text-xs text-gray-600">{m.presentation}</p>}
                 <p className="mt-1 text-xs text-gray-500">{m.dossiersEnCours} dossier(s) en cours{m.type === "INDEPENDANT" ? ` · solde ${Math.round(m.solde).toLocaleString("fr-FR")} F` : ""}</p>
               </div>
