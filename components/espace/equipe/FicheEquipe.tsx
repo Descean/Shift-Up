@@ -8,10 +8,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Carte, EnTeteFiche, FilDiscussion, dateFr, fcfa } from "@/components/espace/elements";
+import { Carte, EnTeteFiche, FilDiscussion, Historique, dateFr, fcfa } from "@/components/espace/elements";
 import { libelleLivraison, type EtatDossier, type InfosDossier } from "@/lib/dossier";
 import { libelleNature } from "@/lib/tarifs-montage";
 import { televerser } from "@/lib/televerser";
+import { PiecesAdmin } from "@/components/prestations/Pieces";
+import SuiviDossier from "@/components/prestations/Suivi";
+import type { Depot, Dossier as FicheMarche, Piece, Resultat } from "@/lib/montage";
 
 type Livrable = { id: string; titre: string; type: string; url: string | null; observation: string | null; vu: boolean };
 type Etape = { id: string; titre: string; statut: string; livrables: Livrable[] };
@@ -24,6 +27,8 @@ type Dossier = {
   etapes: Etape[]; autresLivrables: Livrable[]; fichiersDepart: string[];
   analyse: { statut: string | null; raison: string | null; proposition: Proposition | null } | null;
   transcription: string | null; plancher: number | null;
+  montage: boolean; marche: { dossier: FicheMarche | null; pieces: Piece[]; depot: Depot | null; resultat: Resultat | null };
+  correction: { demandeeLe: string | null; texte: string } | null;
 };
 
 const ETAPES_DEFAUT = ["Pièces Administratives", "Offre Technique & BPU", "Contrôle Qualité"];
@@ -85,6 +90,18 @@ export default function FicheEquipe({ id }: { id: string }) {
               </Carte>
             )}
 
+            {d.correction && (
+              <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4">
+                <p className="text-sm font-bold text-purple-800"><i className="fas fa-pen-to-square mr-2" />Correction demandée par le client avant le solde{d.correction.demandeeLe ? ` (le ${dateFr(d.correction.demandeeLe)})` : ""}</p>
+                {d.correction.texte && <p className="mt-1 whitespace-pre-wrap text-sm text-purple-900">{d.correction.texte}</p>}
+                <p className="mt-1 text-xs text-purple-700">Déposez les versions corrigées dans la checklist, puis renvoyez le dossier au client.</p>
+                <button type="button" onClick={async () => {
+                  const r = await post(`/api/equipe/dossiers/${d.id}/revision`, {});
+                  if (!r.ok) toast.error(r.x.error ?? "Impossible."); else { toast.success("Le client est invité à revoir l'aperçu."); apres(); }
+                }} className="mt-3 rounded-lg bg-purple-700 px-4 py-2 text-xs font-bold text-white">Corrections faites : renvoyer au client</button>
+              </div>
+            )}
+
             {(enProduction || d.etat === "termine" || d.etat === "solde") && d.etapes.length > 0 && (
               <Checklist d={d} actif={!!enProduction && d.etat !== "pause"} post={post} apres={apres} />
             )}
@@ -123,6 +140,8 @@ export default function FicheEquipe({ id }: { id: string }) {
 
             {direction && (d.etat === "attente_acompte" || d.etat === "termine") && <PaiementHorsLigne d={d} apres={apres} />}
 
+            {d.montage && d.etat !== "annule" && <MarcheEquipe d={d} apres={apres} />}
+
             <Carte titre="Pièces de départ" sousTitre="Documents et consigne du client">
               {d.fichiersDepart.length === 0 && !d.consigne && <p className="text-sm text-gray-400">Aucune pièce.</p>}
               <ul className="space-y-1.5">
@@ -133,12 +152,33 @@ export default function FicheEquipe({ id }: { id: string }) {
               {d.consigne && <p className="mt-3 whitespace-pre-wrap rounded-xl bg-su-brume p-3 text-sm text-gray-700">{d.consigne}</p>}
               {d.transcription && <p className="mt-2 rounded-xl bg-su-brume p-3 text-xs italic text-gray-600"><i className="fas fa-microphone mr-1" />{d.transcription}</p>}
             </Carte>
+
+            <Historique prestationId={d.id} />
           </div>
 
           <FilDiscussion prestationId={d.id} pieceJointe signal={signal} />
         </div>
       </div>
     </div>
+  );
+}
+
+/** Fiche de l'appel d'offres, pièces à demander au client, dépôt de l'offre et résultat. */
+function MarcheEquipe({ d, apres }: { d: Dossier; apres: () => void }) {
+  const m = d.marche;
+  const [ouvert, setOuvert] = useState(!!m.dossier);
+  return (
+    <Carte titre="Appel d'offres et pièces du client" sousTitre={m.dossier ? m.dossier.referenceAvis : "Fiche à renseigner pour demander les pièces au client"}>
+      {ouvert ? (
+        <PiecesAdmin key={`${d.id}-${m.pieces.length}-${m.dossier?.referenceAvis ?? ""}`} prestationId={d.id} dossier={m.dossier} pieces={m.pieces} depot={m.depot} resultat={m.resultat} onMaj={apres}
+          ficheDepart={{ soumissionnaire: d.entreprise ?? "" }}
+          suivi={(fiche) => <SuiviDossier prestationId={d.id} dossier={fiche} depot={m.depot} resultat={m.resultat} admin onMaj={apres} />} />
+      ) : (
+        <button type="button" onClick={() => setOuvert(true)} className="w-full rounded-xl border border-dashed border-su-clair py-3 text-sm font-semibold text-su-bleu hover:border-su-bleu">
+          <i className="fas fa-clipboard-list mr-2" />Renseigner la fiche de l&apos;appel d&apos;offres
+        </button>
+      )}
+    </Carte>
   );
 }
 

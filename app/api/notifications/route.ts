@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { equipeAutorisee } from "@/lib/monteurs";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +17,11 @@ export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   const prestationId = req.nextUrl.searchParams.get("prestationId");
-  const equipe = ["ADMIN", "DEVELOPER"].includes(session.user.role as string);
   try {
     if (prestationId) {
-      const p = await prisma.prestation.findUnique({ where: { id: prestationId }, select: { clientId: true } });
-      if (!p || (!equipe && p.clientId !== session.user.id)) return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
+      const p = await prisma.prestation.findUnique({ where: { id: prestationId }, select: { clientId: true, assignedToId: true } });
+      if (!p || (p.clientId !== session.user.id && !(await equipeAutorisee(session.user.id, session.user.role as string, p.assignedToId))))
+        return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
       const journal = await prisma.notification.findMany({
         where: { prestationId, userId: p.clientId },
         orderBy: { createdAt: "desc" }, take: 100,

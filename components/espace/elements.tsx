@@ -1,6 +1,7 @@
 "use client";
 
 /** Éléments communs des fiches dossier (client, monteur, Direction), d'après la maquette. */
+import Journal from "@/components/prestations/Journal";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ETATS, type EtatDossier } from "@/lib/dossier";
@@ -49,7 +50,7 @@ export function EnTeteFiche({ retour, etat, titre, sousTitre, dateLimite, extra,
           {extra}
         </div>
         <div className="self-start rounded-xl border border-su-lavande px-4 py-2 sm:self-auto">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{etiquette}</p>
+          <p className="text-xs text-gray-500">{etiquette}</p>
           <div className="text-sm"><CompteRebours dateLimite={dateLimite} /></div>
         </div>
       </div>
@@ -131,7 +132,9 @@ export function FilDiscussion({ prestationId, pieceJointe = false, signal = 0 }:
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${m.deMoi ? "rounded-br-sm bg-su-nuit text-white" : "rounded-bl-sm bg-gray-100 text-gray-800"}`}>
               {!m.deMoi && <p className="mb-0.5 text-[10px] font-semibold opacity-60">{m.auteur}</p>}
               <p className="whitespace-pre-wrap break-words">{m.content}</p>
-              {m.pieces?.map((p) => (
+              {m.pieces?.map((p) => /\.(webm|m4a|mp3|ogg|wav)$/i.test(p.nom) ? (
+                <audio key={p.url} controls preload="none" src={p.url} className="mt-1.5 h-9 w-full max-w-[240px]" />
+              ) : (
                 <a key={p.url} href={p.url} target="_blank" rel="noreferrer" className={`mt-1.5 flex items-center gap-1.5 text-xs underline ${m.deMoi ? "text-su-ciel" : "text-su-bleu"}`}>
                   <i className="fas fa-paperclip" />{p.nom}
                 </a>
@@ -205,6 +208,20 @@ export function ModalePaiement({ prestationId, montant, libelle, onFermer }: { p
         <button type="button" onClick={onFermer} className="mt-2 w-full py-2 text-sm text-gray-500">Annuler</button>
         <p className="mt-2 text-center text-[11px] text-gray-400"><i className="fas fa-shield-halved mr-1" />Paiement crypté de bout en bout</p>
       </div>
+    </div>
+  );
+}
+
+/** Journal des avis envoyés au client (repliable). */
+export function Historique({ prestationId }: { prestationId: string }) {
+  const [ouvert, setOuvert] = useState(false);
+  return (
+    <div className="rounded-2xl border border-su-lavande bg-white p-4">
+      <button type="button" onClick={() => setOuvert(!ouvert)} className="flex w-full items-center justify-between text-sm font-bold text-su-nuit">
+        <span><i className="fas fa-clock-rotate-left mr-2 text-su-bleu" />Historique du dossier</span>
+        <i className={`fas fa-chevron-${ouvert ? "up" : "down"} text-xs text-gray-400`} />
+      </button>
+      {ouvert && <div className="mt-4 pl-3"><Journal prestationId={prestationId} /></div>}
     </div>
   );
 }

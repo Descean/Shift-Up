@@ -16,6 +16,7 @@ import { z } from "zod";
 import type { Prisma, PrestationStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { messageSysteme } from "@/lib/fil";
 import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { sendDecisionClientAdmin } from "@/lib/email";
 import { envoyer, nomService, soldeRegle } from "@/lib/prestations";
@@ -37,7 +38,7 @@ const LIBELLES: Record<string, string> = {
   accepter_devis: "Devis accepté",
   modifier_devis: "Modification du devis demandée",
   refuser_devis: "Devis refusé",
-  demander_revision: "Révision demandée",
+  demander_revision: "Correction demandée avant le solde",
   valider_livraison: "Livraison validée",
 };
 
@@ -45,7 +46,7 @@ const MESSAGES: Record<string, string> = {
   accepter_devis: "Devis accepté. Vous pouvez payer l'acompte pour démarrer.",
   modifier_devis: "Votre demande de modification a été transmise. Un nouveau devis vous sera envoyé.",
   refuser_devis: "Le devis a été refusé et la demande est close.",
-  demander_revision: "Votre demande de révision a été transmise à l'équipe.",
+  demander_revision: "Votre demande de correction a été transmise : vous serez prévenu dès que l'aperçu sera mis à jour.",
   valider_livraison: "Merci ! La prestation est clôturée.",
 };
 
@@ -96,15 +97,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   });
 
   const serviceName = nomService(p);
-  const admins = await prisma.user.findMany({ where: { role: { in: ["ADMIN", "DEVELOPER"] } }, select: { id: true } });
-  await prisma.message.createMany({
-    data: admins.map((a) => ({
-      senderId: session.user.id,
-      recipientId: a.id,
-      subject: `${LIBELLES[action]} — ${serviceName}`,
-      content: `${LIBELLES[action]} par le client.${commentaire ? `\n\nCommentaire :\n${commentaire}` : ""}`,
-    })),
-  });
+  // Trace dans la discussion du dossier : la Direction et le monteur chargé la voient
+  await messageSysteme(id, `${LIBELLES[action]} par le client.${commentaire ? ` « ${commentaire.slice(0, 600)} »` : ""}`, session.user.id);
 
   await envoyer("décision client", [
     sendDecisionClientAdmin({

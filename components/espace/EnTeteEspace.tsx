@@ -80,7 +80,7 @@ export default function EnTeteEspace({ role, nom }: { role: string; nom: string 
           {client && <Cloche />}
           <div className="hidden text-right leading-tight sm:block">
             <p className="text-sm font-bold text-su-nuit">{nom}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{libelleRole}</p>
+            <p className="text-xs text-gray-400">{libelleRole}</p>
           </div>
           <button type="button" onClick={() => signOut({ callbackUrl: "/" })} title="Se déconnecter" aria-label="Se déconnecter"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-su-brume text-gray-500 hover:text-su-nuit">

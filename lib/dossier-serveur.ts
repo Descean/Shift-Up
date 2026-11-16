@@ -11,6 +11,7 @@ import { etatDossier, infosDossier, reference, revisionOuverte, titreDossier } f
 import { livrableAccessible, soldeRegle } from "@/lib/prestations";
 import { lireTarifs, plancherDe } from "@/lib/reglages";
 import { contexteEquipe, peutTraiter } from "@/lib/monteurs";
+import { SECTEUR_MONTAGE, lireMontage } from "@/lib/montage";
 
 export async function exigerEquipe(direction = false) {
   const session = await getServerSession(authOptions);
@@ -82,6 +83,10 @@ async function formater(p: Brut, vue: "client" | "equipe") {
     paiements: p.payments.map((x) => ({ id: x.id, montant: x.amount, date: x.createdAt.toISOString(), reference: x.reference })),
     fichiersDepart: vue === "equipe" ? p.attachments : [],
     creeLe: p.createdAt.toISOString(),
+    // Montage : fiche de l'appel d'offres, pièces à fournir, dépôt de l'offre et résultat
+    montage: p.sector === SECTEUR_MONTAGE || Boolean(infos.nature),
+    correction: p.status === "REVISION" ? derniereCorrection(cf) : null,
+    marche: lireMontage(p.customFields),
     ...(vue === "equipe" ? {
       analyse: ia ? { statut: ia.statut ?? null, raison: ia.raison ?? null, proposition: ia.proposition ?? null } : null,
       transcription: typeof cf.transcriptionVocale === "string" ? cf.transcriptionVocale : null,
@@ -89,6 +94,13 @@ async function formater(p: Brut, vue: "client" | "equipe") {
       tarifs,
     } : {}),
   };
+}
+
+/** Dernière demande de correction du client avant le solde (historique des décisions). */
+function derniereCorrection(cf: Record<string, unknown>) {
+  const h = Array.isArray(cf.historique) ? (cf.historique as { date?: string; action?: string; commentaire?: string | null }[]) : [];
+  const c = [...h].reverse().find((x) => x.action === "demander_revision");
+  return c ? { demandeeLe: c.date ?? null, texte: c.commentaire ?? "" } : null;
 }
 
 export type DossierVue = Awaited<ReturnType<typeof formater>>;

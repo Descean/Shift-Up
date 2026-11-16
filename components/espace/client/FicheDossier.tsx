@@ -1,11 +1,18 @@
 "use client";
 
-/** Fiche d'un dossier côté client (maquette) : devis et acompte, suivi d'avancement, aperçu, solde, téléchargement, discussion. */
+/**
+ * Fiche d'un dossier côté client : devis (accepter, faire modifier, refuser) et acompte, fiche de l'appel d'offres,
+ * pièces à fournir, suivi d'avancement, aperçu avec remarques écrites ou vocales, correction avant le solde,
+ * solde et téléchargement, dépôt de l'offre et résultat, historique, discussion.
+ */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Carte, EnTeteFiche, FilDiscussion, ModalePaiement, dateFr, fcfa } from "@/components/espace/elements";
+import { Carte, EnTeteFiche, FilDiscussion, Historique, ModalePaiement, dateFr, fcfa } from "@/components/espace/elements";
 import Visionneuse from "@/components/prestations/Visionneuse";
+import { PiecesClient, ResumeDossier } from "@/components/prestations/Pieces";
+import SuiviDossier from "@/components/prestations/Suivi";
+import { type Depot, type Dossier as FicheMarche, type Piece, type Resultat } from "@/lib/montage";
 import { libelleLivraison, type EtatDossier, type InfosDossier } from "@/lib/dossier";
 import { televerser } from "@/lib/televerser";
 
@@ -16,6 +23,8 @@ type Dossier = {
   montant: number; paye: number; acompte: number; resteAPayer: number; solde: boolean;
   devis: { lignes: { label: string; amount: number }[]; total: number; acompte: number; resume: string | null; livrables: { titre: string; description?: string }[]; pointsAttention: string[] } | null;
   etapes: Etape[]; autresLivrables: Livrable[];
+  montage: boolean; marche: { dossier: FicheMarche | null; pieces: Piece[]; depot: Depot | null; resultat: Resultat | null };
+  correction: { demandeeLe: string | null; texte: string } | null;
 };
 
 export default function FicheDossier({ id }: { id: string }) {
@@ -44,11 +53,13 @@ export default function FicheDossier({ id }: { id: string }) {
   if (introuvable) return <p className="py-16 text-center text-gray-500">Dossier introuvable.</p>;
   if (!d) return <div className="mx-auto h-96 max-w-5xl animate-pulse rounded-2xl bg-white" />;
 
-  async function decision(action: "modifier_devis", commentaire: string) {
+  /** Décision du client sur le devis ou la livraison. Renvoie true si elle a été enregistrée. */
+  async function decision(action: "modifier_devis" | "refuser_devis" | "demander_revision", commentaire: string) {
     const r = await fetch(`/api/prestations/${id}/decision`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, commentaire }) });
     const x = await r.json().catch(() => ({}));
-    if (!r.ok) { toast.error(x.error ?? "Envoi impossible."); return; }
-    toast.success("Demande envoyée : le devis va être revu."); void charger(); setSignal((s) => s + 1);
+    if (!r.ok) { toast.error(x.error ?? "Envoi impossible."); return false; }
+    toast.success(x.message ?? "C'est noté."); void charger(); setSignal((s) => s + 1);
+    return true;
   }
 
   async function transmettre(fichiers: FileList | null) {
@@ -96,7 +107,7 @@ export default function FicheDossier({ id }: { id: string }) {
             {d.etat === "attente_acompte" && d.devis && (
               <Carte>
                 <div className="rounded-xl border border-su-lavande bg-su-brume/60 p-5 text-center">
-                  <p className="text-xs font-bold uppercase tracking-wide text-su-bleu">Devis validé</p>
+                  <p className="text-sm font-semibold text-su-bleu">Votre devis</p>
                   <p className="mt-1 text-3xl font-extrabold text-su-nuit">{fcfa(d.devis.total)}</p>
                   <p className="mt-2 text-xs text-gray-500">Ce tarif inclut l&apos;analyse, le montage complet et le contrôle qualité.</p>
                 </div>
@@ -121,8 +132,7 @@ export default function FicheDossier({ id }: { id: string }) {
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-su-nuit py-4 text-base font-bold text-white shadow-lg hover:bg-su-cadet">
                   <i className="fas fa-lock" />Payer l&apos;acompte ({fcfa(Math.min(d.acompte, d.resteAPayer))}) pour démarrer
                 </button>
-                <button type="button" onClick={() => { const c = window.prompt("Qu'aimeriez-vous changer dans ce devis ?"); if (c?.trim()) void decision("modifier_devis", c.trim()); }}
-                  className="mt-2 w-full py-2 text-xs font-medium text-gray-500 hover:text-su-nuit">Demander une modification du devis</button>
+                {d.paye === 0 && <ChoixDevis decider={decision} />}
               </Carte>
             )}
 
@@ -173,6 +183,7 @@ export default function FicheDossier({ id }: { id: string }) {
                   className="mt-4 w-full rounded-xl bg-su-nuit py-3.5 text-sm font-bold text-white hover:bg-su-cadet">
                   Payer le solde ({fcfa(d.resteAPayer)}) <i className="fas fa-lock-open ml-1 text-emerald-400" />
                 </button>
+                <DemandeCorrection decider={decision} />
               </div>
             )}
 
@@ -205,6 +216,29 @@ export default function FicheDossier({ id }: { id: string }) {
             )}
 
             {d.etat === "annule" && <Carte className="text-center text-sm text-gray-500">Ce dossier a été annulé.</Carte>}
+
+            {d.correction && (
+              <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4 text-sm text-purple-900">
+                <p className="font-bold"><i className="fas fa-pen-to-square mr-2" />Correction en cours</p>
+                <p className="mt-1 text-xs">Le monteur reprend les points que vous avez signalés{d.correction.texte ? ` : « ${d.correction.texte} »` : ""}. Vous serez prévenu dès que l&apos;aperçu sera mis à jour.</p>
+              </div>
+            )}
+
+            {d.montage && (d.marche.dossier || d.marche.pieces.length > 0) && (
+              <Carte titre="Votre appel d'offres">
+                <div className="space-y-5">
+                  {d.marche.dossier && <ResumeDossier dossier={d.marche.dossier} depot={d.marche.depot} resultat={d.marche.resultat} />}
+                  {d.marche.pieces.length > 0 && (
+                    <PiecesClient key={`${d.id}-${d.marche.pieces.length}`} prestationId={d.id} pieces={d.marche.pieces} close={["solde", "annule"].includes(d.etat)} onMaj={() => { void charger(); setSignal((s) => s + 1); }} />
+                  )}
+                  {d.marche.dossier && (
+                    <SuiviDossier key={`suivi-${d.id}`} prestationId={d.id} dossier={d.marche.dossier} depot={d.marche.depot} resultat={d.marche.resultat} close={d.etat === "annule"} onMaj={() => void charger()} />
+                  )}
+                </div>
+              </Carte>
+            )}
+
+            <Historique prestationId={d.id} />
           </div>
 
           <FilDiscussion prestationId={d.id} pieceJointe signal={signal} />
@@ -235,12 +269,41 @@ export default function FicheDossier({ id }: { id: string }) {
 function ApercuLivrable({ l, prestationId, onLire }: { l: Livrable; prestationId: string; onLire: () => void }) {
   const [obs, setObs] = useState("");
   const [envoye, setEnvoye] = useState(!!l.observation);
-  async function envoyer() {
-    if (!obs.trim()) return;
-    const r = await fetch(`/api/prestations/${prestationId}/observation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ livrableId: l.id, observation: obs.trim() }) });
-    if (!r.ok) { toast.error("Envoi impossible."); return; }
-    toast.success("Observation transmise au monteur."); setEnvoye(true); setObs("");
+  const [enregistre, setEnregistre] = useState(false);
+  const [occupe, setOccupe] = useState(false);
+  const enregistreur = useRef<MediaRecorder | null>(null);
+  useEffect(() => () => enregistreur.current?.stream.getTracks().forEach((t) => t.stop()), []);
+
+  async function envoyer(voiceNoteUrl?: string) {
+    if (!obs.trim() && !voiceNoteUrl) return;
+    setOccupe(true);
+    const r = await fetch(`/api/prestations/${prestationId}/observation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ livrableId: l.id, observation: obs.trim(), voiceNoteUrl: voiceNoteUrl ?? null }) });
+    setOccupe(false);
+    if (!r.ok) { toast.error((await r.json().catch(() => ({}))).error ?? "Envoi impossible."); return; }
+    toast.success("Remarque transmise au monteur."); setEnvoye(true); setObs("");
   }
+
+  async function vocal() {
+    if (enregistre) { enregistreur.current?.stop(); return; }
+    try {
+      const flux = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(flux);
+      const morceaux: Blob[] = [];
+      mr.ondataavailable = (e) => { if (e.data.size) morceaux.push(e.data); };
+      mr.onstop = async () => {
+        flux.getTracks().forEach((t) => t.stop()); setEnregistre(false);
+        const blob = new Blob(morceaux, { type: mr.mimeType || "audio/webm" });
+        try {
+          setOccupe(true);
+          const up = await televerser(new File([blob], `remarque-vocale.${(mr.mimeType || "").includes("mp4") ? "m4a" : "webm"}`, { type: blob.type }));
+          await envoyer(up.url);
+        } catch { toast.error("La note vocale n'a pas pu être envoyée."); setOccupe(false); }
+      };
+      enregistreur.current = mr; mr.start(); setEnregistre(true);
+      setTimeout(() => { if (mr.state === "recording") mr.stop(); }, 180_000);
+    } catch { toast.error("Micro inaccessible : écrivez votre remarque."); }
+  }
+
   return (
     <li className="rounded-xl border border-su-lavande p-3">
       <div className="flex items-center gap-3">
@@ -249,13 +312,76 @@ function ApercuLivrable({ l, prestationId, onLire }: { l: Livrable; prestationId
         <button type="button" onClick={onLire} className="rounded-lg bg-su-nuit px-3 py-1.5 text-xs font-semibold text-white">Lire</button>
       </div>
       {envoye ? (
-        <p className="mt-2 text-xs text-emerald-700"><i className="fas fa-check mr-1" />Observation transmise{l.observation ? ` : « ${l.observation} »` : "."}</p>
+        <p className="mt-2 text-xs text-emerald-700"><i className="fas fa-check mr-1" />Remarque transmise{l.observation && l.observation !== "[Note vocale]" ? ` : « ${l.observation} »` : "."}</p>
       ) : (
         <div className="mt-2 flex gap-2">
-          <input value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Une remarque sur ce document ?" className="min-w-0 flex-1 rounded-lg border border-su-lavande px-3 py-2 text-xs focus:border-su-bleu focus:outline-none" />
-          <button type="button" onClick={envoyer} disabled={!obs.trim()} className="rounded-lg border border-su-lavande px-3 text-xs font-semibold text-su-bleu disabled:opacity-40">Envoyer</button>
+          <input value={obs} onChange={(e) => setObs(e.target.value)} placeholder={enregistre ? "Enregistrement… touchez le micro pour arrêter" : "Une remarque sur ce document ?"} disabled={enregistre}
+            className="min-w-0 flex-1 rounded-lg border border-su-lavande px-3 py-2 text-xs focus:border-su-bleu focus:outline-none" />
+          <button type="button" onClick={() => void vocal()} disabled={occupe} aria-label={enregistre ? "Arrêter l'enregistrement" : "Enregistrer une note vocale"}
+            className={`rounded-lg px-3 text-xs ${enregistre ? "animate-pulse bg-red-600 text-white" : "border border-su-lavande text-su-bleu"}`}>
+            <i className={`fas ${enregistre ? "fa-stop" : "fa-microphone"}`} />
+          </button>
+          <button type="button" onClick={() => void envoyer()} disabled={!obs.trim() || occupe || enregistre} className="rounded-lg border border-su-lavande px-3 text-xs font-semibold text-su-bleu disabled:opacity-40">Envoyer</button>
         </div>
       )}
     </li>
+  );
+}
+
+type Decider = (action: "modifier_devis" | "refuser_devis" | "demander_revision", commentaire: string) => Promise<boolean>;
+
+/** Sous le devis : demander une modification ou le refuser (tant que rien n'est payé). */
+function ChoixDevis({ decider }: { decider: Decider }) {
+  const [mode, setMode] = useState<null | "modifier" | "refuser">(null);
+  const [texte, setTexte] = useState("");
+  const [occupe, setOccupe] = useState(false);
+  async function envoyer(action: "modifier_devis" | "refuser_devis") {
+    setOccupe(true);
+    if (await decider(action, texte.trim())) { setMode(null); setTexte(""); }
+    setOccupe(false);
+  }
+  if (!mode) return (
+    <div className="mt-2 flex justify-center gap-4 py-1 text-xs font-medium text-gray-500">
+      <button type="button" onClick={() => setMode("modifier")} className="hover:text-su-nuit">Demander une modification</button>
+      <span className="text-gray-300">·</span>
+      <button type="button" onClick={() => setMode("refuser")} className="hover:text-red-600">Refuser le devis</button>
+    </div>
+  );
+  return (
+    <div className="mt-3 space-y-2 rounded-xl border border-su-lavande bg-su-brume/50 p-3">
+      <p className="text-xs font-semibold text-su-nuit">{mode === "modifier" ? "Que faut-il changer dans ce devis ? (prix, contenu, délai…)" : "Confirmez-vous le refus du devis ? Le dossier sera clos."}</p>
+      <textarea rows={2} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={mode === "modifier" ? "Votre demande" : "Motif (facultatif)"}
+        className="w-full resize-none rounded-lg border border-su-lavande bg-white px-3 py-2 text-sm focus:border-su-bleu focus:outline-none" />
+      <div className="flex gap-2">
+        <button type="button" onClick={() => { setMode(null); setTexte(""); }} className="flex-1 rounded-lg border border-su-lavande bg-white py-2 text-xs text-gray-600">Annuler</button>
+        <button type="button" disabled={occupe || (mode === "modifier" && !texte.trim())} onClick={() => void envoyer(mode === "modifier" ? "modifier_devis" : "refuser_devis")}
+          className={`flex-1 rounded-lg py-2 text-xs font-semibold text-white disabled:opacity-50 ${mode === "modifier" ? "bg-su-nuit" : "bg-red-600"}`}>
+          {mode === "modifier" ? "Envoyer la demande" : "Oui, refuser"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Avant le solde : signaler ce qui doit être corrigé dans les livrables. */
+function DemandeCorrection({ decider }: { decider: Decider }) {
+  const [ouvert, setOuvert] = useState(false);
+  const [texte, setTexte] = useState("");
+  const [occupe, setOccupe] = useState(false);
+  if (!ouvert) return (
+    <button type="button" onClick={() => setOuvert(true)} className="mt-2 w-full py-2 text-xs font-medium text-gray-500 hover:text-su-nuit">
+      Quelque chose à corriger ? Demander une correction avant de payer
+    </button>
+  );
+  return (
+    <div className="mt-3 space-y-2 text-left">
+      <textarea rows={3} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Points à corriger ou à compléter"
+        className="w-full resize-none rounded-lg border border-su-lavande bg-white px-3 py-2 text-sm focus:border-su-bleu focus:outline-none" />
+      <div className="flex gap-2">
+        <button type="button" onClick={() => setOuvert(false)} className="flex-1 rounded-lg border border-su-lavande bg-white py-2 text-xs text-gray-600">Annuler</button>
+        <button type="button" disabled={occupe || !texte.trim()} onClick={async () => { setOccupe(true); if (await decider("demander_revision", texte.trim())) { setOuvert(false); setTexte(""); } setOccupe(false); }}
+          className="flex-1 rounded-lg bg-su-nuit py-2 text-xs font-semibold text-white disabled:opacity-50">Envoyer au monteur</button>
+      </div>
+    </div>
   );
 }

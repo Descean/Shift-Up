@@ -85,3 +85,12 @@ export async function competencesPartenaire(c: ContexteEquipe): Promise<Competen
   const p = await profilMonteur(c.userId);
   return competencesDe(p?.specialites);
 }
+
+/**
+ * L'utilisateur fait-il partie de l'équipe autorisée à traiter ce dossier ?
+ * (Direction ; monteur interne ; monteur indépendant à qui le dossier est confié.)
+ */
+export async function equipeAutorisee(userId: string, role: string, assignedToId: string | null) {
+  if (!["ADMIN", "DEVELOPER", "MONTEUR"].includes(role)) return false;
+  return peutTraiter(await contexteEquipe(userId, role), assignedToId);
+}
