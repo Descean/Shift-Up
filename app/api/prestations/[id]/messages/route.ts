@@ -17,19 +17,26 @@ import { rateLimit } from "@/lib/ratelimit";
 import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { avertirClient } from "@/lib/notifications";
 import { nomService } from "@/lib/prestations-noms";
+import { estEquipe } from "@/lib/roles";
+import { contexteEquipe, peutTraiter } from "@/lib/monteurs";
+import { fil, SUJET_SYSTEME } from "@/lib/fil";
+import { fichierDe } from "@/lib/montage-serveur";
 
-const fil = (id: string) => `prestation:${id}`;
-const corps = z.object({ content: z.string().trim().min(1, "Message vide.").max(4000).refine(isSafe, "Contenu non autorisé.") });
+const corps = z.object({
+  content: z.string().trim().max(4000).refine(isSafe, "Contenu non autorisé.").default(""),
+  pieces: z.array(z.object({ url: z.string().url().max(500), nom: z.string().trim().max(200) })).max(5).default([]),
+}).refine((d) => d.content.length > 0 || d.pieces.length > 0, "Message vide.");
 
 async function acces(id: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { erreur: NextResponse.json({ error: "Non authentifié." }, { status: 401 }) };
-  const equipe = ["ADMIN", "DEVELOPER"].includes(session.user.role as string);
+  const equipe = estEquipe(session.user.role as string);
   const p = await prisma.prestation.findUnique({
     where: { id },
-    select: { id: true, clientId: true, sector: true, customService: true, service: { select: { title: true } }, client: { select: { name: true, email: true } } },
+    select: { id: true, clientId: true, assignedToId: true, sector: true, customService: true, service: { select: { title: true } }, client: { select: { name: true, email: true } } },
   });
-  if (!p || (!equipe && p.clientId !== session.user.id)) return { erreur: NextResponse.json({ error: "Demande introuvable." }, { status: 404 }) };
+  const autorise = !!p && (equipe ? await peutTraiter(await contexteEquipe(session.user.id, session.user.role as string), p.assignedToId) : p.clientId === session.user.id);
+  if (!p || !autorise) return { erreur: NextResponse.json({ error: "Demande introuvable." }, { status: 404 }) };
   return { session, equipe, p };
 }
 
@@ -52,7 +59,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return true;
   }).map((m) => ({
     id: m.id, content: m.content, date: m.createdAt.toISOString(),
-    deMoi: m.senderId === moi,
+    systeme: m.subject === SUJET_SYSTEME,
+    pieces: m.attachments.map((u) => ({ url: u, nom: decodeURIComponent(u.split("?")[0].split("/").pop() ?? "Pièce jointe") })),
+    deMoi: m.senderId === moi && m.subject !== SUJET_SYSTEME,
     auteur: m.senderId === a.p.clientId ? (a.p.client.name ?? "Client") : "Équipe SHIFT UP",
     equipe: m.senderId !== a.p.clientId,
   }));
@@ -69,18 +78,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!allowed) return NextResponse.json({ error: "Trop de messages d'affilée. Réessayez dans quelques minutes." }, { status: 429 });
   const parsed = corps.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Message invalide." }, { status: 422 });
-  const content = parsed.data.content;
+  // Pièces jointes : fichiers déposés par l'auteur lui-même
+  const pieces = parsed.data.pieces;
+  if (pieces.some((f) => !fichierDe(f.url, moi))) return NextResponse.json({ error: "Pièce jointe non reconnue." }, { status: 422 });
+  const attachments = pieces.map((f) => f.url);
+  const content = parsed.data.content || (pieces.length > 1 ? `${pieces.length} documents transmis.` : `Document transmis : ${pieces[0].nom}`);
   const service = nomService(a.p);
   const sujet = `Demande ${id.slice(-8).toUpperCase()} — ${service}`.slice(0, 190);
 
   if (a.equipe) {
-    await prisma.message.create({ data: { senderId: moi, recipientId: a.p.clientId, subject: sujet, content, conversationId: fil(id) } });
+    await prisma.message.create({ data: { senderId: moi, recipientId: a.p.clientId, subject: sujet, content, attachments, conversationId: fil(id) } });
     await avertirClient(id, "MESSAGE", "Nouveau message de l'équipe", content.length > 280 ? `${content.slice(0, 280)}…` : content);
   } else {
-    const equipe = await prisma.user.findMany({ where: { role: { in: ["ADMIN", "DEVELOPER"] } }, select: { id: true } });
+    // Direction + monteur chargé du dossier (tous les monteurs tant que personne ne l'a pris)
+    const equipe = await prisma.user.findMany({
+      where: a.p.assignedToId ? { OR: [{ role: { in: ["ADMIN", "DEVELOPER"] } }, { id: a.p.assignedToId }] } : { role: { in: ["ADMIN", "DEVELOPER", "MONTEUR"] } },
+      select: { id: true },
+    });
     const quand = new Date();
     await prisma.message.createMany({
-      data: equipe.map((u) => ({ senderId: moi, recipientId: u.id, subject: sujet, content, conversationId: fil(id), createdAt: quand })),
+      data: equipe.map((u) => ({ senderId: moi, recipientId: u.id, subject: sujet, content, attachments, conversationId: fil(id), createdAt: quand })),
     });
     await alerterEquipeWhatsApp("Message client", `${a.p.client.name ?? a.p.client.email ?? "Client"} — ${service} : ${content.slice(0, 120)}`).catch(() => {});
   }

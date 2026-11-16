@@ -12,7 +12,7 @@ const schema = z.object({
   password: z.string().min(8),
   captchaToken: z.string().optional(),
   phone: z.string().optional(),
-  role: z.enum(["CLIENT", "APPORTEUR", "ETUDIANT"]),
+  role: z.enum(["CLIENT"]).default("CLIENT"),
   affiliationCode: z.string().optional(),
   ifu: z.string().optional(),
   companyName: z.string().optional(),
@@ -45,11 +45,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Cette adresse email est déjà utilisée." }, { status: 400 });
     }
 
-    // Validate IFU for apporteur
-    if (data.role === "APPORTEUR" && !data.ifu) {
-      return NextResponse.json({ error: "L'IFU est requis pour les apporteurs d'affaires." }, { status: 400 });
-    }
-
     const hashedPassword = await bcrypt.hash(data.password, 12);
     const affiliationCode = generateAffiliationCode();
 
@@ -59,13 +54,13 @@ export async function POST(req: NextRequest) {
         email: data.email,
         password: hashedPassword,
         phone: data.phone,
-        role: data.role as any,
+        role: "CLIENT",
         affiliationCode,
       },
     });
 
-    // Create role-specific profile
-    if (data.role === "CLIENT") {
+    // Profil client (seul compte ouvert par cette inscription ; les monteurs passent par /devenir-monteur)
+    {
       await prisma.clientProfile.create({
         data: {
           userId: user.id,
@@ -76,14 +71,6 @@ export async function POST(req: NextRequest) {
           cnss: data.cnss || null,
           rib: data.rib || null,
         },
-      });
-    } else if (data.role === "APPORTEUR") {
-      await prisma.apporteurProfile.create({
-        data: { userId: user.id, ifu: data.ifu! },
-      });
-    } else if (data.role === "ETUDIANT") {
-      await prisma.etudiantProfile.create({
-        data: { userId: user.id },
       });
     }
 

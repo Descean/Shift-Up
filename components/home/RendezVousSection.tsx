@@ -55,7 +55,7 @@ export default function RendezVousSection() {
         <div className="grid gap-10 rounded-3xl bg-su-cadet p-5 sm:p-7 lg:grid-cols-2">
           <div className="flex flex-col justify-between gap-8 rounded-[18px] bg-su-nuit p-8 sm:p-9">
             <p className={`${manrope.className} m-0 text-[26px] font-extrabold leading-[1.25] text-white sm:text-[30px]`}>
-              Diagnostic gratuit et devis gratuit, réponse sous 48 h ouvrées.
+              Une question avant de déposer votre dossier ? Écrivez-nous, nous vous répondons rapidement.
             </p>
             <div className="flex flex-col gap-3.5 text-[15px] text-su-brume">
               <a href={`tel:${ENTREPRISE.telephoneLien}`} className="flex items-center gap-3 hover:text-white"><span className="text-su-clair"><Icone nom="telephone" taille={20} /></span>{ENTREPRISE.telephone}</a>

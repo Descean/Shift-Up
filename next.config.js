@@ -62,6 +62,16 @@ const nextConfig = {
 
   // ── En-têtes de sécurité HTTP ─────────────────────────────────────────────
   // Appliqués à toutes les routes (source: "/(.*)" = pattern regex catch-all).
+  // Comptes apporteur d'affaires et étudiant retirés : la plateforme se concentre sur le montage de dossiers
+  async redirects() {
+    return [
+      { source: "/services-apporteurs/:path*", destination: "/devenir-monteur", permanent: false },
+      { source: "/dashboard/apporteur/:path*", destination: "/dashboard", permanent: false },
+      { source: "/dashboard/etudiant/:path*", destination: "/dashboard", permanent: false },
+      { source: "/dashboard/apporteur", destination: "/dashboard", permanent: false },
+      { source: "/dashboard/etudiant", destination: "/dashboard", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

@@ -15,6 +15,7 @@ import { rateLimit } from "@/lib/ratelimit";
 import { fichierDe } from "@/lib/montage-serveur";
 import { sendDemandeConfirmation } from "@/lib/email";
 import { creerDemandeExpress } from "@/lib/demande-express";
+import { monteurParCode } from "@/lib/monteurs";
 
 export const maxDuration = 300;
 
@@ -24,6 +25,13 @@ const schema = z.object({
   vocal: z.string().url().max(500).optional().nullable(),
   entrepriseId: z.string().max(40).optional().nullable(),
   telephone: z.string().trim().max(40).optional().nullable(),
+  // Formulaire en 3 étapes : nature du marché, date limite, urgence, livraison
+  montage: z.object({
+    nature: z.enum(["cotation", "trp", "dao"]),
+    dateLimite: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date limite invalide."),
+    urgence: z.enum(["standard", "express"]).default("standard"),
+    livraison: z.enum(["numerique", "physique"]).default("numerique"),
+  }).optional().nullable(),
 });
 
 export async function POST(req: NextRequest) {
@@ -50,7 +58,9 @@ export async function POST(req: NextRequest) {
   const nom = session.user.name ?? session.user.email ?? "Client";
   const r = await creerDemandeExpress({
     clientId: moi, nomClient: nom, emailClient: session.user.email!,
-    consigne: d.consigne, fichiers: d.fichiers, vocal: d.vocal, entreprise: ent, telephone: d.telephone, origine: "demande express",
+    consigne: d.consigne, fichiers: d.fichiers, vocal: d.vocal, entreprise: ent, telephone: d.telephone, origine: "demande express", montage: d.montage ?? null,
+    // Client venu par le lien d'un monteur indépendant : le dossier lui est confié
+    monteurId: (await monteurParCode(req.cookies.get("su_monteur")?.value))?.id ?? null,
     autresEnvois: (id) => [sendDemandeConfirmation({ to: session.user.email!, name: nom, serviceName: "Votre demande", prestationId: id, piecesAFournir: 0 })],
   });
   return NextResponse.json(r, { status: 201 });

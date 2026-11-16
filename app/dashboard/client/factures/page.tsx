@@ -1,185 +1,83 @@
-/**
- * app/dashboard/client/factures/page.tsx — Factures et paiements (client)
- *
- * Affiche l'historique des paiements du client connecté.
- * Données : réelles, lues via GET /api/prestations (paiements des prestations du client).
- */
-
 "use client";
 
+/** « Mes Factures » : historique des paiements et reçus imprimables (maquette, espace client). */
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { dateFr, fcfa } from "@/components/espace/elements";
 
-type Invoice = {
-  id: string;
-  payId: string;       // ID réel du Payment (pour le lien PDF)
-  service: string;
-  type: string;
-  amount: number;
-  status: string;
-  method: string;
-  date: string;
-  reference: string;
-  prestationId?: string;
-};
-
-const statusStyle: Record<string, string> = {
-  "PAYÉ":       "bg-green-50 text-green-700",
-  "COMPLETED":  "bg-green-50 text-green-700",
-  "EN ATTENTE": "bg-amber-50 text-amber-700",
-  "PENDING":    "bg-amber-50 text-amber-700",
-  "REMBOURSÉ":  "bg-gray-100 text-gray-500",
-  "FAILED":     "bg-red-50 text-red-600",
-};
-
-const statusLabel: Record<string, string> = {
-  COMPLETED: "Payé",
-  PENDING:   "En attente",
-  FAILED:    "Échoué",
-  REFUNDED:  "Remboursé",
-};
+type Facture = { id: string; numero: string; date: string; montant: number; dossierId: string; dossier: string; titre: string; type: string; reference: string };
 
 export default function FacturesPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [factures, setFactures] = useState<Facture[] | null>(null);
+  const [payePar, setPayePar] = useState("");
+  const [recu, setRecu] = useState<Facture | null>(null);
 
   useEffect(() => {
-    fetch("/api/prestations")
-      .then((r) => r.json())
-      .then((data) => {
-        const prestations = data.prestations ?? [];
-        const rows: Invoice[] = [];
-        prestations.forEach((p: any) => {
-          (p.payments ?? []).forEach((pay: any, idx: number) => {
-            rows.push({
-              id: `FAC-${p.id.slice(-4).toUpperCase()}-${idx + 1}`,
-              payId: pay.id,
-              service: p.service?.title ?? "Service",
-              type: idx === 0 ? "Acompte (60%)" : "Solde (40%)",
-              amount: pay.amount,
-              status: pay.status,
-              method: `${pay.provider} (${pay.method})`,
-              date: pay.createdAt ? new Date(pay.createdAt).toLocaleDateString("fr-FR") : "—",
-              reference: pay.reference,
-              prestationId: p.id,
-            });
-          });
-        });
-        setInvoices(rows);
-      })
-      .finally(() => setLoading(false));
+    fetch("/api/client/factures").then((r) => r.json()).then((d) => { setFactures(d.factures ?? []); setPayePar(d.payePar ?? ""); }).catch(() => setFactures([]));
   }, []);
 
-  const totalPaid    = invoices.filter(i => i.status === "COMPLETED").reduce((s, i) => s + i.amount, 0);
-  const totalPending = invoices.filter(i => i.status === "PENDING").reduce((s, i) => s + i.amount, 0);
-
   return (
-    <div className="space-y-6 max-w-5xl">
-      {/* En-tête */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-syne font-black text-2xl text-primary">Factures & Paiements</h1>
-        <p className="text-gray-500 text-sm">Historique de vos transactions</p>
-      </motion.div>
-
-      {/* Récapitulatif */}
-      <div className="grid sm:grid-cols-3 gap-5">
-        <div className="bg-white rounded-2xl border border-su-lavande p-5">
-          <p className="text-xs text-gray-400 mb-1">Total payé</p>
-          <p className="font-syne font-black text-2xl text-secondary">{totalPaid.toLocaleString()} <span className="text-base font-normal text-gray-500">FCFA</span></p>
-        </div>
-        <div className="bg-white rounded-2xl border border-su-lavande p-5">
-          <p className="text-xs text-gray-400 mb-1">Solde à régler</p>
-          <p className="font-syne font-black text-2xl text-accent">{totalPending.toLocaleString()} <span className="text-base font-normal text-gray-500">FCFA</span></p>
-        </div>
-        <div className="bg-white rounded-2xl border border-su-lavande p-5">
-          <p className="text-xs text-gray-400 mb-1">Transactions</p>
-          <p className="font-syne font-black text-2xl text-primary">{invoices.length}</p>
-        </div>
+    <div className="mx-auto max-w-5xl">
+      <div className="mb-6 border-b border-su-lavande pb-5">
+        <h1 className="text-2xl font-bold text-su-nuit">Mes Factures</h1>
+        <p className="mt-1 text-sm text-gray-500">Retrouvez l&apos;historique de vos paiements et reçus.</p>
       </div>
 
-      {/* Tableau des factures */}
-      <div className="bg-white rounded-2xl border border-su-lavande overflow-hidden">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-syne font-bold text-primary">Toutes les factures</h2>
-          <button className="flex items-center gap-2 text-accent text-sm font-medium hover:underline">
-            <i className="fas fa-download text-xs" />
-            Tout télécharger
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : (
+      <div className="overflow-hidden rounded-2xl border border-su-lavande bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-50">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Référence</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Service</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Type</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400">Montant</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Méthode</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400">Date</th>
-                <th className="text-center px-6 py-3 text-xs font-semibold text-gray-400">Statut</th>
-                <th className="px-6 py-3" />
-              </tr>
+          <table className="w-full min-w-[560px] text-sm">
+            <thead className="bg-su-brume/50 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+              <tr><th className="px-5 py-3">N° Facture</th><th className="px-5 py-3">Date</th><th className="px-5 py-3">Dossier lié</th><th className="px-5 py-3 text-right">Montant</th><th className="px-5 py-3 text-center">Reçu</th></tr>
             </thead>
-            <tbody>
-              {invoices.length === 0 && (
-                <tr><td colSpan={8} className="px-6 py-12 text-center text-gray-400 text-sm">Aucune transaction pour l'instant.</td></tr>
-              )}
-              {invoices.map((inv) => (
-                <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-xs font-mono text-gray-500">{inv.reference}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-primary">{inv.service}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{inv.type}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-primary text-right">{inv.amount.toLocaleString()} F</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{inv.method}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{inv.date}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyle[inv.status] ?? "bg-gray-100 text-gray-500"}`}>
-                      {statusLabel[inv.status] ?? inv.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {inv.status === "COMPLETED" ? (
-                      <a
-                        href={`/api/payments/invoice?paymentId=${inv.payId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-accent hover:text-secondary text-xs font-semibold transition-colors"
-                      >
-                        <i className="fas fa-file-pdf" />
-                        Télécharger
-                      </a>
-                    ) : inv.status === "PENDING" && inv.prestationId ? (
-                      <Link
-                        href={`/paiement?type=service&prestationId=${inv.prestationId}&amount=${inv.amount}`}
-                        className="text-white bg-su-bleu px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity whitespace-nowrap"
-                      >
-                        Payer maintenant
-                      </Link>
-                    ) : null}
+            <tbody className="divide-y divide-su-lavande">
+              {factures === null && <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-400">Chargement…</td></tr>}
+              {factures?.length === 0 && <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-400">Aucun paiement pour l&apos;instant.</td></tr>}
+              {factures?.map((f) => (
+                <tr key={f.id}>
+                  <td className="px-5 py-4 font-mono text-xs text-gray-700">{f.numero}</td>
+                  <td className="px-5 py-4 text-gray-500">{dateFr(f.date)}</td>
+                  <td className="px-5 py-4"><Link href={`/dashboard/client/prestations?id=${f.dossierId}`} className="text-su-nuit hover:underline">{f.dossier}</Link> <span className="text-xs text-gray-400">· {f.type}</span></td>
+                  <td className="px-5 py-4 text-right font-bold text-su-nuit">{Math.round(f.montant).toLocaleString("fr-FR")} F</td>
+                  <td className="px-5 py-4 text-center">
+                    <button type="button" onClick={() => setRecu(f)} aria-label={`Reçu ${f.numero}`} className="h-8 w-8 rounded-lg border border-su-lavande text-gray-500 hover:text-su-bleu"><i className="fas fa-print text-xs" /></button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        )}
-
-        {/* Note de bas de tableau */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-          <p className="text-xs text-gray-400">
-            <i className="fas fa-info-circle mr-1" />
-            Les factures PDF sont générées automatiquement après confirmation du paiement.
-            Pour tout litige, contactez <strong>contact@shiftup.bj</strong>.
-          </p>
-        </div>
       </div>
+
+      {recu && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-su-nuit/60 p-4 print:static print:bg-white print:p-0" onClick={() => setRecu(null)}>
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl print:shadow-none" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-su-lavande bg-su-brume/50 px-5 py-3 print:hidden">
+              <p className="text-sm font-bold text-su-nuit"><i className="fas fa-receipt mr-2 text-su-bleu" />Reçu de Paiement</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => window.print()} className="rounded-lg bg-white px-3 py-1 text-xs font-semibold text-gray-600 border border-su-lavande">Imprimer</button>
+                <a href={`/api/payments/invoice?paymentId=${recu.id}`} target="_blank" rel="noreferrer" className="rounded-lg bg-white px-3 py-1 text-xs font-semibold text-gray-600 border border-su-lavande">PDF</a>
+                <button type="button" onClick={() => setRecu(null)} className="rounded-lg bg-su-lavande px-3 py-1 text-xs font-semibold text-gray-700">Fermer</button>
+              </div>
+            </div>
+            <div className="p-8">
+              <div className="flex items-start justify-between border-b border-su-lavande pb-5">
+                <div><p className="text-xl font-extrabold text-su-nuit">SHIFT UP</p><p className="text-xs text-gray-500">Service de Montage d&apos;Appels d&apos;Offres</p></div>
+                <div className="text-right"><p className="text-lg font-extrabold tracking-widest text-gray-300">FACTURE</p><p className="text-xs font-bold text-su-nuit">N° {recu.numero}</p><p className="text-[11px] text-gray-400">{dateFr(recu.date)}</p></div>
+              </div>
+              <p className="mt-5 text-[10px] font-semibold uppercase text-gray-400">Payé par :</p>
+              <p className="font-bold text-su-nuit">{payePar}</p>
+              <table className="mt-6 w-full text-sm">
+                <thead><tr className="border-b-2 border-su-nuit text-left text-[10px] uppercase text-gray-500"><th className="pb-2">Description</th><th className="pb-2 text-right">Montant</th></tr></thead>
+                <tbody><tr><td className="py-3"><p className="font-semibold text-su-nuit">Prestation Montage (Réf. {recu.dossier})</p><p className="text-xs text-gray-400">{recu.titre} · Paiement : {recu.type}</p></td><td className="py-3 text-right text-su-nuit">{fcfa(recu.montant)}</td></tr></tbody>
+              </table>
+              <div className="mt-6 flex justify-end">
+                <div className="flex items-center gap-6 rounded-xl bg-emerald-50 px-5 py-3"><span className="text-sm font-bold text-emerald-800">TOTAL PAYÉ</span><span className="text-lg font-extrabold text-emerald-800">{fcfa(recu.montant)}</span></div>
+              </div>
+              <p className="mt-6 text-center text-[10px] text-gray-400">Référence de transaction : {recu.reference}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

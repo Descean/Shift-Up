@@ -11,7 +11,6 @@ export default async function ProfilRedirectPage() {
 
   const role = session.user?.role;
   if (role === "ADMIN" || role === "DEVELOPER") redirect("/dashboard/admin");
-  if (role === "APPORTEUR") redirect("/dashboard/apporteur/profil");
-  if (role === "ETUDIANT") redirect("/dashboard/etudiant/profil");
+  if (role === "MONTEUR") redirect("/dashboard/equipe");
   redirect("/dashboard/client/profil");
 }

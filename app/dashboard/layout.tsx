@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import CadreEspace from "@/components/espace/CadreEspace";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Mon espace", robots: { index: false, follow: false } };
@@ -10,19 +11,16 @@ export const metadata: Metadata = { title: "Mon espace", robots: { index: false,
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/connexion");
+  const role = (session.user?.role as string) ?? "CLIENT";
 
   return (
-    <div className="min-h-screen bg-su-brume flex">
-      <DashboardSidebar role={session.user?.role as string} />
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Desktop header only */}
-        <div className="hidden lg:block">
-          <DashboardHeader user={session.user} />
-        </div>
-        {/* Mobile top-bar spacer (the bar itself is fixed in DashboardSidebar) */}
-        <div className="lg:hidden h-14 flex-shrink-0" />
-        <main className="flex-1 p-4 lg:p-6 overflow-auto pb-20 lg:pb-6">{children}</main>
-      </div>
-    </div>
+    <CadreEspace
+      role={role}
+      nom={session.user?.name ?? session.user?.email ?? ""}
+      barreLaterale={<DashboardSidebar role={role} />}
+      enTeteBureau={<DashboardHeader user={session.user} />}
+    >
+      {children}
+    </CadreEspace>
   );
 }

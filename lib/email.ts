@@ -676,3 +676,69 @@ export async function sendEtapeClient({ to, name, titre, texte, serviceName, lie
     <p style="color:#888;font-size:13px;margin-top:16px;">Vous pouvez répondre à ce courriel ou écrire à l'équipe depuis la fiche de votre demande.</p>`;
   return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `${titre} — ${serviceName} — SHIFT UP`, html: baseLayout(content, titre) });
 }
+
+/** Lien de connexion à l'espace client (connexion par e-mail, sans mot de passe). */
+export async function sendLienConnexion({ to, name, lien }: { to: string; name: string; lien: string }) {
+  const content = `
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre lien de connexion</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Cliquez sur le bouton ci-dessous pour ouvrir votre espace SHIFT UP. Le lien est valable 30 minutes et ne sert qu'une fois.</p>
+    ${btn("Accéder à mon espace →", lien)}
+    <p style="color:#999;font-size:13px;line-height:1.6;">Vous n'avez rien demandé ? Ignorez ce courriel : personne ne peut se connecter sans ce lien.</p>
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: "Votre lien de connexion — SHIFT UP", html: baseLayout(content, "Votre lien de connexion") });
+}
+
+/** Monteur : candidature reçue. */
+export async function sendMonteurCandidat({ to, name }: { to: string; name: string }) {
+  const content = `
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Candidature reçue</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Merci pour votre demande de compte monteur sur SHIFT UP. Nous étudions votre profil et vous écrivons dès que votre compte est activé.</p>
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: "Votre demande de compte monteur — SHIFT UP", html: baseLayout(content, "Candidature reçue") });
+}
+
+/** Monteur : compte activé, avec un lien de connexion. */
+export async function sendMonteurActive({ to, name, lien, independant, commission }: { to: string; name: string; lien: string; independant: boolean; commission: number }) {
+  const content = `
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre compte monteur est actif</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">Vous pouvez dès maintenant traiter des dossiers sur SHIFT UP : devis, étapes de montage, dépôt des livrables et discussion avec le client.</p>
+    ${independant ? `<p style="color:#555;line-height:1.6;">Partagez votre lien personnel avec vos clients ou ouvrez leurs dossiers vous-même : ils paient en ligne et vous recevez votre part (${Math.round((1 - commission) * 100)} % des montants encaissés) sur demande de versement Mobile Money.</p>` : ""}
+    ${btn("Ouvrir mon espace →", lien)}
+    <p style="color:#999;font-size:13px;">Ensuite, connectez-vous avec votre adresse e-mail : un lien vous est envoyé à chaque fois.</p>
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: "Votre compte monteur est actif — SHIFT UP", html: baseLayout(content, "Compte monteur actif") });
+}
+
+/** Direction : nouvelle candidature de monteur ou demande de versement. */
+export async function sendAlerteDirection({ titre, lignes }: { titre: string; lignes: [string, string][] }) {
+  const content = `
+    <h2 style="color:#192338;font-size:20px;margin:0 0 12px;">${esc(titre)}</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">${lignes.map(([k, v]) => `<tr><td style="padding:6px 8px;color:#888;vertical-align:top;white-space:nowrap;">${esc(k)}</td><td style="padding:6px 8px;color:#192338;white-space:pre-wrap;">${esc(v)}</td></tr>`).join("")}</table>
+    ${btn("Ouvrir l'espace Direction →", `${APP_URL}/dashboard/equipe/direction`)}`;
+  return resend.emails.send({ from: FROM, to: ADMIN_DEST, subject: `${titre} — SHIFT UP`, html: baseLayout(content, titre) });
+}
+
+/** Client : dossier ouvert pour lui par un monteur, avec un lien de connexion. */
+export async function sendDossierOuvertClient({ to, name, monteur, titre, lien }: { to: string; name: string; monteur: string; titre: string; lien: string }) {
+  const content = `
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre dossier est ouvert</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;"><strong>${esc(monteur)}</strong> a ouvert votre dossier « ${esc(titre)} » sur SHIFT UP. Vous y recevrez le devis, réglerez l'acompte en ligne et suivrez chaque étape du montage.</p>
+    ${btn("Voir mon dossier →", lien)}
+    <p style="color:#999;font-size:13px;">Ensuite, connectez-vous avec votre adresse e-mail : un lien vous est envoyé à chaque fois.</p>
+    <p style="color:#333;font-weight:600;">L'équipe SHIFT UP</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: "Votre dossier est ouvert — SHIFT UP", html: baseLayout(content, "Votre dossier est ouvert") });
+}
+
+/** Monteur : un dossier vient de lui être confié (client venu par son lien). */
+export async function sendNouveauDossierMonteur({ to, name, client, titre, prestationId }: { to: string; name: string; client: string; titre: string; prestationId: string }) {
+  const content = `
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Nouveau dossier à chiffrer</h2>
+    <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
+    <p style="color:#555;line-height:1.6;">${esc(client)} vient de déposer « ${esc(titre)} » par votre lien. La lecture automatique prépare une proposition de devis : vérifiez-la et envoyez-la au client.</p>
+    ${btn("Ouvrir le dossier →", `${APP_URL}/dashboard/equipe/dossiers/${prestationId}`)}`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: "Nouveau dossier à chiffrer — SHIFT UP", html: baseLayout(content, "Nouveau dossier") });
+}

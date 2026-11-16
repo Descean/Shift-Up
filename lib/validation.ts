@@ -280,7 +280,7 @@ export const registerSchema = z.object({
   phone:           phoneOptionalSchema,
   password:        passwordSchema,
   confirmPassword: z.string(),
-  role:            z.enum(["CLIENT", "APPORTEUR", "ETUDIANT"]),
+  role:            z.enum(["CLIENT"]).default("CLIENT"),
   affiliationCode: affiliationCodeSchema,
   ifu:             ifuOptionalSchema,
   acceptTerms:     z.boolean().refine((v) => v === true, "Vous devez accepter les conditions d'utilisation."),

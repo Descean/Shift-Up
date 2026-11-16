@@ -14,8 +14,6 @@ interface DashboardHeaderProps {
 }
 
 function profilHref(role?: string | null) {
-  if (role === "APPORTEUR") return "/dashboard/apporteur/profil";
-  if (role === "ETUDIANT")  return "/dashboard/etudiant/profil";
   if (role === "ADMIN" || role === "DEVELOPER") return "/dashboard/admin";
   return "/dashboard/client/profil";
 }

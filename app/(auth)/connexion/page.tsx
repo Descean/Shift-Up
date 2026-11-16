@@ -32,15 +32,46 @@ export default function ConnexionPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
+  // Accès par e-mail seul (par défaut) ou par mot de passe
+  const [mode, setMode] = useState<"email" | "motdepasse">("email");
+  const [emailAcces, setEmailAcces] = useState("");
+  const [lienEnvoye, setLienEnvoye] = useState("");
 
   // ── Étape 2FA : credentials déjà validés, code TOTP requis ─────────────────
   const [needs2FA, setNeeds2FA] = useState(false);
   const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
   const [codeError, setCodeError] = useState("");
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  async function acceder(e: React.FormEvent) {
+    e.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(emailAcces.trim())) { toast.error("Entrez une adresse e-mail valide."); return; }
+    if (process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY && !captchaToken) { toast.error("Cochez la case anti-robot."); return; }
+    setLoading(true);
+    try {
+      const suite = retourDepuisAdresse();
+      const r = await fetch("/api/auth/acces", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: emailAcces.trim(), suite, captchaToken }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { toast.error(d.error ?? "Connexion impossible."); return; }
+      if (d.nouveau && d.jeton) {
+        const res = await signIn("lien", { jeton: d.jeton, redirect: false });
+        if (res?.error) { toast.error("Connexion impossible. Réessayez."); return; }
+        router.push(suite);
+        return;
+      }
+      if (d.lienEnvoye) { setLienEnvoye(emailAcces.trim()); return; }
+      if (d.motDePasse) {
+        setValue("email", emailAcces.trim());
+        setMode("motdepasse");
+        toast("Ce compte se connecte avec son mot de passe.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const {
     register: registerCode,
@@ -151,8 +182,47 @@ export default function ConnexionPage() {
     await signIn("google", { callbackUrl: retourDepuisAdresse() });
   };
 
+  if (lienEnvoye) {
+    return (
+      <div className="text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-su-brume text-su-bleu"><i className="fas fa-envelope-open-text text-2xl" /></div>
+        <TitrePoints as="h1" taille="text-[28px]">Regardez votre boîte de réception</TitrePoints>
+        <p className="mt-3 text-[15px] text-[#4B5563]">
+          Un lien de connexion vient d&apos;être envoyé à <strong className="text-su-nuit">{lienEnvoye}</strong>. Il est valable 30 minutes.
+        </p>
+        <button type="button" onClick={() => setLienEnvoye("")} className="mt-6 text-sm font-semibold text-su-bleu">← Utiliser une autre adresse</button>
+      </div>
+    );
+  }
+
+  if (mode === "email") {
+    return (
+      <div>
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-su-nuit text-white"><i className="fas fa-layer-group text-2xl" /></div>
+        <TitrePoints as="h1" taille="text-[30px]">Bienvenue sur SHIFT UP</TitrePoints>
+        <p className="mb-8 mt-3 text-[15px] text-[#4B5563]">La plateforme dédiée au montage rapide et sécurisé de vos dossiers d&apos;appels d&apos;offres.</p>
+        <form onSubmit={acceder} className="space-y-4 rounded-2xl border border-su-lavande p-6">
+          <div>
+            <label htmlFor="f-acces" className="mb-1.5 block text-sm font-semibold text-su-nuit">Entrez votre e-mail pour commencer</label>
+            <input id="f-acces" type="email" autoComplete="email" value={emailAcces} onChange={(e) => setEmailAcces(e.target.value)}
+              className="w-full rounded-xl border border-su-lavande bg-su-brume/40 px-4 py-3.5 text-[15px] text-su-nuit focus:border-su-bleu focus:outline-none" placeholder="vous@entreprise.com" />
+          </div>
+          <div className="flex justify-center"><HCaptchaField onVerify={setCaptchaToken} onExpire={() => setCaptchaToken("")} /></div>
+          <button type="submit" disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-su-nuit px-6 py-3.5 text-base font-semibold text-white transition-colors hover:bg-su-cadet disabled:opacity-60">
+            {loading ? "Un instant…" : <>Accéder à mon espace <Icone nom="fleche" taille={18} epaisseur={2} /></>}
+          </button>
+        </form>
+        <p className="mt-6 text-center text-sm text-[#6B7280]">
+          Vous avez un mot de passe ?{" "}
+          <button type="button" onClick={() => { setValue("email", emailAcces.trim()); setMode("motdepasse"); }} className="font-semibold text-su-bleu underline">Se connecter avec le mot de passe</button>
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
+      <button type="button" onClick={() => setMode("email")} className="mb-6 text-sm font-semibold text-su-bleu">← Accès par e-mail seul</button>
       <TitrePoints as="h1" taille="text-[32px]">Connexion</TitrePoints>
       <p className="mb-8 mt-3 text-[15px] text-[#4B5563]">
         Pas encore de compte ?{" "}

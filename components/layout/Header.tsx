@@ -10,11 +10,9 @@ import Button from "@/components/ui/Button";
 
 const navLinks = [
   { href: "/", label: "Accueil" },
-  { href: "/services", label: "Services" },
-  { href: "/boutique", label: "Boutique" },
+  { href: "/services/souscrire", label: "Faire monter un dossier" },
+  { href: "/devenir-monteur", label: "Devenir monteur" },
   { href: "/a-propos", label: "À propos" },
-  { href: "/recrutement", label: "Recrutement" },
-  { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -33,13 +31,11 @@ export default function Header() {
   const role = session?.user?.role;
   const dashboardHref =
     role === "ADMIN" || role === "DEVELOPER" ? "/dashboard/admin" :
-    role === "APPORTEUR" ? "/dashboard/apporteur" :
-    role === "ETUDIANT"  ? "/dashboard/etudiant"  : "/dashboard/client";
+    role === "MONTEUR" ? "/dashboard/equipe" : "/dashboard/client";
 
   const profilHref =
     role === "ADMIN" || role === "DEVELOPER" ? "/dashboard/admin" :
-    role === "APPORTEUR" ? "/dashboard/apporteur/profil" :
-    role === "ETUDIANT"  ? "/dashboard/etudiant/profil"  : "/dashboard/client/profil";
+    role === "MONTEUR" ? "/dashboard/equipe" : "/dashboard/client/profil";
 
   const isDark = scrolled;
 
@@ -171,8 +167,8 @@ export default function Header() {
               >
                 Connexion
               </Button>
-              <Button href="/inscription" variant="gradient" size="sm" animate={false} className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
-                Commencer
+              <Button href="/services/souscrire" variant="gradient" size="sm" animate={false} className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
+                Déposer mon dossier
                 <i className="fas fa-arrow-right text-sm" />
               </Button>
             </>
@@ -250,8 +246,8 @@ export default function Header() {
                     <Button href="/connexion" variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-su-bleu/40 text-su-nuit"}>
                       Connexion
                     </Button>
-                    <Button href="/inscription" variant="gradient" size="md" className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
-                      Commencer gratuitement
+                    <Button href="/services/souscrire" variant="gradient" size="md" className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
+                      Déposer mon dossier
                     </Button>
                   </>
                 )}

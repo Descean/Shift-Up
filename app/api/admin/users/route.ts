@@ -16,7 +16,7 @@ import { z } from "zod";
 const patchSchema = z.object({
   userId:   z.string(),
   isActive: z.boolean().optional(),
-  role:     z.enum(["CLIENT","APPORTEUR","ETUDIANT","ADMIN","DEVELOPER"]).optional(),
+  role:     z.enum(["CLIENT","APPORTEUR","ETUDIANT","ADMIN","DEVELOPER","MONTEUR"]).optional(),
   stars:    z.number().min(0).max(5).optional(),
 });
 

@@ -7,19 +7,20 @@
  * jamais inventé par l'IA. Le devis part au client et à l'équipe ; sans clé IA ou en cas d'échec,
  * la demande reste « en attente » pour un devis préparé à la main.
  */
+import { infosDossier, proposerDevis } from "@/lib/dossier";
+import { lireTarifs } from "@/lib/reglages";
 import prisma from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { lireFichier } from "@/lib/fichiers";
 import { genreFichier, textePdf, texteWord } from "@/lib/apercu";
 import { SECTORS, trouverOffre, prixOffre } from "@/lib/catalogue";
-import { calculerDevis, catalogueTexte } from "@/lib/tarifs";
+import { catalogueTexte } from "@/lib/tarifs";
 import { getPhaseTemplates } from "@/lib/service-templates";
 import { SECTEUR_MONTAGE, joursRestants, type Piece } from "@/lib/montage";
 import { preparerMontage } from "@/lib/montage-serveur";
 import { reprendreDuCoffre } from "@/lib/entreprises";
-import { sendDevisClient, sendSuiviAdmin } from "@/lib/email";
+import { sendSuiviAdmin } from "@/lib/email";
 import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
-import { avertirClient } from "@/lib/notifications";
 import { nomService } from "@/lib/prestations-noms";
 
 export const iaAnalyseDisponible = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -168,8 +169,10 @@ export async function analyserEtChiffrer(prestationId: string): Promise<{ ok: bo
   });
   if (!p || p.status !== "EN_ATTENTE" || p.quote) return { ok: false, raison: "déjà traitée" };
   const cf = (p.customFields ?? {}) as Record<string, unknown>;
+  // Garde la proposition de départ (grille + plancher) tant que la lecture n'en a pas fait une meilleure
+  const avant = (cf.analyseIA ?? {}) as Record<string, unknown>;
   const noter = (analyseIA: Record<string, unknown>) =>
-    prisma.prestation.update({ where: { id: p.id }, data: { customFields: { ...cf, analyseIA } as Prisma.InputJsonValue } });
+    prisma.prestation.update({ where: { id: p.id }, data: { customFields: { ...cf, analyseIA: { proposition: avant.proposition, ...analyseIA } } as Prisma.InputJsonValue } });
 
   if (!iaAnalyseDisponible()) {
     await noter({ statut: "manuel", raison: "IA non configurée", le: new Date().toISOString() });
@@ -189,7 +192,7 @@ export async function analyserEtChiffrer(prestationId: string): Promise<{ ok: bo
     const domaine = SECTORS.find((d) => d.id === a.domaineId) ?? null;
     const offre = trouverOffre(domaine ?? undefined, a.offreTitre) ?? null;
     const secteur = domaine?.label ?? p.sector;
-    const montage = secteur === SECTEUR_MONTAGE;
+    const montage = secteur === SECTEUR_MONTAGE || !!infosDossier(cf).nature;
 
     // Appel d'offres : fiche et liste des pièces, avec reprise du coffre de l'entreprise
     let montageCf: Record<string, unknown> = {};
@@ -212,46 +215,40 @@ export async function analyserEtChiffrer(prestationId: string): Promise<{ ok: bo
       jours = joursRestants((cf.dossier as { dateLimite: string }).dateLimite);
     }
 
-    const devis = calculerDevis(a.intitule || offre?.title || nomService(p), offre, { ...a.volume, joursRestants: jours });
+    // Proposition pour le monteur : grille selon le volume lu, plancher de la nature, Express, livraison physique
+    const infos = infosDossier(cf);
+    const devis = proposerDevis(await lireTarifs(), infos, a.intitule || offre?.title || nomService(p), offre, { ...a.volume, joursRestants: jours });
     const etapes = (a.etapes?.length ? a.etapes : getPhaseTemplates(secteur).map((t) => ({ titre: t.title, description: t.description, duree: "" }))).slice(0, 8);
-    const quote = {
+    const proposition = {
       ...devis, auto: true, resume: a.resume, livrables: (a.livrables ?? []).slice(0, 10),
       pointsAttention: (a.pointsAttention ?? []).slice(0, 8),
-      terms: "Devis établi automatiquement à partir de votre dossier. Vous pouvez demander qu'il soit revu : l'équipe l'ajuste et vous le renvoie.",
+      etapes: etapes.map((e) => ({ titre: e.titre, description: e.description ?? "", duree: e.duree ?? "" })),
     };
-    const plan = { phases: etapes.map((e, i) => ({ title: e.titre, description: e.description ?? "", duration: e.duree ?? "", order: i })) };
 
     await prisma.prestation.update({
       where: { id: p.id },
       data: {
-        sector: secteur,
-        customService: p.serviceId ? p.customService : (offre?.title ?? a.intitule ?? p.customService),
-        quote: quote as Prisma.InputJsonValue,
-        plan: plan as Prisma.InputJsonValue,
-        amount: devis.total,
-        status: "DEVIS_ENVOYE",
+        sector: infos.nature ? SECTEUR_MONTAGE : secteur,
+        customService: p.serviceId || infos.nature ? p.customService : (offre?.title ?? a.intitule ?? p.customService),
         customFields: {
           ...cf, ...montageCf,
           ...(offre ? { offre: { titre: offre.title, prix: prixOffre(offre), delai: offre.duration ?? null } } : {}),
           ...(vocal ? { transcriptionVocale: vocal } : {}),
-          analyseIA: { statut: "ok", le: new Date().toISOString(), modele: MODELE() },
+          analyseIA: { statut: "ok", le: new Date().toISOString(), modele: MODELE(), proposition },
         } as Prisma.InputJsonValue,
       },
     });
 
     const service = offre?.title ?? a.intitule ?? nomService(p);
     await Promise.allSettled([
-      p.client.email ? sendDevisClient({ to: p.client.email, name: p.client.name ?? "", serviceName: service, depositAmount: devis.deposit, prestationId: p.id }) : Promise.resolve(),
       sendSuiviAdmin({
         clientName: p.client.name ?? "Client", clientEmail: p.client.email ?? "", serviceName: service, prestationId: p.id,
-        titre: "Devis automatique envoyé",
-        lignes: [["Total", `${devis.total.toLocaleString("fr-FR")} F (acompte ${devis.deposit.toLocaleString("fr-FR")} F)`], ["Résumé", a.resume],
+        titre: "Dossier lu : devis à valider",
+        lignes: [["Proposition", `${devis.total.toLocaleString("fr-FR")} F (acompte ${devis.deposit.toLocaleString("fr-FR")} F)`], ["Résumé", a.resume],
           ["Livrables", (a.livrables ?? []).map((l) => `• ${l.titre}`).join("\n")], ["Points d'attention", (a.pointsAttention ?? []).join("\n")]],
       }),
-      alerterEquipeWhatsApp("Devis automatique", `${p.client.name ?? p.client.email ?? "Client"} — ${service} — ${devis.total.toLocaleString("fr-FR")} F`),
+      alerterEquipeWhatsApp("Devis à valider", `${p.client.name ?? p.client.email ?? "Client"} — ${service} — proposition ${devis.total.toLocaleString("fr-FR")} F`),
     ]);
-    await avertirClient(p.id, "DEVIS", "Votre devis est prêt",
-      `${devis.total.toLocaleString("fr-FR")} F au total, acompte de ${devis.deposit.toLocaleString("fr-FR")} F pour démarrer. Vous pouvez l'accepter ou demander qu'il soit revu.`, { courriel: false });
     return { ok: true };
   } catch (e) {
     console.error("[ia-devis]", e);

@@ -3,6 +3,8 @@
  * PATCH /api/admin/prestations/[id]/livrable — Rendre un livrable disponible
  */
 
+import { estEquipe } from "@/lib/roles";
+import { exigerDossierEquipe } from "@/lib/dossier-serveur";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -15,7 +17,7 @@ import { envoyer, livrableAccessible } from "@/lib/prestations";
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
-  if (!["ADMIN", "DEVELOPER"].includes(session.user.role as string)) return null;
+  if (!estEquipe(session.user.role as string)) return null;
   return session;
 }
 
@@ -24,6 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
   const { id } = await params;
+  { const acces = await exigerDossierEquipe(id); if ("erreur" in acces) return acces.erreur; }
 
   try {
     const { title, description, type, url, isAvailable, phaseId } = await req.json();
@@ -69,13 +72,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
   const { id } = await params;
+  { const acces = await exigerDossierEquipe(id); if ("erreur" in acces) return acces.erreur; }
 
   try {
     const { livrableId, isAvailable, url } = await req.json();
     if (!livrableId) return NextResponse.json({ error: "livrableId requis." }, { status: 400 });
 
     const livrable = await prisma.livrable.update({
-      where: { id: livrableId },
+      where: { id: livrableId, prestationId: id },
       data: {
         ...(isAvailable !== undefined && { isAvailable }),
         ...(url !== undefined && { url }),

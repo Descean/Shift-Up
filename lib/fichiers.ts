@@ -10,6 +10,8 @@
  * L'ancien bucket public « prestations » est migré une fois par la tâche quotidienne :
  * liens réécrits en base, puis bucket passé en privé.
  */
+import { estEquipe } from "@/lib/roles";
+import { contexteEquipe, idsIndependants } from "@/lib/monteurs";
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import prisma from "@/lib/prisma";
@@ -96,20 +98,44 @@ export function signatureValide(chemin: string, exp: string | null, sig: string 
 
 /** Un utilisateur connecté a-t-il le droit d'ouvrir ce fichier ? */
 export async function peutLire(user: { id: string; email?: string | null; role?: string | null }, bucket: string, path: string) {
-  if (user.role === "ADMIN" || user.role === "DEVELOPER") return true;
   if (path.startsWith(`${user.id}/`)) return true; // déposé par lui
+  if (estEquipe(user.role)) {
+    const ctx = await contexteEquipe(user.id, user.role!);
+    if (ctx.direction || (ctx.actif && !ctx.independant)) {
+      // Monteur interne : tout, sauf les fichiers des dossiers confiés à un monteur indépendant
+      if (ctx.direction) return true;
+      const ind = await idsIndependants();
+      if (!ind.length) return true;
+      const lien0 = lienInterne(bucket, path);
+      const chezIndependant = await prisma.prestation.findFirst({
+        where: { assignedToId: { in: ind }, OR: [{ attachments: { has: lien0 } }, { livrables: { some: { url: lien0 } } }] }, select: { id: true },
+      });
+      return !chezIndependant;
+    }
+    if (!ctx.actif) return false;
+    // Monteur indépendant : fichiers de ses dossiers (pièces de départ, livrables, pièces jointes du fil)
+    const lien1 = lienInterne(bucket, path);
+    const sien = await prisma.prestation.findFirst({
+      where: { assignedToId: user.id, OR: [{ attachments: { has: lien1 } }, { livrables: { some: { url: lien1 } } }] }, select: { id: true },
+    });
+    if (sien) return true;
+    const msg = await prisma.message.findFirst({ where: { attachments: { has: lien1 }, OR: [{ recipientId: user.id }, { senderId: user.id }] }, select: { id: true } });
+    return Boolean(msg);
+  }
   const lien = lienInterne(bucket, path);
-  const [livrable, prestation, commande] = await Promise.all([
+  const [livrable, prestation, commande, message] = await Promise.all([
     prisma.livrable.findFirst({ where: { url: lien, isAvailable: true, prestation: { clientId: user.id } }, select: { type: true, isAvailable: true, prestation: { select: { amount: true, amountPaid: true } } } }),
     prisma.prestation.findFirst({ where: { attachments: { has: lien }, OR: [{ clientId: user.id }, { assignedToId: user.id }] }, select: { id: true } }),
     prisma.apporteurServiceOrder.findFirst({
       where: { documentUrl: { startsWith: lien }, OR: [{ service: { apporteurId: user.id } }, ...(user.email ? [{ clientEmail: user.email }] : [])] },
       select: { id: true },
     }),
+    // Pièce jointe d'un message du fil de discussion d'un dossier dont il est destinataire ou auteur
+    prisma.message.findFirst({ where: { attachments: { has: lien }, OR: [{ recipientId: user.id }, { senderId: user.id }] }, select: { id: true } }),
   ]);
   // Livrable : ouvert une fois le solde payé (ou s'il s'agit d'un aperçu provisoire)
   const livrableOk = livrable ? livrableAccessible(livrable, livrable.prestation) : false;
-  return Boolean(livrableOk || prestation || commande);
+  return Boolean(livrableOk || prestation || commande || message);
 }
 
 /**
