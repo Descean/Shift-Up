@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
-import AccueilMontage from "@/components/home/AccueilMontage";
+import HeroCercle from "@/components/home/HeroCercle";
+import EspaceClientSection from "@/components/home/EspaceClientSection";
+import { EngagementsSection, DomainesSection } from "@/components/home/EngagementsDomaines";
+import EquipeSection from "@/components/home/EquipeSection";
 import RendezVousSection from "@/components/home/RendezVousSection";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: { absolute: "SHIFT UP | Montage de dossiers d'appels d'offres au Bénin" },
+  title: { absolute: "SHIFT UP | Excellence • Innovation • Performance" },
   description:
-    "Déposez votre dossier d'appel d'offres : devis, montage, contrôle qualité et suivi en ligne. Demandes de cotation, DRP/TRP et DAO, partout au Bénin.",
+    "Cabinet de conseil stratégique et solutions numériques basé à Abomey-Calavi, Bénin. Transforming Business, Shaping Future.",
 };
 
 const jsonLd = {
@@ -15,7 +18,7 @@ const jsonLd = {
   "@type": "ProfessionalService",
   name: "SHIFT UP",
   description:
-    "Montage de dossiers d'appels d'offres : demandes de cotation, DRP/TRP et DAO, au Bénin.",
+    "Cabinet de conseil stratégique et solutions numériques. Excellence, Innovation, Performance.",
   url: "https://www.shiftup.bj",
   logo: "https://www.shiftup.bj/assets/logo.png",
   image: "https://www.shiftup.bj/assets/og-image.png",
@@ -64,7 +67,11 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <AccueilMontage />
+      <HeroCercle />
+      <EspaceClientSection />
+      <EngagementsSection />
+      <DomainesSection />
+      <EquipeSection />
       <RendezVousSection />
     </>
   );
