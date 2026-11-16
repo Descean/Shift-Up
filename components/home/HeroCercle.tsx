@@ -48,15 +48,6 @@ export default async function HeroCercle() {
               Découvrir nos services
             </Link>
           </div>
-          <div className="mt-3 flex max-w-[320px] flex-col gap-2.5 self-start rounded-[14px] border border-su-lavande bg-white px-[18px] py-4 shadow-[0_12px_30px_rgba(30,46,79,0.12)]">
-            <span className={`${manrope.className} text-base font-bold text-su-nuit`}>Montage de dossiers</span>
-            <span className="text-sm leading-normal text-[#374151]">Appels d&apos;offres, financement bancaire, subventions : un dossier complet, prêt à déposer.</span>
-            <div className="flex flex-wrap gap-1.5">
-              {["Analyse du DAO", "Montage", "Dépôt"].map((t) => (
-                <span key={t} className="rounded-md border border-su-lavande bg-su-brume px-2.5 py-1 text-xs font-medium text-su-bleu">{t}</span>
-              ))}
-            </div>
-          </div>
         </div>
 
         <div className="flex flex-row flex-wrap gap-7 lg:flex-col">
