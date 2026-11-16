@@ -60,6 +60,7 @@ enum UserRole {
   ETUDIANT
   ADMIN
   DEVELOPER
+  MONTEUR // Équipe de montage : chiffre, produit et suit les dossiers (espace /dashboard/equipe)
 }
 
 model User {
@@ -937,4 +938,47 @@ model MessageWhatsApp {
   createdAt      DateTime             @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+// ============================================================
+// RÉGLAGES DE LA DIRECTION (tarifs planchers, livraison physique…)
+// ============================================================
+
+model Reglage {
+  cle       String   @id
+  valeur    Json
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// MONTEURS (équipe interne et monteurs indépendants)
+// ============================================================
+
+/// Profil d'un monteur. Sans profil, un compte MONTEUR est un monteur interne actif (créé par la Direction).
+model MonteurProfil {
+  userId       String    @id
+  statut       String    @default("EN_ATTENTE") // EN_ATTENTE | ACTIF | SUSPENDU
+  type         String    @default("INDEPENDANT") // INDEPENDANT (ses propres clients, gains reversés) | INTERNE (équipe SHIFT UP)
+  telephone    String?
+  ville        String?
+  experience   String?
+  specialites  String[]  @default([])
+  presentation String?
+  approuveLe   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+/// Part d'un paiement client revenant au monteur indépendant chargé du dossier (après commission SHIFT UP).
+model GainMonteur {
+  id           String   @id @default(cuid())
+  monteurId    String
+  paymentId    String   @unique
+  prestationId String
+  brut         Float
+  commission   Float // taux appliqué (0,15 = 15 %)
+  net          Float
+  createdAt    DateTime @default(now())
+
+  @@index([monteurId])
 }

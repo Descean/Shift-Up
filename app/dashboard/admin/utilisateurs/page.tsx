@@ -19,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type UserRole = "CLIENT" | "APPORTEUR" | "ETUDIANT" | "ADMIN" | "DEVELOPER";
+type UserRole = "CLIENT" | "APPORTEUR" | "ETUDIANT" | "ADMIN" | "DEVELOPER" | "MONTEUR";
 
 interface User {
   id: string;
@@ -43,6 +43,7 @@ const roleStyle: Record<UserRole, string> = {
   ETUDIANT:  "bg-amber-50 text-amber-700",
   ADMIN:     "bg-red-50 text-red-700",
   DEVELOPER: "bg-gray-100 text-gray-700",
+  MONTEUR:   "bg-su-brume text-su-bleu",
 };
 
 // ─── Composant principal ───────────────────────────────────────────────────────
@@ -158,7 +159,7 @@ export default function AdminUtilisateursPage() {
           className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent bg-white"
         >
           <option value="TOUS">Tous les rôles</option>
-          {(["CLIENT", "APPORTEUR", "ETUDIANT", "ADMIN", "DEVELOPER"] as UserRole[]).map((r) => (
+          {(["CLIENT", "APPORTEUR", "ETUDIANT", "MONTEUR", "ADMIN", "DEVELOPER"] as UserRole[]).map((r) => (
             <option key={r} value={r}>{r}</option>
           ))}
         </select>
@@ -333,7 +334,7 @@ export default function AdminUtilisateursPage() {
                     onChange={(e) => setEditRole(e.target.value as UserRole)}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
                   >
-                    {(["CLIENT", "APPORTEUR", "ETUDIANT", "ADMIN", "DEVELOPER"] as UserRole[]).map((r) => (
+                    {(["CLIENT", "APPORTEUR", "ETUDIANT", "MONTEUR", "ADMIN", "DEVELOPER"] as UserRole[]).map((r) => (
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </select>

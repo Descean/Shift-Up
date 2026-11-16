@@ -1,20 +1,16 @@
-"use client";
+import ChoixService from "@/components/espace/client/ChoixService";
+import DemandeMontage from "@/components/espace/client/DemandeMontage";
+import DemandeService from "@/components/espace/client/DemandeService";
+import { trouverDomaine } from "@/lib/catalogue";
 
 /**
- * Nouvelle demande, en une fois : déposer le dossier et dire ce qu'il faut faire (par écrit ou en
- * message vocal). Le dossier est lu automatiquement et le devis arrive dans l'espace en quelques minutes.
+ * Nouvelle demande : liste des services ; le montage de dossiers d'appels d'offres a son formulaire
+ * en 3 étapes, les autres services suivent le même modèle.
  */
-import { TitrePoints } from "@/components/site/Gabarit";
-import DemandeExpress from "@/components/prestations/DemandeExpress";
-
-export default function NouvelleDemandeExpress() {
-  return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <TitrePoints as="h1" taille="text-[28px]">Nouvelle demande</TitrePoints>
-        <p className="mt-1 text-sm text-gray-500">Envoyez votre dossier et dites-nous ce qu&apos;il faut faire. Nous le lisons et vous envoyons le devis, avec la liste de ce que vous recevrez.</p>
-      </div>
-      <DemandeExpress />
-    </div>
-  );
+export default async function NouvelleDemande({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const q = await searchParams;
+  const domaine = trouverDomaine(q.domaine ?? q.secteur ?? q.sector ?? null);
+  if (q.nature || q.avis || q.entreprise || domaine?.id === "marches-publics") return <DemandeMontage />;
+  if (domaine) return <DemandeService domaineId={domaine.id} />;
+  return <ChoixService />;
 }

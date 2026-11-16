@@ -6,6 +6,10 @@
  *    sauf ceux de type APERCU (version provisoire envoyée pour relecture)
  *  - vueClient : retire les liens des livrables encore verrouillés avant de les envoyer au navigateur
  */
+import type { Prisma } from "@prisma/client";
+import { messageSysteme } from "@/lib/fil";
+import { crediterMonteur } from "@/lib/monteurs";
+import { lireTarifs } from "@/lib/reglages";
 import prisma from "@/lib/prisma";
 import { alerterEquipeWhatsApp } from "@/lib/whatsapp";
 import { getPhaseTemplates } from "@/lib/service-templates";
@@ -87,6 +91,9 @@ export async function confirmerPaiement(paymentId: string) {
     }
   }
 
+  // Monteur indépendant chargé du dossier : sa part du paiement (après commission SHIFT UP)
+  await crediterMonteur(payment.id, p.id, p.assignedToId, payment.amount, (await lireTarifs()).commissionMonteurs);
+
   await prisma.auditLog.create({
     data: {
       userId: payment.userId, action: "PAYMENT_COMPLETED", entity: "Payment", entityId: payment.id,
@@ -103,6 +110,17 @@ export async function confirmerPaiement(paymentId: string) {
   ]);
   const montant = `${Math.round(payment.amount).toLocaleString("fr-FR")} F`;
   const reste = Math.max(0, maj.amount - maj.amountPaid);
+  // Solde réglé après la livraison : le dossier est clos et les fichiers débloqués (révision incluse 48 h)
+  if (!demarrage && reste <= 1 && (maj.status === "LIVRAISON" || maj.status === "REVISION")) {
+    const cf = (maj.customFields ?? {}) as Record<string, unknown>;
+    await prisma.prestation.update({
+      where: { id: p.id },
+      data: { status: "TERMINEE", endDate: new Date(), customFields: { ...cf, soldeLe: new Date().toISOString() } as Prisma.InputJsonValue },
+    });
+  }
+  await messageSysteme(p.id, demarrage
+    ? "L'acompte a été reçu. Le monteur commence le travail."
+    : reste <= 1 ? "Solde réglé avec succès. Vos fichiers sont débloqués !" : `Paiement de ${montant} reçu.`, payment.userId);
   await avertirClient(p.id, "PAIEMENT", "Paiement reçu",
     demarrage
       ? `Nous avons bien reçu votre acompte de ${montant}. Les travaux démarrent : vous pouvez suivre chaque étape dans votre espace.`

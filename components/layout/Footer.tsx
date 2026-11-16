@@ -19,7 +19,8 @@ const quickLinks = [
   { href: "/recrutement", label: "Recrutement" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
-  { href: "/inscription", label: "S'inscrire" },
+  { href: "/connexion", label: "Espace client" },
+  { href: "/travailler-avec-nous", label: "Travailler avec nous" },
 ];
 
 const legalLinks = [

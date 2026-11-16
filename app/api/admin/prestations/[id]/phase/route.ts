@@ -4,6 +4,8 @@
  * PATCH /api/admin/prestations/[id]/phase — Mettre à jour une phase (status, progress)
  */
 
+import { estEquipe } from "@/lib/roles";
+import { exigerDossierEquipe } from "@/lib/dossier-serveur";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -13,7 +15,7 @@ import prisma from "@/lib/prisma";
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
-  if (!["ADMIN", "DEVELOPER"].includes(session.user.role as string)) return null;
+  if (!estEquipe(session.user.role as string)) return null;
   return session;
 }
 
@@ -22,6 +24,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
   const { id } = await params;
+  { const acces = await exigerDossierEquipe(id); if ("erreur" in acces) return acces.erreur; }
   const phases = await prisma.prestationPhase.findMany({
     where: { prestationId: id },
     orderBy: { order: "asc" },
@@ -34,6 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
   const { id } = await params;
+  { const acces = await exigerDossierEquipe(id); if ("erreur" in acces) return acces.erreur; }
   try {
     const { title, description, order, status, progress } = await req.json();
     const phase = await prisma.prestationPhase.create({
@@ -51,6 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!session) return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
 
   const { id } = await params;
+  { const acces = await exigerDossierEquipe(id); if ("erreur" in acces) return acces.erreur; }
   try {
     const { phaseId, status, progress, startDate, endDate } = await req.json();
     if (!phaseId) return NextResponse.json({ error: "phaseId requis." }, { status: 400 });

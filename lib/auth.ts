@@ -100,6 +100,23 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
+    // Connexion par lien (e-mail seul) : jeton à usage unique émis par /api/auth/acces
+    CredentialsProvider({
+      id: "lien",
+      name: "lien",
+      credentials: { jeton: { label: "Jeton", type: "text" } },
+      async authorize(credentials) {
+        const token = credentials?.jeton?.trim();
+        if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
+        const v = await prisma.verificationToken.findUnique({ where: { token } });
+        if (!v || !v.identifier.startsWith("acces:")) return null;
+        await prisma.verificationToken.delete({ where: { token } }).catch(() => {});
+        if (v.expires < new Date()) return null;
+        const user = await prisma.user.findUnique({ where: { id: v.identifier.slice("acces:".length) } });
+        if (!user || !["CLIENT", "MONTEUR"].includes(user.role) || user.totpEnabled) return null;
+        return { id: user.id, name: user.name, email: user.email, role: user.role, affiliationCode: user.affiliationCode };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {

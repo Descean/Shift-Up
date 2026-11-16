@@ -285,13 +285,15 @@ export function PiecesClient({ prestationId, pieces: depart, close = false, onMa
 }
 
 // ─── Administration ───────────────────────────────────────────────────────────
-export function PiecesAdmin({ prestationId, dossier: dossierDepart, pieces: depart, onMaj, suivi, depot, resultat }: {
+export function PiecesAdmin({ prestationId, dossier: dossierDepart, pieces: depart, onMaj, suivi, depot, resultat, ficheDepart }: {
   prestationId: string; dossier: Dossier | null; pieces: Piece[]; onMaj?: () => void; suivi?: (d: Dossier) => React.ReactNode; depot?: Depot | null; resultat?: Resultat | null;
+  /** Pré-remplissage de la fiche quand elle n'existe pas encore (date limite, soumissionnaire…) */
+  ficheDepart?: Partial<DossierSaisie>;
 }) {
   const [dossier, setDossier] = useState<Dossier | null>(dossierDepart);
   const [pieces, setPieces] = useState<Piece[]>(depart);
   const [edition, setEdition] = useState(false);
-  const [fiche, setFiche] = useState<DossierSaisie>(dossierDepart ?? dossierVide());
+  const [fiche, setFiche] = useState<DossierSaisie>(dossierDepart ?? { ...dossierVide(), ...ficheDepart });
   const [commentaires, setCommentaires] = useState<Record<string, string>>({});
   const [reprise, setReprise] = useState<string | null>(null);
   const [nouvelle, setNouvelle] = useState({ libelle: "", categorie: "Administratif" as CategoriePiece });

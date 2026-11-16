@@ -33,7 +33,7 @@
  *  2. CONTRÔLE D'ACCÈS PAR RÔLE (RBAC)
  *     ────────────────────────────────
  *     Vérifie le JWT NextAuth de chaque requête vers /dashboard/*.
- *     Redirige vers la bonne vue selon le rôle (ADMIN, APPORTEUR, ETUDIANT, CLIENT).
+ *     Redirige vers la bonne vue selon le rôle (ADMIN, DEVELOPER, MONTEUR, CLIENT).
  *     Un utilisateur non authentifié est redirigé vers /connexion.
  *     Cas particulier : /dashboard/admin/finances* est réservé à ADMIN
  *     uniquement (pas DEVELOPER) — accès aux données financières et aux
@@ -138,29 +138,22 @@ export default withAuth(
       return NextResponse.redirect(new URL("/dashboard/admin", req.url));
     }
 
+    // Équipe de montage : Kanban et fiches (monteurs + Direction) ; page Direction réservée à ADMIN / DEVELOPER
+    if (pathname.startsWith("/dashboard/equipe")) {
+      if (!["ADMIN", "DEVELOPER", "MONTEUR"].includes(role)) return NextResponse.redirect(new URL("/dashboard/client", req.url));
+      if (pathname.startsWith("/dashboard/equipe/direction") && role === "MONTEUR") return NextResponse.redirect(new URL("/dashboard/equipe", req.url));
+      return NextResponse.next();
+    }
+    // Un monteur n'a que l'espace équipe (et son profil)
+    if (role === "MONTEUR" && !pathname.startsWith("/dashboard/profil") && !pathname.startsWith("/dashboard/securite")) {
+      return NextResponse.redirect(new URL("/dashboard/equipe", req.url));
+    }
+
     // Routes réservées aux administrateurs et développeurs
     if (
       pathname.startsWith("/dashboard/admin") &&
       role !== "ADMIN" &&
       role !== "DEVELOPER"
-    ) {
-      return NextResponse.redirect(new URL("/dashboard/client", req.url));
-    }
-
-    // Routes réservées aux apporteurs d'affaires (les admins peuvent aussi y accéder)
-    if (
-      pathname.startsWith("/dashboard/apporteur") &&
-      role !== "APPORTEUR" &&
-      role !== "ADMIN"
-    ) {
-      return NextResponse.redirect(new URL("/dashboard/client", req.url));
-    }
-
-    // Routes réservées aux étudiants
-    if (
-      pathname.startsWith("/dashboard/etudiant") &&
-      role !== "ETUDIANT" &&
-      role !== "ADMIN"
     ) {
       return NextResponse.redirect(new URL("/dashboard/client", req.url));
     }

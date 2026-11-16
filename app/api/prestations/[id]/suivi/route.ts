@@ -13,6 +13,8 @@ import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { equipeAutorisee } from "@/lib/monteurs";
+import { messageSysteme } from "@/lib/fil";
 import { alerterEquipeWhatsApp, lienEspaceClient, notifierClientWhatsApp } from "@/lib/whatsapp";
 import { isSafe } from "@/lib/validation";
 import { envoyer, nomService } from "@/lib/prestations";
@@ -48,17 +50,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   const { id } = await params;
-  const admin = ["ADMIN", "DEVELOPER"].includes(session.user.role as string);
 
   const parsed = schema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Données invalides." }, { status: 422 });
   const a = parsed.data;
 
-  const p = await prisma.prestation.findFirst({
-    where: admin ? { id } : { id, clientId: session.user.id },
+  const p = await prisma.prestation.findUnique({
+    where: { id },
     include: { service: { select: { title: true } }, client: { select: { name: true, email: true } }, prestationPhases: true },
   });
-  if (!p) return NextResponse.json({ error: "Prestation introuvable." }, { status: 404 });
+  // « admin » : membre de l'équipe autorisé à traiter ce dossier (Direction, monteur interne, monteur chargé)
+  const admin = p ? p.clientId !== session.user.id && await equipeAutorisee(session.user.id, session.user.role as string, p.assignedToId) : false;
+  if (!p || (!admin && p.clientId !== session.user.id)) return NextResponse.json({ error: "Prestation introuvable." }, { status: 404 });
   if (a.action === "annuler_depot" && !admin) return NextResponse.json({ error: "Action non autorisée." }, { status: 403 });
   if (p.status === "ANNULEE") return NextResponse.json({ error: "Cette demande est annulée." }, { status: 409 });
 
@@ -145,6 +148,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       await prisma.prestation.update({ where: { id }, data: { globalProgress: Math.round(toutes.reduce((s, x) => s + x, 0) / toutes.length) } });
     }
   }
+
+  // Trace dans la discussion du dossier (client et monteur la voient)
+  const qui = par === "CLIENT" ? "Le client" : "SHIFT UP";
+  if (a.action === "depot") await messageSysteme(id, `${qui} a enregistré le dépôt de l'offre.`, session.user.id);
+  if (a.action === "resultat") await messageSysteme(id, `${qui} a communiqué le résultat : ${RESULTATS[a.statut]}.`, session.user.id);
 
   await prisma.auditLog.create({
     data: { userId: session.user.id, action: `SUIVI_${a.action.toUpperCase()}`, entity: "Prestation", entityId: id, details: { par, ...(a.action === "resultat" ? { statut: a.statut } : {}) } },
