@@ -17,7 +17,7 @@ export default async function HeroCercle() {
   ];
 
   return (
-    <section className="su-hero relative overflow-hidden bg-su-brume pt-36 pb-28">
+    <section className="su-hero relative overflow-hidden bg-su-brume pt-36 pb-28 lg:flex lg:min-h-[760px] lg:items-center">
       <div className="su-ringwrap">
         <nav className="su-ring" aria-label="Nos services">
           {SERVICES.map((s, i) => (
@@ -30,7 +30,7 @@ export default async function HeroCercle() {
         </nav>
       </div>
 
-      <div className="relative z-[1] mx-auto grid max-w-[1200px] items-center gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_240px]">
+      <div className="relative z-[1] mx-auto grid w-full max-w-[1200px] items-center gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_240px]">
         <div className="flex max-w-[640px] flex-col gap-6">
           <h1 className={`${manrope.className} m-0 text-[40px] font-extrabold leading-[1.08] tracking-tight text-su-nuit sm:text-[52px]`}>
             Transformez votre vision
