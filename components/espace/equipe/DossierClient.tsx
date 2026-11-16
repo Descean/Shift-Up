@@ -13,6 +13,7 @@ import { SECTORS } from "@/lib/catalogue";
 import { DOMAINE_MONTAGE, type Competences } from "@/lib/competences";
 
 const champ = "w-full rounded-xl border border-su-lavande bg-su-brume/40 px-4 py-3 text-sm text-su-nuit focus:border-su-bleu focus:outline-none";
+const etiquette = "mb-1 block text-xs font-semibold text-gray-600";
 const aujourdhui = () => new Date(Date.now() + 3600_000).toISOString().slice(0, 10);
 
 export default function DossierClient({ competences }: { competences: Competences }) {
@@ -111,13 +112,16 @@ export default function DossierClient({ competences }: { competences: Competence
                 </select>
               ) : <p className="text-sm text-gray-600">{natures[0]?.label}</p>}
               <div className="grid gap-3 sm:grid-cols-3">
-                <input type="date" min={aujourdhui()} value={dateLimite} onChange={(e) => setDateLimite(e.target.value)} className={champ} aria-label="Date limite de dépôt" />
-                <select value={urgence} onChange={(e) => setUrgence(e.target.value as "standard" | "express")} className={champ} aria-label="Urgence">
-                  <option value="standard">Standard</option><option value="express">Express (+{pct}%)</option>
-                </select>
-                <select value={livraison} onChange={(e) => setLivraison(e.target.value as "numerique" | "physique")} className={champ} aria-label="Livraison">
-                  <option value="numerique">Numérique uniquement</option><option value="physique">Numérique + physique</option>
-                </select>
+                <label><span className={etiquette}>Date limite de dépôt</span>
+                  <input type="date" min={aujourdhui()} value={dateLimite} onChange={(e) => setDateLimite(e.target.value)} className={champ} /></label>
+                <label><span className={etiquette}>Urgence</span>
+                  <select value={urgence} onChange={(e) => setUrgence(e.target.value as "standard" | "express")} className={champ}>
+                    <option value="standard">Standard</option><option value="express">Express (+{pct}%)</option>
+                  </select></label>
+                <label><span className={etiquette}>Livraison</span>
+                  <select value={livraison} onChange={(e) => setLivraison(e.target.value as "numerique" | "physique")} className={champ}>
+                    <option value="numerique">Numérique</option><option value="physique">Numérique + physique</option>
+                  </select></label>
               </div>
             </>
           )}
@@ -128,10 +132,12 @@ export default function DossierClient({ competences }: { competences: Competence
                 {secteur.services.map((o) => <option key={o.title} value={o.title}>{o.title}{o.price ? ` — ${o.priceLabel ?? "à partir de"} ${o.price}` : ""}</option>)}
               </select>
               <div className="grid gap-3 sm:grid-cols-2">
-                <input type="date" min={aujourdhui()} value={dateLimite} onChange={(e) => setDateLimite(e.target.value)} className={champ} aria-label="Pour quand (facultatif)" title="Pour quand (facultatif)" />
-                <select value={urgence} onChange={(e) => setUrgence(e.target.value as "standard" | "express")} className={champ} aria-label="Urgence">
-                  <option value="standard">Standard</option><option value="express">Express (+{pct}%)</option>
-                </select>
+                <label><span className={etiquette}>Pour quand ? <span className="font-normal text-gray-400">(facultatif)</span></span>
+                  <input type="date" min={aujourdhui()} value={dateLimite} onChange={(e) => setDateLimite(e.target.value)} className={champ} /></label>
+                <label><span className={etiquette}>Urgence</span>
+                  <select value={urgence} onChange={(e) => setUrgence(e.target.value as "standard" | "express")} className={champ}>
+                    <option value="standard">Standard</option><option value="express">Express (+{pct}%)</option>
+                  </select></label>
               </div>
             </>
           )}
