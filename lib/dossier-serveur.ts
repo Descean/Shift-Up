@@ -98,7 +98,7 @@ export function carteDossier(p: { id: string; status: string; customFields: unkn
   const infos = infosDossier(p.customFields);
   return {
     id: p.id, reference: reference(p.id), titre: titreDossier(p), etat: etatDossier(p.status, p.customFields),
-    dateLimite: infos.dateLimite, urgence: infos.urgence, livraison: infos.livraison, montant: p.amount,
+    dateLimite: infos.dateLimite, urgence: infos.urgence, livraison: infos.livraison, montant: p.amount, montage: !!infos.nature,
     revision: !!infos.revision && !infos.revision.faiteLe,
     client: p.client?.email ?? p.client?.name ?? null, charge: p.assignedTo?.name ?? null, creeLe: p.createdAt.toISOString(),
   };

@@ -65,7 +65,8 @@ const nextConfig = {
   // Comptes apporteur d'affaires et étudiant retirés : la plateforme se concentre sur le montage de dossiers
   async redirects() {
     return [
-      { source: "/services-apporteurs/:path*", destination: "/devenir-monteur", permanent: false },
+      { source: "/services-apporteurs/:path*", destination: "/travailler-avec-nous", permanent: false },
+      { source: "/devenir-monteur", destination: "/travailler-avec-nous", permanent: false },
       { source: "/dashboard/apporteur/:path*", destination: "/dashboard", permanent: false },
       { source: "/dashboard/etudiant/:path*", destination: "/dashboard", permanent: false },
       { source: "/dashboard/apporteur", destination: "/dashboard", permanent: false },

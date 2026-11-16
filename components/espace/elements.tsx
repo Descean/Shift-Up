@@ -33,8 +33,8 @@ export function CompteRebours({ dateLimite }: { dateLimite?: string | null }) {
 }
 
 /** En-tête de la fiche : retour, statut, titre, référence, livraison, clôture du marché. */
-export function EnTeteFiche({ retour, etat, titre, sousTitre, dateLimite, extra }: {
-  retour: () => void; etat: EtatDossier; titre: string; sousTitre: string; dateLimite?: string | null; extra?: React.ReactNode;
+export function EnTeteFiche({ retour, etat, titre, sousTitre, dateLimite, extra, etiquette = "Clôture du marché" }: {
+  retour: () => void; etat: EtatDossier; titre: string; sousTitre: string; dateLimite?: string | null; extra?: React.ReactNode; etiquette?: string;
 }) {
   return (
     <>
@@ -49,7 +49,7 @@ export function EnTeteFiche({ retour, etat, titre, sousTitre, dateLimite, extra 
           {extra}
         </div>
         <div className="self-start rounded-xl border border-su-lavande px-4 py-2 sm:self-auto">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Clôture du marché</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{etiquette}</p>
           <div className="text-sm"><CompteRebours dateLimite={dateLimite} /></div>
         </div>
       </div>

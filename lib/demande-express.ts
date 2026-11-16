@@ -15,6 +15,7 @@ import { analyserEtChiffrer, iaAnalyseDisponible } from "@/lib/ia-devis";
 import { lireTarifs, libelleNature } from "@/lib/reglages";
 import { infosDossier, proposerDevis } from "@/lib/dossier";
 import { SECTEUR_MONTAGE } from "@/lib/montage";
+import { prixOffre, trouverDomaine, trouverOffre } from "@/lib/catalogue";
 
 export type DonneesExpress = {
   clientId: string;
@@ -30,6 +31,8 @@ export type DonneesExpress = {
   origine: "demande express" | "page publique" | "monteur";
   /** Nature du marché, date limite, urgence, livraison (formulaire en 3 étapes) */
   montage?: { nature: string; dateLimite: string; urgence: "standard" | "express"; livraison: "numerique" | "physique" } | null;
+  /** Autre service que le montage : domaine et offre du catalogue (date souhaitée dans `montage.dateLimite`) */
+  service?: { domaine: string; offre: string | null; echeance: string | null; urgence: "standard" | "express" } | null;
   /** Monteur à qui le dossier est confié d'office (client venu par son lien, ou dossier ouvert par lui) */
   monteurId?: string | null;
   /** Courriels propres à l'appelant (confirmation ou activation du compte) */
@@ -40,15 +43,18 @@ export async function creerDemandeExpress(d: DonneesExpress) {
   const ia = iaAnalyseDisponible();
   // Proposition de départ pour le monteur (grille + plancher), affinée ensuite par la lecture du dossier
   const tarifs = await lireTarifs();
-  const infos = infosDossier({ montage: d.montage ?? {} });
-  const intitule = libelleNature(d.montage?.nature) ?? "Montage de dossier";
-  const base = proposerDevis(tarifs, infos, intitule);
+  const dom = d.service ? trouverDomaine(d.service.domaine) : undefined;
+  const offre = dom ? trouverOffre(dom, d.service?.offre) : undefined;
+  const calendrier = d.montage ?? (d.service?.echeance ? { dateLimite: d.service.echeance, urgence: d.service.urgence, livraison: "numerique" as const } : null);
+  const infos = infosDossier({ montage: calendrier ?? {} });
+  const intitule = libelleNature(d.montage?.nature) ?? offre?.title ?? (dom ? `${dom.label} — besoin à préciser` : "Montage de dossier");
+  const base = proposerDevis(tarifs, infos, intitule, offre);
   const prestation = await prisma.prestation.create({
     data: {
       clientId: d.clientId,
-      sector: d.montage ? SECTEUR_MONTAGE : "Autre",
-      customService: d.montage ? intitule : "Demande en cours d'analyse",
-      deadline: d.montage?.dateLimite ?? null,
+      sector: d.montage ? SECTEUR_MONTAGE : dom?.label ?? "Autre",
+      customService: d.montage || dom ? intitule : "Demande en cours d'analyse",
+      deadline: calendrier?.dateLimite ?? null,
       brief: d.consigne || null,
       company: d.entreprise?.nom ?? d.entrepriseLibre ?? null,
       phone: d.telephone || null,
@@ -61,7 +67,8 @@ export async function creerDemandeExpress(d: DonneesExpress) {
         fichiers: d.fichiers,
         ...(d.vocal ? { consigneVocale: d.vocal } : {}),
         ...(d.entreprise ? { entrepriseId: d.entreprise.id, entrepriseNom: d.entreprise.nom } : {}),
-        ...(d.montage ? { montage: d.montage } : {}),
+        ...(calendrier ? { montage: calendrier } : {}),
+        ...(offre ? { offre: { titre: offre.title, prix: prixOffre(offre), delai: offre.duration ?? null } } : {}),
         analyseIA: { statut: ia ? "en_attente" : "manuel", le: new Date().toISOString(), proposition: { ...base, auto: false } },
       } as Prisma.InputJsonValue,
     },

@@ -67,7 +67,7 @@ export default function FicheEquipe({ id }: { id: string }) {
       <div className="overflow-hidden rounded-2xl border border-su-lavande bg-su-brume/30">
         <div className="p-4 pb-0 sm:p-6 sm:pb-0">
           <EnTeteFiche retour={() => router.push("/dashboard/equipe")} etat={d.etat} titre={d.titre}
-            sousTitre={`${d.reference} • ${libelleLivraison(d.infos.livraison)}${d.infos.urgence === "express" ? " • Express" : ""}`} dateLimite={d.infos.dateLimite}
+            sousTitre={`${d.reference}${d.infos.nature ? ` • ${libelleLivraison(d.infos.livraison)}` : ""}${d.infos.urgence === "express" ? " • Express" : ""}`} dateLimite={d.infos.dateLimite} etiquette={d.infos.nature ? "Clôture du marché" : "Échéance souhaitée"}
             extra={<p className="mt-1 text-xs text-gray-500"><i className="far fa-user mr-1" />{d.client?.nom} · {d.client?.email}{d.entreprise ? ` · ${d.entreprise}` : ""}{d.charge ? ` · chargé : ${d.charge.nom}` : ""}</p>} />
         </div>
 

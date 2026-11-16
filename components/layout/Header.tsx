@@ -8,18 +8,29 @@ import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 
-const navLinks = [
+// Menus du site, regroupés : tous les liens d'origine restent, rangés en deux sous-menus
+type Lien = { href: string; label: string; texte?: string };
+type Entree = Lien | { label: string; enfants: Lien[] };
+const navLinks: Entree[] = [
   { href: "/", label: "Accueil" },
-  { href: "/services/souscrire", label: "Faire monter un dossier" },
-  { href: "/devenir-monteur", label: "Devenir monteur" },
-  { href: "/a-propos", label: "À propos" },
+  { label: "Nos offres", enfants: [
+    { href: "/services", label: "Services", texte: "Tous nos domaines d'intervention" },
+    { href: "/boutique", label: "Boutique", texte: "Modèles, guides et outils" },
+  ] },
+  { label: "SHIFT UP", enfants: [
+    { href: "/a-propos", label: "À propos", texte: "Qui nous sommes" },
+    { href: "/recrutement", label: "Recrutement", texte: "Nos offres d'emploi et de stage" },
+    { href: "/blog", label: "Blog", texte: "Conseils et actualités" },
+  ] },
   { href: "/contact", label: "Contact" },
 ];
+const aplatir = (e: Entree[]): Lien[] => e.flatMap((x) => ("enfants" in x ? x.enfants : [x]));
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [sousMenu, setSousMenu] = useState<string | null>(null);
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -79,10 +90,30 @@ export default function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-1">
-          {navLinks.map((link) => (
+          {navLinks.map((e) => "enfants" in e ? (
+            <div key={e.label} className="relative" onMouseEnter={() => setSousMenu(e.label)} onMouseLeave={() => setSousMenu(null)}>
+              <button type="button" onClick={() => setSousMenu(sousMenu === e.label ? null : e.label)} aria-expanded={sousMenu === e.label}
+                className={cn("flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                  isDark ? "text-white/80 hover:text-white hover:bg-white/10" : "text-su-nuit/70 hover:text-su-nuit hover:bg-su-lavande/60")}>
+                {e.label}<i className="fas fa-chevron-down text-[9px] opacity-60" />
+              </button>
+              {sousMenu === e.label && (
+                <div className="absolute left-0 top-full pt-2">
+                  <div className="w-64 rounded-2xl border border-su-lavande bg-white p-2 shadow-xl">
+                    {e.enfants.map((l) => (
+                      <Link key={l.href} href={l.href} onClick={() => setSousMenu(null)} className="block rounded-xl px-3 py-2.5 hover:bg-su-brume">
+                        <span className="block text-sm font-semibold text-su-nuit">{l.label}</span>
+                        {l.texte && <span className="block text-xs text-gray-500">{l.texte}</span>}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
             <Link
-              key={link.href}
-              href={link.href}
+              key={e.href}
+              href={e.href}
               className={cn(
                 "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
                 isDark
@@ -90,7 +121,7 @@ export default function Header() {
                   : "text-su-nuit/70 hover:text-su-nuit hover:bg-su-lavande/60"
               )}
             >
-              {link.label}
+              {e.label}
             </Link>
           ))}
         </nav>
@@ -160,16 +191,16 @@ export default function Header() {
           ) : (
             <>
               <Button
-                href="/connexion"
+                href="/travailler-avec-nous"
                 variant="ghost"
                 size="sm"
-                className={isDark ? "text-white hover:bg-white/10" : "text-su-nuit hover:bg-su-lavande/60"}
+                className={cn("rounded-full border", isDark ? "border-white/30 text-white hover:bg-white/10" : "border-su-clair text-su-nuit hover:bg-su-lavande/60")}
               >
-                Connexion
+                Travailler avec nous
               </Button>
-              <Button href="/services/souscrire" variant="gradient" size="sm" animate={false} className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
-                Déposer mon dossier
-                <i className="fas fa-arrow-right text-sm" />
+              <Button href="/connexion" variant="gradient" size="sm" animate={false} className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
+                <i className="fas fa-user text-xs" />
+                Espace client
               </Button>
             </>
           )}
@@ -215,7 +246,7 @@ export default function Header() {
             )}
           >
             <div className="container-custom py-4 flex flex-col gap-1">
-              {navLinks.map((link) => (
+              {aplatir(navLinks).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -243,11 +274,12 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Button href="/connexion" variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-su-bleu/40 text-su-nuit"}>
-                      Connexion
+                    <Button href="/connexion" variant="gradient" size="md" className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
+                      <i className="fas fa-user text-xs" />
+                      Espace client
                     </Button>
-                    <Button href="/services/souscrire" variant="gradient" size="md" className="bg-none bg-su-bleu hover:bg-su-cadet hover:opacity-100 rounded-full">
-                      Déposer mon dossier
+                    <Button href="/travailler-avec-nous" variant="outline" size="md" className={isDark ? "border-white/30 text-white" : "border-su-bleu/40 text-su-nuit"}>
+                      Travailler avec nous
                     </Button>
                   </>
                 )}

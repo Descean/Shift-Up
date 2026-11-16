@@ -83,7 +83,7 @@ export function proposerDevis(t: Tarifs, i: InfosDossier, intitule: string, offr
   const items: LigneDevis[] = [...g.items];
   let total = items.reduce((s, l) => s + l.amount, 0);
   const plancher = plancherDe(t, i.nature);
-  if (total < plancher) { items.push({ label: "Mise au tarif minimum de ce type de dossier", amount: plancher - total }); total = plancher; }
+  if (plancher !== null && total < plancher) { items.push({ label: "Mise au tarif minimum de ce type de dossier", amount: plancher - total }); total = plancher; }
   if (i.urgence === "express") {
     const m = arrondir(total * t.majorationExpress);
     items.push({ label: `Traitement express (+${Math.round(t.majorationExpress * 100)} %)`, amount: m });

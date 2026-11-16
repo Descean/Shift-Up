@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Profil client (seul compte ouvert par cette inscription ; les monteurs passent par /devenir-monteur)
+    // Profil client (seul compte ouvert par cette inscription ; les partenaires passent par /travailler-avec-nous)
     {
       await prisma.clientProfile.create({
         data: {

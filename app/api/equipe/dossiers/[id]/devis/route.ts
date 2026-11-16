@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const infos = infosDossier(p.customFields);
   const plancher = plancherDe(await lireTarifs(), infos.nature);
-  if (d.total < plancher) {
+  if (plancher !== null && d.total < plancher) {
     if (!estDirection(a.session.user.role as string)) {
       return NextResponse.json({ error: `Le tarif minimum fixé par la Direction pour ce type de dossier est de ${plancher.toLocaleString("fr-FR")} F.`, plancher }, { status: 409 });
     }

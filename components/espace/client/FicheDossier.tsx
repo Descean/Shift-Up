@@ -80,7 +80,7 @@ export default function FicheDossier({ id }: { id: string }) {
       <div className="overflow-hidden rounded-2xl border border-su-lavande bg-su-brume/30">
         <div className="p-4 pb-0 sm:p-6 sm:pb-0">
           <EnTeteFiche retour={() => router.push("/dashboard/client")} etat={d.etat} titre={d.titre}
-            sousTitre={`${d.reference} • ${libelleLivraison(d.infos.livraison)}${d.infos.urgence === "express" ? " • Express" : ""}`} dateLimite={d.infos.dateLimite} />
+            sousTitre={`${d.reference}${d.infos.nature ? ` • ${libelleLivraison(d.infos.livraison)}` : ""}${d.infos.urgence === "express" ? " • Express" : ""}`} dateLimite={d.infos.dateLimite} etiquette={d.infos.nature ? "Clôture du marché" : "Échéance souhaitée"} />
         </div>
 
         <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_360px]">

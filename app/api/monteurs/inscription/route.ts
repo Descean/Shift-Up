@@ -1,5 +1,6 @@
 /**
- * POST /api/monteurs/inscription — Demande de compte monteur indépendant (page « Devenir monteur »).
+ * POST /api/monteurs/inscription — Demande de compte partenaire (page « Travailler avec nous ») :
+ * monteur de dossiers ou autre compétence des services SHIFT UP.
  * Le compte est créé en attente ; la Direction l'active depuis son espace.
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -18,7 +19,8 @@ const schema = z.object({
   telephone: z.string().trim().min(8, "Indiquez votre téléphone.").max(30),
   ville: z.string().trim().max(80).refine(isSafe).optional().default(""),
   experience: z.string().trim().max(80).optional().default(""),
-  specialites: z.array(z.enum(["cotation", "trp", "dao"])).max(3).default([]),
+  // Domaines de compétence (identifiants du catalogue) et, pour le montage, natures de dossiers
+  specialites: z.array(z.string().regex(/^[a-z-]{2,30}$/)).max(15).default([]),
   presentation: z.string().trim().max(1500).refine(isSafe, "Contenu non autorisé.").optional().default(""),
   captchaToken: z.string().optional(),
 });
@@ -41,8 +43,8 @@ export async function POST(req: NextRequest) {
     });
     await Promise.allSettled([
       sendMonteurCandidat({ to: d.email, name: d.nom }),
-      sendAlerteDirection({ titre: "Nouvelle demande de compte monteur", lignes: [["Nom", d.nom], ["E-mail", d.email], ["Téléphone", d.telephone], ["Ville", d.ville || "—"], ["Expérience", d.experience || "—"], ["Dossiers", d.specialites.join(", ") || "—"], ["Présentation", d.presentation || "—"]] }),
-      alerterEquipeWhatsApp("Candidature monteur", `${d.nom} — ${d.telephone}`),
+      sendAlerteDirection({ titre: "Nouvelle demande « Travailler avec nous »", lignes: [["Nom", d.nom], ["E-mail", d.email], ["Téléphone", d.telephone], ["Ville", d.ville || "—"], ["Expérience", d.experience || "—"], ["Compétences", d.specialites.join(", ") || "—"], ["Présentation", d.presentation || "—"]] }),
+      alerterEquipeWhatsApp("Candidature partenaire", `${d.nom} — ${d.telephone}`),
     ]);
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (e) {

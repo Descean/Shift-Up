@@ -24,6 +24,6 @@ export const TARIFS_DEFAUT: Tarifs = {
   commissionMonteurs: 0.15,
 };
 
-/** Plancher applicable à un dossier : celui de sa nature (le plus bas si la nature est inconnue). */
-export const plancherDe = (t: Tarifs, nature?: string | null) =>
-  t.planchers[nature as Nature] ?? Math.min(...Object.values(t.planchers));
+/** Plancher applicable à un dossier de montage : celui de sa nature (aucun pour les autres services). */
+export const plancherDe = (t: Tarifs, nature?: string | null): number | null =>
+  t.planchers[nature as Nature] ?? null;

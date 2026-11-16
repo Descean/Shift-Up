@@ -6,7 +6,7 @@ import Link from "next/link";
 import { BadgeEtat, CompteRebours } from "@/components/espace/elements";
 import type { EtatDossier } from "@/lib/dossier";
 
-type Carte = { id: string; reference: string; titre: string; etat: EtatDossier; dateLimite: string | null; urgence: string; revision: boolean };
+type Carte = { id: string; reference: string; titre: string; etat: EtatDossier; dateLimite: string | null; urgence: string; revision: boolean; montage?: boolean };
 
 export default function MesDossiers() {
   const [dossiers, setDossiers] = useState<Carte[] | null>(null);
@@ -48,7 +48,7 @@ export default function MesDossiers() {
                 <span className="font-mono text-[11px] text-gray-400">{d.reference}</span>
               </div>
               <p className="mt-3 font-bold text-su-nuit">{d.titre}</p>
-              <p className="mt-1 text-xs text-gray-500">Clôture : <CompteRebours dateLimite={d.dateLimite} /></p>
+              <p className="mt-1 text-xs text-gray-500">{d.montage === false ? "Échéance" : "Clôture"} : <CompteRebours dateLimite={d.dateLimite} /></p>
               {d.urgence === "express" && <p className="mt-1 text-[11px] font-semibold text-orange-600"><i className="fas fa-bolt mr-1" />Express</p>}
               <div className="mt-auto flex items-center justify-between border-t border-su-lavande pt-3 text-xs text-gray-500">
                 <span className="mt-3 inline-block">Voir suivi détaillé</span>

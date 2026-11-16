@@ -10,8 +10,8 @@ import { TitrePoints } from "@/components/site/Gabarit";
 export default function Inscription() {
   const suite = typeof window !== "undefined" ? window.location.search : "";
   const choix = [
-    { href: `/connexion${suite}`, icone: "fa-folder-open", titre: "Je fais monter un dossier", texte: "Déposez votre dossier d'appel d'offres, recevez le devis et suivez chaque étape. Votre adresse e-mail suffit." },
-    { href: "/devenir-monteur", icone: "fa-user-gear", titre: "Je monte des dossiers", texte: "Ouvrez votre compte monteur : vos clients déposent leur dossier et paient en ligne, vous recevez votre part." },
+    { href: `/connexion${suite}`, icone: "fa-user", titre: "Espace client", texte: "Une demande à confier (dossier d'appel d'offres ou autre service) : recevez le devis et suivez chaque étape. Votre adresse e-mail suffit." },
+    { href: "/travailler-avec-nous", icone: "fa-handshake", titre: "Travailler avec nous", texte: "Monteur de dossiers ou professionnel de nos domaines : traitez vos clients sur la plateforme et recevez votre part." },
   ];
   return (
     <div>

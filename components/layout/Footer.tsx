@@ -14,16 +14,13 @@ const services = [
 
 const quickLinks = [
   { href: "/a-propos", label: "À propos" },
-  { href: "/services/souscrire", label: "Faire monter un dossier" },
-  { href: "/devenir-monteur", label: "Devenir monteur" },
   { href: "/services", label: "Nos services" },
-  { href: "/boutique", label: "Boutique" },
-  { href: "/formations", label: "Formations" },
   { href: "/blog", label: "Blog & Ressources" },
   { href: "/recrutement", label: "Recrutement" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
-  { href: "/connexion", label: "Mon espace" },
+  { href: "/connexion", label: "Espace client" },
+  { href: "/travailler-avec-nous", label: "Travailler avec nous" },
 ];
 
 const legalLinks = [
