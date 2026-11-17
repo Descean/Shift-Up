@@ -101,8 +101,10 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com https://*.brevo.com",
               // Connexions fetch/WebSocket : notre domaine + APIs externes
               "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.google.com https://*.supabase.co https://api.fedapay.com https://sandbox-api.fedapay.com https://hcaptcha.com https://*.hcaptcha.com https://*.brevo.com wss://*.brevo.com",
-              // Iframes : Stripe + hCaptcha
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://*.brevo.com",
+              // Iframes : Stripe + hCaptcha + documents du stockage (lecture des PDF dans l'espace monteur)
+              "frame-src 'self' https://*.supabase.co https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://*.brevo.com",
+              // Sons : notes vocales servies par le stockage
+              "media-src 'self' blob: https://*.supabase.co",
               // Toute ressource non couverte : uniquement notre domaine
               "default-src 'self'",
               // Bloque les formulaires qui soumettent vers des sites tiers non listés
