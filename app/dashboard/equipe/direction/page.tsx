@@ -12,7 +12,7 @@ import { competencesDe, DOMAINE_MONTAGE } from "@/lib/competences";
 function libellesCompetences(specialites: string[]) {
   const c = competencesDe(specialites);
   return c.domaines.map((id) => id === DOMAINE_MONTAGE
-    ? `Montage (${NATURES.filter((n) => c.natures.includes(n.id)).map((n) => n.label.replace(/ \(DAO\)$/, "")).join(", ")})`
+    ? `Montage (${NATURES.filter((n) => c.natures.includes(n.id)).map((n) => n.label.replace(/ \(.*\)$/, "")).join(", ")})`
     : SECTORS.find((s) => s.id === id)?.label ?? id).join(" · ");
 }
 

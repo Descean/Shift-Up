@@ -19,7 +19,7 @@ export default function ChoixService() {
         <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-su-nuit text-xl text-white"><i className="fas fa-folder-open" /></span>
         <span className="flex-1">
           <span className="block text-lg font-bold text-su-nuit">Montage de dossier d&apos;appel d&apos;offres</span>
-          <span className="mt-1 block text-sm text-gray-600">Demande de cotation, DRP / TRP, DAO : déposez le dossier et la date limite, nous montons et contrôlons votre offre.</span>
+          <span className="mt-1 block text-sm text-gray-600">Demande de cotation, DRP, appel d&apos;offres, AMI, demande de propositions, marchés des bailleurs : déposez le dossier et la date limite, nous montons et contrôlons votre offre.</span>
         </span>
         <span className="inline-flex items-center gap-2 self-start rounded-xl bg-su-nuit px-5 py-2.5 text-sm font-semibold text-white sm:self-auto">Commencer <i className="fas fa-arrow-right text-xs transition group-hover:translate-x-0.5" /></span>
       </Link>

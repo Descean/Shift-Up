@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
+import { IDS_NATURES } from "@/lib/tarifs-montage";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { isSafe } from "@/lib/validation";
@@ -27,7 +28,7 @@ const schema = z.object({
   telephone: z.string().trim().max(40).optional().nullable(),
   // Formulaire en 3 étapes : nature du marché, date limite, urgence, livraison
   montage: z.object({
-    nature: z.enum(["cotation", "trp", "dao"]),
+    nature: z.enum(IDS_NATURES),
     dateLimite: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date limite invalide."),
     urgence: z.enum(["standard", "express"]).default("standard"),
     livraison: z.enum(["numerique", "physique"]).default("numerique"),
