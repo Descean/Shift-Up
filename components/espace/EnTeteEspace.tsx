@@ -34,7 +34,7 @@ export default function EnTeteEspace({ role, nom }: { role: string; nom: string 
   const liens: Lien[] = client
     ? [{ href: "/dashboard/client", label: "Mes Dossiers", exact: true }, { href: "/dashboard/client/factures", label: "Factures" }]
     : [
-        { href: "/dashboard/equipe", label: "Dossiers (Kanban)", exact: true },
+        { href: "/dashboard/equipe", label: "Dossiers", exact: true },
         ...(!direction ? [{ href: "/dashboard/equipe/gains", label: "Mes gains", icone: "fa-wallet" }] : []),
         ...(direction ? [{ href: "/dashboard/equipe/direction", label: "Direction", icone: "fa-gear" }, { href: "/dashboard/admin", label: "Back-office", icone: "fa-table-columns" }] : []),
       ];

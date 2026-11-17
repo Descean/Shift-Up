@@ -12,7 +12,7 @@ import { exigerDossierEquipe } from "@/lib/dossier-serveur";
 import { estDirection } from "@/lib/roles";
 import { infosDossier, titreDossier } from "@/lib/dossier";
 import { lireTarifs, plancherDe } from "@/lib/reglages";
-import { sendDevisClient } from "@/lib/email";
+import { prevenirClientDevis } from "@/lib/devis-client";
 import { avertirClient } from "@/lib/notifications";
 import { messageSysteme } from "@/lib/fil";
 
@@ -68,10 +68,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       assignedToId: p.assignedToId ?? a.session.user.id,
     },
   });
-  await messageSysteme(id, `Devis envoyé : ${d.total.toLocaleString("fr-FR")} F, dont ${d.acompte.toLocaleString("fr-FR")} F d'acompte pour démarrer.`, a.session.user.id);
-  await Promise.allSettled([
-    p.client.email ? sendDevisClient({ to: p.client.email, name: p.client.name ?? "", serviceName: titre, depositAmount: d.acompte, prestationId: id }) : Promise.resolve(),
-  ]);
+  const modifie = p.status !== "EN_ATTENTE";
+  await messageSysteme(id, `${modifie ? "Devis modifié" : "Devis envoyé"} : ${d.total.toLocaleString("fr-FR")} F, dont ${d.acompte.toLocaleString("fr-FR")} F d'acompte pour démarrer. Le client est prévenu par e-mail.`, a.session.user.id);
+  await prevenirClientDevis(id, titre, d.acompte).catch((e) => console.error("[devis] courriel client", e));
+  await prisma.prestation.update({ where: { id }, data: { customFields: { ...cf, devisPrevenuLe: new Date().toISOString() } as Prisma.InputJsonValue } });
   await avertirClient(id, "DEVIS", "Votre devis est prêt", `${d.total.toLocaleString("fr-FR")} F. Payez l'acompte de ${d.acompte.toLocaleString("fr-FR")} F pour démarrer le montage.`, { courriel: false });
   return NextResponse.json({ ok: true });
 }

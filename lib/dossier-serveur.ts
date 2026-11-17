@@ -90,6 +90,7 @@ async function formater(p: Brut, vue: "client" | "equipe") {
     ...(vue === "equipe" ? {
       analyse: ia ? { statut: ia.statut ?? null, raison: ia.raison ?? null, proposition: ia.proposition ?? null } : null,
       transcription: typeof cf.transcriptionVocale === "string" ? cf.transcriptionVocale : null,
+      prevenuLe: typeof cf.devisPrevenuLe === "string" ? cf.devisPrevenuLe : null,
       plancher: tarifs ? plancherDe(tarifs, infos.nature) : null,
       tarifs,
     } : {}),

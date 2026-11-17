@@ -68,6 +68,21 @@ Règles :
 - N'invente rien qui n'est pas dans le dossier : mets null si l'information manque.
 - Écris en français simple, sans jargon.`;
 
+/** Les n premières pages d'un PDF (null si le PDF ne peut pas être découpé, par ex. chiffré). */
+async function premieresPages(octets: Buffer, n: number): Promise<Buffer | null> {
+  try {
+    const { PDFDocument } = await import("pdf-lib");
+    const src = await PDFDocument.load(octets, { ignoreEncryption: true });
+    const dst = await PDFDocument.create();
+    const pages = await dst.copyPages(src, Array.from({ length: Math.min(n, src.getPageCount()) }, (_, i) => i));
+    pages.forEach((pg) => dst.addPage(pg));
+    const out = Buffer.from(await dst.save());
+    return out.length < 25_000_000 ? out : null;
+  } catch {
+    return null;
+  }
+}
+
 async function blocsDepuisFichiers(urls: string[]): Promise<{ blocs: Bloc[]; noms: string[] }> {
   const blocs: Bloc[] = [];
   const noms: string[] = [];
@@ -87,8 +102,19 @@ async function blocsDepuisFichiers(urls: string[]): Promise<{ blocs: Bloc[]; nom
           // PDF scanné : envoyé tel quel, Claude lit les pages
           pdfBruts++;
           blocs.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: f.octets.toString("base64") }, title: f.nom });
+        } else if (pdfBruts < 2) {
+          // Gros PDF scanné : les 40 premières pages (avis, instructions, données particulières, critères)
+          // suffisent pour identifier le marché ; le nombre total de pages renseigne sur le volume.
+          const extrait = await premieresPages(f.octets, 40);
+          if (extrait) {
+            pdfBruts++;
+            blocs.push({ type: "text", text: `Fichier « ${f.nom} » : PDF scanné de ${pages} pages ; seules les 40 premières sont jointes. Tenez compte des ${pages} pages pour le volume.` });
+            blocs.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: extrait.toString("base64") }, title: `${f.nom} (pages 1 à 40)` });
+          } else {
+            blocs.push({ type: "text", text: `Fichier « ${f.nom} » : PDF scanné de ${pages} pages, non lisible automatiquement.` });
+          }
         } else {
-          blocs.push({ type: "text", text: `Fichier « ${f.nom} » : PDF scanné trop volumineux pour être lu automatiquement (${pages} pages).` });
+          blocs.push({ type: "text", text: `Fichier « ${f.nom} » : PDF scanné de ${pages} pages (non joint : deux PDF scannés sont déjà lus).` });
         }
       } else if (g === "word") {
         const t = await texteWord(f.octets);

@@ -89,11 +89,13 @@ export async function sendNewDemandeAdmin({ clientName, clientEmail, serviceName
 }
 
 /** Notification client : devis envoyé */
-export async function sendDevisClient({ to, name, serviceName, depositAmount, prestationId }: {
+export async function sendDevisClient({ to, name, serviceName, depositAmount, prestationId, lien, relance = false }: {
   to: string; name: string; serviceName: string; depositAmount: number; prestationId: string;
+  /** Lien de connexion directe au dossier (sinon : page du dossier, connexion demandée) */
+  lien?: string | null; relance?: boolean;
 }) {
   const content = `
-    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">Votre devis est prêt 📋</h2>
+    <h2 style="color:#192338;font-size:22px;margin:0 0 8px;">${relance ? "Rappel : votre devis vous attend" : "Votre devis est prêt"}</h2>
     <p style="color:#555;margin:0 0 16px;">Bonjour <strong>${esc(name)}</strong>,</p>
     <p style="color:#555;line-height:1.6;">Notre équipe a analysé votre demande pour <strong>${esc(serviceName)}</strong> et vous a préparé un devis détaillé accompagné d'un plan de réalisation.</p>
     <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:10px;padding:16px 20px;margin:20px 0;">
@@ -101,9 +103,9 @@ export async function sendDevisClient({ to, name, serviceName, depositAmount, pr
       <p style="margin:0;color:#31487A;font-size:24px;font-weight:900;">${depositAmount.toLocaleString("fr-FR")} XOF</p>
     </div>
     <p style="color:#555;">Consultez votre devis : vous pouvez l'accepter et payer l'acompte, demander une modification ou le refuser.</p>
-    ${btn("Voir mon devis →", `${APP_URL}/dashboard/client/prestations`)}
-    <p style="color:#888;font-size:13px;margin-top:16px;">Le devis est valable 7 jours. Passé ce délai, merci de nous recontacter.</p>`;
-  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `Votre devis "${serviceName}" est disponible — SHIFT UP`, html: baseLayout(content, "Devis disponible") });
+    ${btn("Voir mon devis et payer l'acompte →", lien || `${APP_URL}/dashboard/client/prestations?id=${encodeURIComponent(prestationId)}`)}
+    <p style="color:#888;font-size:13px;margin-top:16px;">${lien ? "Ce bouton vous connecte directement à votre dossier (valable 3 jours). " : ""}Le devis est valable 7 jours. Passé ce délai, merci de nous recontacter.</p>`;
+  return resend.emails.send({ from: FROM, to, replyTo: REPONSE, subject: `${relance ? "Rappel : votre devis" : "Votre devis"} "${serviceName}" ${relance ? "attend votre accord" : "est disponible"} — SHIFT UP`, html: baseLayout(content, "Devis disponible") });
 }
 
 /** Notification client : livrable disponible */

@@ -1,9 +1,10 @@
 "use client";
 
 /**
- * Fiche d'un dossier pour l'équipe (maquette, espace monteur) : établir le devis (pré-rempli par la lecture
- * du dossier, contrôle du tarif plancher), checklist de montage avec dépôt des livrables, pause « pièce
- * manquante », révision après solde, paiement hors ligne (Direction), discussion avec le client.
+ * Fiche d'un dossier pour l'équipe (espace monteur) : établir le devis (pré-rempli par la lecture du dossier,
+ * contrôle du tarif plancher), prévenir ou relancer le client, espace de lecture des documents avec étapes et
+ * livrables à côté, checklist de montage avec dépôt des livrables, pause « pièce manquante », corrections,
+ * révision après solde, paiement hors ligne (Direction uniquement), discussion avec le client.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,6 +14,7 @@ import { libelleLivraison, type EtatDossier, type InfosDossier } from "@/lib/dos
 import { libelleNature } from "@/lib/tarifs-montage";
 import { televerser } from "@/lib/televerser";
 import { PiecesAdmin } from "@/components/prestations/Pieces";
+import EspaceLecture, { type FichierLecture } from "@/components/espace/equipe/EspaceLecture";
 import SuiviDossier from "@/components/prestations/Suivi";
 import type { Depot, Dossier as FicheMarche, Piece, Resultat } from "@/lib/montage";
 
@@ -26,12 +28,21 @@ type Dossier = {
   devis: { total: number; acompte: number } | null;
   etapes: Etape[]; autresLivrables: Livrable[]; fichiersDepart: string[];
   analyse: { statut: string | null; raison: string | null; proposition: Proposition | null } | null;
-  transcription: string | null; plancher: number | null;
+  transcription: string | null; plancher: number | null; prevenuLe: string | null;
   montage: boolean; marche: { dossier: FicheMarche | null; pieces: Piece[]; depot: Depot | null; resultat: Resultat | null };
   correction: { demandeeLe: string | null; texte: string } | null;
 };
 
 const ETAPES_DEFAUT = ["Pièces Administratives", "Offre Technique & BPU", "Contrôle Qualité"];
+type Brouillon = { total: string; acompte: string; etapes: string };
+const brouillonDe = (d: Dossier): Brouillon => {
+  const prop = d.analyse?.proposition ?? null;
+  return {
+    total: String(d.devis?.total ?? prop?.total ?? ""),
+    acompte: String(d.devis?.acompte ?? prop?.deposit ?? ""),
+    etapes: (prop?.etapes?.length ? prop.etapes.map((e) => e.titre) : ETAPES_DEFAUT).join("\n"),
+  };
+};
 const nomFichier = (u: string) => decodeURIComponent(u.split("?")[0].split("/").pop() ?? "fichier").replace(/^[a-f0-9]{8,}-/, "");
 
 export default function FicheEquipe({ id }: { id: string }) {
@@ -41,6 +52,8 @@ export default function FicheEquipe({ id }: { id: string }) {
   const [introuvable, setIntrouvable] = useState(false);
   const [signal, setSignal] = useState(0);
   const [refaireDevis, setRefaireDevis] = useState(false);
+  const [lecture, setLecture] = useState<string | null>(null);
+  const [brouillon, setBrouillon] = useState<Brouillon | null>(null);
 
   const charger = useCallback(async () => {
     const r = await fetch(`/api/equipe/dossiers/${id}`).catch(() => null);
@@ -66,6 +79,16 @@ export default function FicheEquipe({ id }: { id: string }) {
   };
 
   const enProduction = ["production", "pause"].includes(d.etat) || (d.etat === "solde" && d.infos.revision && !d.infos.revision.faiteLe);
+  const chiffrage = d.etat === "a_chiffrer" || refaireDevis;
+  const devisEnCours = brouillon ?? brouillonDe(d);
+  const fichiers: FichierLecture[] = [
+    ...d.fichiersDepart.map((url) => ({ url, nom: nomFichier(url), groupe: "Pièces de départ" })),
+    ...d.marche.pieces.flatMap((pc) => pc.fichiers.map((f) => ({ url: f.url, nom: f.nom, groupe: pc.libelle }))),
+  ];
+  const etablirDevis = <EtablirDevis d={d} direction={direction} valeur={devisEnCours} onChange={setBrouillon} onEnvoye={() => { setRefaireDevis(false); setBrouillon(null); apres(); }} post={post} />;
+  const checklist = (enProduction || d.etat === "termine" || d.etat === "solde") && d.etapes.length > 0
+    ? <Checklist d={d} actif={!!enProduction && d.etat !== "pause"} post={post} apres={apres} />
+    : null;
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -78,7 +101,16 @@ export default function FicheEquipe({ id }: { id: string }) {
 
         <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-5">
-            {(d.etat === "a_chiffrer" || refaireDevis) && <EtablirDevis d={d} direction={direction} onEnvoye={() => { setRefaireDevis(false); apres(); }} post={post} />}
+            {fichiers.length > 0 && (
+              <button type="button" onClick={() => setLecture(fichiers[0].url)}
+                className="flex w-full items-center justify-between gap-3 rounded-2xl border border-su-clair bg-white px-4 py-3 text-left shadow-sm hover:border-su-bleu">
+                <span><span className="block text-sm font-bold text-su-nuit"><i className="fas fa-book-open mr-2 text-su-bleu" />Lire le dossier</span>
+                  <span className="block text-xs text-gray-500">{fichiers.length} document{fichiers.length > 1 ? "s" : ""} du client, avec {chiffrage ? "le devis" : "les étapes et livrables"} à côté</span></span>
+                <i className="fas fa-arrow-right text-su-bleu" />
+              </button>
+            )}
+
+            {chiffrage && !lecture && etablirDevis}
 
             {d.etat === "attente_acompte" && !refaireDevis && (
               <Carte className="py-8 text-center">
@@ -86,6 +118,7 @@ export default function FicheEquipe({ id }: { id: string }) {
                 <p className="mt-3 font-semibold text-su-nuit">Devis envoyé avec succès.</p>
                 <p className="mt-1 text-sm text-gray-500">En attente du paiement de l&apos;acompte ({fcfa(d.devis?.acompte ?? d.acompte)}) par le client pour démarrer le montage.</p>
                 <p className="mt-1 text-xs text-gray-400">Total du devis : {fcfa(d.montant)}</p>
+                <ClientPrevenu d={d} post={post} apres={apres} />
                 <button type="button" onClick={() => setRefaireDevis(true)} className="mt-4 text-xs font-semibold text-su-bleu underline">Modifier le devis</button>
               </Carte>
             )}
@@ -102,9 +135,7 @@ export default function FicheEquipe({ id }: { id: string }) {
               </div>
             )}
 
-            {(enProduction || d.etat === "termine" || d.etat === "solde") && d.etapes.length > 0 && (
-              <Checklist d={d} actif={!!enProduction && d.etat !== "pause"} post={post} apres={apres} />
-            )}
+            {!lecture && checklist}
 
             {d.etat === "production" && (
               <button type="button" onClick={async () => {
@@ -146,7 +177,7 @@ export default function FicheEquipe({ id }: { id: string }) {
               {d.fichiersDepart.length === 0 && !d.consigne && <p className="text-sm text-gray-400">Aucune pièce.</p>}
               <ul className="space-y-1.5">
                 {d.fichiersDepart.map((u) => (
-                  <li key={u}><a href={u} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-su-bleu hover:underline"><i className={`fas ${/\.(webm|m4a|mp3|ogg)/i.test(u) ? "fa-microphone" : "fa-file-lines"}`} />{nomFichier(u)}</a></li>
+                  <li key={u}><button type="button" onClick={() => setLecture(u)} className="flex items-center gap-2 text-left text-sm text-su-bleu hover:underline"><i className={`fas ${/\.(webm|m4a|mp3|ogg)/i.test(u) ? "fa-microphone" : "fa-file-lines"}`} />{nomFichier(u)}</button></li>
                 ))}
               </ul>
               {d.consigne && <p className="mt-3 whitespace-pre-wrap rounded-xl bg-su-brume p-3 text-sm text-gray-700">{d.consigne}</p>}
@@ -158,6 +189,15 @@ export default function FicheEquipe({ id }: { id: string }) {
 
           <FilDiscussion prestationId={d.id} pieceJointe signal={signal} />
         </div>
+
+        {lecture && (
+          <EspaceLecture dossierId={d.id} titre={`${d.titre} · ${d.reference}`} fichiers={fichiers} courant={lecture} onChoisir={setLecture} onFermer={() => setLecture(null)}>
+            {chiffrage ? etablirDevis : checklist ?? (
+              <Carte titre="Étapes"><p className="text-sm text-gray-500">Les étapes s&apos;afficheront ici une fois l&apos;acompte payé par le client.</p></Carte>
+            )}
+            {d.consigne && <Carte titre="Consigne du client"><p className="whitespace-pre-wrap text-sm text-gray-700">{d.consigne}</p></Carte>}
+          </EspaceLecture>
+        )}
       </div>
     </div>
   );
@@ -184,11 +224,14 @@ function MarcheEquipe({ d, apres }: { d: Dossier; apres: () => void }) {
 
 type Post = (chemin: string, corps: unknown) => Promise<{ ok: boolean; statut: number; x: { error?: string; plancher?: number } }>;
 
-function EtablirDevis({ d, direction, onEnvoye, post }: { d: Dossier; direction: boolean; onEnvoye: () => void; post: Post }) {
+function EtablirDevis({ d, direction, valeur, onChange, onEnvoye, post }: {
+  d: Dossier; direction: boolean; valeur: Brouillon; onChange: (b: Brouillon) => void; onEnvoye: () => void; post: Post;
+}) {
   const prop = d.analyse?.proposition ?? null;
-  const [total, setTotal] = useState(String(d.devis?.total ?? prop?.total ?? ""));
-  const [acompte, setAcompte] = useState(String(d.devis?.acompte ?? prop?.deposit ?? ""));
-  const [etapes, setEtapes] = useState((prop?.etapes?.length ? prop.etapes.map((e) => e.titre) : ETAPES_DEFAUT).join("\n"));
+  const { total, acompte, etapes } = valeur;
+  const setTotal = (v: string) => onChange({ ...valeur, total: v });
+  const setAcompte = (v: string) => onChange({ ...valeur, acompte: v });
+  const setEtapes = (v: string) => onChange({ ...valeur, etapes: v });
   const [envoi, setEnvoi] = useState(false);
   const [lecture, setLecture] = useState(false);
   const nature = libelleNature(d.infos.nature) ?? "ce dossier";
@@ -227,17 +270,21 @@ function EtablirDevis({ d, direction, onEnvoye, post }: { d: Dossier; direction:
         <div className="flex items-center justify-between gap-2">
           <p className="font-bold text-su-nuit"><i className="fas fa-wand-magic-sparkles mr-1.5 text-su-bleu" />Lecture du dossier</p>
           <span className="text-gray-500">
-            {statut === "ok" ? "Proposition prête" : statut === "en_cours" || statut === "en_attente" ? "En cours…" : statut === "echec" ? "Échec" : "Proposition selon la grille"}
+            {statut === "ok" ? "Proposition prête" : statut === "en_cours" || statut === "en_attente" ? "En cours…" : statut === "echec" ? "Échec" : statut === "manuel" ? "Lecture automatique pas encore activée" : "Proposition selon la grille"}
           </span>
         </div>
         {prop?.resume && <p className="mt-2 text-gray-700">{prop.resume}</p>}
         {prop?.items && prop.items.length > 0 && (
           <ul className="mt-2 space-y-0.5">{prop.items.map((l, i) => <li key={i} className="flex justify-between gap-3 text-gray-600"><span>{l.label}</span><span className="whitespace-nowrap">{Math.round(l.amount).toLocaleString("fr-FR")} F</span></li>)}</ul>
         )}
+        {prop?.livrables && prop.livrables.length > 0 && (
+          <div className="mt-2"><p className="font-semibold text-su-nuit">Livrables à remettre</p><ul className="list-disc pl-4 text-gray-600">{prop.livrables.map((l, i) => <li key={i}>{l.titre}</li>)}</ul></div>
+        )}
         {prop?.pointsAttention && prop.pointsAttention.length > 0 && (
           <div className="mt-2"><p className="font-semibold text-orange-700">Points d&apos;attention</p><ul className="list-disc pl-4 text-gray-600">{prop.pointsAttention.map((p, i) => <li key={i}>{p}</li>)}</ul></div>
         )}
         {statut === "echec" && d.analyse?.raison && <p className="mt-2 text-red-600">{d.analyse.raison}</p>}
+        {statut === "manuel" && <p className="mt-2 text-gray-600">La lecture automatique sera disponible dès que la clé de l&apos;IA sera installée. En attendant, lisez le dossier et fixez le montant vous-même.</p>}
         <button type="button" disabled={lecture} onClick={async () => {
           setLecture(true);
           const r = await post(`/api/admin/prestations/${d.id}/analyse`, {});
@@ -283,6 +330,17 @@ function Checklist({ d, actif, post, apres }: { d: Dossier; actif: boolean; post
     if (!r.ok) { toast.error(r.x.error ?? "Impossible."); return; }
     if ((r.x as { termine?: boolean }).termine) toast.success("Toutes les étapes sont faites : le client est invité à vérifier et à régler le solde.");
     apres();
+  }
+
+  const [nouvelle, setNouvelle] = useState("");
+  async function ajouter() {
+    const titre = nouvelle.trim();
+    if (titre.length < 2) return;
+    setOccupe("ajout");
+    const r = await post(`/api/equipe/dossiers/${d.id}/etape`, { ajouter: titre });
+    setOccupe(null);
+    if (!r.ok) { toast.error(r.x.error ?? "Impossible."); return; }
+    setNouvelle(""); apres();
   }
 
   async function deposer(fichiers: FileList | null) {
@@ -340,7 +398,39 @@ function Checklist({ d, actif, post, apres }: { d: Dossier; actif: boolean; post
           );
         })}
       </ul>
+      {actif && (
+        <form onSubmit={(e) => { e.preventDefault(); void ajouter(); }} className="mt-3 flex gap-2 border-t border-su-lavande pt-3">
+          <input value={nouvelle} onChange={(e) => setNouvelle(e.target.value)} placeholder="Ajouter une étape ou un livrable" maxLength={150}
+            className="min-w-0 flex-1 rounded-lg border border-su-lavande px-3 py-2 text-sm focus:border-su-bleu focus:outline-none" />
+          <button type="submit" disabled={nouvelle.trim().length < 2 || occupe === "ajout"} className="rounded-lg bg-su-nuit px-3 text-xs font-semibold text-white disabled:opacity-40">Ajouter</button>
+        </form>
+      )}
     </Carte>
+  );
+}
+
+/** Après l'envoi du devis : le client est prévenu par e-mail ; le monteur peut le relancer ou copier le lien du dossier. */
+function ClientPrevenu({ d, post, apres }: { d: Dossier; post: Post; apres: () => void }) {
+  const [occupe, setOccupe] = useState(false);
+  const lien = typeof window !== "undefined" ? `${window.location.origin}/dashboard/client/prestations?id=${d.id}` : "";
+  return (
+    <div className="mx-auto mt-4 max-w-md rounded-xl border border-su-lavande bg-su-brume/50 p-3 text-left text-xs text-gray-600">
+      <p><i className="fas fa-envelope-circle-check mr-1.5 text-emerald-600" />
+        {d.client?.email ? <>Le client a reçu le devis par e-mail ({d.client.email}){d.prevenuLe ? `, dernier envoi le ${dateFr(d.prevenuLe)}` : ""}. Le bouton de l&apos;e-mail le connecte directement à son dossier pour payer l&apos;acompte.</> : "Ce client n'a pas d'adresse e-mail."}
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" disabled={occupe || !d.client?.email} onClick={async () => {
+          setOccupe(true);
+          const r = await post(`/api/equipe/dossiers/${d.id}/relance`, {});
+          setOccupe(false);
+          if (!r.ok) toast.error(r.x.error ?? "Relance impossible."); else { toast.success("Rappel envoyé au client."); apres(); }
+        }} className="rounded-lg bg-su-nuit px-3 py-2 font-semibold text-white disabled:opacity-50"><i className="fas fa-paper-plane mr-1.5" />Relancer par e-mail</button>
+        <button type="button" onClick={async () => {
+          try { await navigator.clipboard.writeText(lien); toast.success("Lien copié : envoyez-le au client sur WhatsApp."); } catch { window.prompt("Copiez le lien du dossier :", lien); }
+        }} className="rounded-lg border border-su-lavande bg-white px-3 py-2 font-semibold text-su-bleu"><i className="far fa-copy mr-1.5" />Copier le lien du dossier</button>
+      </div>
+      <p className="mt-2 text-[11px] text-gray-400">Avec le lien copié, le client se connecte en saisissant son adresse e-mail.</p>
+    </div>
   );
 }
 

@@ -48,7 +48,7 @@ const navByRole: Record<string, NavItem[]> = {
   ],
   ADMIN: [
     { href: "/dashboard/admin", icon: "fas fa-table-cells-large", label: "Vue d'ensemble" },
-    { href: "/dashboard/equipe", icon: "fas fa-table-columns", label: "Dossiers (Kanban)" },
+    { href: "/dashboard/equipe", icon: "fas fa-table-columns", label: "Dossiers" },
     { href: "/dashboard/equipe/direction", icon: "fas fa-gear", label: "Direction" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
     { href: "/dashboard/admin/soumissions", icon: "fas fa-trophy", label: "Résultats des dossiers" },
@@ -71,7 +71,7 @@ const navByRole: Record<string, NavItem[]> = {
   ],
   DEVELOPER: [
     { href: "/dashboard/admin", icon: "fas fa-table-cells-large", label: "Vue d'ensemble" },
-    { href: "/dashboard/equipe", icon: "fas fa-table-columns", label: "Dossiers (Kanban)" },
+    { href: "/dashboard/equipe", icon: "fas fa-table-columns", label: "Dossiers" },
     { href: "/dashboard/equipe/direction", icon: "fas fa-gear", label: "Direction" },
     { href: "/dashboard/admin/prestations", icon: "fas fa-briefcase", label: "Prestations" },
     { href: "/dashboard/admin/soumissions", icon: "fas fa-trophy", label: "Résultats des dossiers" },
