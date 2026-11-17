@@ -6,6 +6,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { IDS_NATURES } from "@/lib/tarifs-montage";
 import { isSafe } from "@/lib/validation";
 import { generateAffiliationCode } from "@/lib/utils";
 import { fichierDe } from "@/lib/montage-serveur";
@@ -41,7 +42,7 @@ const schema = z.object({
     entreprise: z.string().trim().max(150).refine(isSafe).optional().default(""),
   }),
   montage: z.object({
-    nature: z.enum(["cotation", "trp", "dao"]),
+    nature: z.enum(IDS_NATURES),
     dateLimite: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date limite invalide."),
     urgence: z.enum(["standard", "express"]).default("standard"),
     livraison: z.enum(["numerique", "physique"]).default("numerique"),

@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { IDS_NATURES, type Nature } from "@/lib/tarifs-montage";
 import prisma from "@/lib/prisma";
 import { exigerEquipe } from "@/lib/dossier-serveur";
 import { enregistrerTarifs, lireTarifs } from "@/lib/reglages";
@@ -22,7 +23,7 @@ export async function GET() {
 
 const montant = z.number().int().min(0).max(100_000_000);
 const schema = z.object({
-  planchers: z.object({ cotation: montant, trp: montant, dao: montant }),
+  planchers: z.object(Object.fromEntries(IDS_NATURES.map((n) => [n, montant])) as Record<Nature, typeof montant>),
   livraisonPhysique: montant,
   majorationExpress: z.number().min(0).max(2),
   acompte: z.number().min(0.1).max(1),
